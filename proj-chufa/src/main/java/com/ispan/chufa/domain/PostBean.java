@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 public class PostBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
-	private int postid; // 貼文_貼文id
+	private Integer postid; // 貼文_貼文id
 	
 // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 // @JoinColumn(name="post")
@@ -31,10 +31,10 @@ public class PostBean {
     private String postContent; // 貼文_自定義內文
     private String tags; // 貼文_標籤
     private String postLink; // 貼文_貼文超連結(文章、影片連結)
-	public int getPostid() {
+	public Integer getPostid() {
 		return postid;
 	}
-	public void setPostid(int postid) {
+	public void setPostid(Integer postid) {
 		this.postid = postid;
 	}
 	public String getPostStatus() {

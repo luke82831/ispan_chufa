@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員資料</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e9f0f7;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(to bottom right, #ffffff, #f7f7f7);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e2e2;
+            padding-bottom: 20px;
+        }
+
+        .profile-header img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+            border: 3px solid #007bff;
+        }
+
+        .profile-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .profile-header p {
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        .profile-details {
+            margin-top: 30px;
+        }
+
+        .profile-details dt {
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .profile-details dd {
+            margin-left: 20px;
+            color: #333;
+            font-size: 16px;
+            padding: 6px 0;
+        }
+
+        .btn-logout {
+            margin-top: 40px;
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 25px;
+            font-size: 18px;
+            text-align: center;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c82333;
+        }
+
+        .profile-details dd {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-header">
+            <!-- 頭像 -->
+            <img src="data:image/jpeg;base64,[[${member.profilePicture}]]" alt="Profile Picture" onerror="this.onerror=null; this.src='https://via.placeholder.com/120';">
+            <div>
+                <h1 th:text="${member.name}">會員名稱</h1>
+                <p>歡迎回來，<span th:text="${member.nickname}">暱稱</span>！</p>
+            </div>
+        </div>
+
+        <dl class="profile-details">
+            <!-- 顯示會員資料 -->
+            <dt>用戶名：</dt>
+            <dd th:text="${member.username}">用戶名</dd>
+
+            <dt>電子郵件：</dt>
+            <dd th:text="${member.email}">電子郵件</dd>
+
+            <dt>手機號碼：</dt>
+            <dd th:text="${member.phoneNumber}">手機號碼</dd>
+
+            <dt>性別：</dt>
+            <dd th:text="${member.gender}">性別</dd>
+
+            <dt>生日：</dt>
+            <dd th:text="${#dates.format(member.birth, 'yyyy-MM-dd')}">生日</dd>
+
+            <dt>個人簡介：</dt>
+            <dd th:text="${member.bio}">個人簡介</dd>
+        </dl>
+
+        <a href="/secure/logout" class="btn btn-logout">登出</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

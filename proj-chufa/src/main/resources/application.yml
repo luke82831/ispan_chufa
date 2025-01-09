@@ -4,14 +4,28 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
     username: sa
-    password: P@ssw0rd
+    password: 1234
 
   #Hibernate/JPA的相關設定
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+#thymeleaf
+  thymeleaf:
+    enabled: true
+    encoding: UTF-8
+    mode: HTML
+    cache: false
+    prefix: classpath:/templates
+    suffix: .html
+
+#i18n
+  messages:
+    basename: messages
+    encoding: UTF-8

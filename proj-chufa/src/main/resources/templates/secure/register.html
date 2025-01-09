@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>註冊</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f7fc;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
+        }
+
+        .card-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff8c00;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ff8c00;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #ff8c00;
+        }
+
+        .btn-primary {
+            background-color: #ff8c00;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            border-radius: 25px;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #e07b00;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .text-center {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #ff8c00;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">註冊帳號</div>
+        <form action="/secure/register" method="post">
+            <div class="form-group">
+                <label for="username">帳號:</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('username') ? errors.username : ''}"></small>
+            </div>
+            <div class="form-group">
+                <label for="email">電子郵件:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('email') ? errors.email : ''}"></small>
+            </div>
+            <div class="form-group">
+                <label for="password">密碼:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('password') ? errors.password : ''}"></small>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">確認密碼:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('confirmPassword') ? errors.confirmPassword : ''}"></small>
+            </div>
+            <div class="form-group">
+                <label for="name">姓名:</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('name') ? errors.name : ''}"></small>
+            </div>
+            <div class="form-group">
+                <label for="birth">生日:</label>
+                <input type="date" id="birth" name="birth" class="form-control" required>
+                <small class="text-danger" th:text="${errors != null && errors.containsKey('birth') ? errors.birth : ''}"></small>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">註冊</button>
+            </div>
+        </form>
+        <div class="text-center">
+            <a href="/secure/login/controller">已有帳號？登入</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

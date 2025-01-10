@@ -2,6 +2,7 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,85 +13,99 @@ import jakarta.persistence.Table;
 @Table(name = "Comments")
 public class CommentBean {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
-    private Integer CommentID; // 留言_留言ID
-    private Integer PostID; // 留言_貼文id (FK)一對多，多方
-    private Integer Title; // 留言_留言狀態
-    private Integer UserID; // 留言_留言者id (FK)一對多，多方
-    private LocalDateTime CommentCreatedAt; // 留言_創建時間
-    private LocalDateTime CommentUpdatedAt; // 留言_更新時間
-    private String Content; // 留言_留言內文
-    private Integer ParentID; // 留言_上層留言id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
+    private Integer commentId;
+
+    @Column(name = "post_id", nullable = false) // 留言_貼文id 不能NULL (FK)一對多，多方
+    private Integer postId;
+
+    @Column(name = "title", nullable = false) // 留言_留言狀態 不能NULL
+    private Integer title;
+
+    @Column(name = "user_id", nullable = false) // 留言_留言者id 不能NULL (FK)一對多，多方
+    private Integer userId;
+
+    @Column(name = "comment_created_at", nullable = false) // 留言_創建時間 不能NULL
+    private LocalDateTime commentCreatedAt;
+
+    @Column(name = "comment_updated_at") // 留言_更新時間
+    private LocalDateTime commentUpdatedAt;
+
+    @Column(name = "content", columnDefinition = "varchar(max) NOT NULL") // 留言_留言內文 指定SQL型態為varchar(max) 不能NULL
+    private String content;
+
+    @Column(name = "post_id") // 留言_上層留言id
+    private Integer parentId;
 
     @Override
     public String toString() {
-        return "CommentBean [CommentID=" + CommentID + ", PostID=" + PostID + ", Title=" + Title + ", UserID=" + UserID
-                + ", CommentCreatedAt=" + CommentCreatedAt + ", CommentUpdatedAt=" + CommentUpdatedAt + ", Content="
-                + Content + ", ParentID=" + ParentID + "]";
+        return "CommentBean [commentId=" + commentId + ", postId=" + postId + ", title=" + title + ", userId=" + userId
+                + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt=" + commentUpdatedAt + ", content="
+                + content + ", parentId=" + parentId + "]";
     }
 
-    public Integer getCommentID() {
-        return CommentID;
+    public Integer getCommentId() {
+        return commentId;
     }
 
-    public void setCommentID(Integer commentID) {
-        CommentID = commentID;
+    public void setCommentId(Integer commentId) {
+        this.commentId = commentId;
     }
 
-    public Integer getPostID() {
-        return PostID;
+    public Integer getPostId() {
+        return postId;
     }
 
-    public void setPostID(Integer postID) {
-        PostID = postID;
+    public void setPostId(Integer postId) {
+        this.postId = postId;
     }
 
     public Integer getTitle() {
-        return Title;
+        return title;
     }
 
     public void setTitle(Integer title) {
-        Title = title;
+        this.title = title;
     }
 
-    public Integer getUserID() {
-        return UserID;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUserID(Integer userID) {
-        UserID = userID;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public LocalDateTime getCommentCreatedAt() {
-        return CommentCreatedAt;
+        return commentCreatedAt;
     }
 
     public void setCommentCreatedAt(LocalDateTime commentCreatedAt) {
-        CommentCreatedAt = commentCreatedAt;
+        this.commentCreatedAt = commentCreatedAt;
     }
 
     public LocalDateTime getCommentUpdatedAt() {
-        return CommentUpdatedAt;
+        return commentUpdatedAt;
     }
 
     public void setCommentUpdatedAt(LocalDateTime commentUpdatedAt) {
-        CommentUpdatedAt = commentUpdatedAt;
+        this.commentUpdatedAt = commentUpdatedAt;
     }
 
     public String getContent() {
-        return Content;
+        return content;
     }
 
     public void setContent(String content) {
-        Content = content;
+        this.content = content;
     }
 
-    public Integer getParentID() {
-        return ParentID;
+    public Integer getParentId() {
+        return parentId;
     }
 
-    public void setParentID(Integer parentID) {
-        ParentID = parentID;
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 
 }

@@ -2,6 +2,7 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,48 +13,51 @@ import jakarta.persistence.Table;
 @Table(name = "Tags")
 public class TagsBean {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
-    private Integer TagID; // 標籤系統_標籤id
-    private String TagName; // 標籤系統_標籤名稱
-    private LocalDateTime TagCreatedAt; // 標籤系統_創建時間
-    private LocalDateTime TagUpdatedAt; // 標籤系統_更新時間
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 標籤系統_標籤id 設定為自增
+    private Integer tagId;
+    @Column(name = "tag_name", nullable = false) // 標籤系統_標籤名稱 不能NULL
+    private String tagName;
+    @Column(name = "tag_created_at", nullable = false) // 標籤系統_創建時間 不能NULL
+    private LocalDateTime tagCreatedAt;
+    @Column(name = "tag_updated_at") // 標籤系統_更新時間 不能NULL
+    private LocalDateTime tagUpdatedAt;
 
     @Override
     public String toString() {
-        return "TagsBean [TagID=" + TagID + ", TagName=" + TagName + ", TagCreatedAt=" + TagCreatedAt
-                + ", TagUpdatedAt=" + TagUpdatedAt + "]";
+        return "TagsBean [tagId=" + tagId + ", tagName=" + tagName + ", tagCreatedAt=" + tagCreatedAt
+                + ", tagUpdatedAt=" + tagUpdatedAt + "]";
     }
 
-    public Integer getTagID() {
-        return TagID;
+    public Integer getTagId() {
+        return tagId;
     }
 
-    public void setTagID(Integer tagID) {
-        TagID = tagID;
+    public void setTagId(Integer tagId) {
+        this.tagId = tagId;
     }
 
     public String getTagName() {
-        return TagName;
+        return tagName;
     }
 
     public void setTagName(String tagName) {
-        TagName = tagName;
+        this.tagName = tagName;
     }
 
     public LocalDateTime getTagCreatedAt() {
-        return TagCreatedAt;
+        return tagCreatedAt;
     }
 
     public void setTagCreatedAt(LocalDateTime tagCreatedAt) {
-        TagCreatedAt = tagCreatedAt;
+        this.tagCreatedAt = tagCreatedAt;
     }
 
     public LocalDateTime getTagUpdatedAt() {
-        return TagUpdatedAt;
+        return tagUpdatedAt;
     }
 
     public void setTagUpdatedAt(LocalDateTime tagUpdatedAt) {
-        TagUpdatedAt = tagUpdatedAt;
+        this.tagUpdatedAt = tagUpdatedAt;
     }
 
 }

@@ -15,25 +15,18 @@ public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
     private Integer commentId;
-
     @Column(name = "post_id", nullable = false) // 留言_貼文id 不能NULL (FK)一對多，多方
     private Integer postId;
-
     @Column(name = "comment_state", nullable = false) // 留言_留言狀態 不能NULL
     private Integer commentState;
-
     @Column(name = "user_id", nullable = false) // 留言_留言者id 不能NULL (FK)一對多，多方
     private Integer userId;
-
     @Column(name = "comment_created_at", nullable = false) // 留言_創建時間 不能NULL
     private LocalDateTime commentCreatedAt;
-
     @Column(name = "comment_updated_at") // 留言_更新時間
     private LocalDateTime commentUpdatedAt;
-
     @Column(name = "content", columnDefinition = "varchar(max) NOT NULL") // 留言_留言內文 指定SQL型態為varchar(max) 不能NULL
     private String content;
-
     @Column(name = "post_id") // 留言_上層留言id
     private Integer parentId;
 

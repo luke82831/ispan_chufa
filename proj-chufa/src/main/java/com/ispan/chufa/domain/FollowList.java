@@ -29,11 +29,11 @@ public class FollowList {
 
     private String followStatus; // 關注狀態 (e.g., "ACTIVE", "BLOCKED")
 
-	public Long getFLid() {
+	public Long getFlid() {
 		return flid;
 	}
 
-	public void setFLid(Long flid) {
+	public void setFlid(Long flid) {
 		flid = flid;
 	}
 

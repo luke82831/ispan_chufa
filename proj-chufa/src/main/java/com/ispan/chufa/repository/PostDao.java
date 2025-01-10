@@ -8,4 +8,6 @@ import com.ispan.chufa.domain.Post;
 
 public interface PostDao {
 	public abstract List<Post> find(JSONObject param);
+	public abstract List<Post>findPostsByTitle(JSONObject param);
+	public abstract List<Post> listall(JSONObject param);
 }

@@ -19,8 +19,8 @@ public class CommentBean {
     @Column(name = "post_id", nullable = false) // 留言_貼文id 不能NULL (FK)一對多，多方
     private Integer postId;
 
-    @Column(name = "title", nullable = false) // 留言_留言狀態 不能NULL
-    private Integer title;
+    @Column(name = "comment_title", nullable = false) // 留言_留言狀態 不能NULL
+    private Integer commentTitle;
 
     @Column(name = "user_id", nullable = false) // 留言_留言者id 不能NULL (FK)一對多，多方
     private Integer userId;
@@ -39,9 +39,9 @@ public class CommentBean {
 
     @Override
     public String toString() {
-        return "CommentBean [commentId=" + commentId + ", postId=" + postId + ", title=" + title + ", userId=" + userId
-                + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt=" + commentUpdatedAt + ", content="
-                + content + ", parentId=" + parentId + "]";
+        return "CommentBean [commentId=" + commentId + ", postId=" + postId + ", commentTitle=" + commentTitle
+                + ", userId=" + userId + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
+                + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
     }
 
     public Integer getCommentId() {
@@ -60,12 +60,12 @@ public class CommentBean {
         this.postId = postId;
     }
 
-    public Integer getTitle() {
-        return title;
+    public Integer getCommentTitle() {
+        return commentTitle;
     }
 
-    public void setTitle(Integer title) {
-        this.title = title;
+    public void setCommentTitle(Integer commentTitle) {
+        this.commentTitle = commentTitle;
     }
 
     public Integer getUserId() {

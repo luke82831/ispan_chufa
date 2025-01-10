@@ -15,6 +15,8 @@ public class TagsBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 標籤系統_標籤id 設定為自增
     private Integer tagId;
+    @Column(name = "tag_title", nullable = false) // 標籤系統_標籤狀態 不能NULL
+    private Integer tagTitle;
     @Column(name = "tag_name", nullable = false) // 標籤系統_標籤名稱 不能NULL
     private String tagName;
     @Column(name = "tag_created_at", nullable = false) // 標籤系統_創建時間 不能NULL
@@ -24,8 +26,8 @@ public class TagsBean {
 
     @Override
     public String toString() {
-        return "TagsBean [tagId=" + tagId + ", tagName=" + tagName + ", tagCreatedAt=" + tagCreatedAt
-                + ", tagUpdatedAt=" + tagUpdatedAt + "]";
+        return "TagsBean [tagId=" + tagId + ", tagTitle=" + tagTitle + ", tagName=" + tagName + ", tagCreatedAt="
+                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + "]";
     }
 
     public Integer getTagId() {
@@ -34,6 +36,14 @@ public class TagsBean {
 
     public void setTagId(Integer tagId) {
         this.tagId = tagId;
+    }
+
+    public Integer getTagTitle() {
+        return tagTitle;
+    }
+
+    public void setTagTitle(Integer tagTitle) {
+        this.tagTitle = tagTitle;
     }
 
     public String getTagName() {

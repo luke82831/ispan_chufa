@@ -12,93 +12,66 @@ import jakarta.persistence.ManyToOne;
 
 public class EventBean {
 
-	 @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    @Column(name = "event_content_id")
-	    private Long eventContentId; // 行程內容id (PK)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "event_content_id")
+	private Long eventContentId; // 行程內容id (PK)
 
-	    @ManyToOne
-	    @JoinColumn(name = "schedule_id", nullable = false)
-	    private ScheduleBean schedule; // 行程id (FK, 多對一)
+	@Column(name = "start_date", nullable = false)
+	private LocalDate startDate; // 行程開始日期
 
-	    @ManyToOne
-	    @JoinColumn(name = "calendar_date", nullable = false)
-	    private CalendarBean calendar; // 行事曆_日期 (FK, 多對一)
+	@Column(name = "end_date", nullable = false)
+	private LocalDate endDate; // 行程結束日期
 
-	    @Column(name = "start_date", nullable = false)
-	    private LocalDate startDate; // 行程開始日期
+	@Column(name = "notes")
+	private String notes; // 行程筆記
 
-	    @Column(name = "end_date", nullable = false)
-	    private LocalDate endDate; // 行程結束日期
+	// Constructors, getters, and setters
 
-	    @Column(name = "notes")
-	    private String notes; // 行程筆記
+	public EventBean() {
+	}
 
-	    // Constructors, getters, and setters
+	public EventBean(LocalDate startDate, LocalDate endDate, String notes) {
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.notes = notes;
+	}
 
-	    public EventBean() {
-	    }
+	public Long getEventContentId() {
+		return eventContentId;
+	}
 
-	    public EventBean(ScheduleBean schedule, CalendarBean calendar, LocalDate startDate, LocalDate endDate, String notes) {
-	        this.schedule = schedule;
-	        this.calendar = calendar;
-	        this.startDate = startDate;
-	        this.endDate = endDate;
-	        this.notes = notes;
-	    }
+	public void setEventContentId(Long eventContentId) {
+		this.eventContentId = eventContentId;
+	}
 
-	    public Long getEventContentId() {
-	        return eventContentId;
-	    }
+	public LocalDate getStartDate() {
+		return startDate;
+	}
 
-	    public void setEventContentId(Long eventContentId) {
-	        this.eventContentId = eventContentId;
-	    }
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
 
-	    public ScheduleBean getSchedule() {
-	        return schedule;
-	    }
+	public LocalDate getEndDate() {
+		return endDate;
+	}
 
-	    public void setSchedule(ScheduleBean schedule) {
-	        this.schedule = schedule;
-	    }
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
 
-	    public CalendarBean getCalendar() {
-	        return calendar;
-	    }
+	public String getNotes() {
+		return notes;
+	}
 
-	    public void setCalendar(CalendarBean calendar) {
-	        this.calendar = calendar;
-	    }
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
 
-	    public LocalDate getStartDate() {
-	        return startDate;
-	    }
-
-	    public void setStartDate(LocalDate startDate) {
-	        this.startDate = startDate;
-	    }
-
-	    public LocalDate getEndDate() {
-	        return endDate;
-	    }
-
-	    public void setEndDate(LocalDate endDate) {
-	        this.endDate = endDate;
-	    }
-
-	    public String getNotes() {
-	        return notes;
-	    }
-
-	    public void setNotes(String notes) {
-	        this.notes = notes;
-	    }
-
-	    @Override
-	    public String toString() {
-	        return "EventContent [eventContentId=" + eventContentId + ", schedule=" + schedule +
-	               ", calendar=" + calendar + ", startDate=" + startDate + 
-	               ", endDate=" + endDate + ", notes=" + notes + "]";
-	    }
+	@Override
+	public String toString() {
+		return "EventContent [eventContentId=" + eventContentId + ", startDate=" + startDate +
+				", endDate=" + endDate + ", notes=" + notes + "]";
+	}
 }

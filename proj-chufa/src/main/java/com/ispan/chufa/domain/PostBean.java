@@ -20,28 +20,10 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "post")
-public class Post {
+public class PostBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
 	private Long postid; // 貼文_貼文id
-
-	@ManyToOne(cascade = { CascadeType.PERSIST })
-	@JoinColumn(name = "userid", nullable = false)
-	MemberBean member;
-
-//    @OneToOne(cascade = CascadeType.PERSIST)
-//    @JoinColumn(name="travel_id_sqlname")
-//    TravelBean travel ;
-//	
-
-	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Interaction> interactions; // 貼文的互動行為
-	private String tags; // 貼文_標籤 
-	
-//	@ManyToMany
-//	@JoinTable(name = "post_tag", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-//	private Set<MemberBean> tag = new HashSet<>();
-
 	private String postStatus; // 貼文_貼文狀態
 	private String postTitle; // 貼文_貼文標題
 	private LocalDateTime postTime; // 貼文_貼文時間
@@ -91,28 +73,12 @@ public class Post {
 		this.postContent = postContent;
 	}
 
-	public String getTags() {
-		return tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-
 	public String getPostLink() {
 		return postLink;
 	}
 
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
-	}
-
-	public List<Interaction> getInteractions() {
-		return interactions;
-	}
-
-	public void setInteractions(List<Interaction> interactions) {
-		this.interactions = interactions;
 	}
 
 }

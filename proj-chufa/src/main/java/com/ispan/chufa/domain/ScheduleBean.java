@@ -34,17 +34,6 @@ public class ScheduleBean {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
 
-
-
-
-    @ManyToOne // 多對一的關係：一個用戶可以有多個行程
-    @JoinColumn(name = "user_id", referencedColumnName = "id") // 對應的外鍵欄位
-
-
-
-    
-    private MemberBean userid; // 外鍵，對應到 UserBean 實體
-
     // Constructors
     public ScheduleBean() {
     }
@@ -54,7 +43,6 @@ public class ScheduleBean {
         this.tripName = tripName;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.userid = userid;
     }
 
     // Getters and Setters
@@ -98,17 +86,9 @@ public class ScheduleBean {
         this.endDate = endDate;
     }
 
-    public MemberBean getUser() {
-        return userid;
-    }
-
-    public void setUser(MemberBean userid) {
-        this.userid = userid;
-    }
-
     @Override
     public String toString() {
         return "TripBean [tripId=" + tripId + ", coverPhoto=" + coverPhoto + ", tripName=" + tripName +
-                ", startDate=" + startDate + ", endDate=" + endDate + ", user=" + userid + "]";
+                ", startDate=" + startDate + ", endDate=" + endDate + "]";
     }
 }

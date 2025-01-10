@@ -20,7 +20,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "post")
-public class Post {
+public class PostBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
 	private Long postid; // 貼文_貼文id

@@ -1,7 +1,7 @@
 USE [chufa]
 GO
 
-/****** «Ø¥ßcity¸ê®Æªí******/
+/****** å»ºç«‹cityè³‡æ–™è¡¨******/
 SET ANSI_NULLS ON
 GO
 
@@ -19,7 +19,7 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-/****** ·s¼W¦æ¨Æ¾äªí®æ ******/
+/****** æ–°å¢žè¡Œäº‹æ›†è¡¨æ ¼ ******/
 SET ANSI_NULLS ON
 GO
 
@@ -34,6 +34,31 @@ CREATE TABLE [dbo].[Calendar](
 PRIMARY KEY CLUSTERED 
 (
 	[date] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+/****** å»ºç«‹æ™¯é»žè³‡æ–™è¡¨******/
+CREATE TABLE [dbo].[place](
+	[placeId] [int] IDENTITY(1,1) NOT NULL,
+	[accommodationType] [varchar](255) NULL,
+	[bookingUrl] [varchar](255) NULL,
+	[businessHours] [varchar](255) NULL,
+	[latitude] [float] NOT NULL,
+	[longitude] [float] NOT NULL,
+	[mealTime] [varchar](255) NULL,
+	[placeAddress] [varchar](255) NULL,
+	[placeImage] [varchar](255) NULL,
+	[placeInfo] [varchar](255) NULL,
+	[placeName] [varchar](255) NULL,
+	[placePhone] [varchar](255) NULL,
+	[placeType] [varchar](255) NULL,
+	[price] [numeric](38, 2) NULL,
+	[reservation] [varchar](255) NULL,
+	[website] [varchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[placeId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO

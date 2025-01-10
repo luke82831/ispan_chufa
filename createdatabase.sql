@@ -1,7 +1,7 @@
 USE [chufa]
 GO
 
-/****** «Ø¥ßcity¸ê®Æªí******/
+/****** å»ºç«‹cityè³‡æ–™è¡¨******/
 SET ANSI_NULLS ON
 GO
 
@@ -19,13 +19,26 @@ PRIMARY KEY CLUSTERED
 ) ON [PRIMARY]
 GO
 
-/****** «ØÄR´ºÂI¸ê®Æªí******/
+/****** æ–°å¢žè¡Œäº‹æ›†è¡¨æ ¼ ******/
 SET ANSI_NULLS ON
 GO
 
 SET QUOTED_IDENTIFIER ON
 GO
 
+CREATE TABLE [dbo].[Calendar](
+	[date] [date] NOT NULL,
+	[description] [varchar](255) NULL,
+	[isHoliday] [bit] NULL,
+	[week] [varchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[date] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+/****** å»ºç«‹æ™¯é»žè³‡æ–™è¡¨******/
 CREATE TABLE [dbo].[place](
 	[placeId] [int] IDENTITY(1,1) NOT NULL,
 	[accommodationType] [varchar](255) NULL,
@@ -49,6 +62,3 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-
-
-

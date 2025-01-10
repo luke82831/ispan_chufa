@@ -4,7 +4,7 @@ spring:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
     username: sa
-    password: 1234
+    password: P@ssw0rd
 
   #Hibernate/JPA的相關設定
   jpa:

@@ -11,66 +11,41 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
-@Table(name="interaction")
-public class Interaction {
-	    @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long actionId; // 互動行為 ID
+@Table(name = "interaction")
+public class InteractionBean {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long actionId; // 互動行為 ID
 
-	    @ManyToOne
-	    @JoinColumn(name = "member_id", nullable = false)
-	    private MemberBean member; // 使用者資料 (多對一關聯)
+	@Column(name = "interaction_type")
+	private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
 
-	    @ManyToOne
-	    @JoinColumn(name = "postid", nullable = false)
-	    private Post post; // 貼文 (多對一關聯)
-	    
-        @Column(name="interaction_type")
-	    private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
+	@Column(name = "interaction_time")
+	private LocalDateTime interactionTime; // 互動行為時間
 
-        @Column(name="interaction_time")
-	    private LocalDateTime interactionTime; // 互動行為時間
+	public Long getActionId() {
+		return actionId;
+	}
 
-		public Long getActionId() {
-			return actionId;
-		}
+	public void setActionId(Long actionId) {
+		this.actionId = actionId;
+	}
 
-		public void setActionId(Long actionId) {
-			this.actionId = actionId;
-		}
+	public String getInteractionType() {
+		return interactionType;
+	}
 
-		public MemberBean getMember() {
-			return member;
-		}
+	public void setInteractionType(String interactionType) {
+		this.interactionType = interactionType;
+	}
 
-		public void setMember(MemberBean member) {
-			this.member = member;
-		}
+	public LocalDateTime getInteractionTime() {
+		return interactionTime;
+	}
 
-		public Post getPost() {
-			return post;
-		}
-
-		public void setPost(Post post) {
-			this.post = post;
-		}
-
-		public String getInteractionType() {
-			return interactionType;
-		}
-
-		public void setInteractionType(String interactionType) {
-			this.interactionType = interactionType;
-		}
-
-		public LocalDateTime getInteractionTime() {
-			return interactionTime;
-		}
-
-		public void setInteractionTime(LocalDateTime interactionTime) {
-			this.interactionTime = interactionTime;
-		}    
+	public void setInteractionTime(LocalDateTime interactionTime) {
+		this.interactionTime = interactionTime;
+	}
 
 }

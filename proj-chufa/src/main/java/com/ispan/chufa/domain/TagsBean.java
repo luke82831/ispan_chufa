@@ -1,6 +1,6 @@
 package com.ispan.chufa.domain;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +15,8 @@ public class TagsBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
     private Integer TagID; // 標籤系統_標籤id
     private String TagName; // 標籤系統_標籤名稱
-    private LocalDate TagCreatedAt; // 標籤系統_創建時間
-    private LocalDate TagUpdatedAt; // 標籤系統_更新時間
+    private LocalDateTime TagCreatedAt; // 標籤系統_創建時間
+    private LocalDateTime TagUpdatedAt; // 標籤系統_更新時間
 
     @Override
     public String toString() {
@@ -40,19 +40,19 @@ public class TagsBean {
         TagName = tagName;
     }
 
-    public LocalDate getTagCreatedAt() {
+    public LocalDateTime getTagCreatedAt() {
         return TagCreatedAt;
     }
 
-    public void setTagCreatedAt(LocalDate tagCreatedAt) {
+    public void setTagCreatedAt(LocalDateTime tagCreatedAt) {
         TagCreatedAt = tagCreatedAt;
     }
 
-    public LocalDate getTagUpdatedAt() {
+    public LocalDateTime getTagUpdatedAt() {
         return TagUpdatedAt;
     }
 
-    public void setTagUpdatedAt(LocalDate tagUpdatedAt) {
+    public void setTagUpdatedAt(LocalDateTime tagUpdatedAt) {
         TagUpdatedAt = tagUpdatedAt;
     }
 

@@ -1,6 +1,6 @@
 package com.ispan.chufa.domain;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,8 +17,8 @@ public class CommentBean {
     private Integer PostID; // 留言_貼文id (FK)一對多，多方
     private Integer Title; // 留言_留言狀態
     private Integer UserID; // 留言_留言者id (FK)一對多，多方
-    private LocalDate CommentCreatedAt; // 留言_創建時間
-    private LocalDate CommentUpdatedAt; // 留言_更新時間
+    private LocalDateTime CommentCreatedAt; // 留言_創建時間
+    private LocalDateTime CommentUpdatedAt; // 留言_更新時間
     private String Content; // 留言_留言內文
     private Integer ParentID; // 留言_上層留言id
 
@@ -61,19 +61,19 @@ public class CommentBean {
         UserID = userID;
     }
 
-    public LocalDate getCommentCreatedAt() {
+    public LocalDateTime getCommentCreatedAt() {
         return CommentCreatedAt;
     }
 
-    public void setCommentCreatedAt(LocalDate commentCreatedAt) {
+    public void setCommentCreatedAt(LocalDateTime commentCreatedAt) {
         CommentCreatedAt = commentCreatedAt;
     }
 
-    public LocalDate getCommentUpdatedAt() {
+    public LocalDateTime getCommentUpdatedAt() {
         return CommentUpdatedAt;
     }
 
-    public void setCommentUpdatedAt(LocalDate commentUpdatedAt) {
+    public void setCommentUpdatedAt(LocalDateTime commentUpdatedAt) {
         CommentUpdatedAt = commentUpdatedAt;
     }
 

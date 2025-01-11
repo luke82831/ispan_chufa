@@ -2,19 +2,25 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
 
-import org.springframework.data.annotation.Id;
-
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+@Entity
+@Table(name = "event")
 public class EventBean {
 
 	@Id
+<<<<<<< HEAD
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "event_content_id")
+=======
+	@Column(name = "event_content_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+>>>>>>> origin/dev
 	private Long eventContentId; // 行程內容id (PK)
 
 	@Column(name = "start_date", nullable = false)

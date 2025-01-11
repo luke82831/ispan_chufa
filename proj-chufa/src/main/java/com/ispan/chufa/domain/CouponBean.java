@@ -6,7 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Coupon")
+@Table(name = "coupon")
 public class CouponBean {
 
     @Id

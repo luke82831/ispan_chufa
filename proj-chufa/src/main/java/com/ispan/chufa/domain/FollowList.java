@@ -6,11 +6,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-<<<<<<< HEAD
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-=======
->>>>>>> origin/dev
 import jakarta.persistence.Table;
 
 @Entity
@@ -27,11 +22,7 @@ public class FollowList {
 	}
 
 	public void setFLid(Long flid) {
-<<<<<<< HEAD
-		flid = flid;
-=======
 		this.flid = flid;
->>>>>>> origin/dev
 	}
 
 	public LocalDateTime getFollowTime() {

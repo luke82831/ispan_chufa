@@ -14,13 +14,8 @@ import jakarta.persistence.Table;
 public class EventBean {
 
 	@Id
-<<<<<<< HEAD
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "event_content_id")
-=======
 	@Column(name = "event_content_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
->>>>>>> origin/dev
 	private Long eventContentId; // 行程內容id (PK)
 
 	@Column(name = "start_date", nullable = false)

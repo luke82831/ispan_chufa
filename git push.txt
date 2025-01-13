@@ -1,0 +1,29 @@
+cd .
+cd ispan_chufa
+
+git branch
+
+@echo 是否繼續推送？ (Y/N)
+set /p userChoice=  
+
+if /I "%userChoice%"=="Y" (
+    git status
+    @echo 查看未被追蹤的檔案
+    pause
+
+    git add .
+
+    @echo 請輸入 commit 訊息:
+    set /p commitMessage=  // 用戶輸入 commit 訊息
+    git commit -m "%commitMessage%"  // 使用用戶輸入的訊息進行 commit
+
+    git branch
+    @echo 務必檢查目前分支是否為自己的分支，確認上傳專案檔案版本
+    pause
+
+    @echo 通知組長合併
+    pause
+) else (
+    @echo 請檢查分支
+    pause
+)

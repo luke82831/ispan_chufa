@@ -10,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Comments")
+@Table(name = "comments")
 public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增

@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 	@Entity
-	@Table(name = "Calendar")
+	@Table(name = "calendar")
 	public class CalendarBean {
 		@Id
 		@Column(name = "date", nullable = false)

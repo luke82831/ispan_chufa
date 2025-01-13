@@ -34,4 +34,12 @@ public class PostController {
 
      return responseBean;
  }
+ 
+ @PostMapping("/listall")
+ public String postMethodName(@RequestBody String entity) {
+     //TODO: process POST request
+     
+     return entity;
+ }
+ 
 }

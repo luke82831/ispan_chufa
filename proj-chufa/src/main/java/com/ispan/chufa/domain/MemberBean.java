@@ -2,6 +2,8 @@ package com.ispan.chufa.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,6 +24,7 @@ public class MemberBean {
 	private Long userid;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonBackReference
 	private List<Post> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

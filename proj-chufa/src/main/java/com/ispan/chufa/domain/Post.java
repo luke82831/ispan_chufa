@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +29,7 @@ public class Post {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST })
 	@JoinColumn(name = "userid", nullable = false)
+	@JsonManagedReference
 	MemberBean member;
 
 //    @OneToOne(cascade = CascadeType.PERSIST)
@@ -38,9 +41,9 @@ public class Post {
 	private List<Interaction> interactions; // 貼文的互動行為
 	private String tags; // 貼文_標籤 
 	
-//	@ManyToMany
-//	@JoinTable(name = "post_tag", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
-//	private Set<MemberBean> tag = new HashSet<>();
+	@ManyToMany
+	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
+	private Set<TagsBean> tag = new HashSet<>();
 
 	private String postStatus; // 貼文_貼文狀態
 	private String postTitle; // 貼文_貼文標題
@@ -114,5 +117,23 @@ public class Post {
 	public void setInteractions(List<Interaction> interactions) {
 		this.interactions = interactions;
 	}
+
+	public MemberBean getMember() {
+		return member;
+	}
+
+	public void setMember(MemberBean member) {
+		this.member = member;
+	}
+
+	public Set<TagsBean> getTag() {
+		return tag;
+	}
+
+	public void setTag(Set<TagsBean> tag) {
+		this.tag = tag;
+	}
+	
+	
 
 }

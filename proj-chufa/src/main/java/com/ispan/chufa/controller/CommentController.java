@@ -98,7 +98,7 @@ public class CommentController {
             Integer id = requestJson.getInt(commentId);
             if (commentService.existsById(id)) {
                 commentService.deleteComment(id);
-                responseJson.put("成功", "已刪除這筆資料");
+                responseJson.put("成功", "已刪除這筆留言");
             } else {
                 responseJson.put("錯誤", "查不到這筆ID");
             }

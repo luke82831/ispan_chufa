@@ -45,7 +45,6 @@ public class CommentService {
         if (id != null) {
             Optional<CommentBean> optional = commentRepository.findById(id);
             if (optional.isPresent()) {
-                System.out.println(optional.get());
                 return optional.get();
             }
         }

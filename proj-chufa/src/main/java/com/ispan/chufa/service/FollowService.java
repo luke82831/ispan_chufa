@@ -61,7 +61,8 @@ public class FollowService {
 //		// TODO Auto-generated method stub
 //		return followRepository.findFollowed_UseridByFollower_Userid(followerId);
 //	}
-	public List<MemberInfo> getFollowedList(Long memberId) {
+	//fans
+	public List<MemberInfo> getFollowedList(Long followerid) {
 	    // 創建 CriteriaBuilder 和 CriteriaQuery
 	    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 	    CriteriaQuery<MemberInfo> query = cb.createQuery(MemberInfo.class);
@@ -70,7 +71,7 @@ public class FollowService {
 	    Root<FollowBean> followRoot = query.from(FollowBean.class);
 	    
 	    // 聯接 FollowBean 和 MemberBean
-	    Join<FollowBean, MemberBean> followerJoin = followRoot.join("follower", JoinType.INNER);
+	    Join<FollowBean, MemberBean> followerJoin = followRoot.join("followed", JoinType.INNER);
 	    
 	    // 選擇字段（id, name, profilePicture）
 	    query.select(cb.construct(MemberInfo.class, 
@@ -80,15 +81,34 @@ public class FollowService {
 	            followerJoin.get("nickname")));
 	    
 	    // 添加查詢條件：memberId
-	    query.where(cb.equal(followRoot.get("followed").get("id"), memberId));
+	    query.where(cb.equal(followRoot.get("follower").get("id"), followerid));
 	    
 	    // 執行查詢
 	    return entityManager.createQuery(query).getResultList();
 	}
 
-	public List<MemberBean> getFollowerList(Long followerId) {
-		// TODO Auto-generated method stub
-		return followRepository.findFollower_UseridByFollowed_Userid(followerId);
+	public List<MemberInfo> getFollowerList(Long followedId) {
+		  CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		    CriteriaQuery<MemberInfo> query = cb.createQuery(MemberInfo.class);
+		    
+		    // 根實體
+		    Root<FollowBean> followRoot = query.from(FollowBean.class);
+		    
+		    // 聯接 FollowBean 和 MemberBean
+		    Join<FollowBean, MemberBean> followerJoin = followRoot.join("follower", JoinType.INNER);
+		    
+		    // 選擇字段（id, name, profilePicture）
+		    query.select(cb.construct(MemberInfo.class, 
+		            followerJoin.get("id"), 
+		            followerJoin.get("name"), 
+		            followerJoin.get("profilePicture"),
+		            followerJoin.get("nickname")));
+		    
+		    // 添加查詢條件：memberId
+		    query.where(cb.equal(followRoot.get("followed").get("id"), followedId));
+		    
+		    // 執行查詢
+		    return entityManager.createQuery(query).getResultList();
 	}
 
 	

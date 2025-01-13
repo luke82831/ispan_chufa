@@ -27,7 +27,6 @@ public class FollowController {
 	@PostMapping("/verb")
 	public FollowResponse follow(@RequestBody FollowRequest followRequest) {
 		FollowResponse responseBean = new FollowResponse();
-		  System.out.println("接收到的請求體: " + followRequest);
 	    try {
            // 請求服務層
 	    	 FollowBean follow = followService.follow(followRequest.getFollowerid(), followRequest.getFollowedid());
@@ -62,7 +61,7 @@ public class FollowController {
 
 	// 查詢用戶的粉絲列表（關注者）
 	@GetMapping("/followerList/{followedId}")
-	public List<MemberBean> getFollowerList(@PathVariable Long followedId) {
+	public List<MemberInfo> getFollowerList(@PathVariable Long followedId) {
 		return followService.getFollowerList(followedId);
 	}
 

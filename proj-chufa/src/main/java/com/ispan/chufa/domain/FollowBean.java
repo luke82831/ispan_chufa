@@ -12,7 +12,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="followlist")
-public class FollowList {
+public class FollowBean {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long flid; // 關注編號 ID

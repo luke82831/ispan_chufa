@@ -28,13 +28,13 @@ public class MemberBean {
 	private List<Post> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Interaction> interactions;
+	private List<InteractionBean> interactions;
 
 	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<FollowList> following;
+	private List<FollowBean> following;
 
 	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<FollowList> followers;
+	private List<FollowBean> followers;
 
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
 	@Column(name = "role", nullable = false) // 身分欄位，必填
@@ -186,27 +186,27 @@ public class MemberBean {
 		this.posts = posts;
 	}
 
-	public List<Interaction> getInteractions() {
+	public List<InteractionBean> getInteractions() {
 		return interactions;
 	}
 
-	public void setInteractions(List<Interaction> interactions) {
+	public void setInteractions(List<InteractionBean> interactions) {
 		this.interactions = interactions;
 	}
 
-	public List<FollowList> getFollowing() {
+	public List<FollowBean> getFollowing() {
 		return following;
 	}
 
-	public void setFollowing(List<FollowList> following) {
+	public void setFollowing(List<FollowBean> following) {
 		this.following = following;
 	}
 
-	public List<FollowList> getFollowers() {
+	public List<FollowBean> getFollowers() {
 		return followers;
 	}
 
-	public void setFollowers(List<FollowList> followers) {
+	public void setFollowers(List<FollowBean> followers) {
 		this.followers = followers;
 	}
 }

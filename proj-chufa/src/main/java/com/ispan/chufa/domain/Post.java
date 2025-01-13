@@ -38,7 +38,7 @@ public class Post {
 //	
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Interaction> interactions; // 貼文的互動行為
+	private List<InteractionBean> interactions; // 貼文的互動行為
 	private String tags; // 貼文_標籤 
 	
 	@ManyToMany
@@ -110,11 +110,11 @@ public class Post {
 		this.postLink = postLink;
 	}
 
-	public List<Interaction> getInteractions() {
+	public List<InteractionBean> getInteractions() {
 		return interactions;
 	}
 
-	public void setInteractions(List<Interaction> interactions) {
+	public void setInteractions(List<InteractionBean> interactions) {
 		this.interactions = interactions;
 	}
 

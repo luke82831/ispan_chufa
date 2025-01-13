@@ -11,35 +11,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.dto.FollowResponse;
 import com.ispan.chufa.dto.PostResponse;
 import com.ispan.chufa.service.PostService;
 
 @RestController
 @RequestMapping("/search")
 public class PostController {
- @Autowired 
- private PostService postService;
- 
- @PostMapping("/post")
- public PostResponse find(@RequestBody JSONObject json) {
-	 PostResponse responseBean = new PostResponse();
+	@Autowired
+	private PostService postService;
 
+	@PostMapping("/post")
+	public PostResponse find(@RequestBody JSONObject json) {
+		PostResponse responseBean = new PostResponse();
 
-     List<Post> posts = postService.findPostsByCriteria(json);
-     if (posts != null && !posts.isEmpty()) {
-         responseBean.setPostlist(posts);
-     } else {
-         responseBean.setPostlist(new ArrayList<>());
-     }
+		List<Post> posts = postService.findPostsByCriteria(json);
+		if (posts != null && !posts.isEmpty()) {
+			responseBean.setPostlist(posts);
+		} else {
+			responseBean.setPostlist(new ArrayList<>());
+		}
 
-     return responseBean;
- }
- 
- @PostMapping("/listall")
- public String postMethodName(@RequestBody String entity) {
-     //TODO: process POST request
-     
-     return entity;
- }
- 
+		return responseBean;
+	}
+
+	@PostMapping("/listall")
+	public String postMethodName(@RequestBody String entity) {
+		// TODO: process POST request
+
+		return entity;
+	}
+
+	
+
 }

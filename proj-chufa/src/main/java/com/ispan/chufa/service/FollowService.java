@@ -9,11 +9,21 @@ import org.springframework.stereotype.Service;
 
 import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.MemberBean;
+import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.repository.FollowRepository;
 import com.ispan.chufa.repository.MemberRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Root;
 @Service
 public class FollowService {
-
+	@PersistenceContext
+	private EntityManager entityManager;
 	@Autowired
 	FollowRepository followRepository;
 	
@@ -47,9 +57,33 @@ public class FollowService {
 		}	
 	}
 
-	public List<MemberBean> getFollowedList(Long followerId) {
-		// TODO Auto-generated method stub
-		return followRepository.findFollowed_UseridByFollower_Userid(followerId);
+//	public List<MemberBean> getFollowedList(Long followerId) {
+//		// TODO Auto-generated method stub
+//		return followRepository.findFollowed_UseridByFollower_Userid(followerId);
+//	}
+	public List<MemberInfo> getFollowedList(Long memberId) {
+	    // 創建 CriteriaBuilder 和 CriteriaQuery
+	    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+	    CriteriaQuery<MemberInfo> query = cb.createQuery(MemberInfo.class);
+	    
+	    // 根實體
+	    Root<FollowBean> followRoot = query.from(FollowBean.class);
+	    
+	    // 聯接 FollowBean 和 MemberBean
+	    Join<FollowBean, MemberBean> followerJoin = followRoot.join("follower", JoinType.INNER);
+	    
+	    // 選擇字段（id, name, profilePicture）
+	    query.select(cb.construct(MemberInfo.class, 
+	            followerJoin.get("id"), 
+	            followerJoin.get("name"), 
+	            followerJoin.get("profilePicture"),
+	            followerJoin.get("nickname")));
+	    
+	    // 添加查詢條件：memberId
+	    query.where(cb.equal(followRoot.get("followed").get("id"), memberId));
+	    
+	    // 執行查詢
+	    return entityManager.createQuery(query).getResultList();
 	}
 
 	public List<MemberBean> getFollowerList(Long followerId) {

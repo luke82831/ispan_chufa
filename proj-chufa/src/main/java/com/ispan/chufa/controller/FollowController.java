@@ -15,6 +15,7 @@ import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.dto.FollowRequest;
 import com.ispan.chufa.dto.FollowResponse;
+import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.service.FollowService;
 
 @RestController
@@ -28,7 +29,7 @@ public class FollowController {
 		FollowResponse responseBean = new FollowResponse();
 		  System.out.println("接收到的請求體: " + followRequest);
 	    try {
-        // 請求服務層
+           // 請求服務層
 	    	 FollowBean follow = followService.follow(followRequest.getFollowerid(), followRequest.getFollowedid());
 	    	 if (followRequest.getFollowerid() == null || followRequest.getFollowedid() == null) {
 	             responseBean.setSuccess(false);
@@ -37,7 +38,7 @@ public class FollowController {
 	         }
 	        if (follow == null) {
 	            responseBean.setSuccess(false);
-	            responseBean.setMessage("沒成功");
+	            responseBean.setMessage("取消關注");
 	        } else {
 	            responseBean.setSuccess(true);
 	            responseBean.setMessage("成功關注");
@@ -55,14 +56,14 @@ public class FollowController {
 
 	// 查詢用戶的關注列表（被關注者）
 	@GetMapping("/followedList/{followerId}")
-	public List<MemberBean> getFollowedList(@PathVariable Long followerId) {
+	public List<MemberInfo> getFollowedList(@PathVariable Long followerId) {
 		return followService.getFollowedList(followerId);
 	}
 
 	// 查詢用戶的粉絲列表（關注者）
 	@GetMapping("/followerList/{followedId}")
 	public List<MemberBean> getFollowerList(@PathVariable Long followedId) {
-		return followService.getFollowedList(followedId);
+		return followService.getFollowerList(followedId);
 	}
 
 }

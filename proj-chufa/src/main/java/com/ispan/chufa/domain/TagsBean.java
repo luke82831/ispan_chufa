@@ -17,7 +17,7 @@ public class TagsBean {
     private Integer tagId;
     @Column(name = "tag_state", nullable = false) // 標籤系統_標籤狀態 不能NULL
     private Integer tagState;
-    @Column(name = "tag_name", nullable = false) // 標籤系統_標籤名稱 不能NULL
+    @Column(name = "tag_name", nullable = false, unique = true) // 標籤系統_標籤名稱 不能NULL 唯一值
     private String tagName;
     @Column(name = "tag_created_at", nullable = false) // 標籤系統_創建時間 不能NULL
     private LocalDateTime tagCreatedAt;

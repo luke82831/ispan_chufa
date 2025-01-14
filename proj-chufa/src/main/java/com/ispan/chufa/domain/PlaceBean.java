@@ -1,11 +1,14 @@
 package com.ispan.chufa.domain;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -14,28 +17,39 @@ public class PlaceBean {
     
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int placeId;
+	private long placeId;
     private String placeType;
     private String placeName;
     private String placeAddress;
     private double longitude; // 精確的經度
     private double latitude; // 精確的緯度
 
-    private String placeImage; // 存儲圖片的二進位數據
+    @ElementCollection
+    private List<String> photos; // 使用 List 儲存圖片 URL
     private String placePhone; // 使用 String 類型來處理電話號碼
     private String businessHours;
     private String placeInfo;
+    private Double rating;
     private String website;
     private String bookingUrl;
     private BigDecimal price; // 使用 BigDecimal 處理價格
     private String accommodationType; // 旅宿類型
     private String mealTime; // 用餐時間
     private String reservation; // 只有在餐廳類型時使用
-	
-    public int getPlaceId() {
+    
+    @OneToMany(mappedBy = "place")
+    private List<PlacePostBean> placePosts;  // 這裡是一對多關聯
+
+    public List<PlacePostBean> getPlacePosts() {
+		return placePosts;
+	}
+	public void setPlacePosts(List<PlacePostBean> placePosts) {
+		this.placePosts = placePosts;
+	}
+	public long getPlaceId() {
 		return placeId;
 	}
-	public void setPlaceId(int placeId) {
+	public void setPlaceId(long placeId) {
 		this.placeId = placeId;
 	}
 	public String getPlaceType() {
@@ -68,11 +82,18 @@ public class PlaceBean {
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
-	public String getPlaceImage() {
-		return placeImage;
+	
+	public List<String> getPhotos() {
+		return photos;
 	}
-	public void setPlaceImage(String placeImage) {
-		this.placeImage = placeImage;
+	public void setPhotos(List<String> photos) {
+		this.photos = photos;
+	}
+	public Double getRating() {
+		return rating;
+	}
+	public void setRating(Double rating) {
+		this.rating = rating;
 	}
 	public String getPlacePhone() {
 		return placePhone;
@@ -128,6 +149,5 @@ public class PlaceBean {
 	public void setReservation(String reservation) {
 		this.reservation = reservation;
 	}
-    
 }
 

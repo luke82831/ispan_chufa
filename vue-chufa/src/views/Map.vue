@@ -1,15 +1,15 @@
 <template>
   <div>
-    <MapSearch></MapSearch>
+    <Map></Map>
   </div>
 </template>
 
 <script>
-import MapSearch from "@/components/MapSearch.vue";
+import Map from "@/components/GoogleMap/Mapdisplay.vue";
 
 export default {
   components: {
-    MapSearch,
+    Map,
   },
 };
 </script>

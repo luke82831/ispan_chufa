@@ -1,11 +1,14 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -17,12 +20,22 @@ public class PostBean {
 	private String postStatus; // 貼文_貼文狀態
 	private String postTitle; // 貼文_貼文標題
 	private LocalDateTime postTime; // 貼文_貼文時間
-
 	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
+	
+    @OneToMany(mappedBy = "post")
+    private List<PlacePostBean> placePosts;  // 這裡是一對多關聯
+
+	public List<PlacePostBean> getPlacePosts() {
+		return placePosts;
+	}
+
+	public void setPlacePosts(List<PlacePostBean> placePosts) {
+		this.placePosts = placePosts;
+	}
 
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
-
+	  
 	public Long getPostid() {
 		return postid;
 	}
@@ -69,6 +82,6 @@ public class PostBean {
 
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
-	}
+	}	
 
 }

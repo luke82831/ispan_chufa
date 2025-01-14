@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,14 +20,21 @@ public class CommentBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
     private Integer commentId;
 
-    @Column(name = "postid", nullable = false) // 留言_貼文id 不能NULL (FK)一對多，多方
-    private Integer postId;
+    @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
+    @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 外鍵列 留言_貼文id
+                                                                                                        // 不能NULL
+                                                                                                        // (FK)一對多，多方
+    private PostBean postBean;
 
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL
     private Integer commentState;
 
-    @Column(name = "user_id", nullable = false) // 留言_留言者id 不能NULL (FK)一對多，多方
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 外鍵列
+                                                                                                           // 留言_留言者id
+                                                                                                           // 不能NULL
+                                                                                                           // (FK)一對多，多方
+    private MemberBean memberBean;
 
     @Column(name = "comment_created_at", nullable = false) // 留言_創建時間 不能NULL
     private LocalDateTime commentCreatedAt;
@@ -39,8 +50,8 @@ public class CommentBean {
 
     @Override
     public String toString() {
-        return "CommentBean [commentId=" + commentId + ", postId=" + postId + ", commentState=" + commentState
-                + ", userId=" + userId + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
+        return "CommentBean [commentId=" + commentId + ", postBean=" + postBean + ", commentState=" + commentState
+                + ", memberBean=" + memberBean + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
                 + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
     }
 
@@ -52,12 +63,12 @@ public class CommentBean {
         this.commentId = commentId;
     }
 
-    public Integer getPostId() {
-        return postId;
+    public PostBean getPostBean() {
+        return postBean;
     }
 
-    public void setPostId(Integer postId) {
-        this.postId = postId;
+    public void setPostBean(PostBean postBean) {
+        this.postBean = postBean;
     }
 
     public Integer getCommentState() {
@@ -68,12 +79,12 @@ public class CommentBean {
         this.commentState = commentState;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public MemberBean getMemberBean() {
+        return memberBean;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setMemberBean(MemberBean memberBean) {
+        this.memberBean = memberBean;
     }
 
     public LocalDateTime getCommentCreatedAt() {

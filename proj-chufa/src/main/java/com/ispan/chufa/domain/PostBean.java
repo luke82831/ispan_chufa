@@ -1,12 +1,17 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,6 +28,12 @@ public class PostBean {
 	private String postContent; // 貼文_自定義內文
 
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
+
+	@ManyToMany(mappedBy = "postBeans")
+	private Set<TagsBean> tagsBeans = new HashSet<>();
+
+	@OneToMany(mappedBy = "postBean")
+	private List<CommentBean> commentBeans;
 
 	public Long getPostid() {
 		return postid;
@@ -70,6 +81,22 @@ public class PostBean {
 
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
+	}
+
+	public Set<TagsBean> getTagsBeans() {
+		return tagsBeans;
+	}
+
+	public void setTagsBeans(Set<TagsBean> tagsBeans) {
+		this.tagsBeans = tagsBeans;
+	}
+
+	public List<CommentBean> getCommentBeans() {
+		return commentBeans;
+	}
+
+	public void setCommentBeans(List<CommentBean> commentBeans) {
+		this.commentBeans = commentBeans;
 	}
 
 }

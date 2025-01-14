@@ -1,12 +1,17 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,10 +29,17 @@ public class TagsBean {
     @Column(name = "tag_updated_at") // 標籤系統_更新時間
     private LocalDateTime tagUpdatedAt;
 
+    @ManyToMany // 多對多
+    @JoinTable(name = "Tags_Post", // 聯結表名稱
+            joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
+            inverseJoinColumns = @JoinColumn(name = "postBean_postid") // 關聯實體的外鍵列
+    )
+    private Set<PostBean> postBeans = new HashSet<>();
+
     @Override
     public String toString() {
         return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
-                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + "]";
+                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + "]";
     }
 
     public Integer getTagId() {
@@ -68,6 +80,14 @@ public class TagsBean {
 
     public void setTagUpdatedAt(LocalDateTime tagUpdatedAt) {
         this.tagUpdatedAt = tagUpdatedAt;
+    }
+
+    public Set<PostBean> getPostBeans() {
+        return postBeans;
+    }
+
+    public void setPostBeans(Set<PostBean> postBeans) {
+        this.postBeans = postBeans;
     }
 
 }

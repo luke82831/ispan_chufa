@@ -1,5 +1,7 @@
 package com.ispan.chufa.domain;
 
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,7 +19,7 @@ public class MemberBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
 	private Long userid;
-	
+
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
 	@Column(name = "role", nullable = false) // 身分欄位，必填
 	private Role role; // 用來表示身分
@@ -35,16 +38,16 @@ public class MemberBean {
 
 	@Column(name = "name", nullable = false, length = 20) // 姓名欄位，限制長度
 	private String name;
-	
+
 	@Column(name = "gender", nullable = false)
-    private String gender;
-	
+	private String gender;
+
 	@Column(name = "nickname", length = 50) // 暱稱欄位，限制長度
 	private String nickname;
-	
+
 	@Lob // 標示為大物件類型，對應資料庫中的 BLOB
-    @Column(name = "profile_picture")
-    private byte[] profilePicture;
+	@Column(name = "profile_picture")
+	private byte[] profilePicture;
 
 	@Column(name = "bio", columnDefinition = "TEXT") // 自介欄位，使用 TEXT 類型
 	private String bio;
@@ -52,7 +55,11 @@ public class MemberBean {
 	@Column(name = "birth")
 	private java.util.Date birth;
 
+	@OneToMany(mappedBy = "memberBean")
+	private List<CommentBean> commentBeans;
+
 	// Getters and Setters
+
 	public Long getUserid() {
 		return userid;
 	}
@@ -118,14 +125,14 @@ public class MemberBean {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public String getGender() {
-        return gender;
-    }
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
 	public String getNickname() {
 		return nickname;
@@ -134,14 +141,14 @@ public class MemberBean {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	
-	public byte[] getProfilePicture() {
-        return profilePicture;
-    }
 
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
+	public byte[] getProfilePicture() {
+		return profilePicture;
+	}
+
+	public void setProfilePicture(byte[] profilePicture) {
+		this.profilePicture = profilePicture;
+	}
 
 	public String getBio() {
 		return bio;
@@ -157,5 +164,13 @@ public class MemberBean {
 
 	public void setBirth(java.util.Date birth) {
 		this.birth = birth;
+	}
+
+	public List<CommentBean> getCommentBeans() {
+		return commentBeans;
+	}
+
+	public void setCommentBeans(List<CommentBean> commentBeans) {
+		this.commentBeans = commentBeans;
 	}
 }

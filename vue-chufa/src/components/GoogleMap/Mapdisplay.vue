@@ -3,8 +3,7 @@
     <!-- 搜尋區域 -->
     <div class="search-section">
       <h1>Google Maps 地點搜尋</h1>
-      <Autocomplete :onPlaceSelected="handlePlaceChanged" />
-      <SavePlace :selectedPlace="selectedPlace" @savePlace="handleSavePlace" />
+      <PlaceSearch :onPlaceSelected="handlePlaceChanged" />
     </div>
     
     <!-- 地圖區域 -->
@@ -16,13 +15,11 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import Autocomplete from "@/components/GoogleMap/Autocomplete.vue";
-import SavePlace from "@/components/GoogleMap/SavePlace.vue"; // 引入 SavePlace 組件
+import PlaceSearch from "@/components/GoogleMap/PlaceSearch.vue";
 
 export default {
   components: {
-    Autocomplete,
-    SavePlace, // 註冊 SavePlace 組件
+    PlaceSearch,
   },
   setup() {
     const map = ref(null); // 地圖實例
@@ -68,6 +65,8 @@ export default {
       map.value.setCenter(place.geometry.location);
       map.value.setZoom(17);
 
+      
+
       updateMarker({ lat, lng }, place);
 
       selectedPlace.value = {
@@ -104,18 +103,12 @@ export default {
       markers.value.push(marker); // 新增到標記清單
     };
 
-    // 儲存選擇的地點
-    const handleSavePlace = (place) => {
-      console.log("儲存地點:", place);
-      // 你可以在這裡處理儲存邏輯，例如存到本地或後端
-    };
 
     return {
       map,
       markers,
       selectedPlace,
       handlePlaceChanged,
-      handleSavePlace,
     };
   },
 };

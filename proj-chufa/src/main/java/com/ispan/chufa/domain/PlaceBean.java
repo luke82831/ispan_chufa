@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -27,7 +28,8 @@ public class PlaceBean {
     @ElementCollection
     private List<String> photos; // 使用 List 儲存圖片 URL
     private String placePhone; // 使用 String 類型來處理電話號碼
-    private String businessHours;
+    @Lob
+    private char[] businessHours;
     private String placeInfo;
     private Double rating;
     private String website;
@@ -35,7 +37,7 @@ public class PlaceBean {
     private BigDecimal price; // 使用 BigDecimal 處理價格
     private String accommodationType; // 旅宿類型
     private String mealTime; // 用餐時間
-    private String reservation; // 只有在餐廳類型時使用
+    private boolean reservation; // 只有在餐廳類型時使用
     
     @OneToMany(mappedBy = "place")
     private List<PlacePostBean> placePosts;  // 這裡是一對多關聯
@@ -101,10 +103,10 @@ public class PlaceBean {
 	public void setPlacePhone(String placePhone) {
 		this.placePhone = placePhone;
 	}
-	public String getBusinessHours() {
+	public char[] getBusinessHours() {
 		return businessHours;
 	}
-	public void setBusinessHours(String businessHours) {
+	public void setBusinessHours(char[] businessHours) {
 		this.businessHours = businessHours;
 	}
 	public String getPlaceInfo() {
@@ -143,10 +145,10 @@ public class PlaceBean {
 	public void setMealTime(String mealTime) {
 		this.mealTime = mealTime;
 	}
-	public String getReservation() {
+	public boolean getReservation() {
 		return reservation;
 	}
-	public void setReservation(String reservation) {
+	public void setReservation(boolean reservation) {
 		this.reservation = reservation;
 	}
 }

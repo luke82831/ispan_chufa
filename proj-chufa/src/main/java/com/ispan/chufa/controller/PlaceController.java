@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.repository.PlaceRepository;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 public class PlaceController {
@@ -19,24 +22,31 @@ public class PlaceController {
 
     @PostMapping("/savePlace")
     public ResponseEntity<?> savePlace(@RequestBody PlaceBean placeBean) {
-    	PlaceBean place = new PlaceBean();
+        PlaceBean place = new PlaceBean();
+        place.setPlaceType(placeBean.getPlaceType());
         place.setPlaceName(placeBean.getPlaceName());
         place.setPlaceAddress(placeBean.getPlaceAddress());
         place.setLongitude(placeBean.getLongitude());
         place.setLatitude(placeBean.getLatitude());
+        place.setPhotos(placeBean.getPhotos());
         place.setPlacePhone(placeBean.getPlacePhone());
         place.setBusinessHours(placeBean.getBusinessHours());
-        place.setWebsite(placeBean.getWebsite());
+        place.setPlaceInfo(placeBean.getPlaceInfo());
         place.setRating(placeBean.getRating());
-        place.setPhotos(placeBean.getPhotos());
+        place.setWebsite(placeBean.getWebsite());
+        place.setBookingUrl(placeBean.getBookingUrl());
+        place.setPrice(placeBean.getPrice());
+        place.setPlaceName(placeBean.getPlaceName());
+        place.setAccommodationType(placeBean.getAccommodationType());
+        place.setMealTime(placeBean.getMealTime());
+        place.setReservation(placeBean.getReservation());
         placeRepository.save(place);
-//        System.out.println("收到的地點資料: " + placeBean);
-        System.out.println("地點電話：" + placeBean.getPlacePhone());
-        System.out.println("地點營業時間：" + placeBean.getBusinessHours());
-        System.out.println("地點網站：" + placeBean.getWebsite());
-        System.out.println("地點評分：" + placeBean.getRating());
-        System.out.println("地點圖片：" + placeBean.getPhotos());
 
-        return ResponseEntity.ok("Place saved successfully");
+        // 準備回應的 JSON 物件
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Place saved successfully");
+
+        return ResponseEntity.ok(response); // 回傳 JSON 格式
     }
 }

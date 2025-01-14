@@ -14,7 +14,7 @@ public class PlaceBean {
     
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int placeId;
+	private long placeId;
     private String placeType;
     private String placeName;
     private String placeAddress;
@@ -32,10 +32,10 @@ public class PlaceBean {
     private String mealTime; // 用餐時間
     private String reservation; // 只有在餐廳類型時使用
 	
-    public int getPlaceId() {
+    public long getPlaceId() {
 		return placeId;
 	}
-	public void setPlaceId(int placeId) {
+	public void setPlaceId(long placeId) {
 		this.placeId = placeId;
 	}
 	public String getPlaceType() {

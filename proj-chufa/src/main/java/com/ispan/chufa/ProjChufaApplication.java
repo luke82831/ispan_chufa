@@ -8,6 +8,7 @@ public class ProjChufaApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProjChufaApplication.class, args);
+
 	}
 
 }

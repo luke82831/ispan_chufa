@@ -12,6 +12,9 @@ public class MemberInfo {
 		this.profilePicture = profilePicture;
 		this.nickname=nickname;
 	}
+	public MemberInfo() {
+		
+	}
 
 	public Long getId() {
 		return userid;

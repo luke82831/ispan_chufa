@@ -57,10 +57,6 @@ public class FollowService {
 		}	
 	}
 
-//	public List<MemberBean> getFollowedList(Long followerId) {
-//		// TODO Auto-generated method stub
-//		return followRepository.findFollowed_UseridByFollower_Userid(followerId);
-//	}
 	//fans
 	public List<MemberInfo> getFollowedList(Long followerid) {
 	    // 創建 CriteriaBuilder 和 CriteriaQuery

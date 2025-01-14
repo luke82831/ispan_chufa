@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -29,6 +30,7 @@ public class Post {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST })
 	@JoinColumn(name = "userid", nullable = false)
+//	@JsonView(Views.Public.class)  // 只顯示公共資料欄
 	@JsonManagedReference
 	MemberBean member;
 
@@ -42,6 +44,7 @@ public class Post {
 	private String tags; // 貼文_標籤 
 	
 	@ManyToMany
+	@JsonManagedReference
 	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
 	private Set<TagsBean> tag = new HashSet<>();
 

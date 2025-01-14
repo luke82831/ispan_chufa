@@ -5,13 +5,15 @@ import java.util.List;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ispan.chufa.domain.Post;
-import com.ispan.chufa.dto.FollowResponse;
+import com.ispan.chufa.domain.InteractionBean;
+import com.ispan.chufa.dto.InteractionDTO;
+import com.ispan.chufa.dto.PostDTO;
 import com.ispan.chufa.dto.PostResponse;
 import com.ispan.chufa.service.PostService;
 
@@ -22,14 +24,15 @@ public class PostController {
 	private PostService postService;
 
 	@PostMapping("/post")
+//	@JsonView(Views.Public.class)
 	public PostResponse find(@RequestBody JSONObject json) {
 		PostResponse responseBean = new PostResponse();
 
-		List<Post> posts = postService.findPostsByCriteria(json);
+		List<PostDTO> posts = postService.findPostsByCriteria(json);
 		if (posts != null && !posts.isEmpty()) {
-			responseBean.setPostlist(posts);
+			responseBean.setPostdto(posts);
 		} else {
-			responseBean.setPostlist(new ArrayList<>());
+			responseBean.setPostdto(new ArrayList<>());
 		}
 
 		return responseBean;
@@ -41,7 +44,23 @@ public class PostController {
 
 		return entity;
 	}
-
 	
+	@PostMapping("/postinteraction")
+	public InteractionDTO interact(@RequestBody JSONObject json) {
+		InteractionBean interactionBean = new InteractionBean();
+		InteractionDTO interactionDTO=new InteractionDTO();
+		
+		boolean interaction=postService.performInteraction(json);
+
+        if (interaction) {
+             interactionDTO.setSuccess(true);
+             interactionDTO.setInteractionbean(interactionBean);
+        } else {
+        	interactionDTO.setSuccess(false);
+        	}
+		
+		return interactionDTO;
+		
+	}
 
 }

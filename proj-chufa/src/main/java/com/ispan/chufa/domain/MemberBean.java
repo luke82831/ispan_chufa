@@ -3,7 +3,8 @@ package com.ispan.chufa.domain;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,22 +29,27 @@ public class MemberBean {
 	private List<Post> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonBackReference
 	private List<InteractionBean> interactions;
 
 	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<FollowBean> following;
 
 	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<FollowBean> followers;
 
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
 	@Column(name = "role", nullable = false) // 身分欄位，必填
 	private Role role; // 用來表示身分
 
+//	@JsonView(Views.Public.class)
 	@Column(name = "username", nullable = false, unique = true) // 自定義帳號
 	private String username;
 
 	@Column(name = "password")
+	@JsonIgnore
 	private byte[] password;
 
 	@Column(name = "phone_number", nullable = false, unique = true) // 手機號碼作為唯一值
@@ -72,6 +78,7 @@ public class MemberBean {
 	private java.util.Date birth;
 
 	// Getters and Setters
+//	@JsonView(Views.Public.class)
 	public Long getUserid() {
 		return userid;
 	}
@@ -92,6 +99,7 @@ public class MemberBean {
 	public enum Role {
 		ADMIN, USER; // 管理員和一般會員
 	}
+
 
 	public String getUsername() {
 		return username;
@@ -130,6 +138,7 @@ public class MemberBean {
 		}
 	}
 
+
 	public String getName() {
 		return name;
 	}
@@ -146,6 +155,7 @@ public class MemberBean {
 		this.gender = gender;
 	}
 
+
 	public String getNickname() {
 		return nickname;
 	}
@@ -153,6 +163,7 @@ public class MemberBean {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
+
 
 	public byte[] getProfilePicture() {
 		return profilePicture;

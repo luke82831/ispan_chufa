@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,6 +30,7 @@ public class TagsBean {
     private LocalDateTime tagUpdatedAt;
     
     @ManyToMany(mappedBy = "tag")
+    @JsonBackReference
     private Set<Post> posts = new HashSet<>();
     
  

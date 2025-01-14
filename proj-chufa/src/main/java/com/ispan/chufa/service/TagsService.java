@@ -19,7 +19,7 @@ public class TagsService {
         if (bean != null && bean.getTagName() != "") {
             // tagId 標籤系統_標籤id 自動生成
             // tagState 標籤系統_標籤狀態 預設1
-            bean.setTagState(1);
+            bean.setTagState("公開");
             // tagName 標籤系統_標籤名稱 RequestBody獲取
             // tagCreatedAt 標籤系統_創建時間 現在時間
             bean.setTagCreatedAt(LocalDateTime.now());
@@ -62,5 +62,15 @@ public class TagsService {
         }
     }
 
-    // 查詢ID是否存在
+    // 更新標籤狀態
+    public TagsBean updateTagsState(Integer id, String tagState) {
+        TagsBean bean = findById(id);
+        if (bean != null) {
+            bean.setTagUpdatedAt(LocalDateTime.now());// 標籤系統_更新時間 set現在時間
+            bean.setTagState(tagState);// 標籤系統_標籤名稱 RequestBody獲取
+            return tagsRepository.save(bean);
+        } else {
+            return null;
+        }
+    }
 }

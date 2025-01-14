@@ -201,4 +201,41 @@ public class CommentController {
         }
         return responseJson.toString();
     }
+
+    // 更新留言狀態
+    // 測試 http://localhost:8080/comment/updateState
+    // 測試 RequestBody => {"commentId":"1","commentState":"私人"}
+    @PutMapping("/updateState")
+    public String updateState(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        JSONObject responseJson = new JSONObject();
+        if (!requestJson.isNull(commentId)) {
+            if (!requestJson.isNull(commentState)) {
+                try {
+                    CommentBean commentBean = commentService.updateCommentState(requestJson.getInt(commentId),
+                            requestJson.getString(commentState));
+                    if (commentBean != null) {
+                        responseJson.put(commentId, commentBean.getCommentId())
+                                .put(postId, commentBean.getPostBean().getPostid())
+                                .put(commentState, commentBean.getCommentState())
+                                .put(userId, commentBean.getMemberBean().getUserid())
+                                .put(commentCreatedAt, commentBean.getCommentCreatedAt())
+                                .put(commentUpdatedAt, commentBean.getCommentUpdatedAt())
+                                .put(content, commentBean.getContent())
+                                .put(parentId, commentBean.getParentId());
+                    } else {
+                        responseJson.put("錯誤", "查不到這筆ID");
+                    }
+                } catch (JSONException e) {
+                    responseJson.put("錯誤", "ID請輸入整數");
+                }
+            } else {
+                responseJson.put("錯誤", "沒有傳入狀態");
+            }
+        } else {
+            responseJson.put("錯誤", "沒有傳入ID");
+        }
+        return responseJson.toString();
+    }
+
 }

@@ -19,9 +19,9 @@ import jakarta.persistence.Table;
 public class TagsBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 標籤系統_標籤id 設定為自增
-    private Integer tagId;
+    private Long tagId;
     @Column(name = "tag_state", nullable = false) // 標籤系統_標籤狀態 不能NULL
-    private Integer tagState;
+    private String tagState;
     @Column(name = "tag_name", nullable = false, unique = true) // 標籤系統_標籤名稱 不能NULL 唯一值
     private String tagName;
     @Column(name = "tag_created_at", nullable = false) // 標籤系統_創建時間 不能NULL
@@ -36,25 +36,19 @@ public class TagsBean {
     )
     private Set<PostBean> postBeans = new HashSet<>();
 
-    @Override
-    public String toString() {
-        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
-                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + "]";
-    }
-
-    public Integer getTagId() {
+    public Long getTagId() {
         return tagId;
     }
 
-    public void setTagId(Integer tagId) {
+    public void setTagId(Long tagId) {
         this.tagId = tagId;
     }
 
-    public Integer getTagState() {
+    public String getTagState() {
         return tagState;
     }
 
-    public void setTagState(Integer tagState) {
+    public void setTagState(String tagState) {
         this.tagState = tagState;
     }
 

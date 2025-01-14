@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
-    private Integer commentId;
+    private Long commentId;
 
     @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
     @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 外鍵列 留言_貼文id
@@ -27,7 +27,7 @@ public class CommentBean {
     private PostBean postBean;
 
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL
-    private Integer commentState;
+    private String commentState;
 
     @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 外鍵列
@@ -48,18 +48,11 @@ public class CommentBean {
     @Column(name = "parentid") // 留言_上層留言id
     private Integer parentId;
 
-    @Override
-    public String toString() {
-        return "CommentBean [commentId=" + commentId + ", postBean=" + postBean + ", commentState=" + commentState
-                + ", memberBean=" + memberBean + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
-                + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
-    }
-
-    public Integer getCommentId() {
+    public Long getCommentId() {
         return commentId;
     }
 
-    public void setCommentId(Integer commentId) {
+    public void setCommentId(Long commentId) {
         this.commentId = commentId;
     }
 
@@ -71,11 +64,11 @@ public class CommentBean {
         this.postBean = postBean;
     }
 
-    public Integer getCommentState() {
+    public String getCommentState() {
         return commentState;
     }
 
-    public void setCommentState(Integer commentState) {
+    public void setCommentState(String commentState) {
         this.commentState = commentState;
     }
 

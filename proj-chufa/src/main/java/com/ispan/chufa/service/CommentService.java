@@ -19,7 +19,7 @@ public class CommentService {
         if (bean != null && bean.getContent() != "") {
             // 留言_留言ID 設定為自增
             // 留言_貼文id RequestBody獲取controller內設定
-            bean.setCommentState(1); // 留言_留言狀態 預設1(顯示)
+            bean.setCommentState("公開"); // 留言_留言狀態 預設(公開)
             // 留言_留言者id RequestBody獲取controller內設定
             bean.setCommentCreatedAt(LocalDateTime.now()); // 留言_創建時間 set現在時間
             // 留言_更新時間 預設NULL
@@ -63,6 +63,18 @@ public class CommentService {
             bean.setCommentUpdatedAt(LocalDateTime.now());// 留言_更新時間 set現在時間
             bean.setContent(content);// 留言_留言內文 RequestBody獲取
             // 留言_上層留言id 不用修改
+            return commentRepository.save(bean);
+        } else {
+            return null;
+        }
+    }
+
+    // 更新標籤狀態
+    public CommentBean updateCommentState(Integer id, String commentState) {
+        CommentBean bean = findById(id);
+        if (bean != null) {
+            bean.setCommentUpdatedAt(LocalDateTime.now());// 留言_更新時間 set現在時間
+            bean.setCommentState(commentState);// 標籤系統_標籤名稱 RequestBody獲取
             return commentRepository.save(bean);
         } else {
             return null;

@@ -51,8 +51,8 @@ public class MemberBean {
 	@Lob // 標示為大物件類型，對應資料庫中的 BLOB
 	@Column(name = "profile_picture")
 	private byte[] profilePicture;
-	
-	@Transient  // 不會入庫
+
+	@Transient // 不會入庫
 	private String base64Pic;
 
 	@Column(name = "bio", columnDefinition = "TEXT") // 自介欄位，使用 TEXT 類型
@@ -63,12 +63,21 @@ public class MemberBean {
 
 	@ManyToMany
 	@JoinTable(name = "member_place", // 中介表的表名 (自己取)
-			joinColumns = @JoinColumn(name = "member_id"), // 中介表中對應到 Member 的外鍵欄位
-			inverseJoinColumns = @JoinColumn(name = "place_id") // 中介表中對應到 Place 的外鍵欄位
+			joinColumns = @JoinColumn(name = "userid"), // 指向 MemberBean 的外鍵
+			inverseJoinColumns = @JoinColumn(name = "placeId") // 指向 PlaceBean 的外鍵
 	)
 	private List<PlaceBean> places;
 
 	// Getters and Setters
+
+	public List<PlaceBean> getPlaces() {
+		return places;
+	}
+
+	public void setPlaces(List<PlaceBean> places) {
+		this.places = places;
+	}
+
 	public Long getUserid() {
 		return userid;
 	}
@@ -158,12 +167,13 @@ public class MemberBean {
 	public void setProfilePicture(byte[] profilePicture) {
 		this.profilePicture = profilePicture;
 	}
-	
+
 	public String getBase64Pic() {
-	    return base64Pic;
+		return base64Pic;
 	}
+
 	public void setBase64Pic(String base64Pic) {
-	    this.base64Pic = base64Pic;
+		this.base64Pic = base64Pic;
 	}
 
 	public String getBio() {

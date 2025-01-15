@@ -41,8 +41,7 @@ public class LoginController {
             @RequestParam String password,
             Model model,
             HttpSession session,
-            Locale locale
-    ) {
+            Locale locale) {
         if (email == null || email.isEmpty()) {
             addError(model, "login.page.form.email.required", locale);
             return "/secure/login";
@@ -79,6 +78,14 @@ public class LoginController {
             }
 
             model.addAttribute("member", member);
+
+            // 判斷是否為 ADMIN，傳遞一個布林值給前端
+            if (member.getRole() == MemberBean.Role.ADMIN) {
+                model.addAttribute("isAdmin", true);
+            } else {
+                model.addAttribute("isAdmin", false);
+            }
+
             return "/secure/profile"; // 返回會員資料頁面
         }
         return "redirect:/secure/login/controller"; // 沒登入就跳回登入頁面
@@ -95,8 +102,7 @@ public class LoginController {
             @RequestParam(value = "bio", required = false) String bio,
             @RequestParam(value = "profilePicture", required = false) MultipartFile file,
             HttpSession session,
-            Model model
-    ) {
+            Model model) {
         MemberBean member = (MemberBean) session.getAttribute("loggedInUser");
         if (member != null) {
             member.setName(name);
@@ -133,7 +139,7 @@ public class LoginController {
     // 用於登出
     @GetMapping("/secure/logout")
     public String logout(HttpSession session) {
-        session.invalidate(); 
+        session.invalidate();
         return "redirect:/secure/login/controller";
     }
 
@@ -153,8 +159,7 @@ public class LoginController {
             @RequestParam("name") String name,
             @RequestParam("birth") String birth,
             Model model,
-            Locale locale
-    ) {
+            Locale locale) {
         // 密碼驗證
         if (!password.equals(confirmPassword)) {
             model.addAttribute("confirmPasswordError", "密碼和確認密碼不一致，請重新輸入。");
@@ -174,7 +179,7 @@ public class LoginController {
         MemberBean memberBean = new MemberBean();
         memberBean.setUsername(username);
         memberBean.setEmail(email);
-        memberBean.setPassword(password.getBytes()); 
+        memberBean.setPassword(password.getBytes());
         memberBean.setName(name);
         memberBean.setBirth(java.sql.Date.valueOf(birth));
 

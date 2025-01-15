@@ -29,3 +29,7 @@ spring:
   messages:
     basename: messages
     encoding: UTF-8
+
+jwt:
+  token:
+    expire: 10

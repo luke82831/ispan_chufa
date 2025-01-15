@@ -36,6 +36,12 @@ public class TagsBean {
     )
     private Set<PostBean> postBeans = new HashSet<>();
 
+    @Override
+    public String toString() {
+        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
+                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + "]";
+    }
+
     public Long getTagId() {
         return tagId;
     }

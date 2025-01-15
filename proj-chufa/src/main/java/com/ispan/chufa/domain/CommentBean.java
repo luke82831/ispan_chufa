@@ -48,6 +48,13 @@ public class CommentBean {
     @Column(name = "parentid") // 留言_上層留言id
     private Integer parentId;
 
+    @Override
+    public String toString() {
+        return "CommentBean [commentId=" + commentId + ", postBean=" + postBean + ", commentState=" + commentState
+                + ", memberBean=" + memberBean + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
+                + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
+    }
+
     public Long getCommentId() {
         return commentId;
     }

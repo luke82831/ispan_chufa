@@ -65,6 +65,7 @@ public class PostService {
 		if (optional.isPresent() && post.isPresent()) {
 			MemberBean perfomer = optional.get();
 			Post postaction = post.get();
+			
 			InteractionBean bean = new InteractionBean();
 			bean.setInteractionTime(LocalDateTime.now());
 			bean.setInteractionType(interactionType);
@@ -78,7 +79,10 @@ public class PostService {
 				MemberInfo memberDTO = new MemberInfo();
 				// 複製 Member 屬性到 MemberInfo
 				BeanUtils.copyProperties(bean.getMember(), memberDTO);
+//				PostDTO postDTO = new PostDTO();
+//				BeanUtils.copyProperties(postaction, postDTO);
 				interactDTO.setMember(memberDTO);
+//				interactDTO.setPostdto(postDTO);
 			}
 		}else {
 			return null;
@@ -86,8 +90,5 @@ public class PostService {
 		return interactDTO;
 	}
 	
-//	public long getLikeCount(Long postId) {
-//	    return interactionRepository.countByPostIdAndInteractionType(postId, "LIKE");
-//	}
 
 }

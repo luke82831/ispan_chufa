@@ -23,6 +23,16 @@ public class InteractionDTO {
 	private Post post; // 貼文 (多對一關聯)
 	private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
 	private LocalDateTime interactionTime; // 互動行為時間
+	private PostDTO postdto; // 貼文 (多對一關聯)
+	
+
+	public PostDTO getPostdto() {
+		return postdto;
+	}
+
+	public void setPostdto(PostDTO postdto) {
+		this.postdto = postdto;
+	}
 
 	public String getMessage() {
 		return message;

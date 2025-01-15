@@ -39,12 +39,12 @@ public class PostTest {
     public void testInsertPostWithTags() {
         // 建立標籤
         TagsBean tag1 = new TagsBean();
-        tag1.setTagName("Java");
+        tag1.setTagName("travel");
         tag1.setTagState(1);
         tag1.setTagCreatedAt(LocalDateTime.now());
 
         TagsBean tag2 = new TagsBean();
-        tag2.setTagName("Spring");
+        tag2.setTagName("hiphop");
         tag2.setTagState(1);
         tag2.setTagCreatedAt(LocalDateTime.now());
 
@@ -54,25 +54,25 @@ public class PostTest {
         // 建立 Member
         MemberBean member = new MemberBean();
         member.setRole(MemberBean.Role.USER);
-        member.setUsername("meow");
+        member.setUsername("hey");
         member.setPassword("password3".getBytes(StandardCharsets.UTF_8));
-        member.setPhoneNumber("09546223324");
-        member.setEmail("meow@example.com");
-        member.setName("meow");
+        member.setPhoneNumber("09989012223324");
+        member.setEmail("gey@example.com");
+        member.setName("hey");
         member.setGender("Male");
-        member.setNickname("meow");
+        member.setNickname("hey");
 
         // 儲存 Member，確保它已經持久化
         MemberBean savedMember = memberRepository.save(member);
 
         // 建立 Post
         Post post = new Post();
-        post.setPostTitle("Learning Spring Boot");
+        post.setPostTitle("what what what");
         post.setPostContent("This is a detailed article about Spring Boot.");
         post.setPostLink("https://example.com/spring-boot");
         post.setPostStatus("Published");
         post.setPostTime(LocalDateTime.now());
-        post.setTags("Java, Spring");
+        post.setTags("Java");
 
         // 關聯已保存的 Member
         post.setMember(savedMember);

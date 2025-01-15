@@ -16,14 +16,6 @@ public class MemberInfo {
 		
 	}
 
-	public Long getId() {
-		return userid;
-	}
-
-	public void setId(Long userid) {
-		this.userid = userid;
-	}
-
 	public String getName() {
 		return name;
 	}

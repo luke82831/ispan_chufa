@@ -26,6 +26,7 @@ public class FollowController {
 
 	@PostMapping("/verb")
 	public FollowResponse follow(@RequestBody FollowRequest followRequest) {
+		System.out.println("接收到的参数：" + followRequest);
 		FollowResponse responseBean = new FollowResponse();
 	    try {
            // 請求服務層

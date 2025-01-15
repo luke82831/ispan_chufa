@@ -5,6 +5,9 @@ spring:
     url: jdbc:sqlserver://localhost:9433;database=chufa;trustServerCertificate=true
     username: sa
     password: P@ssw0rd
+  mvc:
+    converters:
+      preferred-json-mapper: jackson
 
   #Hibernate/JPA的相關設定
   jpa:

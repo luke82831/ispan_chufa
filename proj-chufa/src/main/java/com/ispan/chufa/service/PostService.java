@@ -1,17 +1,22 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.json.JSONObject;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
+import com.ispan.chufa.domain.Post;
 import com.ispan.chufa.dto.InteractionDTO;
+import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
+import com.ispan.chufa.repository.InteractionRepository;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.PostRepository;
 
@@ -24,7 +29,10 @@ public class PostService {
 	@Autowired
 	MemberRepository memberRepository;
 
-	public List<PostDTO> findPostsByCriteria(JSONObject param) {
+	@Autowired
+	InteractionRepository interactionRepository;
+
+	public List<PostDTO> findPostsByCriteria(String param) {
 		try {
 			JSONObject blog = new JSONObject(param);
 			return postRepository.findPostsByTitle(blog);
@@ -41,29 +49,45 @@ public class PostService {
 
 	}
 
-	// 通用方法處理各種互動行為
-	public boolean performInteraction(JSONObject param) {
-		boolean result = false;
-		JSONObject action = new JSONObject(param);
-		if (param != null && !param.isNull("userid") && !param.isNull("interactiontype")) {
-			Long userid = param.getLong("userid");
-			String interacttype = param.getString("interactiontype");
-			Optional<MemberBean> optional = memberRepository.findById(userid);
-		    if(optional.isPresent()) {
-		    	MemberBean perfomer= optional.get();
-		    	InteractionBean interaction = new InteractionBean();
-		    	interaction.setActionId(userid);
-		    	interaction.setInteractionTime(LocalDateTime.now()); // 設定互動時間
-		    	interaction.setInteractionType(interacttype);
-		    	
-		    	return true;
+	public InteractionDTO insertaction(String json) {
+		JSONObject param = new JSONObject(json);
+		
+		InteractionDTO interactDTO = new InteractionDTO();
+		
+		Long userId = param.getLong("userid");
+		String interactionType = param.getString("interactiontype");
+		Long postid = param.getLong("postid");
+		
+		Optional<MemberBean> optional = memberRepository.findById(userId);
+		Optional<Post> post = postRepository.findById(postid);
+		
+		// Long userid= bean.getMember().getUserid();
+		if (optional.isPresent() && post.isPresent()) {
+			MemberBean perfomer = optional.get();
+			Post postaction = post.get();
+			InteractionBean bean = new InteractionBean();
+			bean.setInteractionTime(LocalDateTime.now());
+			bean.setInteractionType(interactionType);
+			bean.setMember(perfomer);
+			bean.setPost(postaction);
+			interactionRepository.save(bean);
+			
+			BeanUtils.copyProperties(bean, interactDTO);
+			
+			if (bean.getMember() != null) {
+				MemberInfo memberDTO = new MemberInfo();
+				// 複製 Member 屬性到 MemberInfo
+				BeanUtils.copyProperties(bean.getMember(), memberDTO);
+				interactDTO.setMember(memberDTO);
 			}
-		} else {
-			System.out.println("request parameter!");
+		}else {
+			return null;
 		}
-		return result;
+		return interactDTO;
 	}
-
 	
+//	public long getLikeCount(Long postId) {
+//	    return interactionRepository.countByPostIdAndInteractionType(postId, "LIKE");
+//	}
 
 }

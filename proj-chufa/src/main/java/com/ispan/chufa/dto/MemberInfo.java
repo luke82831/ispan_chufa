@@ -20,8 +20,8 @@ public class MemberInfo {
 		return userid;
 	}
 
-	public void setId(Long id) {
-		this.userid = id;
+	public void setId(Long userid) {
+		this.userid = userid;
 	}
 
 	public String getName() {

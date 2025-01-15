@@ -2,6 +2,9 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,10 +24,14 @@ public class InteractionBean {
 
 	    @ManyToOne
 	    @JoinColumn(name = "member_id", nullable = false)
+	    //@JsonBackReference
+	    @JsonManagedReference
 	    private MemberBean member; // 使用者資料 (多對一關聯)
 
 	    @ManyToOne
 	    @JoinColumn(name = "postid", nullable = false)
+	    //@JsonBackReference
+	    @JsonManagedReference
 	    private Post post; // 貼文 (多對一關聯)
 	    
         @Column(name="interaction_type")

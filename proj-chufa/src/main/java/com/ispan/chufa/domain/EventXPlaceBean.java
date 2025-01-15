@@ -2,123 +2,123 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalTime;
 
-import org.springframework.beans.factory.parsing.Location;
-import org.springframework.data.annotation.Id;
-
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
+
+@Entity
+@Table(name = "eventXplace")
 public class EventXPlaceBean {
 
-	 @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    @Column(name = "event_location_mapping_id")
-	    private Long eventLocationMappingId; // PK with auto-increment
+	@Id
+	@Column(name = "Eventmapping_id", nullable = false)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long eventmappingId;
 
-	    @ManyToOne
-	    @JoinColumn(name = "event_content_id", nullable = false)
-	    private EventBean eventContentId; // FK to EventContent
+	@ManyToOne
+	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
+	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 
-	    @ManyToOne
-	    @JoinColumn(name = "PlaceId", nullable = false)
-	    private PlaceBean placeId; // FK to Location
+	@ManyToOne
+	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
+	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
 
-	    @Column(name = "location_order", nullable = false)
-	    private Integer locationOrder; // Location order
+	@Column(name = "place_order")
+	private Integer placeOrder;
 
-	    @Column(name = "custom_arrival_time")
-	    private LocalTime customArrivalTime; // Custom arrival time
+	@Column(name = "arrival_time")
+	private LocalTime arrivalTime;
 
-	    @Column(name = "stay_duration")
-	    private Integer stayDuration; // Stay duration in minutes
+	@Column(name = "stay_duration")
+	private Integer stayDuration;
 
-	    @Column(name = "location_note")
-	    private String locationNote; // Notes for the location
+	@Column(name = "notes")
+	private String notes;
 
-	    // Constructors
-	    public EventXPlaceBean() {}
+	// Constructors, getters, setters, and toString()
 
-	    public EventXPlaceBean(EventBean eventContent, PlaceBean placeId, Integer locationOrder, 
-	                                 LocalTime customArrivalTime, Integer stayDuration, String locationNote) {
-	        this.eventContentId = eventContent;
-	        this.placeId = placeId;
-	        this.locationOrder = locationOrder;
-	        this.customArrivalTime = customArrivalTime;
-	        this.stayDuration = stayDuration;
-	        this.locationNote = locationNote;
-	    }
+	public EventXPlaceBean() {
+	}
 
-	    // Getters and Setters
-	    public Long getEventLocationMappingId() {
-	        return eventLocationMappingId;
-	    }
+	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
+			Integer stayDuration, String notes) {
+		this.event = event;
+		this.place = place;
+		this.placeOrder = placeOrder;
+		this.arrivalTime = arrivalTime;
+		this.stayDuration = stayDuration;
+		this.notes = notes;
+	}
 
-	    public void setEventLocationMappingId(Long eventLocationMappingId) {
-	        this.eventLocationMappingId = eventLocationMappingId;
-	    }
+	public Long getMappingId() {
+		return eventmappingId;
+	}
 
-	    public EventBean getEventContentId() {
-	        return eventContentId;
-	    }
+	public void setMappingId(Long mappingId) {
+		this.eventmappingId = mappingId;
+	}
 
-	    public void setEventContentId(EventBean eventContentId) {
-	        this.eventContentId = eventContentId;
-	    }
+	public EventBean getEvent() {
+		return event;
+	}
 
-	    public PlaceBean getPlaceId() {
-	        return placeId;
-	    }
+	public void setEvent(EventBean event) {
+		this.event = event;
+	}
 
-	    public void setPlaceId(PlaceBean placeId) {
-	        this.placeId = placeId;
-	    }
+	public PlaceBean getPlace() {
+		return place;
+	}
 
-	    public Integer getLocationOrder() {
-	        return locationOrder;
-	    }
+	public void setPlace(PlaceBean place) {
+		this.place = place;
+	}
 
-	    public void setLocationOrder(Integer locationOrder) {
-	        this.locationOrder = locationOrder;
-	    }
+	public Integer getPlaceOrder() {
+		return placeOrder;
+	}
 
-	    public LocalTime getCustomArrivalTime() {
-	        return customArrivalTime;
-	    }
+	public void setPlaceOrder(Integer placeOrder) {
+		this.placeOrder = placeOrder;
+	}
 
-	    public void setCustomArrivalTime(LocalTime customArrivalTime) {
-	        this.customArrivalTime = customArrivalTime;
-	    }
+	public LocalTime getArrivalTime() {
+		return arrivalTime;
+	}
 
-	    public Integer getStayDuration() {
-	        return stayDuration;
-	    }
+	public void setArrivalTime(LocalTime arrivalTime) {
+		this.arrivalTime = arrivalTime;
+	}
 
-	    public void setStayDuration(Integer stayDuration) {
-	        this.stayDuration = stayDuration;
-	    }
+	public Integer getStayDuration() {
+		return stayDuration;
+	}
 
-	    public String getLocationNote() {
-	        return locationNote;
-	    }
+	public void setStayDuration(Integer stayDuration) {
+		this.stayDuration = stayDuration;
+	}
 
-	    public void setLocationNote(String locationNote) {
-	        this.locationNote = locationNote;
-	    }
+	public String getNotes() {
+		return notes;
+	}
 
-	    @Override
-	    public String toString() {
-	        return "EventLocationMappingBean{" +
-	                "eventLocationMappingId=" + eventLocationMappingId +
-	                ", eventContentId=" + eventContentId +
-	                ", placeId=" + placeId +
-	                ", locationOrder=" + locationOrder +
-	                ", customArrivalTime=" + customArrivalTime +
-	                ", stayDuration=" + stayDuration +
-	                ", locationNote='" + locationNote + '\'' +
-	                '}';
-	    }
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
 	
+	
+	@Override
+	public String toString() {
+		return "EventPlaceMapping [mappingId=" + eventmappingId +  ", event=" + event +
+				", place=" + place +", placeOrder=" + placeOrder +
+				", arrivalTime=" + arrivalTime + ", stayDuration=" + stayDuration +
+				", notes=" + notes + "]";
+	}
 }

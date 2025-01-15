@@ -1,5 +1,6 @@
 package com.ispan.chufa.domain;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,6 +72,31 @@ public class MemberBean {
 
 	public Long getUserid() {
 		return userid;
+	}
+
+	@Override
+	public String toString() {
+		return "MemberBean [userid=" + userid + ", role=" + role + ", username=" + username + ", password="
+				+ Arrays.toString(password) + ", phoneNumber=" + phoneNumber + ", email=" + email + ", name=" + name
+				+ ", gender=" + gender + ", nickname=" + nickname + ", profilePicture="
+				+ Arrays.toString(profilePicture) + ", bio=" + bio + ", birth=" + birth + ", commentBeans="
+				+ commentBeans + ", postBeans=" + postBeans + ", tagsBeans=" + tagsBeans + "]";
+	}
+
+	public List<PostBean> getPostBeans() {
+		return postBeans;
+	}
+
+	public void setPostBeans(List<PostBean> postBeans) {
+		this.postBeans = postBeans;
+	}
+
+	public Set<TagsBean> getTagsBeans() {
+		return tagsBeans;
+	}
+
+	public void setTagsBeans(Set<TagsBean> tagsBeans) {
+		this.tagsBeans = tagsBeans;
 	}
 
 	public void setUserid(Long userid) {

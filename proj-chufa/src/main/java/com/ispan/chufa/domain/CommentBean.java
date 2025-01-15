@@ -22,9 +22,8 @@ public class CommentBean {
     private Long commentId;
     @JsonIgnoreProperties("commentBeans")
     @ManyToOne // 多對一關係
-    @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 外鍵列 留言_貼文id
+    @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 留言_貼文id
                                                                                                         // 不能NULL
-                                                                                                        // (FK)一對多，多方
     private PostBean postBean;
 
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL
@@ -32,10 +31,8 @@ public class CommentBean {
 
     @JsonIgnoreProperties("commentBeans")
     @ManyToOne // 多對一關係
-    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 外鍵列
-                                                                                                           // 留言_留言者id
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 留言_留言者id
                                                                                                            // 不能NULL
-                                                                                                           // (FK)一對多，多方
     private MemberBean memberBean;
 
     @Column(name = "comment_created_at", nullable = false) // 留言_創建時間 不能NULL

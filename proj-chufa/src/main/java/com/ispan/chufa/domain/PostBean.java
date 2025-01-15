@@ -42,6 +42,13 @@ public class PostBean {
 	@JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member")) // 外鍵列
 	private MemberBean memberBean;
 
+	@Override
+	public String toString() {
+		return "PostBean [postid=" + postid + ", postStatus=" + postStatus + ", postTitle=" + postTitle + ", postTime="
+				+ postTime + ", postContent=" + postContent + ", postLink=" + postLink + ", tagsBeans=" + tagsBeans
+				+ ", commentBeans=" + commentBeans + ", memberBean=" + memberBean + "]";
+	}
+
 	public Long getPostid() {
 		return postid;
 	}
@@ -104,6 +111,14 @@ public class PostBean {
 
 	public void setCommentBeans(List<CommentBean> commentBeans) {
 		this.commentBeans = commentBeans;
+	}
+
+	public MemberBean getMemberBean() {
+		return memberBean;
+	}
+
+	public void setMemberBean(MemberBean memberBean) {
+		this.memberBean = memberBean;
 	}
 
 }

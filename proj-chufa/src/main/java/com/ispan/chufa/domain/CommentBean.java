@@ -2,9 +2,10 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,8 +20,8 @@ public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
     private Long commentId;
-
-    @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
+    @JsonIgnoreProperties("commentBeans")
+    @ManyToOne // 多對一關係
     @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 外鍵列 留言_貼文id
                                                                                                         // 不能NULL
                                                                                                         // (FK)一對多，多方
@@ -29,7 +30,8 @@ public class CommentBean {
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL
     private String commentState;
 
-    @ManyToOne(fetch = FetchType.LAZY) // 多對一關係
+    @JsonIgnoreProperties("commentBeans")
+    @ManyToOne // 多對一關係
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 外鍵列
                                                                                                            // 留言_留言者id
                                                                                                            // 不能NULL
@@ -46,7 +48,7 @@ public class CommentBean {
     private String content;
 
     @Column(name = "parentid") // 留言_上層留言id
-    private Integer parentId;
+    private Long parentId;
 
     @Override
     public String toString() {
@@ -111,11 +113,11 @@ public class CommentBean {
         this.content = content;
     }
 
-    public Integer getParentId() {
+    public Long getParentId() {
         return parentId;
     }
 
-    public void setParentId(Integer parentId) {
+    public void setParentId(Long parentId) {
         this.parentId = parentId;
     }
 

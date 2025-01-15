@@ -29,12 +29,19 @@ public class TagsBean {
     @Column(name = "tag_updated_at") // 標籤系統_更新時間
     private LocalDateTime tagUpdatedAt;
 
-    @ManyToMany // 多對多
+    @ManyToMany // 多對多 標籤對文章
     @JoinTable(name = "Tags_Post", // 聯結表名稱
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
             inverseJoinColumns = @JoinColumn(name = "postBean_postid") // 關聯實體的外鍵列
     )
     private Set<PostBean> postBeans = new HashSet<>();
+
+    @ManyToMany // 多對多 標籤對成員
+    @JoinTable(name = "Tags_Members", // 聯結表名稱
+            joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
+            inverseJoinColumns = @JoinColumn(name = "memberBean_userid") // 關聯實體的外鍵列
+    )
+    private Set<MemberBean> memberBeans = new HashSet<>();
 
     @Override
     public String toString() {

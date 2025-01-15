@@ -1,6 +1,7 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,11 @@ public class CommentService {
             }
         }
         return null;
+    }
+
+    // 用上層查詢留言
+    public List<CommentBean> findByParentId(Long id) {
+        return commentRepository.findByParentId(id);
     }
 
     // 更新留言

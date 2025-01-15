@@ -1,6 +1,8 @@
 package com.ispan.chufa.domain;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -57,6 +60,12 @@ public class MemberBean {
 
 	@OneToMany(mappedBy = "memberBean")
 	private List<CommentBean> commentBeans;
+
+	@OneToMany(mappedBy = "memberBean")
+	private List<PostBean> postBeans;
+
+	@ManyToMany(mappedBy = "memberBeans")
+	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	// Getters and Setters
 

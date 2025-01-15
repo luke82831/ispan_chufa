@@ -7,10 +7,13 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -34,6 +37,10 @@ public class PostBean {
 
 	@OneToMany(mappedBy = "postBean")
 	private List<CommentBean> commentBeans;
+
+	@ManyToOne // 多對一關係
+	@JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member")) // 外鍵列
+	private MemberBean memberBean;
 
 	public Long getPostid() {
 		return postid;

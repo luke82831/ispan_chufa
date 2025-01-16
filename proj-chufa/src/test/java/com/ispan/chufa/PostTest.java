@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 
 import com.ispan.chufa.domain.MemberBean;
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.domain.TagsBean;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.PostRepository;
@@ -54,20 +54,20 @@ public class PostTest {
         // 建立 Member
         MemberBean member = new MemberBean();
         member.setRole(MemberBean.Role.USER);
-        member.setUsername("guisdwdgi");
+        member.setUsername("mapo");
         member.setPassword("passwsdord3".getBytes(StandardCharsets.UTF_8));
-        member.setPhoneNumber("12332223213");
-        member.setEmail("uisw@example.com");
-        member.setName("hsf");
+        member.setPhoneNumber("1233425363");
+        member.setEmail("mapo@example.com");
+        member.setName("mapo");
         member.setGender("Male");
-        member.setNickname("heqswey");
+        member.setNickname("mapo");
 
         // 儲存 Member，確保它已經持久化
         MemberBean savedMember = memberRepository.save(member);
 
         // 建立 Post
-        Post post = new Post();
-        post.setPostTitle("pppppp");
+        PostBean post = new PostBean();
+        post.setPostTitle("mapo");
         post.setPostContent("This is a detailed article about Spring Boot.");
         post.setPostLink("https://example.com/spring-boot");
         post.setPostStatus("Published");
@@ -84,7 +84,7 @@ public class PostTest {
         post.setTag(tags);
 
         // 儲存 Post
-        Post savedPost = postRepository.save(post);
+        PostBean savedPost = postRepository.save(post);
 
         // 驗證插入結果
         assertNotNull(savedPost.getPostid(), "Post ID should not be null");

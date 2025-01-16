@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PostBean;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -23,7 +23,7 @@ public class InteractionDTO {
 	private Long actionId; // 互動行為 ID
 	private MemberInfo member; // 使用者資料 (多對一關聯
 	@JsonIgnore
-	private Post post; // 貼文 (多對一關聯)
+	private PostBean post; // 貼文 (多對一關聯)
 	private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
 	private LocalDateTime interactionTime; // 互動行為時間
 	private PostDTO postdto; // 貼文 (多對一關聯)
@@ -76,11 +76,11 @@ public class InteractionDTO {
 		this.member = memberDTO;
 	}
 
-	public Post getPost() {
+	public PostBean getPost() {
 		return post;
 	}
 
-	public void setPost(Post post) {
+	public void setPost(PostBean post) {
 		this.post = post;
 	}
 

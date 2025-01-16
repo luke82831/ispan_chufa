@@ -31,7 +31,7 @@ public class TagsBean {
     
     @ManyToMany(mappedBy = "tag")
     @JsonBackReference
-    private Set<Post> posts = new HashSet<>();
+    private Set<PostBean> posts = new HashSet<>();
     
  
 
@@ -81,11 +81,11 @@ public class TagsBean {
         this.tagUpdatedAt = tagUpdatedAt;
     }
 
-	public Set<Post> getPosts() {
+	public Set<PostBean> getPosts() {
 		return posts;
 	}
 
-	public void setPosts(Set<Post> posts) {
+	public void setPosts(Set<PostBean> posts) {
 		this.posts = posts;
 	}
     

@@ -8,13 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PostBean;
+
 @Repository
 public interface InteractionRepository extends JpaRepository<InteractionBean, Long> {
 
 	//public long countByPostIdAndInteractionType(Long postId, String interactionType);
 	public long countByPost_PostidAndInteractionType(Long postid, String interactionType);
 
-	public List<InteractionBean> findByMemberAndPost(MemberBean performer, Post postAction);
+	public List<InteractionBean> findByMemberAndPost(MemberBean performer, PostBean postAction);
 
 }

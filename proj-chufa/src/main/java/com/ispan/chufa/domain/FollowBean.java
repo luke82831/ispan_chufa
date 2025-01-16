@@ -34,7 +34,7 @@ public class FollowBean {
 	}
 
 	public void setFlid(Long flid) {
-		flid = flid;
+		this.flid = flid;
 	}
 
 	public MemberBean getFollower() {

@@ -27,7 +27,7 @@ public class MemberBean {
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
-	private List<Post> posts;
+	private List<PostBean> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
@@ -46,12 +46,10 @@ public class MemberBean {
 	@Column(name = "role", nullable = false) // 身分欄位，必填
 	private Role role; // 用來表示身分
 
-//	@JsonView(Views.Public.class)
 	@Column(name = "username", nullable = false, unique = true) // 自定義帳號
 	private String username;
 
 	@Column(name = "password")
-	@JsonIgnore
 	private byte[] password;
 
 	@Column(name = "phone_number", nullable = false, unique = true) // 手機號碼作為唯一值
@@ -62,16 +60,16 @@ public class MemberBean {
 
 	@Column(name = "name", nullable = false, length = 20) // 姓名欄位，限制長度
 	private String name;
-
+	
 	@Column(name = "gender", nullable = false)
-	private String gender;
-
+    private String gender;
+	
 	@Column(name = "nickname", length = 50) // 暱稱欄位，限制長度
 	private String nickname;
-
+	
 	@Lob // 標示為大物件類型，對應資料庫中的 BLOB
-	@Column(name = "profile_picture")
-	private byte[] profilePicture;
+    @Column(name = "profile_picture")
+    private byte[] profilePicture;
 
 	@Column(name = "bio", columnDefinition = "TEXT") // 自介欄位，使用 TEXT 類型
 	private String bio;
@@ -80,7 +78,6 @@ public class MemberBean {
 	private java.util.Date birth;
 
 	// Getters and Setters
-//	@JsonView(Views.Public.class)
 	public Long getUserid() {
 		return userid;
 	}
@@ -101,7 +98,6 @@ public class MemberBean {
 	public enum Role {
 		ADMIN, USER; // 管理員和一般會員
 	}
-
 
 	public String getUsername() {
 		return username;
@@ -140,7 +136,6 @@ public class MemberBean {
 		}
 	}
 
-
 	public String getName() {
 		return name;
 	}
@@ -148,15 +143,14 @@ public class MemberBean {
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 	public String getGender() {
-		return gender;
-	}
+        return gender;
+    }
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
 	public String getNickname() {
 		return nickname;
@@ -165,15 +159,14 @@ public class MemberBean {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-
-
+	
 	public byte[] getProfilePicture() {
-		return profilePicture;
-	}
+        return profilePicture;
+    }
 
-	public void setProfilePicture(byte[] profilePicture) {
-		this.profilePicture = profilePicture;
-	}
+    public void setProfilePicture(byte[] profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 
 	public String getBio() {
 		return bio;
@@ -191,13 +184,7 @@ public class MemberBean {
 		this.birth = birth;
 	}
 
-	public List<Post> getPosts() {
-		return posts;
-	}
 
-	public void setPosts(List<Post> posts) {
-		this.posts = posts;
-	}
 
 	public List<InteractionBean> getInteractions() {
 		return interactions;
@@ -221,5 +208,13 @@ public class MemberBean {
 
 	public void setFollowers(List<FollowBean> followers) {
 		this.followers = followers;
+	}
+
+	public List<PostBean> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<PostBean> posts) {
+		this.posts = posts;
 	}
 }

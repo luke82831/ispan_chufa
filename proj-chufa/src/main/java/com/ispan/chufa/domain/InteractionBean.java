@@ -32,7 +32,7 @@ public class InteractionBean {
 	    @JoinColumn(name = "postid", nullable = false)
 	    //@JsonBackReference
 	    @JsonManagedReference
-	    private Post post; // 貼文 (多對一關聯)
+	    private PostBean post; // 貼文 (多對一關聯)
 	    
         @Column(name="interaction_type")
 	    private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
@@ -56,11 +56,11 @@ public class InteractionBean {
 			this.member = member;
 		}
 
-		public Post getPost() {
+		public PostBean getPost() {
 			return post;
 		}
 
-		public void setPost(Post post) {
+		public void setPost(PostBean post) {
 			this.post = post;
 		}
 

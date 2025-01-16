@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.InteractionBean;
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
 
@@ -33,27 +33,27 @@ public class PostDaoImpl implements PostDao {
 	private InteractionRepository interactionRepository;
 
 	@Override
-	public List<Post> find(JSONObject param) {
+	public List<PostBean> find(JSONObject param) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<Post> listall(JSONObject param) {
+	public List<PostBean> listall(JSONObject param) {
 		return null;
 	}
 
 	@Override
 	public List<PostDTO> findPostsByTitle(JSONObject param) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Post> criteriaQuery = criteriaBuilder.createQuery(Post.class);
+		CriteriaQuery<PostBean> criteriaQuery = criteriaBuilder.createQuery(PostBean.class);
 		// 建立根物件，表示查詢的實體（Post）
-		Root<Post> postRoot = criteriaQuery.from(Post.class);
+		Root<PostBean> postRoot = criteriaQuery.from(PostBean.class);
 		// 準備條件列表
 		List<Predicate> predicates = new ArrayList<>();
 		
 		// Join 到點贊表 (interaction 表)
-	    Join<Post, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
+	    Join<PostBean, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
 
 
 		if (!param.isNull("postTitle")) {
@@ -79,12 +79,12 @@ public class PostDaoImpl implements PostDao {
 		}
 	    
 		// 建立查詢並執行
-		TypedQuery<Post> query = entityManager.createQuery(criteriaQuery);
+		TypedQuery<PostBean> query = entityManager.createQuery(criteriaQuery);
 
-		List<Post> post = query.getResultList();
+		List<PostBean> post = query.getResultList();
 
 		List<PostDTO> postDTOList = new ArrayList<>();
-		for (Post postlist : post) {
+		for (PostBean postlist : post) {
 			// 將 Post 的屬性複製到 PostDTO
 			PostDTO postDTO = new PostDTO();
 			BeanUtils.copyProperties(postlist, postDTO);

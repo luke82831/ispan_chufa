@@ -3,17 +3,17 @@ package com.ispan.chufa.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PostBean;
 
 public class PostResponse {
-	 private List<Post> postlist;
+	 private List<PostBean> postlist;
 	 private List<PostDTO> postdto;
 
-	public List<Post> getPostlist() {
+	public List<PostBean> getPostlist() {
 		return postlist;
 	}
 
-	public void setPostlist(List<Post> postlist) {
+	public void setPostlist(List<PostBean> postlist) {
 		this.postlist = postlist;
 	}
 

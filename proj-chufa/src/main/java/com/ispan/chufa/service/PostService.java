@@ -1,9 +1,12 @@
 package com.ispan.chufa.service;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
@@ -12,12 +15,14 @@ import org.springframework.stereotype.Service;
 
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
-import com.ispan.chufa.domain.Post;
+import com.ispan.chufa.domain.PlaceBean;
+import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.InteractionDTO;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
 import com.ispan.chufa.repository.InteractionRepository;
 import com.ispan.chufa.repository.MemberRepository;
+import com.ispan.chufa.repository.PlaceRepository;
 import com.ispan.chufa.repository.PostRepository;
 
 @Service
@@ -31,6 +36,21 @@ public class PostService {
 
 	@Autowired
 	InteractionRepository interactionRepository;
+
+    @Autowired
+    private PlaceRepository placeRepository;
+
+    // 創建一個 Post 並關聯多個 Place
+    public PostBean createPostWithPlaces(PostBean post, Set<Long> placeIds) {
+    	Set<PlaceBean> places = new HashSet<>(placeRepository.findAllById(placeIds));
+        post.setPlaces(places);
+        return postRepository.save(post);
+    }
+
+    // 根據 ID 查詢 Post 和其相關聯的 Place
+    public PostBean getPostById(Long id) {
+        return postRepository.findById(id).orElse(null);
+    }
 
 	public List<PostDTO> findPostsByCriteria(String param) {
 		try {
@@ -59,14 +79,14 @@ public class PostService {
 		Long postid = param.getLong("postid");
 
 		Optional<MemberBean> optionalMember = memberRepository.findById(userId);
-		Optional<Post> optionalPost = postRepository.findById(postid);
+		Optional<PostBean> optionalPost = postRepository.findById(postid);
 
 		if (!optionalMember.isPresent() || !optionalPost.isPresent()) {
 			return null;
 		}
 		// Member 和 Post 的資料
 		MemberBean performer = optionalMember.get();
-		Post postAction = optionalPost.get();
+		PostBean postAction = optionalPost.get();
 		// 查詢所有相關互動記錄
 		List<InteractionBean> existActions = interactionRepository.findByMemberAndPost(performer, postAction);
 
@@ -117,5 +137,6 @@ public class PostService {
 
 		return interactDTO;
 	}
+
 
 }

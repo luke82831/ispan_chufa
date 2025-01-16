@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+USE [chufa]
+GO
+
+/****** «Ø¥ßcity¸ê®Æªí******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+=======
 /****** å»ºç½®chufaè³‡æ–™åº«******/
 /*CREATE DATABASE [chufa]*/
 
@@ -24,6 +36,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
+>>>>>>> origin/dev
 CREATE TABLE [dbo].[city](
 	[id] [bigint] IDENTITY(1,1) NOT NULL,
 	[cityname] [varchar](255) NOT NULL,
@@ -34,6 +47,27 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
+<<<<<<< HEAD
+
+/****** ·s¼W¦æ¨Æ¾äªí®æ ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Calendar](
+	[date] [date] NOT NULL,
+	[description] [varchar](255) NULL,
+	[isHoliday] [bit] NULL,
+	[week] [varchar](255) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[date] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+=======
 /****** Object:  Table [dbo].[comments]    Script Date: 2025/1/11 ä¸‹åˆ 09:06:02 ******/
 SET ANSI_NULLS ON
 GO
@@ -240,3 +274,4 @@ PRIMARY KEY CLUSTERED
 GO
 ALTER TABLE [dbo].[members]  WITH CHECK ADD CHECK  (([role]='USER' OR [role]='ADMIN'))
 GO
+>>>>>>> origin/dev

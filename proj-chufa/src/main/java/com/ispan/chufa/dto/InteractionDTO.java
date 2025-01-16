@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 public class InteractionDTO {
+	private String status;
 	private String message;
 	private boolean success;
 	private Long actionId; // 互動行為 ID
@@ -27,6 +28,13 @@ public class InteractionDTO {
 	private LocalDateTime interactionTime; // 互動行為時間
 	private PostDTO postdto; // 貼文 (多對一關聯)
 	
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
 	public PostDTO getPostdto() {
 		return postdto;

@@ -9,6 +9,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.Post;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
@@ -18,6 +19,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
@@ -48,16 +51,33 @@ public class PostDaoImpl implements PostDao {
 		Root<Post> postRoot = criteriaQuery.from(Post.class);
 		// 準備條件列表
 		List<Predicate> predicates = new ArrayList<>();
+		
+		// Join 到點贊表 (interaction 表)
+	    Join<Post, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
+
 
 		if (!param.isNull("postTitle")) {
 			String titleKeyword = param.getString("postTitle");
 			Predicate titleLike = criteriaBuilder.like(postRoot.get("postTitle"), "%" + titleKeyword + "%");
 			predicates.add(titleLike);
 		}
+		
+		// 根據 userId 查詢
+	    if (!param.isNull("userid")) {
+	        Long userId = param.getLong("userid");
+	        Predicate userPredicate = criteriaBuilder.equal(postRoot.get("member").get("userid"), userId);
+	        predicates.add(userPredicate);
+	    }
 
 		if (!predicates.isEmpty()) {
 			criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 		}
+		
+		// 按 postTime 排序（按降序排列最新的貼文）
+		if(!param.isNull("sortByTime")&&param.getBoolean("sortByTime")) {
+	    criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
+		}
+	    
 		// 建立查詢並執行
 		TypedQuery<Post> query = entityManager.createQuery(criteriaQuery);
 

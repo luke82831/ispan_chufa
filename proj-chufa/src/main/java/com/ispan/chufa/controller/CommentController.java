@@ -1,6 +1,7 @@
 package com.ispan.chufa.controller;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,18 +31,11 @@ public class CommentController {
     private PostRepository postRepository;
     @Autowired
     private MemberRepository memberRepository;
-    String commentId = "commentId";
-    String postId = "postId";
-    String commentState = "commentState";
-    String userId = "userId";
-    String commentCreatedAt = "commentCreatedAt";
-    String commentUpdatedAt = "commentUpdatedAt";
-    String content = "content";
-    String parentId = "parentId";
 
     // 新增留言
     // 測試 http://localhost:8080/comment/create
-    // 測試 RequestBody => {"postId":"1","userId":"1","content":"內容"}
+    // 測試 RequestBody =>
+    // {"postId":"1","userId":"1","content":"內容","parentId":""}
     @PostMapping("/create")
     public CommentResponse create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
@@ -49,69 +43,116 @@ public class CommentController {
         CommentBean commentBean = new CommentBean();
         PostBean postBean = new PostBean();
         MemberBean memberBean = new MemberBean();
-        // 留言_留言ID 設定為自增
-        // 留言_貼文id RequestBody獲取
-        if (requestJson.isNull(postId)) {
-            response.setSuccesss(false);
-            response.setMessage("請輸入postId");
-            return response;
-        } else {
+
+        Long postId;
+        Long userId;
+        String content;
+        Long parentId;
+        CommentBean parentBean = null;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postId")) {
+                try {
+                    postId = requestJson.getLong("postId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("postId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postId");
+                return response;
+            }
+
+            if (!requestJson.isNull("userId")) {
+                try {
+                    userId = requestJson.getLong("userId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("userId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入userId");
+                return response;
+            }
+
+            if (!requestJson.isNull("content")) {
+                content = requestJson.getString("content");
+                if (content.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入content");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入content");
+                return response;
+            }
+
+            if (!requestJson.isNull("parentId")
+                    && requestJson.getString("parentId").length() != 0) {
+                try {
+                    parentId = requestJson.getLong("parentId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("parentId請輸入整數");
+                    return response;
+                }
+                parentBean = commentService.findById(parentId);
+            } else {
+                parentId = null;
+            }
+        }
+
+        // 設定CommentBean
+        {
+            // setPostId
             try {
-                postBean = postRepository.findById(requestJson.getLong(postId)).get();
+                postBean = postRepository.findById(postId).get();
                 commentBean.setPostBean(postBean);
-            } catch (Exception e) {
+            } catch (NoSuchElementException e) {
                 response.setSuccesss(false);
                 response.setMessage("沒有這則貼文");
                 return response;
             }
-        }
-        // 留言_留言者id RequestBody獲取
-        if (requestJson.isNull(userId)) {
-            response.setSuccesss(false);
-            response.setMessage("請輸入userId");
-            return response;
-        } else {
+            // setUserId
             try {
-                memberBean = memberRepository.findById(requestJson.getLong(userId)).get();
+                memberBean = memberRepository.findById(userId).get();
                 commentBean.setMemberBean(memberBean);
-            } catch (Exception e) {
+            } catch (NoSuchElementException e) {
                 response.setSuccesss(false);
                 response.setMessage("沒有這個使用者");
                 return response;
             }
-        }
-        // 留言_留言內文 RequestBody獲取
-        if (requestJson.isNull(content)) {
-            response.setSuccesss(false);
-            response.setMessage("請輸入content");
-            return response;
-        } else {
-            commentBean.setContent(requestJson.getString(content));
-        }
-        // 留言_上層留言id RequestBody獲取 可以NULL
-        if (!requestJson.isNull(parentId)) {
-            CommentBean parentBean = commentService.findById(requestJson.getInt(parentId));
-            // 要驗證資料庫是否有這筆上層留言ID
+            // setContent
+            commentBean.setContent(content);
+            // setPostId
+            // 是否有這筆上層留言
             if (parentBean != null) {
                 // 要驗證上層留言和這留言是否在同一個貼文中
-                if (parentBean.getPostBean().getPostid() == requestJson.getLong(postId)) {
-                    commentBean.setParentId(requestJson.getLong(parentId));
+                if (parentBean.getPostBean().getPostid() == postId) {
+                    commentBean.setParentId(parentId);
                 } else {
                     response.setSuccesss(false);
                     response.setMessage("上層留言不在這篇文章");
                     return response;
                 }
-            } else {
-                response.setSuccesss(false);
-                response.setMessage("上層留言不存在");
-                return response;
             }
         }
-        // 條件成立，存入資料庫
+
+        // 存入資料庫
         CommentBean bean = commentService.createComment(commentBean);
-        response.setSuccesss(true);
-        response.setMessage("創建成功");
-        response.setBean(bean);
+
+        // 設定response
+        {
+            response.setSuccesss(true);
+            response.setMessage("創建成功");
+            response.setBean(bean);
+        }
+
         return response;
     }
 
@@ -122,64 +163,36 @@ public class CommentController {
     public CommentResponse delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         CommentResponse response = new CommentResponse();
-        if (!requestJson.isNull(commentId)) {
-            Integer id = requestJson.getInt(commentId);
-            if (commentService.existsById(id)) {
-                commentService.deleteComment(id);
+
+        Long commentId;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("commentId")) {
+                try {
+                    commentId = requestJson.getLong("commentId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("commentId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("request請輸入commentId");
+                return response;
+            }
+        }
+
+        // 刪除資料
+        {
+            if (commentService.deleteComment(commentId)) {
                 response.setSuccesss(true);
                 response.setMessage("已刪除這筆留言");
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入commentId");
         }
-        return response;
-    }
 
-    // 查詢留言
-    // 測試 http://localhost:8080/comment/findById
-    // 測試 RequestBody => {"commentId":"1"}
-    @GetMapping("/findById")
-    public CommentResponse findById(@RequestBody String json) {
-        JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
-        if (!requestJson.isNull(commentId)) {
-            try {
-                CommentBean commentBean = commentService.findById(requestJson.getInt(commentId));
-                if (commentBean != null) {
-                    response.setSuccesss(true);
-                    response.setMessage("查尋成功");
-                    response.setBean(commentBean);
-                } else {
-                    response.setSuccesss(false);
-                    response.setMessage("查不到這筆留言");
-                }
-            } catch (JSONException e) {
-                response.setSuccesss(false);
-                response.setMessage("ID請輸入整數");
-            }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入ID");
-        }
-        return response;
-    }
-
-    // 用上層查詢留言
-    // 測試 http://localhost:8080/comment/findByParentId
-    // 測試 RequestBody => {"parentId":"1"}
-    @GetMapping("/findByParentId")
-    public CommentResponse findByParentId(@RequestBody String json) {
-        JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
-        List<CommentBean> beans = commentService.findByParentId(requestJson.getLong(parentId));
-        response.setSuccesss(true);
-        response.setMessage("查到資料");
-        response.setList(beans);
-        System.out.println(beans.size() == 0);
         return response;
     }
 
@@ -190,30 +203,50 @@ public class CommentController {
     public CommentResponse update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         CommentResponse response = new CommentResponse();
-        if (!requestJson.isNull(commentId)) {
-            if (!requestJson.isNull(content)) {
+
+        Long commentId;
+        String content;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("commentId")) {
                 try {
-                    CommentBean commentBean = commentService.updateComment(requestJson.getInt(commentId),
-                            requestJson.getString(content));
-                    if (commentBean != null) {
-                        response.setSuccesss(true);
-                        response.setMessage("更新成功");
-                        response.setBean(commentBean);
-                    } else {
-                        response.setSuccesss(false);
-                        response.setMessage("查不到這筆ID");
-                    }
+                    commentId = requestJson.getLong("commentId");
                 } catch (JSONException e) {
                     response.setSuccesss(false);
-                    response.setMessage("ID請輸入整數");
+                    response.setMessage("commentId請輸入整數");
+                    return response;
                 }
             } else {
                 response.setSuccesss(false);
-                response.setMessage("沒有傳入內容");
+                response.setMessage("請輸入commentId");
+                return response;
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入ID");
+
+            if (!requestJson.isNull("content")) {
+                content = requestJson.getString("content");
+                if (content.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入content");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入content");
+                return response;
+            }
+        }
+
+        // 更新留言
+        {
+            CommentBean bean = commentService.updateComment(commentId, content);
+            if (bean != null) {
+                response.setSuccesss(true);
+                response.setMessage("更新成功");
+                response.setBean(bean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到這筆ID");
+            }
         }
         return response;
     }
@@ -225,31 +258,190 @@ public class CommentController {
     public CommentResponse updateState(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         CommentResponse response = new CommentResponse();
-        if (!requestJson.isNull(commentId)) {
-            if (!requestJson.isNull(commentState)) {
+
+        Long commentId;
+        String commentState;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("commentId")) {
                 try {
-                    CommentBean commentBean = commentService.updateCommentState(requestJson.getInt(commentId),
-                            requestJson.getString(commentState));
-                    if (commentBean != null) {
-                        response.setSuccesss(true);
-                        response.setMessage("留言狀態更新成功");
-                        response.setBean(commentBean);
-                    } else {
-                        response.setSuccesss(false);
-                        response.setMessage("查不到這筆留言");
-                    }
+                    commentId = requestJson.getLong("commentId");
                 } catch (JSONException e) {
                     response.setSuccesss(false);
                     response.setMessage("commentId請輸入整數");
+                    return response;
                 }
             } else {
                 response.setSuccesss(false);
-                response.setMessage("沒有傳入狀態");
+                response.setMessage("請輸入commentId");
+                return response;
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入commentId");
+            if (!requestJson.isNull("commentState")) {
+                commentState = requestJson.getString("commentState");
+                if (commentState.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入commentState");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入commentState");
+                return response;
+            }
         }
+
+        // 更新留言狀態
+        {
+            CommentBean commentBean = commentService.updateCommentState(commentId, commentState);
+            if (commentBean != null) {
+                response.setSuccesss(true);
+                response.setMessage("留言狀態更新成功");
+                response.setBean(commentBean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到這筆留言");
+            }
+        }
+
+        return response;
+    }
+
+    // 用commentId查詢留言
+    // 測試 http://localhost:8080/comment/findById
+    // 測試 RequestBody => {"commentId":"1"}
+    @GetMapping("/findById")
+    public CommentResponse findById(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        CommentResponse response = new CommentResponse();
+
+        Long commentId;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("commentId")) {
+                try {
+                    commentId = requestJson.getLong("commentId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("commentId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入commentId");
+                return response;
+            }
+        }
+
+        // 用commentId查詢留言
+        {
+            CommentBean commentBean = commentService.findById(commentId);
+            if (commentBean != null) {
+                response.setSuccesss(true);
+                response.setMessage("查尋成功");
+                response.setBean(commentBean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到這筆留言");
+            }
+        }
+
+        return response;
+    }
+
+    // 用userid查詢根留言
+    // 測試 http://localhost:8080/comment/findByUserid
+    // 測試 RequestBody => {"userId":"1"}
+    @GetMapping("/findByUserid")
+    public CommentResponse findByUserid(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        CommentResponse response = new CommentResponse();
+
+        Long userId;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("userId")) {
+                try {
+                    userId = requestJson.getLong("userId");
+                    if (!memberRepository.existsById(userId)) {
+                        response.setSuccesss(false);
+                        response.setMessage("沒有這個成員");
+                        return response;
+                    }
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("userId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入userId");
+                return response;
+            }
+        }
+
+        // 用userid查詢根留言
+        {
+            // 用userid查詢所有留言
+            List<CommentBean> beans = commentService.findByUserid(userId);
+            if (beans.size() != 0) {
+                // 刪除有上層留言的資料
+                for (int i = 0; i < beans.size(); i++) {
+                    if (beans.get(i).getParentId() != null) {
+                        beans.remove(i);
+                    }
+                }
+                response.setSuccesss(true);
+                response.setMessage("查到資料");
+                response.setList(beans);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("沒查到資料");
+            }
+
+        }
+
+        return response;
+    }
+
+    // 用parentId查詢留言
+    // 測試 http://localhost:8080/comment/findByParentId
+    // 測試 RequestBody => {"parentId":"1"}
+    @GetMapping("/findByParentId")
+    public CommentResponse findByParentId(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        CommentResponse response = new CommentResponse();
+
+        Long parentId;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("parentId")) {
+                try {
+                    parentId = requestJson.getLong("parentId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("parentId請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入parentId");
+                return response;
+            }
+        }
+
+        // 用parentId查詢留言
+        {
+            List<CommentBean> beans = commentService.findByParentId(parentId);
+            if (beans.size() != 0) {
+                response.setSuccesss(true);
+                response.setMessage("查到資料");
+                response.setList(beans);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("沒查到資料");
+            }
+        }
+
         return response;
     }
 

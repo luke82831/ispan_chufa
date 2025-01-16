@@ -31,7 +31,7 @@ public class CommentService {
     }
 
     // 刪除留言
-    public Boolean deleteComment(Integer id) {
+    public Boolean deleteComment(Long id) {
         if (id != null) {
             if (commentRepository.existsById(id)) {
                 commentRepository.deleteById(id);
@@ -41,34 +41,12 @@ public class CommentService {
         return false;
     }
 
-    // 用ID查詢留言
-    public CommentBean findById(Integer id) {
-        if (id != null) {
-            Optional<CommentBean> optional = commentRepository.findById(id);
-            if (optional.isPresent()) {
-                return optional.get();
-            }
-        }
-        return null;
-    }
-
-    // 用上層查詢留言
-    public List<CommentBean> findByParentId(Long id) {
-        return commentRepository.findByParentId(id);
-    }
-
     // 更新留言
-    public CommentBean updateComment(Integer id, String content) {
+    public CommentBean updateComment(Long id, String content) {
         CommentBean bean = findById(id);
         if (bean != null) {
-            // 留言_留言ID 不用修改
-            // 留言_貼文id 不用修改
-            // 留言_留言狀態 不用修改
-            // 留言_留言者id 不用修改
-            // 留言_創建時間 不用修改
             bean.setCommentUpdatedAt(LocalDateTime.now());// 留言_更新時間 set現在時間
-            bean.setContent(content);// 留言_留言內文 RequestBody獲取
-            // 留言_上層留言id 不用修改
+            bean.setContent(content);// 留言_留言內文
             return commentRepository.save(bean);
         } else {
             return null;
@@ -76,7 +54,7 @@ public class CommentService {
     }
 
     // 更新標籤狀態
-    public CommentBean updateCommentState(Integer id, String commentState) {
+    public CommentBean updateCommentState(Long id, String commentState) {
         CommentBean bean = findById(id);
         if (bean != null) {
             bean.setCommentUpdatedAt(LocalDateTime.now());// 留言_更新時間 set現在時間
@@ -87,8 +65,29 @@ public class CommentService {
         }
     }
 
+    // 用ID查詢留言
+    public CommentBean findById(Long commentId) {
+        if (commentId != null) {
+            Optional<CommentBean> optional = commentRepository.findById(commentId);
+            if (optional.isPresent()) {
+                return optional.get();
+            }
+        }
+        return null;
+    }
+
+    // 用userid查詢根留言
+    public List<CommentBean> findByUserid(Long userId) {
+        return commentRepository.findByMemberBeanUserid(userId);
+    }
+
+    // 用上層查詢留言
+    public List<CommentBean> findByParentId(Long parentId) {
+        return commentRepository.findByParentId(parentId);
+    }
+
     // 查詢ID是否存在
-    public boolean existsById(Integer id) {
-        return commentRepository.existsById(id);
+    public boolean existsById(Long commentid) {
+        return commentRepository.existsById(commentid);
     }
 }

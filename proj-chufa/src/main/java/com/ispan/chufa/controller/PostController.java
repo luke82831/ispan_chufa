@@ -148,7 +148,7 @@ public class PostController {
         return response;
     }
 
-    // 更新留言
+    // 更新貼文
     // 測試 http://localhost:8080/post/update
     // 測試 RequestBody => {"postid":"1","postTitle":"標題","postContent":"內容"}
     @PutMapping("/update")

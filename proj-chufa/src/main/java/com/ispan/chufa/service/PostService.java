@@ -14,7 +14,6 @@ public class PostService {
     @Autowired
     private PostRepository postRepository;
 
-    // 還沒寫好
     // 創建貼文
     public PostBean createPost(PostBean bean) {
         // postid 自動產生
@@ -25,8 +24,6 @@ public class PostService {
         bean.setPostTime(LocalDateTime.now());
         // postContent RequestBody獲得
         // postLink RequestBody獲得
-        // tagsBeans RequestBody獲得
-        // commentBeans RequestBody獲得
         // memberBean RequestBody獲得
         return postRepository.save(bean);
     }
@@ -65,5 +62,10 @@ public class PostService {
         } else {
             return null;
         }
+    }
+
+    // 查詢ID是否存在
+    public boolean existsById(Long id) {
+        return postRepository.existsById(id);
     }
 }

@@ -2,8 +2,9 @@ package com.ispan.chufa.domain;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +32,7 @@ public class MemberBean {
 	@Column(name = "username", nullable = false, unique = true) // 自定義帳號
 	private String username;
 
+	@JsonIgnore // 讓Response不會印出
 	@Column(name = "password")
 	private byte[] password;
 
@@ -60,10 +62,11 @@ public class MemberBean {
 	private java.util.Date birth;
 
 	@OneToMany(mappedBy = "memberBean")
-	private List<CommentBean> commentBeans;
+	private Set<CommentBean> commentBeans;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "memberBean")
-	private List<PostBean> postBeans;
+	private Set<PostBean> postBeans;
 
 	@ManyToMany(mappedBy = "memberBeans")
 	private Set<TagsBean> tagsBeans = new HashSet<>();
@@ -83,11 +86,19 @@ public class MemberBean {
 				+ commentBeans + ", postBeans=" + postBeans + ", tagsBeans=" + tagsBeans + "]";
 	}
 
-	public List<PostBean> getPostBeans() {
+	public Set<CommentBean> getCommentBeans() {
+		return commentBeans;
+	}
+
+	public void setCommentBeans(Set<CommentBean> commentBeans) {
+		this.commentBeans = commentBeans;
+	}
+
+	public Set<PostBean> getPostBeans() {
 		return postBeans;
 	}
 
-	public void setPostBeans(List<PostBean> postBeans) {
+	public void setPostBeans(Set<PostBean> postBeans) {
 		this.postBeans = postBeans;
 	}
 
@@ -201,11 +212,4 @@ public class MemberBean {
 		this.birth = birth;
 	}
 
-	public List<CommentBean> getCommentBeans() {
-		return commentBeans;
-	}
-
-	public void setCommentBeans(List<CommentBean> commentBeans) {
-		this.commentBeans = commentBeans;
-	}
 }

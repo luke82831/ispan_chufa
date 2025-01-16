@@ -2,18 +2,18 @@ package com.ispan.chufa.dto;
 
 import java.util.List;
 
-import com.ispan.chufa.domain.CommentBean;
+import com.ispan.chufa.domain.PostBean;
 
-public class CommentResponse {
+public class PostResponse {
     private Boolean successs;
     private String message;
-    private CommentBean bean;
-    private List<CommentBean> list;
+    private PostBean bean;
+    private List<PostBean> list;
     private Long count;
 
     @Override
     public String toString() {
-        return "Response [successs=" + successs + ", message=" + message + ", bean=" + bean + ", list=" + list
+        return "PostResponse [successs=" + successs + ", message=" + message + ", bean=" + bean + ", list=" + list
                 + ", count=" + count + "]";
     }
 
@@ -33,19 +33,19 @@ public class CommentResponse {
         this.message = message;
     }
 
-    public CommentBean getBean() {
+    public PostBean getBean() {
         return bean;
     }
 
-    public void setBean(CommentBean bean) {
+    public void setBean(PostBean bean) {
         this.bean = bean;
     }
 
-    public List<CommentBean> getList() {
+    public List<PostBean> getList() {
         return list;
     }
 
-    public void setList(List<CommentBean> list) {
+    public void setList(List<PostBean> list) {
         this.list = list;
     }
 

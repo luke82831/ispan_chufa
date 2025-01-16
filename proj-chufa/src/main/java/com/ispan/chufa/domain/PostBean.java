@@ -2,8 +2,9 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,8 +37,9 @@ public class PostBean {
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@OneToMany(mappedBy = "postBean")
-	private List<CommentBean> commentBeans;
+	private Set<CommentBean> commentBeans;
 
+	@JsonIgnoreProperties("commentBeans")
 	@ManyToOne // 多對一關係
 	@JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member")) // 外鍵列
 	private MemberBean memberBean;
@@ -105,11 +107,11 @@ public class PostBean {
 		this.tagsBeans = tagsBeans;
 	}
 
-	public List<CommentBean> getCommentBeans() {
+	public Set<CommentBean> getCommentBeans() {
 		return commentBeans;
 	}
 
-	public void setCommentBeans(List<CommentBean> commentBeans) {
+	public void setCommentBeans(Set<CommentBean> commentBeans) {
 		this.commentBeans = commentBeans;
 	}
 

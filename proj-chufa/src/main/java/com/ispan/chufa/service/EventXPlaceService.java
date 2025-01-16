@@ -15,12 +15,6 @@ public class EventXPlaceService {
     @Autowired
     private EventXPlaceRepository eventXPlaceRepository;
     
-//    @Autowired
-//    private EventService eventService; // 注入 EventService
-//
-//    @Autowired
-//    private PlaceService placeService; // 注入 PlaceService
-    
 
     // 儲存 EventXPlace 資料
     public EventXPlaceBean saveEventXPlace(EventXPlaceBean eventXPlaceBean) {
@@ -38,9 +32,41 @@ public class EventXPlaceService {
     	        System.out.println("Place ID: " + eventXPlaceBean.getPlace().getPlaceId());
     	    }
     	
+    	    return eventXPlaceRepository.save(eventXPlaceBean);
+    		}
+    
+    
+    
+    		// 根據 eventmappingId 查詢 EventXPlace 資料
+    		public EventXPlaceBean findEventXPlaceById(Long eventmappingId) {
+    			return eventXPlaceRepository.findById(eventmappingId).orElse(null); // 如果找到資料，返回 EventXPlaceBean，否則返回 null
+    		}
     	
-    	
-    	
+    		 // 更新 EventXPlace 資料
+    	    public EventXPlaceBean updateEventXPlace(Long eventmappingId, EventXPlaceBean updatedEventXPlace) {
+    	        EventXPlaceBean existingEventXPlace = eventXPlaceRepository.findById(eventmappingId).orElseThrow(() ->
+    	                new IllegalArgumentException("EventXPlace with ID " + eventmappingId + " not found."));
+
+    	        // 更新非外鍵欄位
+    	        existingEventXPlace.setPlaceOrder(updatedEventXPlace.getPlaceOrder());
+    	        existingEventXPlace.setArrivalTime(updatedEventXPlace.getArrivalTime());
+    	        existingEventXPlace.setStayDuration(updatedEventXPlace.getStayDuration());
+    	        existingEventXPlace.setNotes(updatedEventXPlace.getNotes());
+
+    	        return eventXPlaceRepository.save(existingEventXPlace);
+    	    }
+    		
+    		
+    		 // 刪除 EventXPlace 資料
+    	    public void deleteEventXPlaceById(Long eventmappingId) {
+    	        if (eventXPlaceRepository.existsById(eventmappingId)) {
+    	            eventXPlaceRepository.deleteById(eventmappingId);
+    	        } else {
+    	            throw new IllegalArgumentException("EventXPlace with ID " + eventmappingId + " not found.");
+    	        }
+    	    }
+    		
+}   	
     	
 //        if (eventXPlaceBean.getEvent() == null || eventXPlaceBean.getPlace() == null) {
 //            throw new IllegalArgumentException("Event and Place must be provided.");
@@ -57,7 +83,3 @@ public class EventXPlaceService {
 //        // 如果找到相應的實例，則將它們設置到 EventXPlaceBean 中
 //        eventXPlaceBean.setEvent(event);
 //        eventXPlaceBean.setPlace(place);
-
-        return eventXPlaceRepository.save(eventXPlaceBean);
-    }
-}

@@ -1,6 +1,9 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalTime;
+import java.util.Arrays;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -22,12 +26,16 @@ public class EventXPlaceBean {
 	private Long eventmappingId;
 
 	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
 	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 
 	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
 	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
+
+
 
 	@Column(name = "place_order")
 	private Integer placeOrder;
@@ -39,7 +47,8 @@ public class EventXPlaceBean {
 	private Integer stayDuration;
 
 	@Column(name = "notes")
-	private String notes;
+	@Lob
+	private char[] notes;
 
 	// Constructors, getters, setters, and toString()
 
@@ -47,7 +56,7 @@ public class EventXPlaceBean {
 	}
 
 	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
-			Integer stayDuration, String notes) {
+			Integer stayDuration, char[] notes) {
 		this.event = event;
 		this.place = place;
 		this.placeOrder = placeOrder;
@@ -104,21 +113,18 @@ public class EventXPlaceBean {
 		this.stayDuration = stayDuration;
 	}
 
-	public String getNotes() {
+	public char[] getNotes() {
 		return notes;
 	}
 
-	public void setNotes(String notes) {
+	public void setNotes(char[] notes) {
 		this.notes = notes;
 	}
 
-	
-	
 	@Override
 	public String toString() {
-		return "EventPlaceMapping [mappingId=" + eventmappingId +  ", event=" + event +
-				", place=" + place +", placeOrder=" + placeOrder +
-				", arrivalTime=" + arrivalTime + ", stayDuration=" + stayDuration +
-				", notes=" + notes + "]";
+		return "EventXPlaceBean [eventmappingId=" + eventmappingId + ", event=" + event + ", place=" + place
+				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + arrivalTime + ", stayDuration=" + stayDuration
+				+ ", notes=" + Arrays.toString(notes) + "]";
 	}
 }

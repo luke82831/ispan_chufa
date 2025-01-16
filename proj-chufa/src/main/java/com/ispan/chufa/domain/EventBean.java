@@ -42,9 +42,6 @@ public class EventBean {
 	@ManyToMany(mappedBy = "event")
 	private List<EventXPlaceBean> eventXPlaceBeans;
 
-	
-	// Join Column
-
 	// Constructors, getters, and setters
 
 	public EventBean() {
@@ -96,7 +93,6 @@ public class EventBean {
         this.schedule = schedule;
     }
 
-    // calendar 的 Getter 和 Setter
     public CalendarBean getCalendar() {
         return calendar;
     }
@@ -112,7 +108,6 @@ public class EventBean {
 	public void setEventXPlaceBeans(List<EventXPlaceBean> eventXPlaceBeans) {
 		this.eventXPlaceBeans = eventXPlaceBeans;
 	}
-    
 
     @Override
     public String toString() {

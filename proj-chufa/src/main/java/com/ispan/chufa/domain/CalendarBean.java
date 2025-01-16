@@ -86,14 +86,6 @@
 //	}
 //
 
-
-
-
-
-
-
-
-
 package com.ispan.chufa.domain;
 
 import java.time.LocalDate;

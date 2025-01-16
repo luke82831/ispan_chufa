@@ -32,8 +32,6 @@ public class CalendarService {
         return calendarRepository.save(calendar);
     }
 	
-    
-    
 
     public Optional<CalendarBean> findCalendarByDate(LocalDate date) {
         return calendarRepository.findById(date);

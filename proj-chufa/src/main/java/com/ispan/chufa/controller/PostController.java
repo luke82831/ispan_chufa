@@ -99,7 +99,7 @@ public class PostController {
         // 設定PostBean
         {
             // postTitle
-            bean.setPostContent(postTitle);
+            bean.setPostTitle(postTitle);
             // postContent
             bean.setPostContent(postContent);
             // postLink

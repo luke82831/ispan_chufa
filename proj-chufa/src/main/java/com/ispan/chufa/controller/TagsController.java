@@ -48,7 +48,7 @@ public class TagsController {
             }
         }
 
-        // 設定CommentBean
+        // 設定TagsBean
         tagsBean.setTagName(tagName);
 
         // 存入資料庫

@@ -36,48 +36,95 @@ public class PostController {
         JSONObject requestJson = new JSONObject(json);
         PostResponse response = new PostResponse();
         PostBean bean = new PostBean();
-        if (!requestJson.isNull("postTitle") && requestJson.getString("postTitle").length() != 0) {
-            bean.setPostTitle(requestJson.getString("postTitle"));
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("請輸入標題");
-            return response;
-        }
+        MemberBean memberBean;
 
-        if (!requestJson.isNull("postContent") && requestJson.getString("postContent").length() != 0) {
-            bean.setPostContent(requestJson.getString("postContent"));
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("請輸入內容");
-            return response;
-        }
-
-        if (!requestJson.isNull("postLink")) {
-            bean.setPostLink(requestJson.getString("postLink"));
-        }
-
-        if (!requestJson.isNull("userid")) {
-            MemberBean memberBean;
-            try {
-                memberBean = memberRepository.findById(requestJson.getLong("userid")).get();
-            } catch (JSONException e) {
+        String postTitle;
+        String postContent;
+        String postLink;
+        Long userid;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postTitle")) {
+                postTitle = requestJson.getString("postTitle");
+                if (postTitle.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入postTitle");
+                    return response;
+                }
+            } else {
                 response.setSuccesss(false);
-                response.setMessage("userid請輸入整數");
+                response.setMessage("請輸入postTitle");
                 return response;
+            }
+
+            if (!requestJson.isNull("postContent")) {
+                postContent = requestJson.getString("postContent");
+                if (postContent.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入postContent");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postContent");
+                return response;
+            }
+
+            if (!requestJson.isNull("postLink")) {
+                postLink = requestJson.getString("postLink");
+                if (postLink.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入postLink");
+                    return response;
+                }
+            } else {
+                postLink = null;
+            }
+
+            if (!requestJson.isNull("userid")) {
+                try {
+                    userid = requestJson.getLong("userid");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("userid請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入userid");
+                return response;
+            }
+        }
+
+        // 設定PostBean
+        {
+            // postTitle
+            bean.setPostContent(postTitle);
+            // postContent
+            bean.setPostContent(postContent);
+            // postLink
+            if (postLink != null) {
+                bean.setPostLink(postLink);
+            }
+            // memberBean
+            try {
+                memberBean = memberRepository.findById(userid).get();
             } catch (NoSuchElementException e) {
                 response.setSuccesss(false);
-                response.setMessage("沒有這個成員");
+                response.setMessage("沒有這個userid");
                 return response;
             }
             bean.setMemberBean(memberBean);
-            postService.createPost(bean);
+        }
+
+        // 創建貼文
+        postService.createPost(bean);
+
+        // 設定response
+        {
             response.setSuccesss(true);
             response.setMessage("創建貼文成功");
             response.setBean(bean);
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("請輸入userid");
-            return response;
         }
 
         return response;
@@ -90,27 +137,36 @@ public class PostController {
     public PostResponse delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         PostResponse response = new PostResponse();
-        if (!requestJson.isNull("postid")) {
-            Long id;
-            try {
-                id = requestJson.getLong("postid");
-            } catch (JSONException e) {
+
+        Long postid;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postid")) {
+                try {
+                    postid = requestJson.getLong("postid");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("postid請輸入整數");
+                    return response;
+                }
+            } else {
                 response.setSuccesss(false);
-                response.setMessage("postid請輸入整數");
+                response.setMessage("請輸入postid");
                 return response;
             }
-            if (postService.existsById(id)) {
-                postService.deletePost(id);
+        }
+
+        // 刪除貼文
+        {
+            if (postService.deletePost(postid)) {
                 response.setSuccesss(true);
                 response.setMessage("已刪除這筆貼文");
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆貼文");
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入postid");
         }
+
         return response;
     }
 
@@ -121,25 +177,41 @@ public class PostController {
     public PostResponse findById(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         PostResponse response = new PostResponse();
-        if (!requestJson.isNull("postid")) {
-            try {
-                PostBean bean = postService.findById(requestJson.getLong("postid"));
-                if (bean != null) {
-                    response.setSuccesss(true);
-                    response.setMessage("查尋成功");
-                    response.setBean(bean);
-                } else {
+        PostBean bean;
+
+        Long postid;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postid")) {
+                try {
+                    postid = requestJson.getLong("postid");
+                } catch (JSONException e) {
                     response.setSuccesss(false);
-                    response.setMessage("查不到這筆貼文");
+                    response.setMessage("postid請輸入整數");
+                    return response;
                 }
-            } catch (JSONException e) {
+            } else {
                 response.setSuccesss(false);
-                response.setMessage("postid請輸入整數");
+                response.setMessage("請輸入postid");
+                return response;
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入postid");
         }
+
+        // 查詢貼文
+        bean = postService.findById(postid);
+
+        // 設定response
+        {
+            if (bean != null) {
+                response.setSuccesss(true);
+                response.setMessage("查尋成功");
+                response.setBean(bean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到這筆貼文");
+            }
+        }
+
         return response;
     }
 
@@ -150,36 +222,70 @@ public class PostController {
     public PostResponse update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         PostResponse response = new PostResponse();
-        if (!requestJson.isNull("postid")) {
-            if (!requestJson.isNull("postTitle") && requestJson.getString("postTitle").length() != 0) {
-                if (!requestJson.isNull("postContent") && requestJson.getString("postContent").length() != 0) {
-                    try {
-                        PostBean bean = postService.updatePost(requestJson.getLong("postid"),
-                                requestJson.getString("postTitle"), requestJson.getString("postContent"));
-                        if (bean != null) {
-                            response.setSuccesss(true);
-                            response.setMessage("更新成功");
-                            response.setBean(bean);
-                        } else {
-                            response.setSuccesss(false);
-                            response.setMessage("查不到這筆ID");
-                        }
-                    } catch (JSONException e) {
-                        response.setSuccesss(false);
-                        response.setMessage("ID請輸入整數");
-                    }
-                } else {
+        PostBean bean;
+
+        Long postid;
+        String postTitle;
+        String postContent;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postid")) {
+                try {
+                    postid = requestJson.getLong("postid");
+                } catch (JSONException e) {
                     response.setSuccesss(false);
-                    response.setMessage("沒有傳入內容");
+                    response.setMessage("postid請輸入整數");
+                    return response;
                 }
             } else {
                 response.setSuccesss(false);
-                response.setMessage("沒有傳入標題");
+                response.setMessage("請輸入postid");
+                return response;
             }
-        } else {
-            response.setSuccesss(false);
-            response.setMessage("沒有傳入postid");
+
+            if (!requestJson.isNull("postTitle")) {
+                postTitle = requestJson.getString("postTitle");
+                if (postTitle.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入postTitle");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postTitle");
+                return response;
+            }
+
+            if (!requestJson.isNull("postContent")) {
+                postContent = requestJson.getString("postContent");
+                if (postContent.length() == 0) {
+                    response.setSuccesss(false);
+                    response.setMessage("請輸入postContent");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postContent");
+                return response;
+            }
+
         }
+
+        // 更新貼文
+        bean = postService.updatePost(postid, postTitle, postContent);
+
+        // 設定response
+        {
+            if (bean != null) {
+                response.setSuccesss(true);
+                response.setMessage("更新成功");
+                response.setBean(bean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到這筆ID");
+            }
+        }
+
         return response;
     }
 

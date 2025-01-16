@@ -69,11 +69,6 @@ public class PostController {
                 response.setMessage("沒有這個成員");
                 return response;
             }
-            System.err.println("=============================");
-            System.err.println("=============================");
-            System.err.println("=============================");
-            System.err.println("=============================");
-            System.err.println("=============================");
             bean.setMemberBean(memberBean);
             postService.createPost(bean);
             response.setSuccesss(true);

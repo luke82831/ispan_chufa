@@ -29,7 +29,7 @@ public class TagsService {
     }
 
     // 刪除標籤
-    public Boolean deleteTags(Integer id) {
+    public Boolean deleteTags(Long id) {
         if (id != null) {
             if (tagsRepository.existsById(id)) {
                 tagsRepository.deleteById(id);
@@ -40,7 +40,7 @@ public class TagsService {
     }
 
     // 用ID查詢標籤
-    public TagsBean findById(Integer id) {
+    public TagsBean findById(Long id) {
         if (id != null) {
             Optional<TagsBean> optional = tagsRepository.findById(id);
             if (optional.isPresent()) {
@@ -51,7 +51,7 @@ public class TagsService {
     }
 
     // 更新標籤
-    public TagsBean updateTags(Integer id, String tagName) {
+    public TagsBean updateTags(Long id, String tagName) {
         TagsBean bean = findById(id);
         if (bean != null) {
             bean.setTagUpdatedAt(LocalDateTime.now());// 標籤系統_更新時間 set現在時間
@@ -63,7 +63,7 @@ public class TagsService {
     }
 
     // 更新標籤狀態
-    public TagsBean updateTagsState(Integer id, String tagState) {
+    public TagsBean updateTagsState(Long id, String tagState) {
         TagsBean bean = findById(id);
         if (bean != null) {
             bean.setTagUpdatedAt(LocalDateTime.now());// 標籤系統_更新時間 set現在時間

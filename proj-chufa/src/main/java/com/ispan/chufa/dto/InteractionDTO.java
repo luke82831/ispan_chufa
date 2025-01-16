@@ -3,6 +3,7 @@ package com.ispan.chufa.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
@@ -20,6 +21,7 @@ public class InteractionDTO {
 	private boolean success;
 	private Long actionId; // 互動行為 ID
 	private MemberInfo member; // 使用者資料 (多對一關聯
+	@JsonIgnore
 	private Post post; // 貼文 (多對一關聯)
 	private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
 	private LocalDateTime interactionTime; // 互動行為時間

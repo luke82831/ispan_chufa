@@ -1,6 +1,7 @@
 package com.ispan.chufa.repository;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -84,6 +85,13 @@ public class PostDaoImpl implements PostDao {
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);
 		}
+		
+		// 根據點讚數排序
+	    if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
+	    	postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());
+	    	  //criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("likeCount")));
+	    }
+	    
 		return postDTOList;
 	}
 

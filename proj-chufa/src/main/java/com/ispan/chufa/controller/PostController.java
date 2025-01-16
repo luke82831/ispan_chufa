@@ -49,7 +49,7 @@ public class PostController {
 
 	@PostMapping("/insertinteraction")
 	public InteractionDTO insertaction(@RequestBody String json) {
-		InteractionDTO response =postService.insertaction(json);
+		InteractionDTO response =postService.performaction(json);
 		try {
 			// 檢查是否有缺少必要的參數
 			if (json == null || !json.contains("userid") || !json.contains("interactiontype")

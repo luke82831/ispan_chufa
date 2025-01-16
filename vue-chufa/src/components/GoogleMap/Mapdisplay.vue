@@ -1,13 +1,13 @@
 <template>
   <div class="container">
     <!-- 搜尋區域 -->
-    <div class="search-section">
+    <div class="search">
       <h1>Google Maps 地點搜尋</h1>
       <PlaceSearch :onPlaceSelected="handlePlaceChanged" />
     </div>
     
     <!-- 地圖區域 -->
-    <div class="map-section">
+    <div class="map">
       <div id="map"></div>
     </div>
   </div>
@@ -115,32 +115,32 @@ export default {
 </script>
 
 <style scoped>
-html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .container {
   display: flex;
   height: 100%;
 }
 
-.search-section {
-  width: 400px;
+.search {
+  height: 500px;
+  width: 500px;
   padding: 20px;
-  background-color: #f4f4f4;
+  background-color: #e6e6e6e5;
   overflow-y: auto;
-  border-right: 2px solid #ddd;
+  border: 2px solid #ddd;
+  border-radius: 5px;
 }
 
-.map-section {
+.map {
+  margin-left: 10px;
   flex-grow: 1;
-  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
 }
 
 #map {
-  height: 500px;
+  height: 100%;
   width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 </style>

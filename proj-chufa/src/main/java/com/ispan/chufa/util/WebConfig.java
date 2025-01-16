@@ -13,4 +13,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:5173") // 允许来自该源的请求
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
     }
+    
+    
 }

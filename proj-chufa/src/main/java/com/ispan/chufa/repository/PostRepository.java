@@ -7,4 +7,5 @@ import com.ispan.chufa.domain.PostBean;
 
 @Repository
 public interface PostRepository extends JpaRepository<PostBean, Long> {
+	
 }

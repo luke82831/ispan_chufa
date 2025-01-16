@@ -1,52 +1,53 @@
 package com.ispan.chufa.controller;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.PlaceBean;
-import com.ispan.chufa.repository.PlaceRepository;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.service.PlaceService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/places")
 public class PlaceController {
 
     @Autowired
-    private PlaceRepository placeRepository;
+    private PlaceService placeService;
 
-    @PostMapping("/savePlace")
-    public ResponseEntity<?> savePlace(@RequestBody PlaceBean placeBean) {
-        PlaceBean place = new PlaceBean();
-        place.setPlaceType(placeBean.getPlaceType());
-        place.setPlaceName(placeBean.getPlaceName());
-        place.setPlaceAddress(placeBean.getPlaceAddress());
-        place.setLongitude(placeBean.getLongitude());
-        place.setLatitude(placeBean.getLatitude());
-        place.setPhotos(placeBean.getPhotos());
-        place.setPlacePhone(placeBean.getPlacePhone());
-        place.setBusinessHours(placeBean.getBusinessHours());
-        place.setPlaceInfo(placeBean.getPlaceInfo());
-        place.setRating(placeBean.getRating());
-        place.setWebsite(placeBean.getWebsite());
-        place.setBookingUrl(placeBean.getBookingUrl());
-        place.setPrice(placeBean.getPrice());
-        place.setPlaceName(placeBean.getPlaceName());
-        place.setAccommodationType(placeBean.getAccommodationType());
-        place.setMealTime(placeBean.getMealTime());
-        place.setReservation(placeBean.getReservation());
-        placeRepository.save(place);
-
-        // 準備回應的 JSON 物件
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "Place saved successfully");
-
-        return ResponseEntity.ok(response); // 回傳 JSON 格式
+    // 創建 Place 並關聯多個 Post
+    @PostMapping("/create")
+    public ResponseEntity<PlaceBean> createPlaceWithPosts(@RequestBody PlaceBean place) {
+        // 假設前端會提供一個 place 和一個包含 Post ID 的 list
+        Set<Long> postIds = place.getPosts().stream()
+                                  .map(PostBean::getPostid)
+                                  .collect(Collectors.toSet());
+        PlaceBean createdPlace = placeService.createPlaceWithPosts(place, postIds);
+        return ResponseEntity.ok(createdPlace);
     }
-}
+
+    // 查詢指定 ID 的 Place 和其關聯的 Posts
+    @GetMapping("/{id}")
+    public ResponseEntity<PlaceBean> getPlaceById(@PathVariable Long id) {
+    	 PlaceBean place = placeService.getPlaceById(id);
+         if (place == null) {
+             return ResponseEntity.notFound().build();
+         }
+         return ResponseEntity.ok(place);
+        }
+    @PostMapping("/test")
+    public ResponseEntity<String> testPost(@RequestBody String json) {
+        return ResponseEntity.ok("Received: " + json);
+    }
+    
+    
+    }
+

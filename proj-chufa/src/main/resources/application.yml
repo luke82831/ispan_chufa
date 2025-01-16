@@ -2,7 +2,7 @@
 spring:  
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:9433;database=chufa;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
     username: sa
     password: P@ssw0rd
   mvc:

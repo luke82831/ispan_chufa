@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 public class FollowResponse {
 	private String message;
 	private boolean success;
-	private Long followerId; // 關注者ID
-	private Long followedId; // 被關注者ID
+	private Long follower; // 關注者ID
+	private Long followed; // 被關注者ID
 	private LocalDateTime followTime; // 關注時間
 	public String getMessage() {
 		return message;
@@ -15,16 +15,16 @@ public class FollowResponse {
 		this.message = message;
 	}
 	public Long getFollowerId() {
-		return followerId;
+		return follower;
 	}
 	public void setFollowerId(Long followerId) {
-		this.followerId = followerId;
+		this.follower = followerId;
 	}
 	public Long getFollowedId() {
-		return followedId;
+		return followed;
 	}
 	public void setFollowedId(Long followedId) {
-		this.followedId = followedId;
+		this.followed = followedId;
 	}
 	public LocalDateTime getFollowTime() {
 		return followTime;

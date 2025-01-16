@@ -3,6 +3,7 @@ package com.ispan.chufa.controller;
 import java.util.List;
 
 import org.json.JSONException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +18,8 @@ import com.ispan.chufa.dto.FollowRequest;
 import com.ispan.chufa.dto.FollowResponse;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.service.FollowService;
+
+import ch.qos.logback.core.joran.util.beans.BeanUtil;
 
 @RestController
 @RequestMapping("/follow")
@@ -42,6 +45,9 @@ public class FollowController {
 	        } else {
 	            responseBean.setSuccess(true);
 	            responseBean.setMessage("成功關注");
+	            responseBean.setFollowedId(follow.getFollowed().getUserid());
+	            responseBean.setFollowerId(follow.getFollower().getUserid());
+	            BeanUtils.copyProperties(follow, responseBean);
 	        }
 
 	    } catch (JSONException e) {

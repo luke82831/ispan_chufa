@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ispan.chufa.domain.CommentBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.dto.CommentDTO;
 import com.ispan.chufa.dto.CommentResponse;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.PostRepository;
@@ -32,10 +34,13 @@ public class CommentController {
     @Autowired
     private MemberRepository memberRepository;
 
+    // 將Bean映射到DTO用的
+    private final ModelMapper modelMapper = new ModelMapper();
+
     // 新增留言
     // 測試 http://localhost:8080/comment/create
     // 測試 RequestBody =>
-    // {"postId":"1","userId":"1","content":"內容","parentId":""}
+    // {"postId":"1","userId":"1","content":"留言內容","parentId":""}
     @PostMapping("/create")
     public CommentResponse create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
@@ -148,9 +153,11 @@ public class CommentController {
 
         // 設定response
         {
+            // 將Bean映射到DTO用的
+            CommentDTO dto = modelMapper.map(bean, CommentDTO.class);
             response.setSuccesss(true);
             response.setMessage("創建成功");
-            response.setBean(bean);
+            response.setBean(dto);
         }
 
         return response;
@@ -198,7 +205,7 @@ public class CommentController {
 
     // 更新留言
     // 測試 http://localhost:8080/comment/update
-    // 測試 RequestBody => {"commentId":"1","content":"內容"}
+    // 測試 RequestBody => {"commentId":"1","content":"留言內容"}
     @PutMapping("/update")
     public CommentResponse update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
@@ -240,9 +247,11 @@ public class CommentController {
         {
             CommentBean bean = commentService.updateComment(commentId, content);
             if (bean != null) {
+                // 將Bean映射到DTO用的
+                CommentDTO dto = modelMapper.map(bean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("更新成功");
-                response.setBean(bean);
+                response.setBean(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");
@@ -294,9 +303,11 @@ public class CommentController {
         {
             CommentBean commentBean = commentService.updateCommentState(commentId, commentState);
             if (commentBean != null) {
+                // 將Bean映射到DTO用的
+                CommentDTO dto = modelMapper.map(commentBean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("留言狀態更新成功");
-                response.setBean(commentBean);
+                response.setBean(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
@@ -336,9 +347,11 @@ public class CommentController {
         {
             CommentBean commentBean = commentService.findById(commentId);
             if (commentBean != null) {
+                // 將Bean映射到DTO用的
+                CommentDTO dto = modelMapper.map(commentBean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("查尋成功");
-                response.setBean(commentBean);
+                response.setBean(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
@@ -383,16 +396,20 @@ public class CommentController {
         {
             // 用userid查詢所有留言
             List<CommentBean> beans = commentService.findByUserid(userId);
-            if (beans.size() != 0) {
-                // 刪除有上層留言的資料
-                for (int i = 0; i < beans.size(); i++) {
-                    if (beans.get(i).getParentId() != null) {
-                        beans.remove(i);
-                    }
+            // 刪除有上層留言的資料
+            for (int i = 0; i < beans.size(); i++) {
+                if (beans.get(i).getParentId() != null) {
+                    beans.remove(i);
+                } else {
+                    // 將Bean映射到DTO用的
+                    CommentDTO dto = modelMapper.map(beans.get(i), CommentDTO.class);
+                    response.getList().add(dto);
                 }
+            }
+
+            if (beans.size() != 0) {
                 response.setSuccesss(true);
                 response.setMessage("查到資料");
-                response.setList(beans);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("沒查到資料");
@@ -433,9 +450,13 @@ public class CommentController {
         {
             List<CommentBean> beans = commentService.findByParentId(parentId);
             if (beans.size() != 0) {
+                for (int i = 0; i < beans.size(); i++) {
+                    // 將Bean映射到DTO用的
+                    CommentDTO dto = modelMapper.map(beans.get(i), CommentDTO.class);
+                    response.getList().add(dto);
+                }
                 response.setSuccesss(true);
                 response.setMessage("查到資料");
-                response.setList(beans);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("沒查到資料");

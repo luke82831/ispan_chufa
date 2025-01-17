@@ -1,14 +1,13 @@
 package com.ispan.chufa.dto;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.ispan.chufa.domain.CommentBean;
 
 public class CommentResponse {
     private Boolean successs;
     private String message;
-    private CommentBean bean;
-    private List<CommentBean> list;
+    private CommentDTO bean;
+    private List<CommentDTO> list = new ArrayList<>();
     private Long count;
 
     @Override
@@ -33,20 +32,12 @@ public class CommentResponse {
         this.message = message;
     }
 
-    public CommentBean getBean() {
+    public CommentDTO getBean() {
         return bean;
     }
 
-    public void setBean(CommentBean bean) {
+    public void setBean(CommentDTO bean) {
         this.bean = bean;
-    }
-
-    public List<CommentBean> getList() {
-        return list;
-    }
-
-    public void setList(List<CommentBean> list) {
-        this.list = list;
     }
 
     public Long getCount() {
@@ -55,6 +46,14 @@ public class CommentResponse {
 
     public void setCount(Long count) {
         this.count = count;
+    }
+
+    public List<CommentDTO> getList() {
+        return list;
+    }
+
+    public void setList(List<CommentDTO> list) {
+        this.list = list;
     }
 
 }

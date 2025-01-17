@@ -2,8 +2,6 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -20,7 +18,7 @@ public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
     private Long commentId;
-    @JsonIgnoreProperties("commentBeans")
+
     @ManyToOne // 多對一關係
     @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 留言_貼文id
                                                                                                         // 不能NULL
@@ -29,7 +27,6 @@ public class CommentBean {
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL
     private String commentState;
 
-    @JsonIgnoreProperties("commentBeans")
     @ManyToOne // 多對一關係
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_member")) // 留言_留言者id
                                                                                                            // 不能NULL

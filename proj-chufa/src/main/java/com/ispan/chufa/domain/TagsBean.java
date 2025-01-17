@@ -36,18 +36,19 @@ public class TagsBean {
     )
     private Set<PostBean> postBeans = new HashSet<>();
 
+    @Override
+    public String toString() {
+        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
+                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + ", memberBeans="
+                + memberBeans + "]";
+    }
+
     @ManyToMany // 多對多 標籤對成員
     @JoinTable(name = "Tags_Members", // 聯結表名稱
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
             inverseJoinColumns = @JoinColumn(name = "memberBean_userid") // 關聯實體的外鍵列
     )
     private Set<MemberBean> memberBeans = new HashSet<>();
-
-    @Override
-    public String toString() {
-        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
-                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + "]";
-    }
 
     public Long getTagId() {
         return tagId;
@@ -95,6 +96,14 @@ public class TagsBean {
 
     public void setPostBeans(Set<PostBean> postBeans) {
         this.postBeans = postBeans;
+    }
+
+    public Set<MemberBean> getMemberBeans() {
+        return memberBeans;
+    }
+
+    public void setMemberBeans(Set<MemberBean> memberBeans) {
+        this.memberBeans = memberBeans;
     }
 
 }

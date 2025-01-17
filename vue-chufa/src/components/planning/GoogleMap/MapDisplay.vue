@@ -15,7 +15,7 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import PlaceSearch from "@/components/GoogleMap/PlaceSearch.vue";
+import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 
 export default {
   components: {

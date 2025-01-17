@@ -51,7 +51,7 @@ public class PostDaoImpl implements PostDao {
 		// 準備條件列表
 		List<Predicate> predicates = new ArrayList<>();
 
-		// Join 到點贊表 (interaction 表)
+		// Join 到點讚表 (interaction 表)
 		Join<PostBean, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
 
 		if (!param.isNull("postTitle")) {

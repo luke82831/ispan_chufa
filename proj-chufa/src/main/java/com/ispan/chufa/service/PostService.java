@@ -2,7 +2,6 @@ package com.ispan.chufa.service;
 
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -64,9 +63,7 @@ public class PostService {
 
 	public List<InteractionDTO> interact(JSONObject param) {
 		JSONObject action = new JSONObject(param);
-
 		return null;
-
 	}
 
 	public InteractionDTO performaction(String json) {

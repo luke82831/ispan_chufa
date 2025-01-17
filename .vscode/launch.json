@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ProjChufaApplication<proj-chufa>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.ispan.chufa.ProjChufaApplication",
+            "projectName": "proj-chufa",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

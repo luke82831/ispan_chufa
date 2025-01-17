@@ -22,7 +22,7 @@ public class PlaceService {
 
     // 創建一個 Place 並關聯多個 Post
     public PlaceBean createPlaceWithPosts(PlaceBean place, Set<Long> postIds) {
-    	Set<PostBean> posts = new HashSet<>(postRepository.findAllById(postIds));
+        Set<PostBean> posts = new HashSet<>(postRepository.findAllById(postIds));
         place.setPosts(posts);
         return placeRepository.save(place);
     }
@@ -32,4 +32,3 @@ public class PlaceService {
         return placeRepository.findById(id).orElse(null);
     }
 }
-

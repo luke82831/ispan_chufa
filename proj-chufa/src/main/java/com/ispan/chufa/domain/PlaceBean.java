@@ -22,42 +22,52 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "place")
 public class PlaceBean {
-    
-	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long placeId;
-    private String placeType;
-    private String placeName;
-    private String city;
-    private String region;
-    private String placeAddress;
-    private double longitude; // 精確的經度
-    private double latitude; // 精確的緯度
 
-    @ElementCollection
-    private List<String> photos; // 使用 List 儲存圖片 URL
-    private String placePhone; // 使用 String 類型來處理電話號碼
-    @Lob
-    private char[] businessHours;
-    
-    private String placeInfo;
-    private Double rating;
-    private String website;
-    private String bookingUrl;
-    private BigDecimal price; // 使用 BigDecimal 處理價格
-    private String accommodationType; // 旅宿類型
-    private boolean reservation; // 只有在餐廳類型時使用
- 
-    @ManyToMany
-    @JoinTable(
-        name = "PlaceWithPosts", // 中介表名稱
-        joinColumns = @JoinColumn(name = "fk_Place_Id",foreignKey=@ForeignKey(name="placeId")), // PlaceBean 關聯的外鍵
-        inverseJoinColumns = @JoinColumn(name = "fk_Post_Id",foreignKey=@ForeignKey(name="postid")) // PostBean 關聯的外鍵
-    )
-    @JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
-    private Set<PostBean> posts = new HashSet<>();
-    
-    //getter and setter
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private long placeId;
+	private String placeType;
+	private String placeName;
+	private String city;
+	private String region;
+	private String placeAddress;
+	private double longitude; // 精確的經度
+	private double latitude; // 精確的緯度
+
+	@ElementCollection
+	private List<String> photos; // 使用 List 儲存圖片 URL
+	private String placePhone; // 使用 String 類型來處理電話號碼
+	@Lob
+	private char[] businessHours;
+
+	private String placeInfo;
+	private Double rating;
+	private String website;
+	private String bookingUrl;
+	private BigDecimal price; // 使用 BigDecimal 處理價格
+	private String accommodationType; // 旅宿類型
+	private boolean reservation; // 只有在餐廳類型時使用
+
+	@ManyToMany(mappedBy = "places") // 多對多，對應 MemberBean 的 places
+	private List<MemberBean> members;
+
+	public List<MemberBean> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<MemberBean> members) {
+		this.members = members;
+	}
+
+	@ManyToMany
+	@JoinTable(name = "PlaceWithPosts", // 中介表名稱
+			joinColumns = @JoinColumn(name = "fk_Place_Id", foreignKey = @ForeignKey(name = "placeId")), // PlaceBean關聯的外鍵
+			inverseJoinColumns = @JoinColumn(name = "fk_Post_Id", foreignKey = @ForeignKey(name = "postid")) // PostBean關聯的外鍵
+	)
+	@JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
+	private Set<PostBean> posts = new HashSet<>();
+
+	// getter and setter
 	public long getPlaceId() {
 		return placeId;
 	}
@@ -210,6 +220,4 @@ public class PlaceBean {
 		this.posts = posts;
 	}
 
-	
 }
-

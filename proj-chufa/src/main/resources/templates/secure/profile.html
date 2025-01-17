@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員資料</title>
+    <!-- Google Fonts + Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f2f5f9;
+            /* 比原本更淡的底色 */
+            margin: 0;
+            padding: 20px;
+        }
+
+        .profile-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0px 5px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e2e2e2;
+            padding-bottom: 20px;
+        }
+
+        .profile-header img {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 25px;
+            border: 4px solid #0d6efd;
+            /* 改成 Bootstrap 主色 */
+        }
+
+        .profile-header h1 {
+            font-size: 34px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .profile-header p {
+            color: #0d6efd;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .profile-details dt {
+            font-weight: 600;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .profile-details dd {
+            margin-left: 0;
+            /* 調整預設縮排 */
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 16px;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .profile-details dt:not(:first-child) {
+            margin-top: 15px;
+        }
+
+        .btn {
+            font-size: 16px;
+            border-radius: 50px;
+            padding: 10px 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-save {
+            background-color: #198754;
+            /* Bootstrap success color */
+            color: #fff;
+            border: none;
+        }
+
+        .btn-save:hover {
+            background-color: #157347;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            margin-top: 20px;
+        }
+
+        .btn-logout:hover {
+            background-color: #bb2d3b;
+        }
+
+        #edit-form {
+            display: none;
+            margin-top: 30px;
+        }
+
+        /* 調整編輯表單內部的間距 */
+        .form-group label {
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            border-radius: 8px !important;
+        }
+
+        /* 檔案上傳欄位美化 */
+        .form-control-file {
+            border: 1px solid #ced4da;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        /* 分隔線上方留一點間距 */
+        .profile-details {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <!-- 頁首：大頭照 + 會員資訊 -->
+        <div class="profile-header">
+            <img th:src="@{'data:image/jpeg;base64,' + ${member.base64Pic}}" alt="Profile Picture"
+                onerror="this.onerror=null; this.src='https://via.placeholder.com/130';">
+            <div>
+                <h1 th:text="${member.name}">會員名稱</h1>
+                <p>歡迎回來，<span th:text="${member.nickname}">暱稱</span>！</p>
+            </div>
+        </div>
+
+        <!-- 資料顯示區 -->
+        <div id="profile-info">
+            <dl class="profile-details row">
+                <dt class="col-sm-3">用戶名：</dt>
+                <dd class="col-sm-9" th:text="${member.username}">用戶名</dd>
+
+                <dt class="col-sm-3">電子郵件：</dt>
+                <dd class="col-sm-9" th:text="${member.email}">電子郵件</dd>
+
+                <dt class="col-sm-3">手機號碼：</dt>
+                <dd class="col-sm-9" th:text="${member.phoneNumber}">手機號碼</dd>
+
+                <dt class="col-sm-3">性別：</dt>
+                <dd class="col-sm-9" th:text="${member.gender}">性別</dd>
+
+                <dt class="col-sm-3">生日：</dt>
+                <dd class="col-sm-9" th:text="${#dates.format(member.birth, 'yyyy-MM-dd')}">生日</dd>
+
+                <dt class="col-sm-3">個人簡介：</dt>
+                <dd class="col-sm-9" th:text="${member.bio}">個人簡介</dd>
+            </dl>
+            <div class="mt-4">
+                <button class="btn btn-primary" onclick="editProfile()">編輯資料</button>
+            </div>
+        </div>
+
+        <!-- 編輯表單 -->
+        <div id="edit-form">
+            <h4 class="mb-3">編輯個人資料</h4>
+            <!-- 一定要有 multipart/form-data 才能上傳檔案 -->
+            <form action="/secure/profile" method="POST" enctype="multipart/form-data">
+                <!-- 上傳檔案欄位 -->
+                <div class="form-group mb-3">
+                    <label for="profilePicture">上傳大頭貼：</label>
+                    <input type="file" id="profilePicture" name="profilePicture"
+                        class="form-control-file form-control" />
+                </div>
+
+                <div th:if="${isAdmin}" class="mb-3">
+                    <a th:href="@{/admin/members}" class="btn btn-warning">管理會員</a>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="name">姓名：</label>
+                    <input type="text" id="name" name="name" class="form-control" th:value="${member.name}"
+                        placeholder="請輸入您的真實姓名">
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="nickname">暱稱：</label>
+                    <input type="text" id="nickname" name="nickname" class="form-control" th:value="${member.nickname}"
+                        placeholder="請輸入您的暱稱，如：小明、小白">
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="phoneNumber">手機號碼：</label>
+                    <input type="text" id="phoneNumber" name="phoneNumber" class="form-control"
+                        th:value="${member.phoneNumber}" placeholder="請輸入 10 位數字手機號碼，例如：0912345678">
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="gender">性別：</label>
+                    <select id="gender" name="gender" class="form-control">
+                        <option value="MALE" th:selected="${member.gender} == 'MALE'">男 (MALE)</option>
+                        <option value="FEMALE" th:selected="${member.gender} == 'FEMALE'">女 (FEMALE)</option>
+                    </select>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="email">電子郵件：</label>
+                    <input type="email" id="email" name="email" class="form-control" th:value="${member.email}"
+                        placeholder="請輸入有效的電子郵件，例如：example@gmail.com">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="bio">個人簡介：</label>
+                    <textarea id="bio" name="bio" class="form-control" rows="5" placeholder="請簡單介紹自己，例如：喜歡運動、旅遊或其他興趣愛好。"
+                        th:text="${member.bio}"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-save">
+                    <i class="fas fa-save"></i> 儲存變更
+                </button>
+                <button type="button" class="btn btn-secondary ml-3" onclick="cancelEdit()">
+                    取消
+                </button>
+            </form>
+        </div>
+
+        <!-- 登出按鈕 -->
+        <div class="text-right">
+            <a href="/secure/logout" class="btn btn-logout">登出</a>
+        </div>
+    </div>
+
+    <!-- 引入 FontAwesome (可加一些小icon) -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS (可選) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpujzy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 切換到編輯表單
+        function editProfile() {
+            document.getElementById("profile-info").style.display = "none";
+            document.getElementById("edit-form").style.display = "block";
+        }
+        // 取消編輯
+        function cancelEdit() {
+            document.getElementById("edit-form").style.display = "none";
+            document.getElementById("profile-info").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>

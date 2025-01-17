@@ -28,8 +28,8 @@ public class PlaceController {
     public ResponseEntity<PlaceBean> createPlaceWithPosts(@RequestBody PlaceBean place) {
         // 假設前端會提供一個 place 和一個包含 Post ID 的 list
         Set<Long> postIds = place.getPosts().stream()
-                                  .map(PostBean::getPostid)
-                                  .collect(Collectors.toSet());
+                .map(PostBean::getPostid)
+                .collect(Collectors.toSet());
         PlaceBean createdPlace = placeService.createPlaceWithPosts(place, postIds);
         return ResponseEntity.ok(createdPlace);
     }
@@ -37,17 +37,16 @@ public class PlaceController {
     // 查詢指定 ID 的 Place 和其關聯的 Posts
     @GetMapping("/{id}")
     public ResponseEntity<PlaceBean> getPlaceById(@PathVariable Long id) {
-    	 PlaceBean place = placeService.getPlaceById(id);
-         if (place == null) {
-             return ResponseEntity.notFound().build();
-         }
-         return ResponseEntity.ok(place);
+        PlaceBean place = placeService.getPlaceById(id);
+        if (place == null) {
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(place);
+    }
+
     @PostMapping("/test")
     public ResponseEntity<String> testPost(@RequestBody String json) {
         return ResponseEntity.ok("Received: " + json);
     }
-    
-    
-    }
 
+}

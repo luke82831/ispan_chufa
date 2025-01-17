@@ -35,6 +35,7 @@ public class PostBean {
 
 	@ManyToOne(cascade = { CascadeType.PERSIST })
 	@JoinColumn(name = "userid", nullable = false)
+//	@JoinColumn(name = "userid", nullable = true) //測試用	
 	@JsonBackReference
 	MemberBean member;
 

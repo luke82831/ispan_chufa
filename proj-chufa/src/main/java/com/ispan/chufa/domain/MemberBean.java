@@ -2,10 +2,10 @@ package com.ispan.chufa.domain;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,9 +14,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name = "members")
@@ -31,7 +35,7 @@ public class MemberBean {
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
-	//@JsonManagedReference
+	// @JsonManagedReference
 	private List<InteractionBean> interactions;
 
 	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -43,7 +47,7 @@ public class MemberBean {
 	private List<FollowBean> followers;
 
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
-	@Column(name = "role", nullable = false) // 身分欄位，必填
+	@Column(name = "role") // 身分欄位
 	private Role role; // 用來表示身分
 
 	@Column(name = "username", nullable = false, unique = true) // 自定義帳號
@@ -52,7 +56,8 @@ public class MemberBean {
 	@Column(name = "password")
 	private byte[] password;
 
-	@Column(name = "phone_number", nullable = false, unique = true) // 手機號碼作為唯一值
+	@Column(name = "phone_number", unique = true) // 手機號碼作為唯一值
+	@JsonProperty("phone_number")
 	private String phoneNumber;
 
 	@Column(name = "email", nullable = false, unique = true) // 信箱
@@ -60,16 +65,19 @@ public class MemberBean {
 
 	@Column(name = "name", nullable = false, length = 20) // 姓名欄位，限制長度
 	private String name;
-	
-	@Column(name = "gender", nullable = false)
-    private String gender;
-	
+
+	@Column(name = "gender", nullable = true)
+	private String gender;
+
 	@Column(name = "nickname", length = 50) // 暱稱欄位，限制長度
 	private String nickname;
-	
+
 	@Lob // 標示為大物件類型，對應資料庫中的 BLOB
-    @Column(name = "profile_picture")
-    private byte[] profilePicture;
+	@Column(name = "profile_picture")
+	private byte[] profilePicture;
+
+	@Transient // 不會入庫
+	private String base64Pic;
 
 	@Column(name = "bio", columnDefinition = "TEXT") // 自介欄位，使用 TEXT 類型
 	private String bio;
@@ -77,7 +85,23 @@ public class MemberBean {
 	@Column(name = "birth")
 	private java.util.Date birth;
 
+	@ManyToMany
+	@JoinTable(name = "member_place", // 中介表的表名 (自己取)
+			joinColumns = @JoinColumn(name = "userid"), // 指向 MemberBean 的外鍵
+			inverseJoinColumns = @JoinColumn(name = "placeId") // 指向 PlaceBean 的外鍵
+	)
+	private List<PlaceBean> places;
+
 	// Getters and Setters
+
+	public List<PlaceBean> getPlaces() {
+		return places;
+	}
+
+	public void setPlaces(List<PlaceBean> places) {
+		this.places = places;
+	}
+
 	public Long getUserid() {
 		return userid;
 	}
@@ -143,14 +167,14 @@ public class MemberBean {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public String getGender() {
-        return gender;
-    }
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
 
 	public String getNickname() {
 		return nickname;
@@ -159,14 +183,22 @@ public class MemberBean {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	
-	public byte[] getProfilePicture() {
-        return profilePicture;
-    }
 
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
+	public byte[] getProfilePicture() {
+		return profilePicture;
+	}
+
+	public void setProfilePicture(byte[] profilePicture) {
+		this.profilePicture = profilePicture;
+	}
+
+	public String getBase64Pic() {
+		return base64Pic;
+	}
+
+	public void setBase64Pic(String base64Pic) {
+		this.base64Pic = base64Pic;
+	}
 
 	public String getBio() {
 		return bio;
@@ -183,8 +215,6 @@ public class MemberBean {
 	public void setBirth(java.util.Date birth) {
 		this.birth = birth;
 	}
-
-
 
 	public List<InteractionBean> getInteractions() {
 		return interactions;

@@ -48,6 +48,17 @@ public class PlaceBean {
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 
+	@ManyToMany(mappedBy = "places") // 多對多，對應 MemberBean 的 places
+	private List<MemberBean> members;
+
+	public List<MemberBean> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<MemberBean> members) {
+		this.members = members;
+	}
+
 	@ManyToMany
 	@JoinTable(name = "PlaceWithPosts", // 中介表名稱
 			joinColumns = @JoinColumn(name = "fk_Place_Id", foreignKey = @ForeignKey(name = "placeId")), // PlaceBean關聯的外鍵

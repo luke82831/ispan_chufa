@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>修改會員權限</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h2>修改會員權限</h2>
+        <form th:action="@{'/admin/members/' + ${member.userid} + '/updateRole'}" method="post">
+            <div class="form-group">
+                <label>姓名：</label>
+                <span th:text="${member.name}">會員姓名</span>
+            </div>
+            <div class="form-group">
+                <label>Email：</label>
+                <span th:text="${member.email}">會員Email</span>
+            </div>
+            <div class="form-group">
+                <label for="role">角色：</label>
+                <select id="role" name="role" class="form-control">
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}" th:selected="${r} == ${member.role}">
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">儲存變更</button>
+            <a th:href="@{/admin/members}" class="btn btn-secondary ml-2">取消</a>
+        </form>
+    </div>
+</body>
+
+</html>

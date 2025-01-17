@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
-import com.ispan.chufa.dto.PostResponse;
+import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.service.PostService;
 
@@ -32,9 +32,9 @@ public class PostController {
     // 測試 RequestBody =>
     // {"postTitle":"標題","postContent":"內容","postLink":"超連結","userid":"1"}
     @PostMapping("/create")
-    public PostResponse create(@RequestBody String json) {
+    public Response create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        PostResponse response = new PostResponse();
+        Response response = new Response();
         PostBean bean = new PostBean();
         MemberBean memberBean;
 
@@ -124,7 +124,7 @@ public class PostController {
         {
             response.setSuccesss(true);
             response.setMessage("創建貼文成功");
-            response.setBean(bean);
+            response.getList().add(bean);
         }
 
         return response;
@@ -134,9 +134,9 @@ public class PostController {
     // 測試 http://localhost:8080/post/delete
     // 測試 RequestBody => {"postid":"1"}
     @DeleteMapping("/delete")
-    public PostResponse delete(@RequestBody String json) {
+    public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        PostResponse response = new PostResponse();
+        Response response = new Response();
 
         Long postid;
         // 驗證request資料(防呆)
@@ -174,9 +174,9 @@ public class PostController {
     // 測試 http://localhost:8080/post/findById
     // 測試 RequestBody => {"postid":"1"}
     @GetMapping("/findById")
-    public PostResponse findById(@RequestBody String json) {
+    public Response findById(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        PostResponse response = new PostResponse();
+        Response response = new Response();
         PostBean bean;
 
         Long postid;
@@ -205,7 +205,7 @@ public class PostController {
             if (bean != null) {
                 response.setSuccesss(true);
                 response.setMessage("查尋成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆貼文");
@@ -219,9 +219,9 @@ public class PostController {
     // 測試 http://localhost:8080/post/update
     // 測試 RequestBody => {"postid":"1","postTitle":"標題","postContent":"內容"}
     @PutMapping("/update")
-    public PostResponse update(@RequestBody String json) {
+    public Response update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        PostResponse response = new PostResponse();
+        Response response = new Response();
         PostBean bean;
 
         Long postid;
@@ -279,7 +279,7 @@ public class PostController {
             if (bean != null) {
                 response.setSuccesss(true);
                 response.setMessage("更新成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");

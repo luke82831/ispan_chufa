@@ -1,20 +1,17 @@
 package com.ispan.chufa.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import com.ispan.chufa.domain.PostBean;
-
-public class PostResponse {
+public class Response {
     private Boolean successs;
     private String message;
-    private PostBean bean;
-    private List<PostBean> list;
+    private List<Object> list = new ArrayList<>();
     private Long count;
 
     @Override
     public String toString() {
-        return "PostResponse [successs=" + successs + ", message=" + message + ", bean=" + bean + ", list=" + list
-                + ", count=" + count + "]";
+        return "Response [successs=" + successs + ", message=" + message + ", list=" + list + ", count=" + count + "]";
     }
 
     public Boolean getSuccesss() {
@@ -33,19 +30,11 @@ public class PostResponse {
         this.message = message;
     }
 
-    public PostBean getBean() {
-        return bean;
-    }
-
-    public void setBean(PostBean bean) {
-        this.bean = bean;
-    }
-
-    public List<PostBean> getList() {
+    public List<Object> getList() {
         return list;
     }
 
-    public void setList(List<PostBean> list) {
+    public void setList(List<Object> list) {
         this.list = list;
     }
 

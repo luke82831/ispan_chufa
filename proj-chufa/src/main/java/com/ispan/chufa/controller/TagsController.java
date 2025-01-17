@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.TagsBean;
-import com.ispan.chufa.dto.TagsResponse;
+import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.service.TagsService;
 
 @RestController
@@ -24,11 +24,11 @@ public class TagsController {
 
     // 創建標籤
     // http://localhost:8080/Tags/create
-    // RequestBody => {"tagName":"名稱"}
+    // RequestBody => {"tagName":"標籤名稱"}
     @PostMapping("/create")
-    public TagsResponse create(@RequestBody String json) {
+    public Response create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        TagsResponse response = new TagsResponse();
+        Response response = new Response();
         TagsBean tagsBean = new TagsBean();
 
         String tagName;
@@ -57,7 +57,7 @@ public class TagsController {
                 TagsBean bean = tagsService.createTags(tagsBean);
                 response.setSuccesss(true);
                 response.setMessage("創建標籤成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } catch (DataIntegrityViolationException e) {
                 response.setSuccesss(false);
                 response.setMessage("已存在此標籤");
@@ -70,9 +70,9 @@ public class TagsController {
     // http://localhost:8080/Tags/delete
     // RequestBody => {"tagId":"1"}
     @DeleteMapping("/delete")
-    public TagsResponse delete(@RequestBody String json) {
+    public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        TagsResponse response = new TagsResponse();
+        Response response = new Response();
 
         Long tagId;
         // 驗證request資料(防呆)
@@ -110,9 +110,9 @@ public class TagsController {
     // 測試 http://localhost:8080/Tags/findById
     // RequestBody => {"tagId":"1"}
     @GetMapping("/findById")
-    public TagsResponse findById(@RequestBody String json) {
+    public Response findById(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        TagsResponse response = new TagsResponse();
+        Response response = new Response();
         TagsBean bean = new TagsBean();
 
         Long tagId;
@@ -139,7 +139,7 @@ public class TagsController {
             if (bean != null) {
                 response.setSuccesss(true);
                 response.setMessage("查詢標籤成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查詢不到這筆標籤");
@@ -153,9 +153,9 @@ public class TagsController {
     // 測試 http://localhost:8080/Tags/update
     // RequestBody => {"tagId":"1","tagName":"名稱"}
     @PutMapping("/update")
-    public TagsResponse update(@RequestBody String json) {
+    public Response update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        TagsResponse response = new TagsResponse();
+        Response response = new Response();
         TagsBean bean = new TagsBean();
 
         Long tagId;
@@ -206,7 +206,7 @@ public class TagsController {
             if (bean != null) {
                 response.setSuccesss(true);
                 response.setMessage("更新標籤成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");
@@ -220,9 +220,9 @@ public class TagsController {
     // 測試 http://localhost:8080/Tags/updateState
     // RequestBody => {"tagId":"1","tagState":"私人"}
     @PutMapping("/updateState")
-    public TagsResponse updateState(@RequestBody String json) {
+    public Response updateState(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        TagsResponse response = new TagsResponse();
+        Response response = new Response();
         TagsBean bean = new TagsBean();
 
         Long tagId;
@@ -265,7 +265,7 @@ public class TagsController {
             if (bean != null) {
                 response.setSuccesss(true);
                 response.setMessage("更新標籤成功");
-                response.setBean(bean);
+                response.getList().add(bean);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");

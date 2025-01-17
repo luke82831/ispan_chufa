@@ -16,14 +16,9 @@ public class TagsService {
 
     // 創建標籤
     public TagsBean createTags(TagsBean bean) {
-        if (bean != null && bean.getTagName() != "") {
-            // tagId 標籤系統_標籤id 自動生成
-            // tagState 標籤系統_標籤狀態 預設1
+        if (bean != null) {
             bean.setTagState("公開");
-            // tagName 標籤系統_標籤名稱 RequestBody獲取
-            // tagCreatedAt 標籤系統_創建時間 現在時間
             bean.setTagCreatedAt(LocalDateTime.now());
-            // tagUpdatedAt 標籤系統_更新時間 null
         }
         return tagsRepository.save(bean);
     }

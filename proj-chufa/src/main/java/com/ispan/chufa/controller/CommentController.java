@@ -19,7 +19,7 @@ import com.ispan.chufa.domain.CommentBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.CommentDTO;
-import com.ispan.chufa.dto.CommentResponse;
+import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.PostRepository;
 import com.ispan.chufa.service.CommentService;
@@ -42,9 +42,9 @@ public class CommentController {
     // 測試 RequestBody =>
     // {"postId":"1","userId":"1","content":"留言內容","parentId":""}
     @PostMapping("/create")
-    public CommentResponse create(@RequestBody String json) {
+    public Response create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
         CommentBean commentBean = new CommentBean();
         PostBean postBean = new PostBean();
         MemberBean memberBean = new MemberBean();
@@ -157,7 +157,7 @@ public class CommentController {
             CommentDTO dto = modelMapper.map(bean, CommentDTO.class);
             response.setSuccesss(true);
             response.setMessage("創建成功");
-            response.setBean(dto);
+            response.getList().add(dto);
         }
 
         return response;
@@ -167,9 +167,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/delete
     // 測試 RequestBody => {"commentId":"1"}
     @DeleteMapping("/delete")
-    public CommentResponse delete(@RequestBody String json) {
+    public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long commentId;
         // 驗證request資料(防呆)
@@ -207,9 +207,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/update
     // 測試 RequestBody => {"commentId":"1","content":"留言內容"}
     @PutMapping("/update")
-    public CommentResponse update(@RequestBody String json) {
+    public Response update(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long commentId;
         String content;
@@ -251,7 +251,7 @@ public class CommentController {
                 CommentDTO dto = modelMapper.map(bean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("更新成功");
-                response.setBean(dto);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");
@@ -264,9 +264,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/updateState
     // 測試 RequestBody => {"commentId":"1","commentState":"私人"}
     @PutMapping("/updateState")
-    public CommentResponse updateState(@RequestBody String json) {
+    public Response updateState(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long commentId;
         String commentState;
@@ -307,7 +307,7 @@ public class CommentController {
                 CommentDTO dto = modelMapper.map(commentBean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("留言狀態更新成功");
-                response.setBean(dto);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
@@ -321,9 +321,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/findById
     // 測試 RequestBody => {"commentId":"1"}
     @GetMapping("/findById")
-    public CommentResponse findById(@RequestBody String json) {
+    public Response findById(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long commentId;
         // 驗證request資料(防呆)
@@ -351,7 +351,7 @@ public class CommentController {
                 CommentDTO dto = modelMapper.map(commentBean, CommentDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("查尋成功");
-                response.setBean(dto);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
@@ -365,9 +365,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/findByUserid
     // 測試 RequestBody => {"userId":"1"}
     @GetMapping("/findByUserid")
-    public CommentResponse findByUserid(@RequestBody String json) {
+    public Response findByUserid(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long userId;
         // 驗證request資料(防呆)
@@ -424,9 +424,9 @@ public class CommentController {
     // 測試 http://localhost:8080/comment/findByParentId
     // 測試 RequestBody => {"parentId":"1"}
     @GetMapping("/findByParentId")
-    public CommentResponse findByParentId(@RequestBody String json) {
+    public Response findByParentId(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
-        CommentResponse response = new CommentResponse();
+        Response response = new Response();
 
         Long parentId;
         // 驗證request資料(防呆)

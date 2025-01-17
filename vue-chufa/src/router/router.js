@@ -1,7 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Map from "@/views/Map.vue";
+import Map from "@/components/planning/GoogleMap/MapDisplay.vue";
+import CreatePlanning from "@/views/planning/CreatePlanning.vue";
+import PlanningTabs from "@/components/planning/PlanningTabs.vue";
+import Home from "@/views/Home.vue";
 
 const routes = [
+    { path: "/", component: Home },
+    { path: "/map", component: Map },
+    { path: "/planningtabs", component: PlanningTabs },
+    { path: "/createplanning", component: CreatePlanning },
     {
         path: "/secure/Login",
         name: "Login",
@@ -18,7 +25,8 @@ const routes = [
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
 
-    { path: "/map", component: Map },
+
+
 ]
 
 

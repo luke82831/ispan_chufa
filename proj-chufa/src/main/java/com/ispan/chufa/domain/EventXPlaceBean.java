@@ -1,4 +1,4 @@
-package com.ispan.chufa.domain;
+package com.ispan.chufa.domain; 
 
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -15,7 +15,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "eventXplace")
 public class EventXPlaceBean {
@@ -28,14 +27,12 @@ public class EventXPlaceBean {
 	@ManyToOne
 	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
-	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
+	private EventBean event; // FK_Event_\u884c\u7a0b\u5167\u5bb9id, \u591a\u5c0d\u591a(\u884c\u7a0b\u5167\u5bb9VS\u5730\u9ede)
 
 	@ManyToOne
 	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
-	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
-
-
+	private PlaceBean place; // FK_\u5730\u9ede_\u5730\u9edeid, \u591a\u5c0d\u591a(\u884c\u7a0b\u5167\u5bb9VS\u5730\u9ede)
 
 	@Column(name = "place_order")
 	private Integer placeOrder;
@@ -44,7 +41,7 @@ public class EventXPlaceBean {
 	private LocalTime arrivalTime;
 
 	@Column(name = "stay_duration")
-	private Integer stayDuration;
+	private LocalTime stayDuration;
 
 	@Column(name = "notes")
 	@Lob
@@ -56,7 +53,7 @@ public class EventXPlaceBean {
 	}
 
 	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
-			Integer stayDuration, char[] notes) {
+			LocalTime stayDuration, char[] notes) {
 		this.event = event;
 		this.place = place;
 		this.placeOrder = placeOrder;
@@ -105,11 +102,11 @@ public class EventXPlaceBean {
 		this.arrivalTime = arrivalTime;
 	}
 
-	public Integer getStayDuration() {
+	public LocalTime getStayDuration() {
 		return stayDuration;
 	}
 
-	public void setStayDuration(Integer stayDuration) {
+	public void setStayDuration(LocalTime stayDuration) {
 		this.stayDuration = stayDuration;
 	}
 

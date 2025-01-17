@@ -21,7 +21,7 @@ import jakarta.persistence.Table;
 public class EventXPlaceBean {
 
 	@Id
-	@Column(name = "Eventmapping_id", nullable = false)
+	@Column(name = "Eventmapping_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long eventmappingId;
 

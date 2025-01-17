@@ -18,7 +18,7 @@ public class ScheduleBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
-    @Column(name = "trip_id", nullable = false)
+    @Column(name = "trip_id")
     private Long tripId;
 
     @Column(name = "cover_photo")

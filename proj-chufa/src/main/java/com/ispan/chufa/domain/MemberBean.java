@@ -1,5 +1,12 @@
 package com.ispan.chufa.domain;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,7 +24,24 @@ public class MemberBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
 	private Long userid;
-	
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<PostBean> posts;
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	//@JsonManagedReference
+	private List<InteractionBean> interactions;
+
+	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<FollowBean> following;
+
+	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<FollowBean> followers;
+
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
 	@Column(name = "role", nullable = false) // 身分欄位，必填
 	private Role role; // 用來表示身分
@@ -157,5 +182,39 @@ public class MemberBean {
 
 	public void setBirth(java.util.Date birth) {
 		this.birth = birth;
+	}
+
+
+
+	public List<InteractionBean> getInteractions() {
+		return interactions;
+	}
+
+	public void setInteractions(List<InteractionBean> interactions) {
+		this.interactions = interactions;
+	}
+
+	public List<FollowBean> getFollowing() {
+		return following;
+	}
+
+	public void setFollowing(List<FollowBean> following) {
+		this.following = following;
+	}
+
+	public List<FollowBean> getFollowers() {
+		return followers;
+	}
+
+	public void setFollowers(List<FollowBean> followers) {
+		this.followers = followers;
+	}
+
+	public List<PostBean> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(List<PostBean> posts) {
+		this.posts = posts;
 	}
 }

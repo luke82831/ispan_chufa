@@ -2,14 +2,23 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -24,9 +33,25 @@ public class PostBean {
 	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
 
+	@ManyToOne(cascade = { CascadeType.PERSIST })
+	@JoinColumn(name = "userid", nullable = false)
+	@JsonBackReference
+	MemberBean member;
+
+	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	// @JsonManagedReference
+	private List<InteractionBean> interactions; // 貼文的互動行為
+	private String tags; // 貼文_標籤
+
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> places = new HashSet<>();
 
+	@ManyToMany
+	// @JsonManagedReference
+	@JsonIgnore
+	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
+	private Set<TagsBean> tag = new HashSet<>();
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 
 	public Long getPostid() {
@@ -83,6 +108,38 @@ public class PostBean {
 
 	public void setPlaces(Set<PlaceBean> places) {
 		this.places = places;
+	}
+
+	public MemberBean getMember() {
+		return member;
+	}
+
+	public void setMember(MemberBean member) {
+		this.member = member;
+	}
+
+	public List<InteractionBean> getInteractions() {
+		return interactions;
+	}
+
+	public void setInteractions(List<InteractionBean> interactions) {
+		this.interactions = interactions;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	public Set<TagsBean> getTag() {
+		return tag;
+	}
+
+	public void setTag(Set<TagsBean> tag) {
+		this.tag = tag;
 	}
 
 	@Override

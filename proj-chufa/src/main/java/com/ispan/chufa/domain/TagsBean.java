@@ -1,16 +1,21 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "Tags")
 public class TagsBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 標籤系統_標籤id 設定為自增
@@ -23,6 +28,12 @@ public class TagsBean {
     private LocalDateTime tagCreatedAt;
     @Column(name = "tag_updated_at") // 標籤系統_更新時間
     private LocalDateTime tagUpdatedAt;
+    
+    @ManyToMany(mappedBy = "tag")
+    @JsonBackReference
+    private Set<PostBean> posts = new HashSet<>();
+    
+ 
 
     @Override
     public String toString() {
@@ -69,5 +80,14 @@ public class TagsBean {
     public void setTagUpdatedAt(LocalDateTime tagUpdatedAt) {
         this.tagUpdatedAt = tagUpdatedAt;
     }
+
+	public Set<PostBean> getPosts() {
+		return posts;
+	}
+
+	public void setPosts(Set<PostBean> posts) {
+		this.posts = posts;
+	}
+    
 
 }

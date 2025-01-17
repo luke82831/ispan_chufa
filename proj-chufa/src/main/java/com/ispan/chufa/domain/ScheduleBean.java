@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,7 +18,7 @@ public class ScheduleBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
-    @Column(name = "trip_id", nullable = false)
+    @Column(name = "trip_id")
     private Long tripId;
 
     @Column(name = "cover_photo")
@@ -31,6 +33,10 @@ public class ScheduleBean {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
 
+    @ManyToOne
+    @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
+    private MemberBean user;
+
     // Constructors
     public ScheduleBean() {
     }
@@ -40,6 +46,7 @@ public class ScheduleBean {
         this.tripName = tripName;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.user = userid;
     }
 
     // Getters and Setters
@@ -82,10 +89,18 @@ public class ScheduleBean {
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
+    
+    public MemberBean getUser() {
+        return user;
+    }
+
+    public void setUser(MemberBean user) {
+        this.user = user;
+    }
 
     @Override
     public String toString() {
-        return "TripBean [tripId=" + tripId + ", coverPhoto=" + coverPhoto + ", tripName=" + tripName +
+        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + coverPhoto + ", tripName=" + tripName +
                 ", startDate=" + startDate + ", endDate=" + endDate + "]";
     }
 }

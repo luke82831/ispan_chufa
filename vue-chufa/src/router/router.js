@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Map from "@/views/Map.vue";
 
 const routes = [
     {
@@ -16,7 +17,10 @@ const routes = [
         name: "Register",
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
-];
+
+    { path: "/map", component: Map },
+]
+
 
 export default createRouter({
     history: createWebHistory(),

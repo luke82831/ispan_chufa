@@ -71,5 +71,16 @@ public class FollowController {
 	public List<MemberInfo> getFollowerList(@PathVariable Long followedId) {
 		return followService.getFollowerList(followedId);
 	}
+	//count
+	@GetMapping("/followercount/{followedId}")
+	public Long followercount(@PathVariable Long followedId) {
+		return followService.followercount(followedId);	
+	}
+	//count
+	@GetMapping("/followingcount/{followingId}")
+	public Long followingcount(@PathVariable Long followingId) {
+		return followService.followingcount(followingId);	
+	}
+	
 
 }

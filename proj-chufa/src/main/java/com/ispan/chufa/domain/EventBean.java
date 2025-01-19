@@ -9,8 +9,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -38,9 +38,9 @@ public class EventBean {
 	@ManyToOne
 	@JoinColumn(name = "FK_calendar", referencedColumnName = "date", nullable = false)
 	private CalendarBean calendar; // 多對一關聯 (行程內容 -> 行事曆)
-
-	@ManyToMany(mappedBy = "event")
-	private List<EventXPlaceBean> eventXPlaceBeans;
+	
+    @OneToMany(mappedBy = "event")
+    private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 
 	// Constructors, getters, and setters
 

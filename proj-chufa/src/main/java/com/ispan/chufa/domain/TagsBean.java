@@ -15,7 +15,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Tags")
+@Table(name = "tags")
 public class TagsBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 標籤系統_標籤id 設定為自增
@@ -30,21 +30,14 @@ public class TagsBean {
     private LocalDateTime tagUpdatedAt;
 
     @ManyToMany // 多對多 標籤對文章
-    @JoinTable(name = "Tags_Post", // 聯結表名稱
+    @JoinTable(name = "tags_post", // 聯結表名稱
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
             inverseJoinColumns = @JoinColumn(name = "postBean_postid") // 關聯實體的外鍵列
     )
     private Set<PostBean> postBeans = new HashSet<>();
 
-    @Override
-    public String toString() {
-        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
-                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + ", memberBeans="
-                + memberBeans + "]";
-    }
-
     @ManyToMany // 多對多 標籤對成員
-    @JoinTable(name = "Tags_Members", // 聯結表名稱
+    @JoinTable(name = "tags_members", // 聯結表名稱
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
             inverseJoinColumns = @JoinColumn(name = "memberBean_userid") // 關聯實體的外鍵列
     )
@@ -104,6 +97,13 @@ public class TagsBean {
 
     public void setMemberBeans(Set<MemberBean> memberBeans) {
         this.memberBeans = memberBeans;
+    }
+    
+    @Override
+    public String toString() {
+        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
+                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + ", memberBeans="
+                + memberBeans + "]";
     }
 
 }

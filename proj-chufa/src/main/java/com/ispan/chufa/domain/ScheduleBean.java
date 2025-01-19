@@ -89,7 +89,7 @@ public class ScheduleBean {
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
-    
+
     public MemberBean getUser() {
         return user;
     }

@@ -6,14 +6,15 @@ public class MemberInfo {
 	private byte[] profilePicture;
 	private String nickname;
 
-	public MemberInfo(Long userid, String name, byte[] profilePicture,String nickname) {
+	public MemberInfo(Long userid, String name, byte[] profilePicture, String nickname) {
 		this.userid = userid;
 		this.name = name;
 		this.profilePicture = profilePicture;
-		this.nickname=nickname;
+		this.nickname = nickname;
 	}
+
 	public MemberInfo() {
-		
+
 	}
 
 	public String getName() {
@@ -47,8 +48,5 @@ public class MemberInfo {
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	
-
-
 
 }

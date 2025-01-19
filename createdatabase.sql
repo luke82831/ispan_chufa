@@ -1,12 +1,12 @@
 USE [master]
 GO
-/****** Object:  Database [chufa]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Database [chufa]    Script Date: 2025/1/19 下午 06:34:29 ******/
 CREATE DATABASE [chufa]
  CONTAINMENT = NONE
  ON  PRIMARY 
 ( NAME = N'chufa', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\chufa.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
  LOG ON 
-( NAME = N'chufa_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\chufa_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+( NAME = N'chufa_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.MSSQLSERVER\MSSQL\DATA\chufa_log.ldf' , SIZE = 73728KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
  WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
 GO
 ALTER DATABASE [chufa] SET COMPATIBILITY_LEVEL = 160
@@ -84,10 +84,10 @@ ALTER DATABASE [chufa] SET QUERY_STORE (OPERATION_MODE = READ_WRITE, CLEANUP_POL
 GO
 USE [chufa]
 GO
-/****** Object:  User [luke]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  User [luke]    Script Date: 2025/1/19 下午 06:34:30 ******/
 CREATE USER [luke] FOR LOGIN [luke] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  Table [dbo].[calendar]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[calendar]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,65 +103,92 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[comments]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[comments]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[comments](
-	[commentId] [int] IDENTITY(1,1) NOT NULL,
+	[commentId] [bigint] IDENTITY(1,1) NOT NULL,
 	[comment_created_at] [datetime2](6) NOT NULL,
-	[commentstate] [int] NOT NULL,
+	[commentstate] [varchar](255) NOT NULL,
 	[comment_updated_at] [datetime2](6) NULL,
 	[content] [varchar](max) NOT NULL,
-	[parentid] [int] NULL,
-	[postid] [int] NOT NULL,
-	[user_id] [int] NOT NULL,
+	[parentid] [bigint] NULL,
+	[user_id] [bigint] NOT NULL,
+	[postid] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[commentId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[coupon]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[coupon]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[coupon](
-	[couponid] [int] NOT NULL,
-	[content] [varchar](255) NULL,
-	[endtime] [int] NULL,
-	[picture] [varchar](255) NULL,
-	[remaining] [varchar](255) NULL,
-	[secondtitle] [varchar](255) NULL,
-	[starttime] [int] NULL,
-	[state] [varchar](255) NULL,
-	[title] [varchar](255) NULL,
-	[web] [varchar](255) NULL,
+	[couponId] [bigint] IDENTITY(1,1) NOT NULL,
+	[Content] [varchar](255) NULL,
+	[coupon_code] [varchar](255) NOT NULL,
+	[EndTime] [datetime2](6) NULL,
+	[Picture] [varchar](255) NULL,
+	[remaining] [int] NULL,
+	[StartTime] [datetime2](6) NULL,
+	[State] [bit] NULL,
+	[Subtitle] [varchar](255) NULL,
+	[Title] [varchar](255) NULL,
+	[Web] [varchar](255) NULL,
+	[placeId] [bigint] NULL,
 PRIMARY KEY CLUSTERED 
 (
-	[couponid] ASC
+	[couponId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UKsre2vcap4vs6qucaksomk3c7s] UNIQUE NONCLUSTERED 
+(
+	[coupon_code] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[event]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[event]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[event](
-	[event_content_id] [bigint] IDENTITY(1,1) NOT NULL,
+	[event_id] [bigint] IDENTITY(1,1) NOT NULL,
 	[end_date] [date] NOT NULL,
 	[notes] [varchar](255) NULL,
 	[start_date] [date] NOT NULL,
+	[FK_calendar] [date] NOT NULL,
+	[FK_schedule] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
-	[event_content_id] ASC
+	[event_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[followlist]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[eventXplace]    Script Date: 2025/1/19 下午 06:34:30 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[eventXplace](
+	[Eventmapping_id] [bigint] IDENTITY(1,1) NOT NULL,
+	[arrival_time] [time](7) NULL,
+	[notes] [varchar](max) NULL,
+	[place_order] [int] NULL,
+	[stay_duration] [int] NULL,
+	[fk_event_id] [bigint] NOT NULL,
+	[fk_place_id] [bigint] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Eventmapping_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[followlist]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -178,7 +205,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[interaction]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[interaction]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -186,7 +213,7 @@ GO
 CREATE TABLE [dbo].[interaction](
 	[actionId] [bigint] IDENTITY(1,1) NOT NULL,
 	[interaction_time] [datetime2](6) NULL,
-	[interaction_type] [varchar](255) NULL,
+	[interction_type] [varchar](255) NULL,
 	[member_id] [bigint] NOT NULL,
 	[postid] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -195,7 +222,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[members]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[members]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -205,21 +232,17 @@ CREATE TABLE [dbo].[members](
 	[bio] [text] NULL,
 	[birth] [datetime2](6) NULL,
 	[email] [varchar](255) NOT NULL,
-	[gender] [varchar](255) NOT NULL,
+	[gender] [varchar](255) NULL,
 	[name] [varchar](20) NOT NULL,
 	[nickname] [varchar](50) NULL,
 	[password] [varbinary](255) NULL,
-	[phone_number] [varchar](255) NOT NULL,
+	[phone_number] [varchar](255) NULL,
 	[profile_picture] [varbinary](max) NULL,
-	[role] [varchar](255) NOT NULL,
+	[role] [varchar](255) NULL,
 	[username] [varchar](255) NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[userid] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
- CONSTRAINT [UK99xbxdwmyun0ehfiwpbntlqs5] UNIQUE NONCLUSTERED 
-(
-	[phone_number] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
  CONSTRAINT [UK9d30a9u1qpg8eou0otgkwrp5d] UNIQUE NONCLUSTERED 
 (
@@ -231,7 +254,33 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[place]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[mycoupon]    Script Date: 2025/1/19 下午 06:34:30 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[mycoupon](
+	[mycoupon_id] [bigint] IDENTITY(1,1) NOT NULL,
+	[gettime] [datetime2](6) NULL,
+	[fk_couponid] [bigint] NULL,
+	[fk_userid] [bigint] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[mycoupon_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[myplace]    Script Date: 2025/1/19 下午 06:34:30 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[myplace](
+	[userid] [bigint] NOT NULL,
+	[placeId] [bigint] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[place]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -260,7 +309,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[place_photos]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[place_photos]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -270,12 +319,12 @@ CREATE TABLE [dbo].[place_photos](
 	[photos] [varchar](255) NULL
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[PlaceWithPosts]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[placewithposts]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[PlaceWithPosts](
+CREATE TABLE [dbo].[placewithposts](
 	[fk_Place_Id] [bigint] NOT NULL,
 	[fk_Post_Id] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
@@ -285,7 +334,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[post]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[post]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -297,7 +346,6 @@ CREATE TABLE [dbo].[post](
 	[postStatus] [varchar](255) NULL,
 	[postTime] [datetime2](6) NULL,
 	[postTitle] [varchar](255) NULL,
-	[tags] [varchar](255) NULL,
 	[userid] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
@@ -305,14 +353,14 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[post_tags]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[post_tags]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[post_tags](
 	[postid] [bigint] NOT NULL,
-	[tagId] [int] NOT NULL,
+	[tagId] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[postid] ASC,
@@ -320,7 +368,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[schedule]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[schedule]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -331,28 +379,108 @@ CREATE TABLE [dbo].[schedule](
 	[end_date] [date] NOT NULL,
 	[start_date] [date] NOT NULL,
 	[trip_name] [varchar](255) NOT NULL,
+	[FK_user] [bigint] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[trip_id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Tags]    Script Date: 2025/1/17 上午 12:15:34 ******/
+/****** Object:  Table [dbo].[tags]    Script Date: 2025/1/19 下午 06:34:30 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[Tags](
-	[tagId] [int] IDENTITY(1,1) NOT NULL,
+CREATE TABLE [dbo].[tags](
+	[tagId] [bigint] IDENTITY(1,1) NOT NULL,
 	[tag_created_at] [datetime2](6) NOT NULL,
 	[tag_name] [varchar](255) NOT NULL,
-	[tag_state] [int] NOT NULL,
+	[tag_state] [varchar](255) NOT NULL,
 	[tag_updated_at] [datetime2](6) NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[tagId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UK2c6s9hekidseaj5vbgb3pgy3k] UNIQUE NONCLUSTERED 
+(
+	[tag_name] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tags_members]    Script Date: 2025/1/19 下午 06:34:30 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tags_members](
+	[tagsBean_tagId] [bigint] NOT NULL,
+	[memberBean_userid] [bigint] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[tagsBean_tagId] ASC,
+	[memberBean_userid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tags_post]    Script Date: 2025/1/19 下午 06:34:30 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tags_post](
+	[tagsBean_tagId] [bigint] NOT NULL,
+	[postBean_postid] [bigint] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[tagsBean_tagId] ASC,
+	[postBean_postid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+SET ANSI_PADDING ON
+GO
+/****** Object:  Index [UK99xbxdwmyun0ehfiwpbntlqs5]    Script Date: 2025/1/19 下午 06:34:30 ******/
+CREATE UNIQUE NONCLUSTERED INDEX [UK99xbxdwmyun0ehfiwpbntlqs5] ON [dbo].[members]
+(
+	[phone_number] ASC
+)
+WHERE ([phone_number] IS NOT NULL)
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[comments]  WITH CHECK ADD  CONSTRAINT [fk_comments_member] FOREIGN KEY([user_id])
+REFERENCES [dbo].[members] ([userid])
+GO
+ALTER TABLE [dbo].[comments] CHECK CONSTRAINT [fk_comments_member]
+GO
+ALTER TABLE [dbo].[comments]  WITH CHECK ADD  CONSTRAINT [fk_comments_post] FOREIGN KEY([postid])
+REFERENCES [dbo].[post] ([postid])
+GO
+ALTER TABLE [dbo].[comments] CHECK CONSTRAINT [fk_comments_post]
+GO
+ALTER TABLE [dbo].[coupon]  WITH CHECK ADD  CONSTRAINT [FKs4vpe0ajv51wb2vtr8ur75qgs] FOREIGN KEY([placeId])
+REFERENCES [dbo].[place] ([placeId])
+GO
+ALTER TABLE [dbo].[coupon] CHECK CONSTRAINT [FKs4vpe0ajv51wb2vtr8ur75qgs]
+GO
+ALTER TABLE [dbo].[event]  WITH CHECK ADD  CONSTRAINT [FK3kcqil5gg1c1hio9gjhtf9io6] FOREIGN KEY([FK_calendar])
+REFERENCES [dbo].[calendar] ([date])
+GO
+ALTER TABLE [dbo].[event] CHECK CONSTRAINT [FK3kcqil5gg1c1hio9gjhtf9io6]
+GO
+ALTER TABLE [dbo].[event]  WITH CHECK ADD  CONSTRAINT [FKcdqpyhal6mv5p3pdkqre44sd6] FOREIGN KEY([FK_schedule])
+REFERENCES [dbo].[schedule] ([trip_id])
+GO
+ALTER TABLE [dbo].[event] CHECK CONSTRAINT [FKcdqpyhal6mv5p3pdkqre44sd6]
+GO
+ALTER TABLE [dbo].[eventXplace]  WITH CHECK ADD  CONSTRAINT [FK97qtoug39i4shd4eid1ke5he6] FOREIGN KEY([fk_place_id])
+REFERENCES [dbo].[place] ([placeId])
+GO
+ALTER TABLE [dbo].[eventXplace] CHECK CONSTRAINT [FK97qtoug39i4shd4eid1ke5he6]
+GO
+ALTER TABLE [dbo].[eventXplace]  WITH CHECK ADD  CONSTRAINT [FKak4xj1nevxndw6h78issipri3] FOREIGN KEY([fk_event_id])
+REFERENCES [dbo].[event] ([event_id])
+GO
+ALTER TABLE [dbo].[eventXplace] CHECK CONSTRAINT [FKak4xj1nevxndw6h78issipri3]
 GO
 ALTER TABLE [dbo].[followlist]  WITH CHECK ADD  CONSTRAINT [FKc4pth9omw88slrjyl7kkqhrj8] FOREIGN KEY([follower_id])
 REFERENCES [dbo].[members] ([userid])
@@ -374,35 +502,85 @@ REFERENCES [dbo].[post] ([postid])
 GO
 ALTER TABLE [dbo].[interaction] CHECK CONSTRAINT [FKbpn4kaj576hhsbkfgo6007ksn]
 GO
+ALTER TABLE [dbo].[mycoupon]  WITH CHECK ADD  CONSTRAINT [FK3vg3khqytvxpciskg86m16en5] FOREIGN KEY([mycoupon_id])
+REFERENCES [dbo].[mycoupon] ([mycoupon_id])
+GO
+ALTER TABLE [dbo].[mycoupon] CHECK CONSTRAINT [FK3vg3khqytvxpciskg86m16en5]
+GO
+ALTER TABLE [dbo].[mycoupon]  WITH CHECK ADD  CONSTRAINT [FKcglm2oachj9t8mdqfaxary2um] FOREIGN KEY([fk_userid])
+REFERENCES [dbo].[members] ([userid])
+GO
+ALTER TABLE [dbo].[mycoupon] CHECK CONSTRAINT [FKcglm2oachj9t8mdqfaxary2um]
+GO
+ALTER TABLE [dbo].[mycoupon]  WITH CHECK ADD  CONSTRAINT [FKnob6f3pl42axxbe0lhber91s9] FOREIGN KEY([fk_couponid])
+REFERENCES [dbo].[coupon] ([couponId])
+GO
+ALTER TABLE [dbo].[mycoupon] CHECK CONSTRAINT [FKnob6f3pl42axxbe0lhber91s9]
+GO
+ALTER TABLE [dbo].[myplace]  WITH CHECK ADD  CONSTRAINT [FKkxf1t74ra8cotr94w55babopd] FOREIGN KEY([placeId])
+REFERENCES [dbo].[place] ([placeId])
+GO
+ALTER TABLE [dbo].[myplace] CHECK CONSTRAINT [FKkxf1t74ra8cotr94w55babopd]
+GO
+ALTER TABLE [dbo].[myplace]  WITH CHECK ADD  CONSTRAINT [FKqftwj95usd2999csspx7qc8l4] FOREIGN KEY([userid])
+REFERENCES [dbo].[members] ([userid])
+GO
+ALTER TABLE [dbo].[myplace] CHECK CONSTRAINT [FKqftwj95usd2999csspx7qc8l4]
+GO
 ALTER TABLE [dbo].[place_photos]  WITH CHECK ADD  CONSTRAINT [FK7ttw8fdw9b9y7wdjoidwolg5u] FOREIGN KEY([place_placeId])
 REFERENCES [dbo].[place] ([placeId])
 GO
 ALTER TABLE [dbo].[place_photos] CHECK CONSTRAINT [FK7ttw8fdw9b9y7wdjoidwolg5u]
 GO
-ALTER TABLE [dbo].[PlaceWithPosts]  WITH CHECK ADD  CONSTRAINT [placeId] FOREIGN KEY([fk_Place_Id])
+ALTER TABLE [dbo].[placewithposts]  WITH CHECK ADD  CONSTRAINT [placeId] FOREIGN KEY([fk_Place_Id])
 REFERENCES [dbo].[place] ([placeId])
 GO
-ALTER TABLE [dbo].[PlaceWithPosts] CHECK CONSTRAINT [placeId]
+ALTER TABLE [dbo].[placewithposts] CHECK CONSTRAINT [placeId]
 GO
-ALTER TABLE [dbo].[PlaceWithPosts]  WITH CHECK ADD  CONSTRAINT [postid] FOREIGN KEY([fk_Post_Id])
+ALTER TABLE [dbo].[placewithposts]  WITH CHECK ADD  CONSTRAINT [postid] FOREIGN KEY([fk_Post_Id])
 REFERENCES [dbo].[post] ([postid])
 GO
-ALTER TABLE [dbo].[PlaceWithPosts] CHECK CONSTRAINT [postid]
+ALTER TABLE [dbo].[placewithposts] CHECK CONSTRAINT [postid]
 GO
-ALTER TABLE [dbo].[post]  WITH CHECK ADD  CONSTRAINT [FKgjd74shchoq0qysuaowjd2vd9] FOREIGN KEY([userid])
+ALTER TABLE [dbo].[post]  WITH CHECK ADD  CONSTRAINT [fk_posts_member] FOREIGN KEY([userid])
 REFERENCES [dbo].[members] ([userid])
 GO
-ALTER TABLE [dbo].[post] CHECK CONSTRAINT [FKgjd74shchoq0qysuaowjd2vd9]
+ALTER TABLE [dbo].[post] CHECK CONSTRAINT [fk_posts_member]
 GO
-ALTER TABLE [dbo].[post_tags]  WITH CHECK ADD  CONSTRAINT [FK4phf9xhlg7vbvygtdmf76nbjx] FOREIGN KEY([tagId])
-REFERENCES [dbo].[Tags] ([tagId])
+ALTER TABLE [dbo].[post_tags]  WITH CHECK ADD  CONSTRAINT [FKbevmctjw3hmtgafuqydd9hy82] FOREIGN KEY([tagId])
+REFERENCES [dbo].[tags] ([tagId])
 GO
-ALTER TABLE [dbo].[post_tags] CHECK CONSTRAINT [FK4phf9xhlg7vbvygtdmf76nbjx]
+ALTER TABLE [dbo].[post_tags] CHECK CONSTRAINT [FKbevmctjw3hmtgafuqydd9hy82]
 GO
 ALTER TABLE [dbo].[post_tags]  WITH CHECK ADD  CONSTRAINT [FKhbneyoiffiu8jwvsb6ool4ujk] FOREIGN KEY([postid])
 REFERENCES [dbo].[post] ([postid])
 GO
 ALTER TABLE [dbo].[post_tags] CHECK CONSTRAINT [FKhbneyoiffiu8jwvsb6ool4ujk]
+GO
+ALTER TABLE [dbo].[schedule]  WITH CHECK ADD  CONSTRAINT [FKgdca640socgalo9m4lxlvky3q] FOREIGN KEY([FK_user])
+REFERENCES [dbo].[members] ([userid])
+GO
+ALTER TABLE [dbo].[schedule] CHECK CONSTRAINT [FKgdca640socgalo9m4lxlvky3q]
+GO
+ALTER TABLE [dbo].[tags_members]  WITH CHECK ADD  CONSTRAINT [FK3j3tpp1hp2aave07tttxveelg] FOREIGN KEY([tagsBean_tagId])
+REFERENCES [dbo].[tags] ([tagId])
+GO
+ALTER TABLE [dbo].[tags_members] CHECK CONSTRAINT [FK3j3tpp1hp2aave07tttxveelg]
+GO
+ALTER TABLE [dbo].[tags_members]  WITH CHECK ADD  CONSTRAINT [FKlmyctqcmdmlme2xm8qcpllymf] FOREIGN KEY([memberBean_userid])
+REFERENCES [dbo].[members] ([userid])
+GO
+ALTER TABLE [dbo].[tags_members] CHECK CONSTRAINT [FKlmyctqcmdmlme2xm8qcpllymf]
+GO
+ALTER TABLE [dbo].[tags_post]  WITH CHECK ADD  CONSTRAINT [FK2rr9sxc21ni9lnpcvi282ppvb] FOREIGN KEY([tagsBean_tagId])
+REFERENCES [dbo].[tags] ([tagId])
+GO
+ALTER TABLE [dbo].[tags_post] CHECK CONSTRAINT [FK2rr9sxc21ni9lnpcvi282ppvb]
+GO
+ALTER TABLE [dbo].[tags_post]  WITH CHECK ADD  CONSTRAINT [FK9qc43ayq9cad2od4b3g8t1oow] FOREIGN KEY([postBean_postid])
+REFERENCES [dbo].[post] ([postid])
+GO
+ALTER TABLE [dbo].[tags_post] CHECK CONSTRAINT [FK9qc43ayq9cad2od4b3g8t1oow]
 GO
 ALTER TABLE [dbo].[members]  WITH CHECK ADD CHECK  (([role]='USER' OR [role]='ADMIN'))
 GO

@@ -1,14 +1,10 @@
 <template>
-  <div class="container">
+  <!-- 地圖區域 -->
+  <div class="map">
+    <div id="map"></div>
     <!-- 搜尋區域 -->
     <div class="search">
-      <h1>Google Maps 地點搜尋</h1>
       <PlaceSearch :onPlaceSelected="handlePlaceChanged" />
-    </div>
-    
-    <!-- 地圖區域 -->
-    <div class="map">
-      <div id="map"></div>
     </div>
   </div>
 </template>
@@ -65,8 +61,6 @@ export default {
       map.value.setCenter(place.geometry.location);
       map.value.setZoom(17);
 
-      
-
       updateMarker({ lat, lng }, place);
 
       selectedPlace.value = {
@@ -78,7 +72,7 @@ export default {
 
     // 更新或新增標記並顯示資訊框
     const updateMarker = (position, place) => {
-      markers.value.forEach(marker => marker.setMap(null));
+      markers.value.forEach((marker) => marker.setMap(null));
       markers.value = [];
 
       const marker = new google.maps.Marker({
@@ -103,7 +97,6 @@ export default {
       markers.value.push(marker); // 新增到標記清單
     };
 
-
     return {
       map,
       markers,
@@ -114,33 +107,32 @@ export default {
 };
 </script>
 
-<style scoped>
-.container {
-  display: flex;
-  height: 100%;
-}
-
+<style>
 .search {
-  height: 500px;
-  width: 500px;
-  padding: 20px;
-  background-color: #e6e6e6e5;
-  overflow-y: auto;
-  border: 2px solid #ddd;
-  border-radius: 5px;
+  position: absolute;
+  top: 20px; /* 距離容器頂部 20px，可根據需要調整 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px; /* 固定寬度，可根據需求調整 */
+  background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加陰影 */
+  border-radius: 8px; /* 圓角設計 */
+  z-index: 10; /* 確保在其他元素之上 */
 }
 
 .map {
-  margin-left: 10px;
+  height: 100%; /* 確保容器滿高 */
+  width: 100%;
   flex-grow: 1;
-  border: 2px solid #ddd;
-  border-radius: 5px;
+  position: relative; /* 確保內部元素的絕對定位相對於 .container */
+  margin-left: 100px;
+  position: relative; /* 為地圖設定定位基準 */
+  height: 100%; /* 確保容器滿高 */
 }
 
 #map {
   height: 100%;
   width: 100%;
-  align-items: center;
-  justify-content: center;
 }
 </style>

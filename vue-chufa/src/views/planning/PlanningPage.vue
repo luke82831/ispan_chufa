@@ -1,15 +1,15 @@
 <template>
-    <div>
-        <PlanningTabs></PlanningTabs>
-    </div>
+  <div>
+    <PlanningTabs></PlanningTabs>
+  </div>
 </template>
 
 <script>
 import PlanningTabs from "@/components/planning/PlanningTabs.vue";
 
 export default {
-    components: {
-        PlanningTabs,
-    },
+  components: {
+    PlanningTabs,
+  },
 };
 </script>

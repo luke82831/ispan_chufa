@@ -53,8 +53,8 @@ public class EventController {
             }
 
             // Update fields
-            existingEvent.setStartDate(updatedEvent.getStartDate());
-            existingEvent.setEndDate(updatedEvent.getEndDate());
+            existingEvent.setStartTime(updatedEvent.getStartTime());
+            existingEvent.setEndTime(updatedEvent.getEndTime());
             existingEvent.setNotes(updatedEvent.getNotes());
             existingEvent.setSchedule(updatedEvent.getSchedule());
             existingEvent.setCalendar(updatedEvent.getCalendar());

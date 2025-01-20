@@ -26,12 +26,12 @@ INSERT INTO schedule (cover_photo, trip_name, start_date, end_date, FK_user) VAL
 Go
 
 -- event
-INSERT INTO event (start_date, end_date, notes, FK_schedule, FK_calendar) VALUES
-('2025-01-20', '2025-01-22', 'Visit Tokyo and Kyoto.', 1, '2025-01-20'),
-('2025-01-23', '2025-01-25', 'Explore Osaka and Nara.', 1, '2025-01-23'),
-('2025-01-26', '2025-01-27', 'Relax in Hakone hot springs.', 1, '2025-01-26'),
-('2025-02-01', '2025-02-05', 'Attend business meetings in Taipei.', 2, '2025-02-01'),
-('2025-03-10', '2025-03-15', 'Family vacation in Bali.', 3, '2025-03-10');
+INSERT INTO event (start_time, end_time, notes, FK_schedule, FK_calendar) VALUES
+('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 1, '2025-01-20'),
+('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 1, '2025-01-23'),
+('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 1, '2025-01-26'),
+('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 2, '2025-02-01'),
+('22:00:00', '23:00:00', 'Family vacation in Bali.', 3, '2025-03-10');
 Go
 
 -- followlist
@@ -128,12 +128,6 @@ Go
 INSERT INTO post_tags (postid, tagId) VALUES
 (1, 1), -- My First Post -> Travel
 (2, 2); -- Another Post -> Adventure
-Go
-
--- Tags_Post
-INSERT INTO Tags_Post (tagsBean_tagId, postBean_postid) VALUES
-(1, 1),  -- 標籤 Travel 與 貼文 My First Post
-(2, 2);  -- 標籤 Adventure 與 貼文 Another Post
 Go
 
 -- Tags_Members

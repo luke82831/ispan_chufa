@@ -71,7 +71,7 @@ public class PostService {
 		InteractionBean interactionBean = new InteractionBean();
 
 		Long userId = param.getLong("userid");
-		String interactionType = param.getString("interactiontype");
+		String interactionType = param.getString("interactionType");
 		Long postid = param.getLong("postid");
 
 		Optional<MemberBean> optionalMember = memberRepository.findById(userId);

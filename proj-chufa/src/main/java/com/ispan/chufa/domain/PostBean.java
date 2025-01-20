@@ -33,38 +33,33 @@ public class PostBean {
 	private LocalDateTime postTime; // 貼文_貼文時間
 	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
+	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 
-	@ManyToOne(cascade = { CascadeType.PERSIST })
+
+	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
-	// @JoinColumn(name = "userid", nullable = true) //測試用
 	@JsonBackReference
 	MemberBean member;
+	
 	@OneToMany(mappedBy = "postBean")
 	private Set<CommentBean> commentBeans;
+	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	// @JsonManagedReference
 	private List<InteractionBean> interactions; // 貼文的互動行為
+	
 	@ManyToMany(mappedBy = "postBeans")
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
-	private Set<PlaceBean> places = new HashSet<>();
+	private Set<PlaceBean> place = new HashSet<>();
 
 	@ManyToMany
 	// @JsonManagedReference
 	@JsonIgnore
 	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
 	private Set<TagsBean> tag = new HashSet<>();
-	private String postLink; // 貼文_貼文超連結(文章、影片連結)
-
-	@Override
-	public String toString() {
-		return "PostBean [postid=" + postid + ", postStatus=" + postStatus + ", postTitle=" + postTitle + ", postTime="
-				+ postTime + ", postContent=" + postContent + ", member=" + member + ", commentBeans=" + commentBeans
-				+ ", interactions=" + interactions + ", tagsBeans=" + tagsBeans + ", places=" + places + ", tag=" + tag
-				+ ", postLink=" + postLink + "]";
-	}
 
 	public Long getPostid() {
 		return postid;
@@ -139,11 +134,11 @@ public class PostBean {
 	}
 
 	public Set<PlaceBean> getPlaces() {
-		return places;
+		return place;
 	}
 
 	public void setPlaces(Set<PlaceBean> places) {
-		this.places = places;
+		this.place = places;
 	}
 
 	public Set<TagsBean> getTag() {
@@ -160,6 +155,14 @@ public class PostBean {
 
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
+	}
+	
+	@Override
+	public String toString() {
+		return "PostBean [postid=" + postid + ", postStatus=" + postStatus + ", postTitle=" + postTitle + ", postTime="
+				+ postTime + ", postContent=" + postContent + ", member=" + member + ", commentBeans=" + commentBeans
+				+ ", interactions=" + interactions + ", tagsBeans=" + tagsBeans + ", place=" + place + ", tag=" + tag
+				+ ", postLink=" + postLink + "]";
 	}
 
 }

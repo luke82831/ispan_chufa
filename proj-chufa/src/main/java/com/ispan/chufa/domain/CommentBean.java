@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Comments")
+@Table(name = "comments")
 public class CommentBean {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 留言_留言ID 設定為自增
@@ -44,13 +44,7 @@ public class CommentBean {
     @Column(name = "parentid") // 留言_上層留言id
     private Long parentId;
 
-    @Override
-    public String toString() {
-        return "CommentBean [commentId=" + commentId + ", postBean=" + postBean + ", commentState=" + commentState
-                + ", memberBean=" + memberBean + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
-                + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
-    }
-
+    //Getter and Setter
     public Long getCommentId() {
         return commentId;
     }
@@ -113,6 +107,13 @@ public class CommentBean {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+    
+    @Override
+    public String toString() {
+        return "CommentBean [commentId=" + commentId + ", postBean=" + postBean + ", commentState=" + commentState
+                + ", memberBean=" + memberBean + ", commentCreatedAt=" + commentCreatedAt + ", commentUpdatedAt="
+                + commentUpdatedAt + ", content=" + content + ", parentId=" + parentId + "]";
     }
 
 }

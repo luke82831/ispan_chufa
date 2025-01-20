@@ -25,18 +25,6 @@ public class EventXPlaceBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long eventmappingId;
 
-	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
-	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
-	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
-
-	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
-	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
-	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
-
-
-
 	@Column(name = "place_order")
 	private Integer placeOrder;
 
@@ -49,9 +37,20 @@ public class EventXPlaceBean {
 	@Column(name = "notes")
 	@Lob
 	private char[] notes;
+	
+	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
+	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
+	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 
+	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
+	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
+	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
+
+	
 	// Constructors, getters, setters, and toString()
-
+	
 	public EventXPlaceBean() {
 	}
 

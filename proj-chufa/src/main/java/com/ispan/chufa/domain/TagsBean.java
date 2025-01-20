@@ -31,19 +31,10 @@ public class TagsBean {
     @Column(name = "tag_updated_at") // 標籤系統_更新時間
     private LocalDateTime tagUpdatedAt;
 
-    @ManyToMany // 多對多 標籤對文章
-    @JoinTable(name = "tags_post", // 聯結表名稱
-            joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
-            inverseJoinColumns = @JoinColumn(name = "postBean_postid") // 關聯實體的外鍵列
-    )
+    @ManyToMany(mappedBy = "tagsBeans") // mappedBy 指向 PostBean 中的屬性名稱
     @JsonBackReference
     private Set<PostBean> postBeans = new HashSet<>();
     
-//    @ManyToMany(mappedBy = "tag")
-//    @JsonBackReference
-//    private Set<PostBean> postBeans = new HashSet<>();
-//    
-
     @ManyToMany // 多對多 標籤對成員
     @JoinTable(name = "tags_members", // 聯結表名稱
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
@@ -91,14 +82,6 @@ public class TagsBean {
         this.tagUpdatedAt = tagUpdatedAt;
     }
 
-    public Set<PostBean> getPostBeans() {
-        return postBeans;
-    }
-
-    public void setPostBeans(Set<PostBean> postBeans) {
-        this.postBeans = postBeans;
-    }
-
     public Set<MemberBean> getMemberBeans() {
         return memberBeans;
     }
@@ -106,12 +89,20 @@ public class TagsBean {
     public void setMemberBeans(Set<MemberBean> memberBeans) {
         this.memberBeans = memberBeans;
     }
-    
-    @Override
-    public String toString() {
-        return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
-                + tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + ", memberBeans="
-                + memberBeans + "]";
-    }
 
+	public Set<PostBean> getPostBeans() {
+		return postBeans;
+	}
+
+	public void setPostBeans(Set<PostBean> postBeans) {
+		this.postBeans = postBeans;
+	}
+
+	@Override
+	public String toString() {
+		return "TagsBean [tagId=" + tagId + ", tagState=" + tagState + ", tagName=" + tagName + ", tagCreatedAt="
+				+ tagCreatedAt + ", tagUpdatedAt=" + tagUpdatedAt + ", postBeans=" + postBeans + ", memberBeans="
+				+ memberBeans + "]";
+	}
+    
 }

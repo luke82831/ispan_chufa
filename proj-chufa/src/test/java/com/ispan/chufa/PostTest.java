@@ -80,7 +80,7 @@ public class PostTest {
         Set<TagsBean> tags = new HashSet<>();
         tags.add(tag1);
         tags.add(tag2);
-        post.setTag(tags);
+        post.setTagsBeans(tags);
 
         // 儲存 Post
         PostBean savedPost = postRepository.save(post);
@@ -88,7 +88,7 @@ public class PostTest {
         // 驗證插入結果
         assertNotNull(savedPost.getPostid(), "Post ID should not be null");
         assertNotNull(savedPost.getMember(), "Member should not be null");
-        assertNotNull(savedPost.getTag(), "Tags should not be null");
+        assertNotNull(savedPost.getTagsBeans(), "Tags should not be null");
         assertNotNull(savedPost.getPostTitle(), "Post Title should not be null");
     }
 }

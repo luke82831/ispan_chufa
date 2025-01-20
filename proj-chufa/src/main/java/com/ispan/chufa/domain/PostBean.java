@@ -50,24 +50,19 @@ public class PostBean {
 	@JsonIgnore
 	// @JsonManagedReference
 	private List<InteractionBean> interactions; // 貼文的互動行為
-	
-	@ManyToMany(mappedBy = "postBeans")
-	@JsonManagedReference
-	private Set<TagsBean> tagsBeans = new HashSet<>();
-	
-//  @ManyToMany(mappedBy = "tag")
-//  @JsonBackReference
-//  private Set<PostBean> postBeans = new HashSet<>();
 
+    @ManyToMany
+	@JsonManagedReference
+    @JoinTable(
+        name = "post_tags", // 中間表名稱
+        joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
+        inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
+    )
+    private Set<TagsBean> tagsBeans = new HashSet<>();
+	
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
 	private Set<TagsBean> tag;
-
-//	@ManyToMany
-//	// @JsonManagedReference
-//	@JsonIgnore
-//	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
-//	private Set<TagsBean> tag = new HashSet<>();
 
 	public Long getPostid() {
 		return postid;
@@ -133,28 +128,12 @@ public class PostBean {
 		this.interactions = interactions;
 	}
 
-	public Set<TagsBean> getTagsBeans() {
-		return tagsBeans;
-	}
-
-	public void setTagsBeans(Set<TagsBean> tagsBeans) {
-		this.tagsBeans = tagsBeans;
-	}
-
 	public Set<PlaceBean> getPlaces() {
 		return place;
 	}
 
 	public void setPlaces(Set<PlaceBean> places) {
 		this.place = places;
-	}
-
-	public Set<TagsBean> getTag() {
-		return tag;
-	}
-
-	public void setTag(Set<TagsBean> tag) {
-		this.tag = tag;
 	}
 
 	public String getPostLink() {
@@ -164,13 +143,31 @@ public class PostBean {
 	public void setPostLink(String postLink) {
 		this.postLink = postLink;
 	}
-	
+
+	public Set<PlaceBean> getPlace() {
+		return place;
+	}
+
+	public void setPlace(Set<PlaceBean> place) {
+		this.place = place;
+	}
+
+	public Set<TagsBean> getTagsBeans() {
+		return tagsBeans;
+	}
+
+	public void setTagsBeans(Set<TagsBean> tagsBeans) {
+		this.tagsBeans = tagsBeans;
+	}
+
 	@Override
 	public String toString() {
 		return "PostBean [postid=" + postid + ", postStatus=" + postStatus + ", postTitle=" + postTitle + ", postTime="
-				+ postTime + ", postContent=" + postContent + ", member=" + member + ", commentBeans=" + commentBeans
-				+ ", interactions=" + interactions + ", tagsBeans=" + tagsBeans + ", place=" + place + ", tag=" + tag
-				+ ", postLink=" + postLink + "]";
+				+ postTime + ", postContent=" + postContent + ", postLink=" + postLink + ", member=" + member
+				+ ", commentBeans=" + commentBeans + ", interactions=" + interactions + ", tagsBeans=" + tagsBeans
+				+ ", place=" + place + "]";
 	}
 
-}
+
+	}
+	

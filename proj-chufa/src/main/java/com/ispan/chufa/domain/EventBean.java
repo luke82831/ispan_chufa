@@ -1,6 +1,6 @@
 package com.ispan.chufa.domain;
 
-import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -22,11 +22,11 @@ public class EventBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long eventId; // 行程內容id (PK)
 
-	@Column(name = "start_date", nullable = false)
-	private LocalDate startDate; // 行程開始日期
+	@Column(name = "start_time", nullable = false)
+	private LocalTime startTime; // 行程開始日期
 
-	@Column(name = "end_date", nullable = false)
-	private LocalDate endDate; // 行程結束日期
+	@Column(name = "end_time", nullable = false)
+	private LocalTime endTime; // 行程結束日期
 
 	@Column(name = "notes")
 	private String notes; // 行程筆記
@@ -47,9 +47,9 @@ public class EventBean {
 	public EventBean() {
 	}
 
-	public EventBean(LocalDate startDate, LocalDate endDate, String notes) {
-		this.startDate = startDate;
-		this.endDate = endDate;
+	public EventBean(LocalTime startTime, LocalTime endTime, String notes) {
+		this.startTime = startTime;
+		this.endTime = endTime;
 		this.notes = notes;
 	}
 
@@ -61,20 +61,20 @@ public class EventBean {
 		this.eventId = eventId;
 	}
 
-	public LocalDate getStartDate() {
-		return startDate;
+	public LocalTime getStartTime() {
+		return startTime;
 	}
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
 	}
 
-	public LocalDate getEndDate() {
-		return endDate;
+	public LocalTime getEndTime() {
+		return endTime;
 	}
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
 	}
 
 	public String getNotes() {
@@ -111,7 +111,7 @@ public class EventBean {
 
 	@Override
 	public String toString() {
-		return "EventBean [eventId=" + eventId + ", startDate=" + startDate + ", endDate=" + endDate + ", notes="
+		return "EventBean [eventId=" + eventId + ", startTime=" + startTime + ", endTime=" + endTime + ", notes="
 				+ notes + ", schedule=" + schedule + ", calendar=" + calendar + ", eventXPlaceBeans=" + eventXPlaceBeans
 				+ "]";
 	}

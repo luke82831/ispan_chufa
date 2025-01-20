@@ -1,6 +1,5 @@
 package com.ispan.chufa.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.ispan.chufa.domain.PostBean;

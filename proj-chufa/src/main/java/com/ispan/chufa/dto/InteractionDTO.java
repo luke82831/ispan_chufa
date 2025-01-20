@@ -1,20 +1,9 @@
 package com.ispan.chufa.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.ispan.chufa.domain.InteractionBean;
-import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 public class InteractionDTO {
 	private String status;

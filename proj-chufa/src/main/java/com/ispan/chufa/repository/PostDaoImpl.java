@@ -36,7 +36,6 @@ public class PostDaoImpl implements PostDao {
 
 	@Override
 	public List<PostBean> find(JSONObject param) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

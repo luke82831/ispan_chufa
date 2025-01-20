@@ -1,8 +1,6 @@
 package com.ispan.chufa.service;
 
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,7 @@ import com.ispan.chufa.repository.PlaceRepository;
 import com.ispan.chufa.repository.PostRepository;
 
 @Service
-//@Transactional
+// @Transactional
 public class PostService {
 	@Autowired
 	PostRepository postRepository;
@@ -37,20 +35,20 @@ public class PostService {
 	@Autowired
 	InteractionRepository interactionRepository;
 
-    @Autowired
-    private PlaceRepository placeRepository;
+	@Autowired
+	private PlaceRepository placeRepository;
 
-    // 創建一個 Post 並關聯多個 Place
-    public PostBean createPostWithPlaces(PostBean post, Set<Long> placeIds) {
-    	Set<PlaceBean> places = new HashSet<>(placeRepository.findAllById(placeIds));
-        post.setPlaces(places);
-        return postRepository.save(post);
-    }
+	// 創建一個 Post 並關聯多個 Place
+	public PostBean createPostWithPlaces(PostBean post, Set<Long> placeIds) {
+		Set<PlaceBean> places = new HashSet<>(placeRepository.findAllById(placeIds));
+		post.setPlaces(places);
+		return postRepository.save(post);
+	}
 
-    // 根據 ID 查詢 Post 和其相關聯的 Place
-    public PostBean getPostById(Long id) {
-        return postRepository.findById(id).orElse(null);
-    }
+	// 根據 ID 查詢 Post 和其相關聯的 Place
+	public PostBean getPostById(Long id) {
+		return postRepository.findById(id).orElse(null);
+	}
 
 	public List<PostDTO> findPostsByCriteria(String param) {
 		try {
@@ -64,9 +62,7 @@ public class PostService {
 
 	public List<InteractionDTO> interact(JSONObject param) {
 		JSONObject action = new JSONObject(param);
-
 		return null;
-
 	}
 
 	public InteractionDTO performaction(String json) {
@@ -75,7 +71,7 @@ public class PostService {
 		InteractionBean interactionBean = new InteractionBean();
 
 		Long userId = param.getLong("userid");
-		String interactionType = param.getString("interactiontype");
+		String interactionType = param.getString("interactionType");
 		Long postid = param.getLong("postid");
 
 		Optional<MemberBean> optionalMember = memberRepository.findById(userId);
@@ -94,7 +90,7 @@ public class PostService {
 		InteractionBean likeAction = existActions.stream().filter(action -> "LIKE".equals(action.getInteractionType()))
 				.findFirst().orElse(null);
 
-		if ("LIKE".equals(interactionType)&& likeAction != null) {
+		if ("LIKE".equals(interactionType) && likeAction != null) {
 			// 如果是點讚操作，檢查是否已有 LIKE 記錄
 			// 如果已存在 LIKE，則刪除該互動並返回取消狀態
 			if (likeAction != null) {
@@ -137,6 +133,5 @@ public class PostService {
 
 		return interactDTO;
 	}
-
 
 }

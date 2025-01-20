@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Map from "@/views/Map.vue";
+// import CreatePlanning from "@/views/planning/CreatePlanning.vue";
 
 const routes = [
     {
@@ -17,8 +18,16 @@ const routes = [
         name: "Register",
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
+    {
+        path: "/admin/Role",
+        name: "Role", // 路由名稱
+        component: () => import("@/views/admin/Role.vue"), // 指向 Role 組件
+    },
 
     { path: "/map", component: Map },
+    // { path: "/createPlanning", component: CreatePlanning },
+
+
 ]
 
 

@@ -142,7 +142,8 @@ public class LoginAjaxController {
                         .put("bio", member.getBio())
                         .put("phone_number", member.getPhoneNumber())
                         .put("username", member.getUsername())
-                        .put("gender", member.getGender()));
+                        .put("gender", member.getGender())
+                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"));
             } else {
                 responseJson.put("success", false);
                 responseJson.put("message", "會員資料未找到");
@@ -158,7 +159,7 @@ public class LoginAjaxController {
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody MemberBean updatedMember,
             @RequestHeader("Authorization") String authorizationHeader) {
-        System.out.println("Received Member Data: " + updatedMember); // 调试点
+        System.out.println("Received Member Data: " + updatedMember.toString()); // 调试点
 
         JSONObject responseJson = new JSONObject();
         try {
@@ -208,7 +209,13 @@ public class LoginAjaxController {
             System.out.println("Response JSON: " + responseJson.toString());
 
             return ResponseEntity.ok(responseJson.toString());
+
+        } catch (IllegalArgumentException e) {
+            responseJson.put("success", false);
+            responseJson.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(responseJson.toString());
         } catch (Exception e) {
+            e.printStackTrace();
             responseJson.put("success", false);
             responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
             return ResponseEntity.status(500).body(responseJson.toString());

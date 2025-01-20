@@ -129,6 +129,8 @@ const fetchProfile = async () => {
 
       // 判断是否为管理员
       isAdmin.value = response.data.user.role === 'ADMIN';
+      console.log("User Role:", response.data.user.role);
+console.log("Is Admin:", isAdmin.value);
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
     }
@@ -180,6 +182,8 @@ const saveProfile = async () => {
     console.error('Save profile failed:', error);
     Swal.fire('錯誤', '伺服器錯誤，請稍後再試', 'error');
   }
+
+  console.log('Submitting data:', editMember.value);
 };
 
 const uploadProfilePicture = async (event) => {

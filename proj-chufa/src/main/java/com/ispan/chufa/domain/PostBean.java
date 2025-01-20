@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -42,6 +43,7 @@ public class PostBean {
 	MemberBean member;
 	
 	@OneToMany(mappedBy = "postBean")
+	@JsonIgnore
 	private Set<CommentBean> commentBeans;
 	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -50,16 +52,22 @@ public class PostBean {
 	private List<InteractionBean> interactions; // 貼文的互動行為
 	
 	@ManyToMany(mappedBy = "postBeans")
+	@JsonManagedReference
 	private Set<TagsBean> tagsBeans = new HashSet<>();
+	
+//  @ManyToMany(mappedBy = "tag")
+//  @JsonBackReference
+//  private Set<PostBean> postBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
+	private Set<TagsBean> tag;
 
-	@ManyToMany
-	// @JsonManagedReference
-	@JsonIgnore
-	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
-	private Set<TagsBean> tag = new HashSet<>();
+//	@ManyToMany
+//	// @JsonManagedReference
+//	@JsonIgnore
+//	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
+//	private Set<TagsBean> tag = new HashSet<>();
 
 	public Long getPostid() {
 		return postid;

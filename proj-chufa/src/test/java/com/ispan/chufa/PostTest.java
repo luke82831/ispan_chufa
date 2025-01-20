@@ -39,12 +39,12 @@ public class PostTest {
     public void testInsertPostWithTags() {
         // 建立標籤
         TagsBean tag1 = new TagsBean();
-        tag1.setTagName("easy");
+        tag1.setTagName("chiiakawa");
         tag1.setTagState("1");
         tag1.setTagCreatedAt(LocalDateTime.now());
 
         TagsBean tag2 = new TagsBean();
-        tag2.setTagName("hard");
+        tag2.setTagName("cats");
         tag2.setTagState("1");
         tag2.setTagCreatedAt(LocalDateTime.now());
 
@@ -54,22 +54,22 @@ public class PostTest {
         // 建立 Member
         MemberBean member = new MemberBean();
         member.setRole(MemberBean.Role.USER);
-        member.setUsername("mapo");
+        member.setUsername("chiiakawa");
         member.setPassword("passwsdord3".getBytes(StandardCharsets.UTF_8));
-        member.setPhoneNumber("1233425363");
-        member.setEmail("mapo@example.com");
-        member.setName("mapo");
+        member.setPhoneNumber("123123121863");
+        member.setEmail("chiiakawa@example.com");
+        member.setName("chiiakawa");
         member.setGender("Male");
-        member.setNickname("mapo");
+        member.setNickname("chiiakawa");
 
         // 儲存 Member，確保它已經持久化
         MemberBean savedMember = memberRepository.save(member);
 
         // 建立 Post
         PostBean post = new PostBean();
-        post.setPostTitle("mapo");
-        post.setPostContent("This is a detailed article about Spring Boot.");
-        post.setPostLink("https://example.com/spring-boot");
+        post.setPostTitle("chiiakawa");
+        post.setPostContent("This is a detailed article about chiiakawa Boot.");
+        post.setPostLink("https://chiiakawa.com/spring-boot");
         post.setPostStatus("Published");
         post.setPostTime(LocalDateTime.now());
 

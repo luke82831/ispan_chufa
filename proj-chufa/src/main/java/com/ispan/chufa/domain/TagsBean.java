@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +36,13 @@ public class TagsBean {
             joinColumns = @JoinColumn(name = "tagsBean_tagId"), // 當前實體的外鍵列
             inverseJoinColumns = @JoinColumn(name = "postBean_postid") // 關聯實體的外鍵列
     )
+    @JsonBackReference
     private Set<PostBean> postBeans = new HashSet<>();
+    
+//    @ManyToMany(mappedBy = "tag")
+//    @JsonBackReference
+//    private Set<PostBean> postBeans = new HashSet<>();
+//    
 
     @ManyToMany // 多對多 標籤對成員
     @JoinTable(name = "tags_members", // 聯結表名稱

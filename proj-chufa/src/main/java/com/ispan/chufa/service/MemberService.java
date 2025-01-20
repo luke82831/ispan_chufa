@@ -125,6 +125,12 @@ public class MemberService {
 	// }
 
 	public void saveMember(MemberBean memberBean) {
+		if (memberBean.getPassword() == null || memberBean.getPassword().length < 6) {
+			throw new IllegalArgumentException("密碼長度必須至少為 6 個字元");
+		}
+		if (memberBean.getRole() == null) {
+			memberBean.setRole(MemberBean.Role.USER);
+		}
 		System.out.println("Saving member: " + memberBean.getEmail() + ", Phone: " + memberBean.getPhoneNumber());
 		memberRepository.save(memberBean);
 	} // 儲存 MemberBean 物件到資料庫

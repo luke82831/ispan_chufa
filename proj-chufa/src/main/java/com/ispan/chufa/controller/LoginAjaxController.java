@@ -1,7 +1,9 @@
 package com.ispan.chufa.controller;
 
 import java.util.Base64;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -381,6 +383,58 @@ public class LoginAjaxController {
             }
             return ResponseEntity.ok(responseJson.toString());
         } catch (Exception e) {
+            responseJson.put("success", false);
+            responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
+            return ResponseEntity.status(500).body(responseJson.toString());
+        }
+    }
+
+    @GetMapping("/members")
+    public ResponseEntity<String> getAllMembers(@RequestHeader("Authorization") String authorizationHeader) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            // 1. 權限檢查（確定當前使用者是管理員）
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                responseJson.put("success", false);
+                responseJson.put("message", "缺少或無效的 Authorization header");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+            String token = authorizationHeader.substring(7);
+            String email = jsonWebTokenUtility.validateToken(token);
+            if (email == null) {
+                responseJson.put("success", false);
+                responseJson.put("message", "無效或過期的 Token");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            MemberBean currentUser = memberService.findByEmail(email);
+            if (currentUser == null || currentUser.getRole() != MemberBean.Role.ADMIN) {
+                responseJson.put("success", false);
+                responseJson.put("message", "只有管理員可查看所有會員");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            // 2. 獲取全部會員
+            List<MemberBean> allMembers = memberService.findAllMembers();
+
+            // 3. 把會員資料轉成 JSON
+            JSONArray usersArray = new JSONArray();
+            for (MemberBean mb : allMembers) {
+                JSONObject userJson = new JSONObject();
+                userJson.put("userid", mb.getUserid());
+                userJson.put("name", mb.getName());
+                userJson.put("email", mb.getEmail());
+                userJson.put("role", mb.getRole() != null ? mb.getRole().toString() : "USER");
+                // 這裡可以再加上更多要顯示的欄位
+                usersArray.put(userJson);
+            }
+
+            responseJson.put("success", true);
+            responseJson.put("users", usersArray);
+
+            return ResponseEntity.ok(responseJson.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
             responseJson.put("success", false);
             responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
             return ResponseEntity.status(500).body(responseJson.toString());

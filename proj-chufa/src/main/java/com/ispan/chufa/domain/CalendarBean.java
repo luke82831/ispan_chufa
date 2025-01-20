@@ -10,66 +10,66 @@ import jakarta.persistence.Table;
 @Table(name = "calendar")
 public class CalendarBean {
 
-    @Id
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+	@Id
+	@Column(name = "date", nullable = false)
+	private LocalDate date;
 
-    @Column(name = "week")
-    private String week;
+	@Column(name = "week")
+	private String week;
 
-    @Column(name = "isHoliday")
-    private boolean isHoliday;
+	@Column(name = "isHoliday")
+	private boolean isHoliday;
 
-    @Column(name = "description", nullable = true)
-    private String description;
+	@Column(name = "description", nullable = true)
+	private String description;
 
-    // Constructors
-    public CalendarBean() {
-    }
+	// Constructors
+	public CalendarBean() {
+	}
 
-    public CalendarBean(LocalDate date, String week, Boolean isHoliday, String description) {
-        this.date = date;
-        this.week = week;
-        this.isHoliday = isHoliday;
-        this.description = description;
-    }
+	public CalendarBean(LocalDate date, String week, Boolean isHoliday, String description) {
+		this.date = date;
+		this.week = week;
+		this.isHoliday = isHoliday;
+		this.description = description;
+	}
 
-    // Getters and Setters
-    public LocalDate getDate() {
-        return date;
-    }
+	// Getters and Setters
+	public LocalDate getDate() {
+		return date;
+	}
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
 
-    public String getWeek() {
-        return week;
-    }
+	public String getWeek() {
+		return week;
+	}
 
-    public void setWeek(String week) {
-        this.week = week;
-    }
+	public void setWeek(String week) {
+		this.week = week;
+	}
 
-    public boolean isHoliday() {
-        return isHoliday;
-    }
+	public boolean isHoliday() {
+		return isHoliday;
+	}
 
-    public void setHoliday(boolean isHoliday) {
-        this.isHoliday = isHoliday;
-    }
+	public void setHoliday(boolean isHoliday) {
+		this.isHoliday = isHoliday;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    @Override
-    public String toString() {
-        return "Calendar [date=" + date + ", week=" + week + ", isHoliday=" + isHoliday +
-                ", description=" + description + "]";
-    }
+	@Override
+	public String toString() {
+		return "Calendar [date=" + date + ", week=" + week + ", isHoliday=" + isHoliday +
+				", description=" + description + "]";
+	}
 }

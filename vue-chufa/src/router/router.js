@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Map from "@/components/planning/GoogleMap/MapDisplay.vue";
 import CreatePlanning from "@/views/planning/CreatePlanning.vue";
-import PlanningTabs from "@/components/planning/PlanningTabs.vue";
+import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
 
 const routes = [

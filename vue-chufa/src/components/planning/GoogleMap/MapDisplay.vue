@@ -1,111 +1,107 @@
 <template>
-  <!-- 地圖區域 -->
   <div class="map">
     <div id="map"></div>
-    <!-- 搜尋區域 -->
     <div class="search">
-      <PlaceSearch :onPlaceSelected="handlePlaceChanged" />
+      <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
+    <!-- 傳遞 selectedPlace 到 PlaceDetail -->
+    <PlaceDetail :place="selectedPlace" />
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
+import PlaceDetail from "./PlaceDetail.vue";
 
-export default {
-  components: {
-    PlaceSearch,
-  },
-  setup() {
-    const map = ref(null); // 地圖實例
-    const markers = ref([]); // 存儲所有標記
-    const selectedPlace = ref(null); // 已選地點
+// 定義事件
+const emit = defineEmits(["place-selected"]);
 
-    onMounted(() => {
-      initMap();
+const map = ref(null); // 地圖實例
+const markers = ref([]); // 存儲所有標記
+const selectedPlace = ref(null); // 已選地點
+
+onMounted(() => {
+  initMap();
+});
+
+// 初始化地圖
+const initMap = async () => {
+  try {
+    const { Map } = await google.maps.importLibrary("maps");
+
+    map.value = new Map(document.getElementById("map"), {
+      zoom: 12,
+      center: { lat: 25.0339643, lng: 121.564468 },
+      mapId: "DEMO_MAP_ID",
+      gestureHandling: "cooperative",
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
     });
+  } catch (error) {
+    console.error("地圖初始化失敗:", error);
+  }
+};
 
-    // 初始化地圖
-    const initMap = async () => {
-      try {
-        const { Map } = await google.maps.importLibrary("maps");
+// 處理地點變更
+const handlePlaceChanged = (place) => {
+  if (!place || !place.geometry || !place.geometry.location) {
+    console.error("無效的地點或缺少幾何資料");
+    return;
+  }
 
-        map.value = new Map(document.getElementById("map"), {
-          zoom: 12,
-          center: { lat: 25.0339643, lng: 121.564468 },
-          mapId: "DEMO_MAP_ID",
-          gestureHandling: "cooperative",
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-        });
-      } catch (error) {
-        console.error("地圖初始化失敗:", error);
-      }
-    };
+  const { lat, lng } = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+  };
 
-    // 處理地點變更
-    const handlePlaceChanged = (place) => {
-      if (!place || !place.geometry || !place.geometry.location) {
-        console.error("無效的地點或缺少幾何資料");
-        return;
-      }
+  map.value.setCenter(place.geometry.location);
+  map.value.setZoom(17);
 
-      const { lat, lng } = {
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      };
+  updateMarker({ lat, lng }, place);
 
-      map.value.setCenter(place.geometry.location);
-      map.value.setZoom(17);
+  // 更新 selectedPlace 並發送事件給父組件
+  selectedPlace.value = {
+    displayName: place.name || "未知地點",
+    formattedAddress: place.formatted_address || "無地址",
+    location: { lat, lng },
+  };
 
-      updateMarker({ lat, lng }, place);
+  // 發送 place-selected 事件到父組件，傳遞 selectedPlace
+  emit("place-selected", selectedPlace.value);
+};
 
-      selectedPlace.value = {
-        displayName: place.name || "未知地點",
-        formattedAddress: place.formatted_address || "無地址",
-        location: { lat, lng },
-      };
-    };
+// 更新或新增標記並顯示資訊框
+const updateMarker = (position, place) => {
+  markers.value.forEach((marker) => marker.setMap(null));
+  markers.value = [];
 
-    // 更新或新增標記並顯示資訊框
-    const updateMarker = (position, place) => {
-      markers.value.forEach((marker) => marker.setMap(null));
-      markers.value = [];
+  const marker = new google.maps.Marker({
+    map: map.value,
+    position: position,
+    animation: google.maps.Animation.DROP, // 啟用落下動畫
+  });
 
-      const marker = new google.maps.Marker({
-        map: map.value,
-        position: position,
-        animation: google.maps.Animation.DROP, // 啟用落下動畫
-      });
+  // 創建資訊框
+  const infoWindow = new google.maps.InfoWindow({
+    content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
+  });
 
-      // 創建資訊框
-      const infoWindow = new google.maps.InfoWindow({
-        content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
-      });
+  // 設定標記動畫完成後顯示資訊框
+  marker.addListener("animation_changed", () => {
+    if (marker.getAnimation() === null) {
+      // 落下動畫結束後顯示資訊框
+      infoWindow.open(map.value, marker);
+    }
+  });
 
-      // 設定標記動畫完成後顯示資訊框
-      marker.addListener("animation_changed", () => {
-        if (marker.getAnimation() === null) {
-          // 落下動畫結束後顯示資訊框
-          infoWindow.open(map.value, marker);
-        }
-      });
-
-      markers.value.push(marker); // 新增到標記清單
-    };
-
-    return {
-      map,
-      markers,
-      selectedPlace,
-      handlePlaceChanged,
-    };
-  },
+  markers.value.push(marker); // 新增到標記清單
 };
 </script>
+
+
 
 <style>
 .search {

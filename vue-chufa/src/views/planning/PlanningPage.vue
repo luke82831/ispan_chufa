@@ -31,8 +31,8 @@ export default {
   },
   data() {
     return {
-      placeSelected: false,  // 控制是否顯示 PlaceDetail
-      selectedPlace: null,   // 存放選擇的地點資料
+      placeSelected: false, // 控制是否顯示 PlaceDetail
+      selectedPlace: null, // 存放選擇的地點資料
     };
   },
   methods: {
@@ -49,13 +49,13 @@ export default {
 .container {
   display: flex;
   height: 100vh; /* 填滿視窗高度 */
-  width: 100%;   /* 填滿視窗寬度 */
+  width: 100%; /* 填滿視窗寬度 */
   margin: 0;
   padding: 0;
 }
 
 .form-container {
-  flex: 0 0 30%; /* 固定 30% 寬度 */
+  flex: 0 0 25%; /* 固定 30% 寬度 */
   height: 100%; /* 滿高 */
   overflow-y: auto; /* 垂直滾動 */
   padding: 5px;
@@ -64,20 +64,15 @@ export default {
   position: relative; /* 確保 z-index 運作 */
   z-index: 10; /* 讓表單顯示在地圖上方 */
   background-color: #f9f9f9;
-  scrollbar-width: thin;
-  scrollbar-color: #ccc #f9f9f9;
+  overflow-y: auto; /* 當內容超出高度時，允許垂直滾動 */
+  overflow-x: hidden; /* 隱藏水平滾動條 */
+  box-sizing: border-box; /* 包括 padding 在內計算寬高 */
+  word-wrap: break-word; /* 自動換行，避免溢出 */
+  word-break: break-word; /* 將長單詞或字串強制換行 */
+  white-space: normal; /* 確保內容不強制在一行內顯示 */
 }
 
-.form-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.form-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
-}
-
-.map-container { 
+.map-container {
   height: 100%; /* 確保容器高度填滿父容器 */
   flex: 1; /* 自動填滿剩餘空間 */
   position: relative; /* 確保內部絕對定位基於 .map-container */
@@ -86,10 +81,17 @@ export default {
 .place-container {
   position: relative;
   top: 0;
-  width: 20%; /* 佔地圖區域 */
-  height: 100%;
+  width: 25%; /* 占地圖區域的寬度 */
+  height: 100vh; /* 高度填滿視窗 */
   z-index: 15; /* 保證 PlaceDetail 覆蓋在地圖之上 */
-  background-color: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+  background-color: #f9f9f9;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 輕微陰影 */
+  overflow-y: auto; /* 當內容超出高度時，允許垂直滾動 */
+  overflow-x: hidden; /* 隱藏水平滾動條 */
+  padding: 16px; /* 內部間距 */
+  box-sizing: border-box; /* 包括 padding 在內計算寬高 */
+  word-wrap: break-word; /* 自動換行，避免溢出 */
+  word-break: break-word; /* 將長單詞或字串強制換行 */
+  white-space: normal; /* 確保內容不強制在一行內顯示 */
 }
 </style>

@@ -5,7 +5,7 @@
       <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
     <!-- 傳遞 selectedPlace 到 PlaceDetail -->
-    <PlaceDetail :place="selectedPlace" />
+    <PlaceDetail v-if="false" :place="selectedPlace" />
   </div>
 </template>
 
@@ -62,11 +62,39 @@ const handlePlaceChanged = (place) => {
 
   updateMarker({ lat, lng }, place);
 
+  // 根據 priceLevel 數值轉換為中文描述
+  const convertPriceLevel = (priceLevel) => {
+    switch (priceLevel) {
+      case 0:
+        return "便宜";
+      case 1:
+        return "平價";
+      case 2:
+        return "中等";
+      case 3:
+        return "高級";
+      case 4:
+        return "奢華";
+      default:
+        return null;
+    }
+  };
+
   // 更新 selectedPlace 並發送事件給父組件
   selectedPlace.value = {
-    displayName: place.name || "未知地點",
-    formattedAddress: place.formatted_address || "無地址",
+    displayName: place.name || null,
+    formattedAddress: place.formatted_address || null,
     location: { lat, lng },
+    rating: place.rating || null,
+    openingHours: place.opening_hours?.weekday_text || null,
+    photos: place.photos || [],
+    types: place.types || [],
+    formattedPhoneNumber: place.formatted_phone_number || null,
+    userRatingsTotal: place.user_ratings_total || 0,
+    website: place.website || null,
+    priceLevel: convertPriceLevel(place.price_level) || null, // 使用函式轉換價格等級
+    url: place.url || null,
+    addressComponents: place.address_components || [],
   };
 
   // 發送 place-selected 事件到父組件，傳遞 selectedPlace
@@ -101,8 +129,6 @@ const updateMarker = (position, place) => {
 };
 </script>
 
-
-
 <style>
 .search {
   position: absolute;
@@ -122,7 +148,6 @@ const updateMarker = (position, place) => {
   width: 100%;
   flex-grow: 1;
   position: relative; /* 確保內部元素的絕對定位相對於 .container */
-  margin-left: 100px;
   position: relative; /* 為地圖設定定位基準 */
   height: 100%; /* 確保容器滿高 */
 }

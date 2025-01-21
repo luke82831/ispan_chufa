@@ -7,7 +7,9 @@
       placeholder="請輸入地點"
     />
     <!-- 新增儲存地點的按鈕 -->
-    <button @click="submitToBackend(placeDetails)" :disabled="!placeDetails">儲存地點</button>
+    <button @click="submitToBackend(placeDetails)" :disabled="!placeDetails">
+      儲存地點
+    </button>
   </div>
 </template>
 
@@ -17,17 +19,22 @@ import Swal from "sweetalert2"; // 確保引入 SweetAlert2
 
 const searchInput = ref(""); // 搜尋框輸入
 const placeDetails = ref(null); // 儲存地點詳細資訊
-const emit = defineEmits(['place-selected']); // 定義 place-selected 事件
+const emit = defineEmits(["place-selected"]); // 定義 place-selected 事件
 
 // 初始化 Autocomplete
 const initAutocomplete = async () => {
   try {
-    const { Autocomplete, PlacesService } = await google.maps.importLibrary("places");
+    const { Autocomplete, PlacesService } = await google.maps.importLibrary(
+      "places"
+    );
 
-    const autocomplete = new Autocomplete(document.getElementById("search-input"), {
-      fields: ["place_id", "address_components", "geometry", "name"], // 最小化初始欄位
-      types: ['establishment'], // 只顯示地點名稱
-    });
+    const autocomplete = new Autocomplete(
+      document.getElementById("search-input"),
+      {
+        fields: ["place_id", "address_components", "geometry", "name"], // 最小化初始欄位
+        types: ["establishment"], // 只顯示地點名稱
+      }
+    );
 
     // 限制地點搜尋在台灣
     autocomplete.setOptions({
@@ -62,7 +69,7 @@ const initAutocomplete = async () => {
             "address_components",
           ],
         };
-      
+
         service.getDetails(request, (details, status) => {
           if (status === google.maps.places.PlacesServiceStatus.OK && details) {
             console.log("地點詳細資訊:", details);
@@ -109,6 +116,7 @@ const submitToBackend = async (details) => {
 
   // 構建提交資料
   const formattedPlaceDetails = {
+    googlemapPlaceId: details.place_id || null,
     placeType: details.types?.join(", ") || null,
     placeName: details.name || null,
     placeAddress: details.formatted_address || null,
@@ -128,32 +136,67 @@ const submitToBackend = async (details) => {
     reservation: details.isReservable || null,
   };
 
-  try {
-    const response = await fetch("http://localhost:8080/api/savePlace", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formattedPlaceDetails),
-    });
+  // 假設 formattedPlaceDetails 包含 placeAddress（唯一識別地點的地址）
+  const placeAddress = formattedPlaceDetails.placeAddress;
+  // console.log("取出地址: " + placeAddress); // 確認取出的地址
 
-    if (!response.ok) {
-      throw new Error(`伺服器錯誤: ${response.statusText}`);
+  try {
+    // 用 POST 方法查詢後端是否已有該地址的資料
+    const checkResponse = await fetch(
+      "http://localhost:8080/api/checkPlaceByAddress",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ address: placeAddress }),
+      }
+    );
+
+    if (!checkResponse.ok) {
+      console.log("checkResult:", checkResult);
+      throw new Error(`伺服器錯誤: ${checkResponse.statusText}`);
     }
 
-    const result = await response.json();
-    Swal.fire({
-      icon: "success",
-      title: "成功",
-      text: "地點已成功傳入後端!",
-    });
-    console.log("地點已成功傳入後端:", result);
+    const checkResult = await checkResponse.json();
+
+    if (checkResult.message === "地點已存在資料庫") {
+      // 如果資料已存在，直接提示成功，不需再次儲存
+      Swal.fire({
+        icon: "warning",
+        title: "資料已存在",
+        text: "此地點資料已在後端中儲存。",
+      });
+      console.log("地點資料已存在於後端:", checkResult.placeInfo);
+      console.log("地點資料已存在於後端:", details);
+    } else {
+      // 如果資料不存在，則儲存地點資訊
+      const saveResponse = await fetch("http://localhost:8080/api/savePlace", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formattedPlaceDetails),
+      });
+
+      if (!saveResponse.ok) {
+        throw new Error(`伺服器錯誤: ${saveResponse.statusText}`);
+      }
+
+      const saveResult = await saveResponse.json();
+      Swal.fire({
+        icon: "success",
+        title: "成功",
+        text: "地點已成功傳入後端!",
+      });
+      console.log("地點已成功傳入後端:", saveResult);
+    }
   } catch (error) {
-    console.error("傳送地點資訊至後端時出錯:", error);
+    console.error("處理地點資訊時出錯:", error);
     Swal.fire({
       icon: "error",
       title: "錯誤",
-      text: `傳送地點資訊時出現錯誤: ${error.message}`,
+      text: `處理地點資訊時出現錯誤: ${error.message}`,
     });
   }
 };
@@ -162,9 +205,7 @@ const submitToBackend = async (details) => {
 onMounted(() => {
   initAutocomplete();
 });
-
 </script>
-
 
 <style scoped>
 .search input {
@@ -184,7 +225,7 @@ button {
   cursor: pointer;
   border: none;
   border-radius: 5px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   margin-top: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);

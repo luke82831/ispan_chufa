@@ -1,4 +1,4 @@
-package com.ispan.chufa;
+package com.ispan.chufa.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

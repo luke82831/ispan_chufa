@@ -1,5 +1,8 @@
 package com.ispan.chufa.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,9 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.repository.PlaceRepository;
-
-import java.util.HashMap;
-import java.util.Map;
+import com.ispan.chufa.service.PlaceService;
 
 @RestController
 @RequestMapping("/api")
@@ -19,10 +20,35 @@ public class MapController {
 
     @Autowired
     private PlaceRepository placeRepository;
+    
+    @Autowired
+    private PlaceService placeService; 
 
+    // 查詢地點是否存在
+    @PostMapping("/checkPlaceByAddress")
+    public ResponseEntity<?> checkPlaceByAddress(@RequestBody Map<String, String> request) {
+        String placeAddress = request.get("address");
+        System.out.println("Received address: " + placeAddress);  // 輸出收到的地址
+
+        PlaceBean existingPlace = placeService.findPlaceByAddress(placeAddress);
+
+        if (existingPlace != null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "地點已存在資料庫");
+            response.put("placeInfo", existingPlace);  
+            return ResponseEntity.ok(response); // 返回地點資訊
+        } else {
+            // 直接返回 Map，Spring 會將它轉換為 JSON 格式
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "地點不存在");
+            return ResponseEntity.ok(response);        
+            }
+    }
+    
     @PostMapping("/savePlace")
     public ResponseEntity<?> savePlace(@RequestBody PlaceBean placeBean) {
         PlaceBean place = new PlaceBean();
+        place.setGooglemapPlaceId(placeBean.getGooglemapPlaceId());
         place.setPlaceType(placeBean.getPlaceType());
         place.setPlaceName(placeBean.getPlaceName());
         place.setCity(placeBean.getCity());

@@ -112,4 +112,10 @@ public class PlaceService {
 
         return true;  // 成功刪除
     }
+
+	public PlaceBean findPlaceByAddress(String placeAddress) {
+        return placeRepository.findByPlaceAddress(placeAddress); // 呼叫 Repository 方法
+	}
+
+
 }

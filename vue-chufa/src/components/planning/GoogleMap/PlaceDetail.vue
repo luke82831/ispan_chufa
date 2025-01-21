@@ -4,11 +4,15 @@
     <p>{{ place.formattedAddress }}</p>
     <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p>
     <p v-if="place.rating">評分: {{ place.rating }}</p>
-    <p v-if="place.formattedPhoneNumber">電話: {{ place.formattedPhoneNumber }}</p>
+    <p v-if="place.formattedPhoneNumber">
+      電話: {{ place.formattedPhoneNumber }}
+    </p>
     <p v-if="place.priceLevel">價位資訊: {{ place.priceLevel }}</p>
     <p v-if="place.openingHours">營業時間:</p>
     <ul v-if="place.openingHours">
-      <li v-for="(time, index) in place.openingHours" :key="index">{{ time }}</li>
+      <li v-for="(time, index) in place.openingHours" :key="index">
+        {{ time }}
+      </li>
     </ul>
     <p v-if="place.website">
       網站: <a :href="place.website" target="_blank">{{ place.website }}</a>

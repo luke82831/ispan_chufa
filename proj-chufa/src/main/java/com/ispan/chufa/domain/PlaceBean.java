@@ -27,7 +27,8 @@ public class PlaceBean {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long placeId;
+	private Long placeId;
+	private String googlemapPlaceId;
 	private String placeType;
 	private String placeName;
 	private String city;
@@ -52,6 +53,7 @@ public class PlaceBean {
 
 	//  一對多
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnoreProperties({"myCoupons", "place"})
 	private List<CouponBean> coupons;
 
     @OneToMany(mappedBy = "place")
@@ -70,11 +72,11 @@ public class PlaceBean {
 	
 
 	// getter and setter
-	public long getPlaceId() {
+	public Long getPlaceId() {
 		return placeId;
 	}
 
-	public void setPlaceId(long placeId) {
+	public void setPlaceId(Long placeId) {
 		this.placeId = placeId;
 	}
 
@@ -246,4 +248,12 @@ public class PlaceBean {
 		this.eventXPlaceBeans = eventXPlaceBeans;
 	}
 
+	public String getGooglemapPlaceId() {
+		return googlemapPlaceId;
+	}
+
+	public void setGooglemapPlaceId(String googlemapPlaceId) {
+		this.googlemapPlaceId = googlemapPlaceId;
+	}
+	
 }

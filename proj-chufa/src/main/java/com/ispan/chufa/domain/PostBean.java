@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -34,7 +35,6 @@ public class PostBean {
 	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
-
 
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))

@@ -441,4 +441,30 @@ public class LoginAjaxController {
         }
     }
 
+    @DeleteMapping("/members/{memberId}")
+    public ResponseEntity<?> deleteMember(@PathVariable Long memberId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            // 權限檢查，確認當前使用者是管理員，類似 updateMemberRole
+            // ...
+
+            // 呼叫 Service
+            boolean deleted = memberService.deleteMemberById(memberId);
+            if (deleted) {
+                responseJson.put("success", true);
+                responseJson.put("message", "會員已刪除");
+            } else {
+                responseJson.put("success", false);
+                responseJson.put("message", "會員不存在，無法刪除");
+            }
+            return ResponseEntity.ok(responseJson.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseJson.put("success", false);
+            responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
+            return ResponseEntity.status(500).body(responseJson.toString());
+        }
+    }
+
 }

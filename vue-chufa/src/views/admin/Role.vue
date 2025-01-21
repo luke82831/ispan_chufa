@@ -54,14 +54,9 @@ import { ref } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 
-// 會員資料陣列
 const users = ref([]);
-// 是否載入中
 const loading = ref(false);
 
-/**
- * 取得所有會員資料
- */
 const fetchUsers = async () => {
   loading.value = true;
   try {
@@ -82,15 +77,10 @@ const fetchUsers = async () => {
   }
 };
 
-/**
- * 更新會員角色
- * @param {Number} userId - 會員 ID
- * @param {String} newRole - 新角色
- */
 const updateRole = async (userId, newRole) => {
   try {
     const response = await axios.put(
-      `/ajax/secure/profile/${userId}/role`,
+      `/ajax/secure/members/${userId}/role`,
       { role: newRole },
       {
         withCredentials: true,
@@ -98,21 +88,17 @@ const updateRole = async (userId, newRole) => {
       }
     );
     if (response.data.success) {
-      Swal.fire('成功', '角色更新成功', 'success');
+      Swal.fire('成功', '身份更新成功', 'success');
       fetchUsers();
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
     }
   } catch (error) {
-    Swal.fire('錯誤', '角色更新失敗', 'error');
+    Swal.fire('錯誤', '身份更新失敗', 'error');
     console.error('Update Role Error:', error);
   }
 };
 
-/**
- * 刪除會員
- * @param {Number} userId - 會員 ID
- */
 const deleteMember = async (userId) => {
   try {
     const response = await axios.delete(`/ajax/secure/members/${userId}`, {
@@ -131,7 +117,6 @@ const deleteMember = async (userId) => {
   }
 };
 
-// 初始化抓取會員資料
 fetchUsers();
 </script>
 
@@ -148,11 +133,15 @@ fetchUsers();
   overflow: hidden;
 }
 
+/* 調整標題排版，置中 + 底線 */
 .member-management h1 {
+  display: inline-block;          /* 讓底線能隨文字寬度 */
   text-align: center;
-  margin-bottom: 30px;
   font-size: 28px;
   color: #343a40;
+  border-bottom: 2px solid #ccc;  /* 底部加一道線 */
+  padding-bottom: 10px;
+  margin: 0 auto 30px;            /* 上面 0, 下面 30px 間距, 同時置中 */
 }
 
 /* 載入中文字樣 */
@@ -192,6 +181,7 @@ fetchUsers();
   border-bottom: 1px solid #ccc;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: center; /* 欄位標題置中 */
 }
 
 /* 表身 */
@@ -202,7 +192,7 @@ fetchUsers();
 .user-table td {
   padding: 14px 12px;
   border-bottom: 1px solid #ddd;
-  text-align: center;
+  text-align: center;    /* 內容置中，可視需求調整成 left/right */
   color: #555;
   font-size: 14px;
 }

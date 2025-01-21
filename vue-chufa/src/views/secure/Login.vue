@@ -31,10 +31,14 @@
                 <div v-if="serverError" class="server-error">
                     {{ serverError }}
                 </div>
+            </form>
+                <div class="social-login">
+                    <button class="line-login-button" @click="redirectToLineLogin">使用 LINE 帳號登入</button>
+                </div>
                 <div class="login-footer">
                     <router-link to="/secure/register" class="register-link">尚未註冊？點此註冊</router-link>
                 </div>
-            </form>
+
         </div>
     </div>
 </template>
@@ -118,6 +122,11 @@ async function login() {
             icon: 'error',
         });
     }
+}
+
+function redirectToLineLogin() {
+  // 重導到後端的 LINE 登入路徑
+  window.location.href = 'http://localhost:8080/ajax/secure/lineLogin';
 }
 </script>
 
@@ -228,5 +237,24 @@ async function login() {
 
 .register-link:hover {
     color: #3a6ea1;
+}
+
+/* LINE 登入按鈕樣式 */
+.line-login-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #00c300;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.line-login-button:hover {
+  background-color: #00a300;
 }
 </style>

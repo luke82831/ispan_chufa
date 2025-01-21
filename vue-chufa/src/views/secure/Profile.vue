@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
@@ -121,9 +121,16 @@ const formatDate = (date) => {
 
 const fetchProfile = async () => {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      Swal.fire('錯誤', '未登入或登入已過期，請重新登入', 'error');
+      router.push('/secure/Login');
+      return;
+      }
     const response = await axios.get('/ajax/secure/profile', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
+
     if (response.data.success) {
       member.value = response.data.user || {};
       editMember.value = { ...member.value };
@@ -141,6 +148,29 @@ const fetchProfile = async () => {
     Swal.fire('錯誤', '無法獲取會員資料', 'error');
   }
 };
+// 處理頁面載入和回調參數的邏輯
+onMounted(() => {
+    const initialize = async () => {
+        // 定義 urlParams 並從當前窗口的 URL 中解析查詢參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            // 保存 token 並清理 URL
+            localStorage.setItem('token', token);
+            axios.defaults.headers.Authorization = `Bearer ${token}`;
+            window.history.replaceState({}, document.title, '/secure/Profile'); // 清除查詢參數
+        } else {
+            console.warn("Token not found in URL query parameters.");
+        }
+
+        // 嘗試抓取用戶資料
+        await fetchProfile();
+    };
+
+    initialize(); // 呼叫初始化函數
+});
+
 
 // 管理員跳轉到會員管理頁面 (路徑不變)
 const navigateToAdmin = () => {

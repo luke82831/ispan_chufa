@@ -48,6 +48,7 @@ public class PlaceService {
  // 更新指定 ID 的 Place
     public PlaceBean updatePlace(Long id, PlaceBean placeBean) {
         return placeRepository.findById(id).map(place -> {
+            place.setGooglemapPlaceId(placeBean.getGooglemapPlaceId());
             place.setPlaceName(placeBean.getPlaceName());
             place.setPlaceAddress(placeBean.getPlaceAddress());
             place.setCity(placeBean.getCity());
@@ -66,7 +67,7 @@ public class PlaceService {
             place.setRating(placeBean.getRating());
             place.setWebsite(placeBean.getWebsite());
             place.setBookingUrl(placeBean.getBookingUrl());
-            place.setPrice(placeBean.getPrice());
+            place.setPriceLevel(placeBean.getPriceLevel());
             place.setPlaceName(placeBean.getPlaceName());
             place.setAccommodationType(placeBean.getAccommodationType());
             place.setReservation(placeBean.isReservation());
@@ -115,6 +116,10 @@ public class PlaceService {
 
 	public PlaceBean findPlaceByAddress(String placeAddress) {
         return placeRepository.findByPlaceAddress(placeAddress); // 呼叫 Repository 方法
+	}
+
+	public PlaceBean findPlaceByGooglemapPlaceId(String googlemapPlaceId) {
+        return placeRepository.findPlaceByGooglemapPlaceId(googlemapPlaceId); // 呼叫 Repository 方法
 	}
 
 

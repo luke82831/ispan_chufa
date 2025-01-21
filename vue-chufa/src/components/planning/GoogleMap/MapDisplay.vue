@@ -47,17 +47,19 @@ const initMap = async () => {
 
 // 處理地點變更
 const handlePlaceChanged = (place) => {
-  if (!place || !place.geometry || !place.geometry.location) {
+  if (!place || !place.placeId) {
+    console.log("地點:", place);
+    console.log("是否有placeId:", place.placeId);
     console.error("無效的地點或缺少幾何資料");
     return;
   }
 
   const { lat, lng } = {
-    lat: place.geometry.location.lat(),
-    lng: place.geometry.location.lng(),
+    lat: place.latitude,
+    lng: place.longitude,
   };
 
-  map.value.setCenter(place.geometry.location);
+  map.value.setCenter({ lat, lng });
   map.value.setZoom(17);
 
   updateMarker({ lat, lng }, place);
@@ -80,21 +82,39 @@ const handlePlaceChanged = (place) => {
     }
   };
 
+  // 根據營業時間字串轉換為物件格式
+  const convertBusinessHours = (openingHours) => {
+    if (!openingHours) return null;
+
+    // 將字串切分並轉換為物件
+    return openingHours.split("\n").reduce((acc, line) => {
+      const [day, hours] = line.split(": "); // 用 ": " 分隔
+      if (day && hours) {
+        acc[day.trim()] = hours.trim(); // 去除多餘空白
+      }
+      return acc;
+    }, {});
+  };
+  // const businessHours =
+  //   "星期一: 24 小時營業\n星期二: 24 小時營業\n星期三: 24 小時營業\n星期四: 24 小時營業\n星期五: 24 小時營業\n星期六: 24 小時營業\n星期日: 24 小時營業";
+
+  // const businessHoursObject = convertBusinessHours(businessHours);
+  // console.log(businessHoursObject);
+
   // 更新 selectedPlace 並發送事件給父組件
   selectedPlace.value = {
-    displayName: place.name || null,
-    formattedAddress: place.formatted_address || null,
+    displayName: place.placeName || null,
+    formattedAddress: place.placeAddress || null,
     location: { lat, lng },
     rating: place.rating || null,
-    openingHours: place.opening_hours?.weekday_text || null,
+    openingHours: convertBusinessHours(place.businessHours) || null, // 傳入轉換後的物件
     photos: place.photos || [],
-    types: place.types || [],
-    formattedPhoneNumber: place.formatted_phone_number || null,
-    userRatingsTotal: place.user_ratings_total || 0,
+    types: place.placeType || [],
+    formattedPhoneNumber: place.placePhone || null,
     website: place.website || null,
-    priceLevel: convertPriceLevel(place.price_level) || null, // 使用函式轉換價格等級
-    url: place.url || null,
+    priceLevel: convertPriceLevel(place.priceLevel) || null, // 使用函式轉換價格等級
     addressComponents: place.address_components || [],
+    reservation: place.reservation || null,
   };
 
   // 發送 place-selected 事件到父組件，傳遞 selectedPlace
@@ -102,7 +122,7 @@ const handlePlaceChanged = (place) => {
 };
 
 // 更新或新增標記並顯示資訊框
-const updateMarker = (position, place) => {
+function updateMarker(position, place) {
   markers.value.forEach((marker) => marker.setMap(null));
   markers.value = [];
 
@@ -114,7 +134,7 @@ const updateMarker = (position, place) => {
 
   // 創建資訊框
   const infoWindow = new google.maps.InfoWindow({
-    content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
+    content: `<div><h3>${place.placeName}</h3><p>${place.placeAddress}</p></div>`,
   });
 
   // 設定標記動畫完成後顯示資訊框
@@ -126,7 +146,7 @@ const updateMarker = (position, place) => {
   });
 
   markers.value.push(marker); // 新增到標記清單
-};
+}
 </script>
 
 <style>

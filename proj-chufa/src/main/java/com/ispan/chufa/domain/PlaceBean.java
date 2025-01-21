@@ -47,7 +47,7 @@ public class PlaceBean {
 	private Double rating;
 	private String website;
 	private String bookingUrl;
-	private BigDecimal price; // 使用 BigDecimal 處理價格
+	private BigDecimal priceLevel; // 使用 BigDecimal 處理價格
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 
@@ -192,12 +192,12 @@ public class PlaceBean {
 		this.bookingUrl = bookingUrl;
 	}
 
-	public BigDecimal getPrice() {
-		return price;
+	public BigDecimal getPriceLevel() {
+		return priceLevel;
 	}
 
-	public void setPrice(BigDecimal price) {
-		this.price = price;
+	public void setPriceLevel(BigDecimal priceLevel) {
+		this.priceLevel = priceLevel;
 	}
 
 	public String getAccommodationType() {

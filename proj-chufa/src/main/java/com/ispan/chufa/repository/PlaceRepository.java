@@ -10,4 +10,6 @@ public interface PlaceRepository extends JpaRepository<PlaceBean, Long> {
 
 	PlaceBean findByPlaceAddress(String placeAddress);
 
+	PlaceBean findPlaceByGooglemapPlaceId(String googlemapPlaceId);
+
 }

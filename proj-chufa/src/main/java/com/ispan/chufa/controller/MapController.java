@@ -25,12 +25,13 @@ public class MapController {
     private PlaceService placeService; 
 
     // 查詢地點是否存在
-    @PostMapping("/checkPlaceByAddress")
+    @PostMapping("/checkPlace")
     public ResponseEntity<?> checkPlaceByAddress(@RequestBody Map<String, String> request) {
-        String placeAddress = request.get("address");
-        System.out.println("Received address: " + placeAddress);  // 輸出收到的地址
+        String googlemapPlaceId = request.get("placeId");
+        System.out.println("Received googlemap placeid: " + googlemapPlaceId);  // 輸出收到的地址
 
-        PlaceBean existingPlace = placeService.findPlaceByAddress(placeAddress);
+        PlaceBean existingPlace = placeService.findPlaceByGooglemapPlaceId(googlemapPlaceId);
+//        System.out.println(existingPlace.getGooglemapPlaceId());
 
         if (existingPlace != null) {
             Map<String, Object> response = new HashMap<>();
@@ -63,7 +64,7 @@ public class MapController {
         place.setRating(placeBean.getRating());
         place.setWebsite(placeBean.getWebsite());
         place.setBookingUrl(placeBean.getBookingUrl());
-        place.setPrice(placeBean.getPrice());
+        place.setPriceLevel(placeBean.getPriceLevel());
         place.setPlaceName(placeBean.getPlaceName());
         place.setAccommodationType(placeBean.getAccommodationType());
         place.setReservation(placeBean.isReservation());

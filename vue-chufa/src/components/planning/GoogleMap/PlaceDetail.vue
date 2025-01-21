@@ -4,21 +4,20 @@
     <p>{{ place.formattedAddress }}</p>
     <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p>
     <p v-if="place.rating">評分: {{ place.rating }}</p>
-    <p v-if="place.formattedPhoneNumber">
-      電話: {{ place.formattedPhoneNumber }}
-    </p>
+    <p v-if="place.formattedPhoneNumber">電話: {{ place.formattedPhoneNumber }}</p>
     <p v-if="place.priceLevel">價位資訊: {{ place.priceLevel }}</p>
     <p v-if="place.openingHours">營業時間:</p>
     <ul v-if="place.openingHours">
-      <li v-for="(time, index) in place.openingHours" :key="index">
-        {{ time }}
+      <li v-for="(hours, day) in place.openingHours" :key="day">
+        {{ day }}: {{ hours }}
       </li>
     </ul>
+
     <p v-if="place.website">
       網站: <a :href="place.website" target="_blank">{{ place.website }}</a>
     </p>
     <p v-if="place.url">
-      地圖連結: <a :href="place.url" target="_blank"> 查看 Google 地圖</a>
+      是否可訂位: <a :href="place.reservation" target="_blank">{{ place.reservation }}</a>
     </p>
     <p v-if="place.photos && place.photos.length">照片:</p>
     <div v-if="place.photos && place.photos.length" class="photo-gallery">

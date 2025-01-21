@@ -35,28 +35,26 @@ public class PostBean {
 	private String postContent; // 貼文_自定義內文
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 
-
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
 	@JsonBackReference
 	MemberBean member;
-	
+
 	@OneToMany(mappedBy = "postBean")
 	private Set<CommentBean> commentBeans;
-	
+
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	// @JsonManagedReference
 	private List<InteractionBean> interactions; // 貼文的互動行為
 
-    @ManyToMany
-    @JoinTable(
-        name = "post_tags", // 中間表名稱
-        joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
-        inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
-    )
-    private Set<TagsBean> tagsBeans = new HashSet<>();
-	
+	@ManyToMany
+	@JoinTable(name = "post_tags", // 中間表名稱
+			joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
+			inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
+	)
+	private Set<TagsBean> tagsBeans = new HashSet<>();
+
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
 
@@ -164,6 +162,4 @@ public class PostBean {
 				+ ", place=" + place + "]";
 	}
 
-
-	}
-	
+}

@@ -7,6 +7,7 @@ const routes = [
         name: "Login",
         component: () => import("@/views/secure/Login.vue"), // 指向 Login 組件
     },
+
     {
         path: "/secure/Profile",
         name: "Profile",
@@ -17,7 +18,11 @@ const routes = [
         name: "Register",
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
-
+    {
+        path: "/blog/create",
+        name: "BlogCreate",
+        component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
+    },
     { path: "/map", component: Map },
 ]
 

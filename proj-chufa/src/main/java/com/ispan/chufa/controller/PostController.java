@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +24,7 @@ import com.ispan.chufa.dto.PostResponse;
 import com.ispan.chufa.service.PostService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api/posts")
 public class PostController {
     @Autowired
@@ -56,7 +58,7 @@ public class PostController {
         InteractionDTO response = postService.performaction(json);
         try {
             // 檢查是否有缺少必要的參數
-            if (json == null || !json.contains("userid") || !json.contains("interactiontype")
+            if (json == null || !json.contains("userid") || !json.contains("interactionType")
                     || !json.contains("postid")) {
                 response.setSuccess(false);
                 response.setMessage("缺少必要的參數");

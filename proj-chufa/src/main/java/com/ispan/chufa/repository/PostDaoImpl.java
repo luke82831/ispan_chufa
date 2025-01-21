@@ -68,6 +68,14 @@ public class PostDaoImpl implements PostDao {
 			Predicate userPredicate = criteriaBuilder.equal(postRoot.get("member").get("userid"), userId);
 			predicates.add(userPredicate);
 		}
+		
+
+		// 根據 postid 查詢
+		if (!param.isNull("postid")) {
+			Long postid = param.getLong("postid");
+			Predicate userPredicate = criteriaBuilder.equal(postRoot.get("postid"), postid);
+			predicates.add(userPredicate);
+		}
 
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID

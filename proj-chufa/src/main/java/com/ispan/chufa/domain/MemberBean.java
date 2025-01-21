@@ -99,6 +99,7 @@ public class MemberBean {
 	        joinColumns = @JoinColumn(name = "fk_userid", referencedColumnName = "userid"), // 使用者欄位
 	        inverseJoinColumns = @JoinColumn(name = "fk_couponid", referencedColumnName = "couponId") // 優惠券欄位
 	    )
+	 @JsonIgnore
 	    private List<CouponBean> couponBeans; // 使用者領取的優惠券列表
 	
 	// Getters and Setters

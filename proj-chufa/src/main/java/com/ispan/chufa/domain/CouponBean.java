@@ -3,6 +3,10 @@ package com.ispan.chufa.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -43,10 +47,12 @@ public class CouponBean {
     private LocalDateTime endTime;
     
     @ManyToMany(mappedBy = "couponBean")
+    @JsonIgnore
     private List<MyCouponBean> myCoupons; 
     
     @ManyToOne
     @JoinColumn(name = "placeId")
+    @JsonBackReference
     private PlaceBean place;
 
     // Getters and Setters

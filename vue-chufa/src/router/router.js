@@ -17,6 +17,16 @@ const routes = [
         name: "Register",
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
+    {
+        path: "/blog/bloghouse",
+        name: "bloghouse",
+        component: () => import("@/views/blog/bloghouse.vue"), // 指向 bloghouse 組件
+    },
+    {
+        path: "/blog/bloghome",
+        name: "bloghome",
+        component: () => import("@/views/blog/bloghome.vue"), // 指向 bloghouse 組件
+    },
 
     { path: "/map", component: Map },
 ]

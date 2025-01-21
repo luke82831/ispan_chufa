@@ -35,4 +35,4 @@ spring:
 
 jwt:
   token:
-    expire: 10
+    expire: 10000000

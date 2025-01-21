@@ -143,6 +143,7 @@ public class LoginAjaxController {
 
                 responseJson.put("success", true);
                 responseJson.put("user", new JSONObject()
+                		.put("userid", member.getUserid())
                         .put("name", member.getName())
                         .put("email", member.getEmail())
                         .put("nickname", member.getNickname())

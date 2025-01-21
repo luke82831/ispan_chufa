@@ -52,17 +52,17 @@ public class PostBean {
 	private List<InteractionBean> interactions; // 貼文的互動行為
 
     @ManyToMany
-	@JsonManagedReference
     @JoinTable(
         name = "post_tags", // 中間表名稱
         joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
         inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
     )
+    @JsonIgnore
     private Set<TagsBean> tagsBeans = new HashSet<>();
 	
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
-	private Set<TagsBean> tag;
+	//private Set<TagsBean> tag;
 
 	public Long getPostid() {
 		return postid;

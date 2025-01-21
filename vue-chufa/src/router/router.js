@@ -1,7 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Map from "@/views/Map.vue";
+import CreatePlanning from "@/views/planning/CreatePlanning.vue";
+import PlanningTabs from "@/views/planning/PlanningPage.vue";
+import Home from "@/views/Home.vue";
 
 const routes = [
+    { path: "/", component: Home },
+    { path: "/map", component: Map },
+    { path: "/planningtabs", component: PlanningTabs },
+    { path: "/createplanning", component: CreatePlanning },
     {
         path: "/secure/Login",
         name: "Login",
@@ -28,7 +34,8 @@ const routes = [
         component: () => import("@/views/blog/bloghome.vue"), // 指向 bloghouse 組件
     },
 
-    { path: "/map", component: Map },
+
+
 ]
 
 

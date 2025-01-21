@@ -4,7 +4,6 @@
     <div class="nav-links">
       <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
       <RouterLink to="/secure/Profile" class="nav-link">會員資料</RouterLink>
-      <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink>
     </div>
   </div>
   <div>

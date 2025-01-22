@@ -77,8 +77,8 @@ export default {
       // 檢查 coverPhoto 是否存在
       if (!this.formData.coverPhoto) {
         console.log("Cover photo is missing.");
-        // Swal.fire("錯誤", "封面照片是必填的", "error");
-        // return;
+        Swal.fire("錯誤", "封面照片是必填的", "error");
+        return;
       }
 
       // 構建 FormData
@@ -87,11 +87,7 @@ export default {
       formData.append("tripName", this.formData.name);
       formData.append("startDate", this.formData.startDate);
       formData.append("endDate", this.formData.endDate);
-
-      const user = {
-        userid: this.userId,
-      };
-      formData.append("userId", this.userId);
+      formData.append("userId", this.userId); // 只保留這個 userId
 
       // Log FormData content
       for (let [key, value] of formData.entries()) {
@@ -108,37 +104,47 @@ export default {
         });
         console.log("行程已成功建立", response.data);
         Swal.fire("成功", "行程已成功建立", "success");
+
+        // 儲存行程資料至 localStorage
+        localStorage.setItem("itineraryData", JSON.stringify(this.formData));
+
+        // 導航到 Map.vue 頁面
+        this.$router.push("/planningtabs");
       } catch (error) {
         console.error("發生錯誤", error);
+        const errorMessage = error.response?.data?.message || "發生未知錯誤";
         Swal.fire({
           icon: "error",
           title: "錯誤",
-          text: error.response?.data?.message || "發生未知錯誤",
+          text: errorMessage,
         });
       }
     },
+
+    // 處理檔案變更
+    onFileChange(event) {
+      const file = event.target.files[0];
+      console.log("File selected:", file);
+
+      if (!file) {
+        console.log("No file selected");
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert("文件大小超過限制");
+        return;
+      }
+
+      this.formData.coverPhoto = file;
+      // 檢查檔案是否存在
+      console.log("Cover photo file:", this.formData.coverPhoto);
+    },
   },
+
   created() {
     console.log("Component created, fetching profile...");
     this.fetchProfile(); // 在組件創建時調用以獲取會員資料
-  },
-
-  onFileChange(event) {
-    const file = event.target.files[0];
-    console.log("File selected:", file);
-
-    if (!file) {
-      console.log("No file selected");
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      alert("文件大小超過限制");
-      return;
-    }
-    this.formData.coverPhoto = file;
-    // 檢查檔案是否存在
-    console.log("Cover photo file:", this.formData.coverPhoto);
   },
 };
 </script>

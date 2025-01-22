@@ -10,7 +10,7 @@
   </div>
 </template>
 
-<script >
+<script>
 import Quill from "quill";
 import "quill/dist/quill.snow.css"; // Quill 的樣式文件
 
@@ -22,7 +22,7 @@ export default {
   },
   mounted() {
     // 初始化 Quill
-    this.quill = new Quill('#editor', {
+    this.quill = new Quill("#editor", {
       theme: "snow",
       modules: {
         toolbar: {
@@ -37,12 +37,12 @@ export default {
           },
         },
       },
-    })
+    });
   },
-  methods:{
-    submitArticle(){
-      console.log(this.quill.root.innerHTML)
-    }
+  methods: {
+    submitArticle() {
+      console.log(this.quill.root.innerHTML);
+    },
   },
 };
 </script>

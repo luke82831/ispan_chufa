@@ -25,20 +25,17 @@ const routes = [
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
     {
-        path: "/blog/create",
-        name: "BlogCreate",
-        component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
-    },
-    {
         path: "/admin/Role",
         name: "Role", // 路由名稱
         component: () => import("@/views/admin/Role.vue"), // 指向 Role 組件
     },
-
-
-
+    {
+        path: "/blog/create",
+        name: "BlogCreate",
+        component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
+    },
+    { path: "/map", component: Map },
 ]
-
 
 export default createRouter({
     history: createWebHistory(),

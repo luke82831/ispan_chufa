@@ -5,7 +5,6 @@
 
     <!-- 右側導航區域 -->
     <div class="nav-links">
-<<<<<<< HEAD
       <!-- 登入後顯示大頭貼和下拉選單 -->
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
@@ -15,7 +14,7 @@
             class="avatar"
             @error="onAvatarError"
           />
-          <span class="username">{{ userStore.member.name || '會員' }}</span>
+          <span class="username">{{ userStore.member.name || "會員" }}</span>
           <i
             class="fas fa-chevron-down dropdown-icon"
             :class="{ 'icon-rotate': isDropdownVisible }"
@@ -26,6 +25,7 @@
             <RouterLink to="/secure/Profile" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 會員資料
             </RouterLink>
+            <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
             <button @click="logout" class="dropdown-item">
               <i class="fas fa-sign-out-alt"></i> 登出
             </button>
@@ -38,11 +38,6 @@
         <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
         <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink>
       </div>
-=======
-      <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
-      <RouterLink to="/secure/Profile" class="nav-link">會員資料</RouterLink>
-      <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
->>>>>>> origin/dev
     </div>
   </div>
 
@@ -60,11 +55,10 @@
   <RouterView></RouterView>
 </template>
 
-
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '@/stores/user.js'; // 引入 Pinia Store
+import { ref, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useUserStore } from "@/stores/user.js"; // 引入 Pinia Store
 
 const userStore = useUserStore(); // 使用 Pinia 的狀態
 const router = useRouter();
@@ -80,7 +74,7 @@ const hidePlanningButton = () => {
 watch(
   () => route.path,
   (newPath) => {
-    if (newPath === '/') {
+    if (newPath === "/") {
       isPlanningStarted.value = false;
     }
   }
@@ -93,27 +87,24 @@ const toggleDropdown = () => {
 
 // 登出行為
 const logout = () => {
-  localStorage.removeItem('token');
+  localStorage.removeItem("token");
   userStore.logout(); // 清空 Pinia 狀態
-  router.push('/secure/Login');
+  router.push("/secure/Login");
 };
 
 // 處理頭像加載錯誤
 const onAvatarError = () => {
-  userStore.member.profile_picture = '/path/to/default-avatar.png';
+  userStore.member.profile_picture = "/path/to/default-avatar.png";
 };
 
 // 初始化會員資料
 onMounted(() => {
   userStore.fetchProfile().catch(() => {
-    router.push('/secure/Login');
+    router.push("/secure/Login");
   });
 });
 </script>
 
-<<<<<<< HEAD
-
-=======
 <style>
 #planningbutton {
   position: fixed;
@@ -149,19 +140,10 @@ onMounted(() => {
   background-color: #5a95d5;
   /* 深藍色 */
 }
->>>>>>> origin/dev
 
-<style scoped>
 /* 全局樣式 */
 .navbar {
   background-color: #5a95d5;
-<<<<<<< HEAD
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 60px;
-=======
   /* 背景色 */
   padding: 10px 20px;
   /* 上下和左右的內邊距 */
@@ -173,7 +155,6 @@ onMounted(() => {
   /* 垂直置中 */
   height: 60px;
   /* 設定導覽列高度 */
->>>>>>> origin/dev
 }
 
 .logo {
@@ -186,20 +167,11 @@ onMounted(() => {
 .nav-links {
   display: flex;
   align-items: center;
-<<<<<<< HEAD
-=======
   /* 垂直置中 */
->>>>>>> origin/dev
 }
 
 .nav-link {
   margin-left: 20px;
-<<<<<<< HEAD
-  color: white;
-  text-decoration: none;
-  font-size: 16px;
-  transition: color 0.3s;
-=======
   /* 讓鏈接之間有間隔 */
   color: white;
   /* 文字顏色 */
@@ -209,12 +181,10 @@ onMounted(() => {
   /* 文字大小 */
   transition: color 0.3s;
   /* 設置平滑過渡 */
->>>>>>> origin/dev
 }
 
 .nav-link:hover {
   color: #ffd700;
-<<<<<<< HEAD
 }
 
 /* 會員區域樣式 */
@@ -319,10 +289,5 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-=======
-  /* 滑鼠懸停時改變文字顏色 */
->>>>>>> origin/dev
 }
 </style>
-
-

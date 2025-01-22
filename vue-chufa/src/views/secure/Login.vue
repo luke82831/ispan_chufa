@@ -126,9 +126,9 @@ async function login() {
 
 function redirectToLineLogin() {
     {}
-    const backendLoginUrl = 'http://localhost:8080/ajax/secure/lineLogin'; // 后端 LINE 登录 URL
+    const backendLoginUrl = 'http://localhost:8080/ajax/secure/lineLogin'; // 後端 LINE 登入 URL
 
-    // 跳转到后端 LINE 登录授权路径
+    // 跳转到後端 LINE 登入授權路径
     window.location.href = backendLoginUrl;
 
     axiosapi
@@ -152,7 +152,7 @@ function redirectToLineLogin() {
                     icon: 'success',
                 });
 
-                // 跳转到用户资料页面
+                // 跳轉到用户资料页面
                 router.push({ path: '/secure/Profile' });
             } else {
                 console.error('Token is missing from the server response.');
@@ -173,7 +173,7 @@ function redirectToLineLogin() {
             console.error('LINE login error:', error);
             Swal.fire({
                 title: '登入失敗',
-                text: '服務器发生错误，请稍后再试。',
+                text: '服務器發生错误，请稍後再试。',
                 icon: 'error',
             });
         });

@@ -313,7 +313,7 @@ fetchProfile();
 }
 
 .detail-item {
-  flex: 1 1 calc(50% - 20px); /* 每個項目占50%寬度，左右間距20px */
+  flex: 1 1 calc(50% - 20px); 
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -437,11 +437,10 @@ fetchProfile();
   box-shadow: 0 4px 10px rgba(33, 136, 56, 0.4);
 }
 
-/* 統一放在同一排的操作按鈕列 */
 .actions-row {
   display: flex;
-  justify-content: flex-end; /* 也可以改成 space-between 或其他排版方式 */
-  gap: 20px;                 /* 按鈕間距 */
-  margin-top: 30px;          /* 與上方區塊拉開一點距離 */
+  justify-content: flex-end; 
+  gap: 20px;                 
+  margin-top: 30px;          
 }
 </style>

@@ -5,6 +5,7 @@
 
     <!-- 右側導航區域 -->
     <div class="nav-links">
+<<<<<<< HEAD
       <!-- 登入後顯示大頭貼和下拉選單 -->
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
@@ -37,6 +38,11 @@
         <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
         <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink>
       </div>
+=======
+      <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
+      <RouterLink to="/secure/Profile" class="nav-link">會員資料</RouterLink>
+      <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
+>>>>>>> origin/dev
     </div>
   </div>
 
@@ -47,8 +53,8 @@
       to="/createPlanning"
       id="planningbutton"
       @click="hidePlanningButton"
-      >開始規劃</RouterLink
-    >
+      >開始規劃
+    </RouterLink>
   </div>
 
   <RouterView></RouterView>
@@ -105,17 +111,69 @@ onMounted(() => {
 });
 </script>
 
+<<<<<<< HEAD
 
+=======
+<style>
+#planningbutton {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #84baf5;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  /* 根據需要調整字體大小 */
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 使文字在圓形按鈕中垂直與水平居中 */
+  white-space: normal;
+  /* 允許文字換行 */
+  overflow-wrap: break-word;
+  /* 防止文字溢出圓形範圍 */
+  padding: 10px;
+  /* 內邊距，讓文字不會貼到圓形的邊緣 */
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#planningbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a95d5;
+  /* 深藍色 */
+}
+>>>>>>> origin/dev
 
 <style scoped>
 /* 全局樣式 */
 .navbar {
   background-color: #5a95d5;
+<<<<<<< HEAD
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 60px;
+=======
+  /* 背景色 */
+  padding: 10px 20px;
+  /* 上下和左右的內邊距 */
+  display: flex;
+  /* 啟用 Flexbox */
+  justify-content: space-between;
+  /* 讓兩個區域分開，左側是 logo 右側是導航 */
+  align-items: center;
+  /* 垂直置中 */
+  height: 60px;
+  /* 設定導覽列高度 */
+>>>>>>> origin/dev
 }
 
 .logo {
@@ -128,18 +186,35 @@ onMounted(() => {
 .nav-links {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
+=======
+  /* 垂直置中 */
+>>>>>>> origin/dev
 }
 
 .nav-link {
   margin-left: 20px;
+<<<<<<< HEAD
   color: white;
   text-decoration: none;
   font-size: 16px;
   transition: color 0.3s;
+=======
+  /* 讓鏈接之間有間隔 */
+  color: white;
+  /* 文字顏色 */
+  text-decoration: none;
+  /* 去掉下劃線 */
+  font-size: 16px;
+  /* 文字大小 */
+  transition: color 0.3s;
+  /* 設置平滑過渡 */
+>>>>>>> origin/dev
 }
 
 .nav-link:hover {
   color: #ffd700;
+<<<<<<< HEAD
 }
 
 /* 會員區域樣式 */
@@ -244,6 +319,9 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+=======
+  /* 滑鼠懸停時改變文字顏色 */
+>>>>>>> origin/dev
 }
 </style>
 

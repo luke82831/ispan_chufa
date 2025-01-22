@@ -2,6 +2,8 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,6 +36,7 @@ public class ScheduleBean {
     private LocalDate endDate; // 行程結束日期
 
     @ManyToOne
+	@JsonIgnoreProperties({"posts","couponBeans"})
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 

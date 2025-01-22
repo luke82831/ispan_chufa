@@ -19,26 +19,15 @@
             <td>{{ user.email }}</td>
             <td>
               <!-- 切換為管理員按鈕 -->
-              <button
-                v-if="user.role !== 'ADMIN'"
-                @click="updateRole(user.userid, 'ADMIN')"
-                class="btn admin-btn"
-              >
+              <button v-if="user.role !== 'ADMIN'" @click="updateRole(user.userid, 'ADMIN')" class="btn admin-btn">
                 設為管理員
               </button>
               <!-- 切換為會員按鈕 -->
-              <button
-                v-if="user.role !== 'USER'"
-                @click="updateRole(user.userid, 'USER')"
-                class="btn user-btn"
-              >
+              <button v-if="user.role !== 'USER'" @click="updateRole(user.userid, 'USER')" class="btn user-btn">
                 設為會員
               </button>
               <!-- 刪除會員按鈕 -->
-              <button
-                @click="deleteMember(user.userid)"
-                class="btn delete-btn"
-              >
+              <button @click="deleteMember(user.userid)" class="btn delete-btn">
                 刪除會員
               </button>
             </td>
@@ -135,13 +124,16 @@ fetchUsers();
 
 /* 調整標題排版，置中 + 底線 */
 .member-management h1 {
-  display: inline-block;          /* 讓底線能隨文字寬度 */
+  display: inline-block;
+  /* 讓底線能隨文字寬度 */
   text-align: center;
   font-size: 28px;
   color: #343a40;
-  border-bottom: 2px solid #ccc;  /* 底部加一道線 */
+  border-bottom: 2px solid #ccc;
+  /* 底部加一道線 */
   padding-bottom: 10px;
-  margin: 0 auto 30px;            /* 上面 0, 下面 30px 間距, 同時置中 */
+  margin: 0 auto 30px;
+  /* 上面 0, 下面 30px 間距, 同時置中 */
 }
 
 /* 載入中文字樣 */
@@ -164,7 +156,8 @@ fetchUsers();
   width: 100%;
   border-collapse: collapse;
   border-radius: 10px;
-  overflow: hidden; /* 讓邊角圓弧不被單元格破壞 */
+  overflow: hidden;
+  /* 讓邊角圓弧不被單元格破壞 */
   background: #fff;
 }
 
@@ -181,7 +174,8 @@ fetchUsers();
   border-bottom: 1px solid #ccc;
   text-transform: uppercase;
   letter-spacing: 1px;
-  text-align: center; /* 欄位標題置中 */
+  text-align: center;
+  /* 欄位標題置中 */
 }
 
 /* 表身 */
@@ -192,7 +186,8 @@ fetchUsers();
 .user-table td {
   padding: 14px 12px;
   border-bottom: 1px solid #ddd;
-  text-align: center;    /* 內容置中，可視需求調整成 left/right */
+  text-align: center;
+  /* 內容置中，可視需求調整成 left/right */
   color: #555;
   font-size: 14px;
 }

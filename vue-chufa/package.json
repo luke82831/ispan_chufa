@@ -12,10 +12,16 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "paginate": "^0.1.1",
+<<<<<<< HEAD
     "pinia": "^2.3.1",
     "pinia-plugin-persistedstate": "^4.2.0",
+=======
+    "pinia": "^2.3.0",
+    "quill": "^2.0.3",
+>>>>>>> origin/dev
     "sweetalert2": "^11.6.13",
     "vue": "^3.5.13",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^4.5.0",
     "vuejs-paginate-next": "^1.0.2"
   },

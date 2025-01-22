@@ -8,7 +8,10 @@
     <!-- placedetails (only show if a place is selected) -->
     <div v-if="placeSelected" class="place-container">
       <!-- 傳遞 selectedPlace 到 PlaceDetail 組件 -->
-      <PlaceDetail :place="selectedPlace" @update:selectedPlace="handlePlaceSelected" />
+      <PlaceDetail
+        :place="selectedPlace"
+        @update:selectedPlace="handlePlaceSelected"
+      />
     </div>
 
     <!-- map -->

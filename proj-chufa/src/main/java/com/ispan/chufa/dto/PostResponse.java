@@ -5,8 +5,8 @@ import java.util.List;
 import com.ispan.chufa.domain.PostBean;
 
 public class PostResponse {
-	 private List<PostBean> postlist;
-	 private List<PostDTO> postdto;
+	private List<PostBean> postlist;
+	private List<PostDTO> postdto;
 
 	public List<PostBean> getPostlist() {
 		return postlist;
@@ -23,6 +23,5 @@ public class PostResponse {
 	public void setPostdto(List<PostDTO> postdto) {
 		this.postdto = postdto;
 	}
-	
 
 }

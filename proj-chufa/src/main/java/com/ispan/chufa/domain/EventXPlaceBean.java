@@ -39,7 +39,7 @@ public class EventXPlaceBean {
 	private char[] notes;
 	
 	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
+	@JsonIgnoreProperties({"eventXPlaceBeans"})
 	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
 	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 

@@ -57,7 +57,7 @@ public class MapController {
         place.setPlaceAddress(placeBean.getPlaceAddress());
         place.setLongitude(placeBean.getLongitude());
         place.setLatitude(placeBean.getLatitude());
-        place.setPhotos(placeBean.getPhotos());
+        place.setPhotos(placeBean.getPhotos());  // 這裡會自動轉換成 JSON 字串並儲存        
         place.setPlacePhone(placeBean.getPlacePhone());
         place.setBusinessHours(placeBean.getBusinessHours());
         place.setPlaceInfo(placeBean.getPlaceInfo());
@@ -68,6 +68,7 @@ public class MapController {
         place.setPlaceName(placeBean.getPlaceName());
         place.setAccommodationType(placeBean.getAccommodationType());
         place.setReservation(placeBean.isReservation());
+        place.setClosed(placeBean.getClosed());
         placeRepository.save(place);
 
         // 準備回應的 JSON 物件

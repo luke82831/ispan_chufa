@@ -1,6 +1,7 @@
 package com.ispan.chufa.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -122,5 +123,15 @@ public class PlaceService {
         return placeRepository.findPlaceByGooglemapPlaceId(googlemapPlaceId); // 呼叫 Repository 方法
 	}
 
+	 // 保存 Place 詳細資訊的方法，接收名稱和圖片 URL 列表
+    public void savePlaceDetails(String name, List<String> photosUrls) {
+        PlaceBean place = new PlaceBean();
+        place.setPlaceName(name);
 
+        // 將照片 URL 列表轉換為 JSON 字串並儲存
+        place.setPhotos(photosUrls);
+
+        // 儲存到資料庫
+        placeRepository.save(place);
+    }
 }

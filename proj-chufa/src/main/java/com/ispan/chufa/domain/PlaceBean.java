@@ -1,14 +1,15 @@
 package com.ispan.chufa.domain;
 
-import java.math.BigDecimal;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -37,8 +38,8 @@ public class PlaceBean {
 	private double longitude; // 精確的經度
 	private double latitude; // 精確的緯度
 
-	@ElementCollection
-	private List<String> photos; // 使用 List 儲存圖片 URL
+	@Lob
+	private String photos; // 儲存圖片 URL 的 JSON 字串
 	private String placePhone; // 使用 String 類型來處理電話號碼
 	@Lob
 	private char[] businessHours;
@@ -47,9 +48,10 @@ public class PlaceBean {
 	private Double rating;
 	private String website;
 	private String bookingUrl;
-	private BigDecimal priceLevel; // 使用 BigDecimal 處理價格
+	private Integer priceLevel; 
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
+	private boolean isClosed;
 
 	//  一對多
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -136,14 +138,27 @@ public class PlaceBean {
 		this.latitude = latitude;
 	}
 
-	public List<String> getPhotos() {
-		return photos;
-	}
+	// 設置圖片 URL 列表的方法，將 List<String> 轉換為 JSON 字串
+    public void setPhotos(List<String> photos) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            this.photos = objectMapper.writeValueAsString(photos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	public void setPhotos(List<String> photos) {
-		this.photos = photos;
-	}
-
+    // 轉換 JSON 字串為 List<String> 的方法
+    public List<String> getPhotos() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(photos, new TypeReference<List<String>>() {});
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
 	public String getPlacePhone() {
 		return placePhone;
 	}
@@ -192,11 +207,11 @@ public class PlaceBean {
 		this.bookingUrl = bookingUrl;
 	}
 
-	public BigDecimal getPriceLevel() {
+	public Integer getPriceLevel() {
 		return priceLevel;
 	}
 
-	public void setPriceLevel(BigDecimal priceLevel) {
+	public void setPriceLevel(Integer priceLevel) {
 		this.priceLevel = priceLevel;
 	}
 
@@ -214,6 +229,14 @@ public class PlaceBean {
 
 	public void setReservation(boolean reservation) {
 		this.reservation = reservation;
+	}
+	
+	public boolean getClosed() {
+		return isClosed;
+	}
+
+	public void setClosed(boolean isClosed) {
+		this.isClosed = isClosed;
 	}
 
 	public Set<PostBean> getPosts() {

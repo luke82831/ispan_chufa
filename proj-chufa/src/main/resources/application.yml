@@ -8,13 +8,14 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
+    static-path-pattern: /static/**
 
   #Hibernate/JPA的相關設定
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
@@ -36,3 +37,10 @@ spring:
 jwt:
   token:
     expire: 10
+
+#line login
+line:
+  login:
+    channel-id: "2006733552"
+    channel-secret: "2e094b815ed92a5e16cb5938e9576102"
+    callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"

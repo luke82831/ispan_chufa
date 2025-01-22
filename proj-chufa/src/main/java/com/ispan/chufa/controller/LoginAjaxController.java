@@ -1,7 +1,9 @@
 package com.ispan.chufa.controller;
 
 import java.util.Base64;
+import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -143,6 +145,7 @@ public class LoginAjaxController {
 
                 responseJson.put("success", true);
                 responseJson.put("user", new JSONObject()
+                        .put("userid", member.getUserid())
                         .put("name", member.getName())
                         .put("email", member.getEmail())
                         .put("nickname", member.getNickname())
@@ -151,7 +154,8 @@ public class LoginAjaxController {
                         .put("bio", member.getBio())
                         .put("phone_number", member.getPhoneNumber())
                         .put("username", member.getUsername())
-                        .put("gender", member.getGender()));
+                        .put("gender", member.getGender())
+                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"));
             } else {
                 responseJson.put("success", false);
                 responseJson.put("message", "會員資料未找到");
@@ -167,7 +171,7 @@ public class LoginAjaxController {
     @PutMapping("/profile")
     public ResponseEntity<?> updateProfile(@RequestBody MemberBean updatedMember,
             @RequestHeader("Authorization") String authorizationHeader) {
-        System.out.println("Received Member Data: " + updatedMember); // 调试点
+        System.out.println("Received Member Data: " + updatedMember.toString()); // 调试点
 
         JSONObject responseJson = new JSONObject();
         try {
@@ -217,7 +221,13 @@ public class LoginAjaxController {
             System.out.println("Response JSON: " + responseJson.toString());
 
             return ResponseEntity.ok(responseJson.toString());
+
+        } catch (IllegalArgumentException e) {
+            responseJson.put("success", false);
+            responseJson.put("message", e.getMessage());
+            return ResponseEntity.status(400).body(responseJson.toString());
         } catch (Exception e) {
+            e.printStackTrace();
             responseJson.put("success", false);
             responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
             return ResponseEntity.status(500).body(responseJson.toString());
@@ -374,6 +384,84 @@ public class LoginAjaxController {
             }
             return ResponseEntity.ok(responseJson.toString());
         } catch (Exception e) {
+            responseJson.put("success", false);
+            responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
+            return ResponseEntity.status(500).body(responseJson.toString());
+        }
+    }
+
+    @GetMapping("/members")
+    public ResponseEntity<String> getAllMembers(@RequestHeader("Authorization") String authorizationHeader) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            // 1. 權限檢查（確定當前使用者是管理員）
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                responseJson.put("success", false);
+                responseJson.put("message", "缺少或無效的 Authorization header");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+            String token = authorizationHeader.substring(7);
+            String email = jsonWebTokenUtility.validateToken(token);
+            if (email == null) {
+                responseJson.put("success", false);
+                responseJson.put("message", "無效或過期的 Token");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            MemberBean currentUser = memberService.findByEmail(email);
+            if (currentUser == null || currentUser.getRole() != MemberBean.Role.ADMIN) {
+                responseJson.put("success", false);
+                responseJson.put("message", "只有管理員可查看所有會員");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            // 2. 獲取全部會員
+            List<MemberBean> allMembers = memberService.findAllMembers();
+
+            // 3. 把會員資料轉成 JSON
+            JSONArray usersArray = new JSONArray();
+            for (MemberBean mb : allMembers) {
+                JSONObject userJson = new JSONObject();
+                userJson.put("userid", mb.getUserid());
+                userJson.put("name", mb.getName());
+                userJson.put("email", mb.getEmail());
+                userJson.put("role", mb.getRole() != null ? mb.getRole().toString() : "USER");
+                // 這裡可以再加上更多要顯示的欄位
+                usersArray.put(userJson);
+            }
+
+            responseJson.put("success", true);
+            responseJson.put("users", usersArray);
+
+            return ResponseEntity.ok(responseJson.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            responseJson.put("success", false);
+            responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
+            return ResponseEntity.status(500).body(responseJson.toString());
+        }
+    }
+
+    @DeleteMapping("/members/{memberId}")
+    public ResponseEntity<?> deleteMember(@PathVariable Long memberId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            // 權限檢查，確認當前使用者是管理員，類似 updateMemberRole
+            // ...
+
+            // 呼叫 Service
+            boolean deleted = memberService.deleteMemberById(memberId);
+            if (deleted) {
+                responseJson.put("success", true);
+                responseJson.put("message", "會員已刪除");
+            } else {
+                responseJson.put("success", false);
+                responseJson.put("message", "會員不存在，無法刪除");
+            }
+            return ResponseEntity.ok(responseJson.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
             responseJson.put("success", false);
             responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
             return ResponseEntity.status(500).body(responseJson.toString());

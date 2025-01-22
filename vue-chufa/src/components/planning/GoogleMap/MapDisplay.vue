@@ -148,9 +148,6 @@ function updateMarker(position, place) {
   left: 50%;
   transform: translateX(-50%);
   width: 400px; /* 固定寬度，可根據需求調整 */
-  background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加陰影 */
   border-radius: 8px; /* 圓角設計 */
   z-index: 10; /* 確保在其他元素之上 */
 }

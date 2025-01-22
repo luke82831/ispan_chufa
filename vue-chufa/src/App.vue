@@ -4,11 +4,16 @@
     <div class="nav-links">
       <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
       <RouterLink to="/secure/Profile" class="nav-link">會員資料</RouterLink>
-      <RouterLink to="/blog/create" class="BlogCreate">創建文章</RouterLink>
+      <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
     </div>
   </div>
   <div>
-    <RouterLink v-if="!isPlanningStarted" to="/createPlanning" id="planningbutton" @click="hidePlanningButton">開始規劃
+    <RouterLink
+      v-if="!isPlanningStarted"
+      to="/createPlanning"
+      id="planningbutton"
+      @click="hidePlanningButton"
+      >開始規劃
     </RouterLink>
   </div>
   <RouterView></RouterView>

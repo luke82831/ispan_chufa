@@ -6,10 +6,6 @@
       v-model="searchInput"
       placeholder="請輸入地點"
     />
-    <!-- 新增儲存地點的按鈕 -->
-    <button @click="submitToBackend(placeDetails)" :disabled="!placeDetails">
-      儲存地點
-    </button>
   </div>
 </template>
 
@@ -390,23 +386,5 @@ onMounted(() => {
   border: 1px solid #ccc;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 5px;
-  background-color: #4caf50;
-  color: white;
-  margin-top: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
 }
 </style>

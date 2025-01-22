@@ -125,9 +125,60 @@ async function login() {
 }
 
 function redirectToLineLogin() {
-  // 重導到後端的 LINE 登入路徑
-  window.location.href = 'http://localhost:8080/ajax/secure/lineLogin';
+    {}
+    const backendLoginUrl = 'http://localhost:8080/ajax/secure/lineLogin'; // 後端 LINE 登入 URL
+
+    // 跳转到後端 LINE 登入授權路径
+    window.location.href = backendLoginUrl;
+
+    axiosapi
+        .get(lineCallbackUrl)
+        .then((response) => {
+            if (response.data.success) {
+                const token = response.data.token;
+
+                if (token) {
+                // 存储 Token
+                localStorage.setItem('token', token);
+                console.log('Token successfully stored:', token);
+
+                // 设置 Axios Authorization Header
+                axiosapi.defaults.headers.Authorization = `Bearer ${token}`;
+                console.log('Authorization header set for axios:', axiosapi.defaults.headers.Authorization);
+
+                // 提示登入成功
+                Swal.fire({
+                    title: response.data.message,
+                    icon: 'success',
+                });
+
+                // 跳轉到用户资料页面
+                router.push({ path: '/secure/Profile' });
+            } else {
+                console.error('Token is missing from the server response.');
+                Swal.fire({
+                        title: '登入失敗: 無法獲取 Token',
+                        icon: 'error',
+                    });
+                    }
+                } else {
+                Swal.fire({
+                    title: 'LINE 登入失败',
+                    text: response.data.message,
+                    icon: 'error',
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('LINE login error:', error);
+            Swal.fire({
+                title: '登入失敗',
+                text: '服務器發生错误，请稍後再试。',
+                icon: 'error',
+            });
+        });
 }
+
 </script>
 
 <style scoped>

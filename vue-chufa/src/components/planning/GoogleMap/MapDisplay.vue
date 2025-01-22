@@ -101,7 +101,7 @@ const handlePlaceChanged = (place) => {
   selectedPlace.value = {
     displayName: place.placeName || null,
     formattedAddress: place.placeAddress || null,
-    location: { lat: place.lat, lng: place.lng }, // 確保有 lat 和 lng
+    location: { lat: place.latitude, lng: place.longitude }, // 確保有 lat 和 lng
     rating: place.rating || null,
     openingHours: convertBusinessHours(place.businessHours) || null,
     photos: place.photos || [],
@@ -112,7 +112,6 @@ const handlePlaceChanged = (place) => {
     addressComponents: place.address_components || [],
     reservation: place.reservation || null,
   };
-
   emit("place-selected", selectedPlace.value);
 };
 

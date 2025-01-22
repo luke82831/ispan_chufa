@@ -15,6 +15,7 @@ import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.dto.CommentDTO;
 import com.ispan.chufa.dto.InteractionDTO;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
@@ -49,6 +50,10 @@ public class PostService {
 	public PostBean getPostById(Long id) {
 		return postRepository.findById(id).orElse(null);
 	}
+	
+//	public Optional<PostBean> getPostdetailById(Long id) {
+//	        return postRepository.findById(id);
+//	}
 
 	public List<PostDTO> findPostsByCriteria(String param) {
 		try {
@@ -125,6 +130,9 @@ public class PostService {
 			postDTO.setMember(memberDTO);
 		}
 		// postDTOList.add(postDTO);
+		
+		
+		
 
 		// 準備 InteractionDTO
 		if (interactionBean.getPost() != null) {

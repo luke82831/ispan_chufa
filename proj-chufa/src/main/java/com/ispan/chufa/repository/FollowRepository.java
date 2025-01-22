@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.FollowBean;
@@ -20,5 +22,6 @@ public interface FollowRepository extends JpaRepository<FollowBean, Long>{
     public List<MemberBean> findFollowed_UseridByFollower_Userid(Long followerId);
 
 	public Optional<FollowBean> findByFollower_UseridAndFollowed_Userid(Long followerId, Long followedId);
+
 
 }

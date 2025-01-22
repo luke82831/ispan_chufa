@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import CreatePlanning from "@/views/planning/CreatePlanning.vue";
 import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
+import PostDetail from "@/views/blog/PostDetail.vue";
+
 
 const routes = [
     { path: "/", component: Home },
@@ -33,7 +35,22 @@ const routes = [
         name: "bloghome",
         component: () => import("@/views/blog/bloghome.vue"), // 指向 bloghouse 組件
     },
-
+    {
+        path: "/admin/Role",
+        name: "Role", // 路由名稱
+        component: () => import("@/views/admin/Role.vue"), // 指向 Role 組件
+    },
+    {
+        path: '/post/:id',
+        name: 'PostDetail',
+        component: PostDetail,
+        props: true,
+    },
+    {
+        path: "/blog/followblog",
+        name: "followblog", // 路由名稱
+        component: () => import("@/views/blog/followblog.vue"), // 指向 Role 組件
+    }
 
 
 ]

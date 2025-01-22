@@ -8,6 +8,7 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
+    static-path-pattern: /static/**
 
   #Hibernate/JPA的相關設定
   jpa:
@@ -36,3 +37,13 @@ spring:
 jwt:
   token:
     expire: 10000000
+
+
+
+#line login
+line:
+  login:
+    channel-id: "2006733552"
+    channel-secret: "2e094b815ed92a5e16cb5938e9576102"
+    callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"
+

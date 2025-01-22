@@ -85,13 +85,14 @@
       </form>
     </div>
 
-    <!-- 管理员功能按钮 -->
-    <button v-if="isAdmin" class="btn btn-secondary" @click="navigateToAdmin">
-      管理會員資料
-    </button>
+    <!-- 將管理員功能按鈕與登出按鈕放在同一排 -->
+    <div class="actions-row">
+      <button class="btn btn-secondary" v-if="isAdmin" @click="navigateToAdmin">
+        管理會員資料
+      </button>
+      <button class="btn btn-logout" @click="logout">登出</button>
+    </div>
 
-    <!-- Logout Button -->
-    <button class="btn btn-logout" @click="logout">登出</button>
   </div>
 </template>
 
@@ -109,7 +110,7 @@ const profileLoaded = ref(false);
 const member = ref({});
 const editMember = ref({});
 
-// 定义 isAdmin 变量并初始化
+// 定義 isAdmin 變數並初始化
 const isAdmin = ref(false);
 
 const formatDate = (date) => {
@@ -127,8 +128,10 @@ const fetchProfile = async () => {
       member.value = response.data.user || {};
       editMember.value = { ...member.value };
 
-      // 判断是否为管理员
+      // 判斷是否為管理員
       isAdmin.value = response.data.user.role === 'ADMIN';
+      console.log("User Role:", response.data.user.role);
+      console.log("Is Admin:", isAdmin.value);
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
     }
@@ -139,24 +142,24 @@ const fetchProfile = async () => {
   }
 };
 
-// 管理員跳轉到會員管理頁面
+// 管理員跳轉到會員管理頁面 (路徑不變)
 const navigateToAdmin = () => {
-  router.push('/admin/Role'); // 跳转到管理会员页面
+  router.push('/admin/Role');
 };
 
 const editProfile = () => {
   isEditing.value = true;
-  editMember.value = { ...member.value }; // 深拷贝数据
+  editMember.value = { ...member.value }; // 深拷貝資料
 };
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editMember.value = { ...member.value }; // 恢复到未编辑状态
+  editMember.value = { ...member.value }; // 恢復到未編輯狀態
 };
 
 const saveProfile = async () => {
   try {
-    // 格式化生日字段
+    // 格式化生日欄位
     if (editMember.value.birth) {
       editMember.value.birth = new Date(editMember.value.birth).toISOString().split('T')[0];
     }
@@ -166,13 +169,12 @@ const saveProfile = async () => {
     });
 
     if (response.data.success) {
-      member.value = { ...editMember.value }; // 更新视图数据
+      member.value = { ...editMember.value }; // 更新畫面資料
       isEditing.value = false;
       Swal.fire('成功', '資料已更新！', 'success');
-      fetchProfile(); // 保存后重新加载数据
+      fetchProfile(); // 重新抓取最新資料
 
       console.log("Sending Updated Member Data:", editMember.value);
-
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
     }
@@ -180,6 +182,8 @@ const saveProfile = async () => {
     console.error('Save profile failed:', error);
     Swal.fire('錯誤', '伺服器錯誤，請稍後再試', 'error');
   }
+
+  console.log('Submitting data:', editMember.value);
 };
 
 const uploadProfilePicture = async (event) => {
@@ -196,7 +200,7 @@ const uploadProfilePicture = async (event) => {
     });
 
     if (response.data.success) {
-      member.value.profile_picture = response.data.profilePicture; // 更新头像
+      member.value.profile_picture = response.data.profilePicture; // 更新頭像
       Swal.fire('成功', '大頭貼已更新！', 'success');
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
@@ -215,8 +219,8 @@ const logout = () => {
 fetchProfile();
 </script>
 
-  <style scoped>
-  .profile-container {
+<style scoped>
+.profile-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 30px;
@@ -275,13 +279,13 @@ fetchProfile();
 .profile-details {
   display: flex;
   flex-wrap: wrap; /* 允許換行 */
-  gap: 20px; /* 每個欄位的間距 */
+  gap: 20px;       /* 每個欄位的間距 */
 }
 
 .detail-item {
-  flex: 1 1 calc(50% - 20px); /* 每個項目占50%的寬度，間距為20px */
+  flex: 1 1 calc(50% - 20px); /* 每個項目占50%寬度，左右間距20px */
   display: flex;
-  flex-direction: column; /* 垂直排列 */
+  flex-direction: column;
   background: #ffffff;
   border: 1px solid #e9ecef;
   border-radius: 10px;
@@ -291,17 +295,17 @@ fetchProfile();
 }
 
 .detail-item:hover {
-  transform: scale(1.02); /* 懸停放大效果 */
+  transform: scale(1.02);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .detail-item dt {
   font-weight: bold;
   color: #495057;
-  margin-bottom: 8px; /* 與值的間距 */
+  margin-bottom: 8px;
   font-size: 14px;
-  text-transform: uppercase; /* 標籤文字大寫 */
-  letter-spacing: 1px; /* 增加字間距 */
+  text-transform: uppercase; 
+  letter-spacing: 1px;
 }
 
 .detail-item dd {
@@ -309,12 +313,7 @@ fetchProfile();
   color: #6c757d;
   font-size: 16px;
   font-weight: 500;
-  word-break: break-word; /* 防止超長文字溢出 */
-}
-
-.detail-item:not(:last-child) {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 10px;
+  word-break: break-word;
 }
 
 .edit-form-container {
@@ -390,7 +389,6 @@ fetchProfile();
   background: #dc3545;
   color: white;
   border: none;
-  margin-top: 20px;
 }
 
 .btn-logout:hover {
@@ -409,15 +407,11 @@ fetchProfile();
   box-shadow: 0 4px 10px rgba(33, 136, 56, 0.4);
 }
 
-/* 添加細節分隔線 */
-.profile-details-container dl {
-  border-top: 1px solid #dee2e6;
-  padding-top: 20px;
+/* 統一放在同一排的操作按鈕列 */
+.actions-row {
+  display: flex;
+  justify-content: flex-end; /* 也可以改成 space-between 或其他排版方式 */
+  gap: 20px;                 /* 按鈕間距 */
+  margin-top: 30px;          /* 與上方區塊拉開一點距離 */
 }
-
-.profile-details-container .detail-item:not(:last-child) {
-  border-bottom: 1px solid #dee2e6;
-  padding-bottom: 15px;
-}
-
 </style>

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ispan.chufa.domain.CommentBean;
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.TagsBean;
 
@@ -24,7 +26,45 @@ public class PostDTO {
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 	private Long likeCount;
 	private Long repostCount;
+	@JsonIgnoreProperties({"memberBeans","postBeans"})
+	private Set<TagsBean> tagsBeans = new HashSet<>();
+//private List<CommentDTO>CommentDTO ;
+	private boolean isRepost;
+    private MemberInfo repostMember;  // 如果是轉發貼文，則會包含原貼文數據
+
 	
+//	public List<CommentDTO> getCommentDTO() {
+//		return CommentDTO;
+//	}
+//
+//	public void setCommentDTO(List<CommentDTO> commentDTO) {
+//		CommentDTO = commentDTO;
+//	}
+
+	public boolean isRepost() {
+		return isRepost;
+	}
+
+	public void setRepost(boolean isRepost) {
+		this.isRepost = isRepost;
+	}
+	
+	public MemberInfo getRepostMember() {
+		return repostMember;
+	}
+
+	public void setRepostMember(MemberInfo repostMember) {
+		this.repostMember = repostMember;
+	}
+
+	public Set<TagsBean> getTagsBeans() {
+		return tagsBeans;
+	}
+
+	public void setTagsBeans(Set<TagsBean> tagsBeans) {
+		this.tagsBeans = tagsBeans;
+	}
+
 	public Long getRepostCount() {
 		return repostCount;
 	}

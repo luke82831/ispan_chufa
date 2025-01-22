@@ -125,6 +125,12 @@ public class MemberService {
 	// }
 
 	public void saveMember(MemberBean memberBean) {
+		if (memberBean.getPassword() == null || memberBean.getPassword().length < 6) {
+			throw new IllegalArgumentException("密碼長度必須至少為 6 個字元");
+		}
+		if (memberBean.getRole() == null) {
+			memberBean.setRole(MemberBean.Role.USER);
+		}
 		System.out.println("Saving member: " + memberBean.getEmail() + ", Phone: " + memberBean.getPhoneNumber());
 		memberRepository.save(memberBean);
 	} // 儲存 MemberBean 物件到資料庫
@@ -178,4 +184,20 @@ public class MemberService {
 		memberRepository.save(member);
 		return true; // 表示角色更新成功
 	}
+
+	public boolean deleteMemberById(Long memberId) {
+		// 1. 先從資料庫查詢是否存在該會員
+		Optional<MemberBean> optionalMember = memberRepository.findById(memberId);
+
+		// 2. 判斷是否有找到
+		if (optionalMember.isPresent()) {
+			// 3. 存在，則刪除並回傳 true
+			memberRepository.deleteById(memberId);
+			return true;
+		} else {
+			// 4. 不存在，回傳 false
+			return false;
+		}
+	}
+
 }

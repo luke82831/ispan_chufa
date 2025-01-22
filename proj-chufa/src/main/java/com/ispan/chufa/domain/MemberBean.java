@@ -2,6 +2,7 @@ package com.ispan.chufa.domain;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,7 +70,7 @@ public class MemberBean {
 	private java.util.Date birth;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
+	@JsonBackReference
 	private List<PostBean> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

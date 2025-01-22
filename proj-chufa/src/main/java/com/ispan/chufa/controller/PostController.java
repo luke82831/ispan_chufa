@@ -2,12 +2,11 @@ package com.ispan.chufa.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,8 +19,12 @@ import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.InteractionDTO;
 import com.ispan.chufa.dto.PostDTO;
+import com.ispan.chufa.dto.PostDto2;
 import com.ispan.chufa.dto.PostResponse;
+import com.ispan.chufa.dto.TimelinePostDto;
 import com.ispan.chufa.service.PostService;
+import com.ispan.chufa.service.PostShowService;
+import com.ispan.chufa.service.TimelineService;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
@@ -29,6 +32,10 @@ import com.ispan.chufa.service.PostService;
 public class PostController {
     @Autowired
     private PostService postService;
+    
+    @Autowired TimelineService timelineService;
+    
+    @Autowired PostShowService postShowService;
 
     @PostMapping("/post")
     // @JsonView(Views.Public.class)
@@ -101,5 +108,27 @@ public class PostController {
         }
         return ResponseEntity.ok(post);
     }
+    
+    @GetMapping("/repostpost/{followerId}")
+    public ResponseEntity<List<TimelinePostDto>> getPostsByFollowerId(@PathVariable Long followerId) {
+        List<TimelinePostDto> posts = timelineService.getPostsByFollowerId(followerId);
+        return ResponseEntity.ok(posts);
+    }
+    
+    @GetMapping("/blog/{followerId}")
+    public ResponseEntity<List<PostDto2>> getPostsForFollower(@PathVariable Long followerId) {
+    	int page = 1; // 第 1 頁
+    	int pageSize = 10;
+        List<PostDto2> posts = postShowService.getPostsForFollower(followerId,page,pageSize);
+        return ResponseEntity.ok(posts);
+    }
+    
+//    @GetMapping("/post/{id}")
+//    public ResponseEntity<PostBean> getPostdetailById(@PathVariable Long id) {
+//    	return postService.getPostdetailById(id)
+//        .map(ResponseEntity::ok)
+//        .orElse(ResponseEntity.notFound().build());
+//               
+//    }
 
 }

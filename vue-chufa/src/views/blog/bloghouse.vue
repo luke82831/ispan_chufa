@@ -11,13 +11,17 @@
 
     <div v-if="posts.length > 0">
     <div v-for="post in posts" :key="post.postid" class="post">
+    <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }">
     <h2>{{ post.postTitle }}</h2>
+    </router-link>
+    <p>{{ post.postid }}</p>
     <p>{{ post.postContent }}</p>
     <p>作者名:{{ post.member.name }}</p>
     <p>發佈時間: {{ formatDate(post.postTime) }}</p>
     <a :href="post.postLink" target="_blank">查看詳情</a>
     <div>喜歡數: {{ post.likeCount }}</div>
     <div>轉發數: {{ post.repostCount }}</div>
+
 </div>
 </div>
 <div v-else>
@@ -37,6 +41,8 @@ import { useRouter } from 'vue-router';
 import axiosapi from '@/plugins/axios.js';
 
 export default {
+
+
     setup() {
     const router = useRouter();
     const isEditing = ref(false);
@@ -97,11 +103,8 @@ export default {
     console.error('Fetch posts failed:', error);
     Swal.fire('錯誤', '無法取得貼文', 'error');
 };
-};
-
-
-
-    // 在組件加載時獲取資料
+};   
+   // 在組件加載時獲取資料
     onMounted(async () => {
         await fetchProfile();  // 先獲取會員資料
         if (member.value.userid) {

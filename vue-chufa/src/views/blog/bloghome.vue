@@ -17,7 +17,9 @@
         
         <ul class="post-list" v-if="posts.length > 0">
             <li v-for="post in posts" :key="post.id" class="post-item">
+            <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }">
             <h4>{{ post.postTitle }}</h4>
+            </router-link>
             <p>{{ post.postContent }}</p>
             <h4>{{ post.member.name }}</h4>
             <p>{{ post.tags || '無標籤' }}</p>           

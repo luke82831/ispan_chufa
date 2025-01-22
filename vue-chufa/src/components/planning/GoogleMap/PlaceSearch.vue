@@ -1,6 +1,11 @@
 <template>
   <div>
-    <input id="search-input" type="text" v-model="searchInput" placeholder="請輸入地點" />
+    <input
+      id="search-input"
+      type="text"
+      v-model="searchInput"
+      placeholder="請輸入地點"
+    />
     <!-- 新增儲存地點的按鈕 -->
     <button @click="submitToBackend(placeDetails)" :disabled="!placeDetails">
       儲存地點
@@ -22,10 +27,13 @@ const initAutocomplete = async () => {
     // const { Autocomplete, PlacesService } = await google.maps.importLibrary("places");
     const { Autocomplete } = await google.maps.importLibrary("places");
 
-    const autocomplete = new Autocomplete(document.getElementById("search-input"), {
-      fields: ["place_id", "address_components", "geometry", "name"], // 最小化初始欄位
-      types: ["establishment"], // 只顯示地點名稱
-    });
+    const autocomplete = new Autocomplete(
+      document.getElementById("search-input"),
+      {
+        fields: ["place_id", "address_components", "geometry", "name"], // 最小化初始欄位
+        types: ["establishment"], // 只顯示地點名稱
+      }
+    );
 
     // 限制地點搜尋在台灣
     autocomplete.setOptions({

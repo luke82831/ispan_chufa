@@ -95,11 +95,6 @@ const handlePlaceChanged = (place) => {
       return acc;
     }, {});
   };
-  // const businessHours =
-  //   "星期一: 24 小時營業\n星期二: 24 小時營業\n星期三: 24 小時營業\n星期四: 24 小時營業\n星期五: 24 小時營業\n星期六: 24 小時營業\n星期日: 24 小時營業";
-
-  // const businessHoursObject = convertBusinessHours(businessHours);
-  // console.log(businessHoursObject);
 
   // 更新 selectedPlace 並發送事件給父組件
   selectedPlace.value = {

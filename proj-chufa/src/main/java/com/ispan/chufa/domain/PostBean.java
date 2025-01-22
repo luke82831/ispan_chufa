@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,28 +33,32 @@ public class PostBean {
 	private LocalDateTime postTime; // 貼文_貼文時間
 	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
+	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 
-	@ManyToOne(cascade = { CascadeType.PERSIST })
-	@JoinColumn(name = "userid", nullable = false)
-//	@JoinColumn(name = "userid", nullable = true) //測試用	
+
+	@ManyToOne(cascade = { CascadeType.MERGE })
+	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
 	@JsonBackReference
 	MemberBean member;
-
+	
+	@OneToMany(mappedBy = "postBean")
+	private Set<CommentBean> commentBeans;
+	
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
 	// @JsonManagedReference
 	private List<InteractionBean> interactions; // 貼文的互動行為
-	private String tags; // 貼文_標籤
 
+    @ManyToMany
+    @JoinTable(
+        name = "post_tags", // 中間表名稱
+        joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
+        inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
+    )
+    private Set<TagsBean> tagsBeans = new HashSet<>();
+	
 	@ManyToMany(mappedBy = "posts")
-	private Set<PlaceBean> places = new HashSet<>();
-
-	@ManyToMany
-	// @JsonManagedReference
-	@JsonIgnore
-	@JoinTable(name = "post_tags", joinColumns = @JoinColumn(name = "postid"), inverseJoinColumns = @JoinColumn(name = "tagId"))
-	private Set<TagsBean> tag = new HashSet<>();
-	private String postLink; // 貼文_貼文超連結(文章、影片連結)
+	private Set<PlaceBean> place = new HashSet<>();
 
 	public Long getPostid() {
 		return postid;
@@ -95,28 +100,20 @@ public class PostBean {
 		this.postContent = postContent;
 	}
 
-	public String getPostLink() {
-		return postLink;
-	}
-
-	public void setPostLink(String postLink) {
-		this.postLink = postLink;
-	}
-
-	public Set<PlaceBean> getPlaces() {
-		return places;
-	}
-
-	public void setPlaces(Set<PlaceBean> places) {
-		this.places = places;
-	}
-
 	public MemberBean getMember() {
 		return member;
 	}
 
 	public void setMember(MemberBean member) {
 		this.member = member;
+	}
+
+	public Set<CommentBean> getCommentBeans() {
+		return commentBeans;
+	}
+
+	public void setCommentBeans(Set<CommentBean> commentBeans) {
+		this.commentBeans = commentBeans;
 	}
 
 	public List<InteractionBean> getInteractions() {
@@ -127,26 +124,46 @@ public class PostBean {
 		this.interactions = interactions;
 	}
 
-	public String getTags() {
-		return tags;
+	public Set<PlaceBean> getPlaces() {
+		return place;
 	}
 
-	public void setTags(String tags) {
-		this.tags = tags;
+	public void setPlaces(Set<PlaceBean> places) {
+		this.place = places;
 	}
 
-	public Set<TagsBean> getTag() {
-		return tag;
+	public String getPostLink() {
+		return postLink;
 	}
 
-	public void setTag(Set<TagsBean> tag) {
-		this.tag = tag;
+	public void setPostLink(String postLink) {
+		this.postLink = postLink;
+	}
+
+	public Set<PlaceBean> getPlace() {
+		return place;
+	}
+
+	public void setPlace(Set<PlaceBean> place) {
+		this.place = place;
+	}
+
+	public Set<TagsBean> getTagsBeans() {
+		return tagsBeans;
+	}
+
+	public void setTagsBeans(Set<TagsBean> tagsBeans) {
+		this.tagsBeans = tagsBeans;
 	}
 
 	@Override
 	public String toString() {
 		return "PostBean [postid=" + postid + ", postStatus=" + postStatus + ", postTitle=" + postTitle + ", postTime="
-				+ postTime + ", postContent=" + postContent + ", places=" + places + ", postLink=" + postLink + "]";
+				+ postTime + ", postContent=" + postContent + ", postLink=" + postLink + ", member=" + member
+				+ ", commentBeans=" + commentBeans + ", interactions=" + interactions + ", tagsBeans=" + tagsBeans
+				+ ", place=" + place + "]";
 	}
 
-}
+
+	}
+	

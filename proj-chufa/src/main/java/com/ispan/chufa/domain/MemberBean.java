@@ -2,10 +2,10 @@ package com.ispan.chufa.domain;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,23 +28,6 @@ public class MemberBean {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
 	private Long userid;
-
-	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
-	private List<PostBean> posts;
-
-	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore
-	// @JsonManagedReference
-	private List<InteractionBean> interactions;
-
-	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore
-	private List<FollowBean> following;
-
-	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore
-	private List<FollowBean> followers;
 
 	@Enumerated(EnumType.STRING) // 使用 String 儲存枚舉的值（"ADMIN" 或 "USER"）
 	@Column(name = "role") // 身分欄位
@@ -85,21 +68,47 @@ public class MemberBean {
 	@Column(name = "birth")
 	private java.util.Date birth;
 
+	private String lineUserId; // 用於存儲 LINE 的 User ID
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonManagedReference
+	private List<PostBean> posts;
+
+	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	// @JsonManagedReference
+	private List<InteractionBean> interactions;
+
+	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<FollowBean> following;
+
+	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
+	private List<FollowBean> followers;
+
 	@ManyToMany
-	@JoinTable(name = "member_place", // 中介表的表名 (自己取)
+	@JoinTable(name = "myplace", // 中介表的表名 (自己取)
 			joinColumns = @JoinColumn(name = "userid"), // 指向 MemberBean 的外鍵
 			inverseJoinColumns = @JoinColumn(name = "placeId") // 指向 PlaceBean 的外鍵
 	)
-	private List<PlaceBean> places;
+	private List<PlaceBean> place;
+
+	@ManyToMany
+	@JoinTable(name = "mycoupon", // 關聯表名稱
+			joinColumns = @JoinColumn(name = "fk_userid", referencedColumnName = "userid"), // 使用者欄位
+			inverseJoinColumns = @JoinColumn(name = "fk_couponid", referencedColumnName = "couponId") // 優惠券欄位
+	)
+	private List<CouponBean> couponBeans; // 使用者領取的優惠券列表
 
 	// Getters and Setters
 
 	public List<PlaceBean> getPlaces() {
-		return places;
+		return place;
 	}
 
 	public void setPlaces(List<PlaceBean> places) {
-		this.places = places;
+		this.place = places;
 	}
 
 	public Long getUserid() {
@@ -216,6 +225,14 @@ public class MemberBean {
 		this.birth = birth;
 	}
 
+	public String getLineUserId() {
+		return lineUserId;
+	}
+
+	public void setLineUserId(String lineUserId) {
+		this.lineUserId = lineUserId;
+	}
+
 	public List<InteractionBean> getInteractions() {
 		return interactions;
 	}
@@ -247,4 +264,13 @@ public class MemberBean {
 	public void setPosts(List<PostBean> posts) {
 		this.posts = posts;
 	}
+
+	public List<CouponBean> getCouponBeans() {
+		return couponBeans;
+	}
+
+	public void setCouponBeans(List<CouponBean> couponBeans) {
+		this.couponBeans = couponBeans;
+	}
+
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -17,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -48,24 +50,24 @@ public class PlaceBean {
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 
-	@ManyToMany(mappedBy = "places") // 多對多，對應 MemberBean 的 places
+	//  一對多
+	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<CouponBean> coupons;
+
+    @OneToMany(mappedBy = "place")
+    private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
+	
+	@ManyToMany(mappedBy = "place") // 多對多，對應 MemberBean 的 places
 	private List<MemberBean> members;
-
-	public List<MemberBean> getMembers() {
-		return members;
-	}
-
-	public void setMembers(List<MemberBean> members) {
-		this.members = members;
-	}
-
+	
 	@ManyToMany
-	@JoinTable(name = "PlaceWithPosts", // 中介表名稱
+	@JoinTable(name = "placewithposts", // 中介表名稱
 			joinColumns = @JoinColumn(name = "fk_Place_Id", foreignKey = @ForeignKey(name = "placeId")), // PlaceBean關聯的外鍵
 			inverseJoinColumns = @JoinColumn(name = "fk_Post_Id", foreignKey = @ForeignKey(name = "postid")) // PostBean關聯的外鍵
 	)
 	@JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
 	private Set<PostBean> posts = new HashSet<>();
+	
 
 	// getter and setter
 	public long getPlaceId() {
@@ -218,6 +220,30 @@ public class PlaceBean {
 
 	public void setPosts(Set<PostBean> posts) {
 		this.posts = posts;
+	}
+	
+	public List<MemberBean> getMembers() {
+		return members;
+	}
+	
+	public void setMembers(List<MemberBean> members) {
+		this.members = members;
+	}
+
+	public List<CouponBean> getCoupons() {
+		return coupons;
+	}
+
+	public void setCoupons(List<CouponBean> coupons) {
+		this.coupons = coupons;
+	}
+
+	public List<EventXPlaceBean> getEventXPlaceBeans() {
+		return eventXPlaceBeans;
+	}
+
+	public void setEventXPlaceBeans(List<EventXPlaceBean> eventXPlaceBeans) {
+		this.eventXPlaceBeans = eventXPlaceBeans;
 	}
 
 }

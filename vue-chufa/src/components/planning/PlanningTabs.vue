@@ -1,39 +1,19 @@
 <template>
-<div class="container">
-    <!-- 左邊區塊: 表單 -->
-    <div class="form-container">
-    <PlanningForm @submit="handleFormSubmit"></PlanningForm>
+  <div>
+    <div>
+      <h2>這裡放行程標題</h2>
+      <p>下面會放每日的行程內容...</p>
     </div>
-
-    <!-- 右邊區塊: 顯示地圖或其他內容 -->
-    <div class="map-container">
-    <router-view></router-view>
-    </div>
-</div>
+  </div>
 </template>
 
 <script>
+import { defineComponent } from "vue";
 
+export default defineComponent({
+  components: {
+  },
+});
 </script>
 
-<style scoped>
-.container {
-display: flex;
-justify-content: space-between;
-gap: 2rem;
-}
-
-.form-container {
-flex: 1;
-padding: 1rem;
-border: 1px solid #ccc;
-border-radius: 8px;
-}
-
-.map-container {
-flex: 2;
-padding: 1rem;
-border: 1px solid #ccc;
-border-radius: 8px;
-}
-</style>
+<style></style>

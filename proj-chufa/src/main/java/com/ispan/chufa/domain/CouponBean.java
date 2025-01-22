@@ -1,8 +1,16 @@
 package com.ispan.chufa.domain;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -10,88 +18,146 @@ import jakarta.persistence.Table;
 public class CouponBean {
 
     @Id
-    @Column(name = "couponid")
-    private Integer couponId;
-    @Column(name = "remaining")
-    private String remaining;
-    @Column(name = "title")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long couponId;
+
+    @Column(name = "coupon_code", unique = true, nullable = false)
+    private String couponCode; // 優惠券代碼，要求唯一且不能為空
+    @Column(name="remaining")
+    private Integer remaining;
+    @Column(name="Title")
     private String title;
-    @Column(name = "secondtitle")
-    private String secondTitle;
-    @Column(name = "content")
+    @Column(name="Subtitle")
+    private String subtitle;
+    @Column(name="Content")
     private String content;
-    @Column(name = "state")
-    private String state;
-    @Column(name = "web")
+    @Column(name="State")
+    private Boolean state;
+    @Column(name="Web")
     private String web;
-    @Column(name = "picture")
+    @Column(name="Picture")
     private String picture;
-    @Column(name = "starttime")
-    private Integer starttime;
-    @Column(name = "endtime")
-    private Integer endtime;
+    @Column(name="StartTime")
+    private LocalDateTime startTime;
+    @Column(name="EndTime")
+    private LocalDateTime endTime;
     
-	public Integer getCouponId() {
-		return couponId;
+    @ManyToMany(mappedBy = "couponBean")
+    private List<MyCouponBean> myCoupons; 
+    
+    @ManyToOne
+    @JoinColumn(name = "placeId")
+    private PlaceBean place;
+
+    // Getters and Setters
+
+    public Long getCouponId() {
+    	return couponId;
+    }
+    
+    public void setCouponId(Long couponId) {
+    	this.couponId = couponId;
+    }
+
+    public Integer getRemaining() {
+        return remaining;
+    }
+
+
+	public void setRemaining(Integer remaining) {
+        this.remaining = remaining;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Boolean isState() {
+        return state;
+    }
+
+    public void setState(Boolean state) {
+        this.state = state;
+    }
+
+    public String getWeb() {
+        return web;
+    }
+
+    public void setWeb(String web) {
+        this.web = web;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
+    }
+
+    public LocalDateTime getstartTime() {
+        return startTime;
+    }
+
+    public void setstartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getendTime() {
+        return endTime;
+    }
+
+    public void setendTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+	public String getCouponCode() {
+		return couponCode;
 	}
-	public void setCouponId(Integer couponId) {
-		this.couponId = couponId;
+
+	public void setCouponCode(String couponCode) {
+		this.couponCode = couponCode;
 	}
-	public String getRemaining() {
-		return remaining;
+
+	public List<MyCouponBean> getMyCoupons() {
+		return myCoupons;
 	}
-	public void setRemaining(String remaining) {
-		this.remaining = remaining;
+
+	public void setMyCoupons(List<MyCouponBean> myCoupons) {
+		this.myCoupons = myCoupons;
 	}
-	public String getTitle() {
-		return title;
+
+	public PlaceBean getPlace() {
+		return place;
 	}
-	public void setTitle(String title) {
-		this.title = title;
+
+	public void setPlace(PlaceBean place) {
+		this.place = place;
 	}
-	public String getSecondTitle() {
-		return secondTitle;
-	}
-	public void setSecondTitle(String secondTitle) {
-		this.secondTitle = secondTitle;
-	}
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content) {
-		this.content = content;
-	}
-	public String getState() {
+
+	public Boolean getState() {
 		return state;
 	}
-	public void setState(String state) {
-		this.state = state;
-	}
-	public String getWeb() {
-		return web;
-	}
-	public void setWeb(String web) {
-		this.web = web;
-	}
-	public String getPicture() {
-		return picture;
-	}
-	public void setPicture(String picture) {
-		this.picture = picture;
-	}
-	public Integer getStarttime() {
-		return starttime;
-	}
-	public void setStarttime(Integer starttime) {
-		this.starttime = starttime;
-	}
-	public Integer getEndtime() {
-		return endtime;
-	}
-	public void setEndtime(Integer endtime) {
-		this.endtime = endtime;
-	}
-
-   
-
+    
 }

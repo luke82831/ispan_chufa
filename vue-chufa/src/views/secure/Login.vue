@@ -31,10 +31,14 @@
                 <div v-if="serverError" class="server-error">
                     {{ serverError }}
                 </div>
+            </form>
+                <div class="social-login">
+                    <button class="line-login-button" @click="redirectToLineLogin">使用 LINE 帳號登入</button>
+                </div>
                 <div class="login-footer">
                     <router-link to="/secure/register" class="register-link">尚未註冊？點此註冊</router-link>
                 </div>
-            </form>
+
         </div>
     </div>
 </template>
@@ -119,6 +123,62 @@ async function login() {
         });
     }
 }
+
+function redirectToLineLogin() {
+    {}
+    const backendLoginUrl = 'http://localhost:8080/ajax/secure/lineLogin'; // 後端 LINE 登入 URL
+
+    // 跳转到後端 LINE 登入授權路径
+    window.location.href = backendLoginUrl;
+
+    axiosapi
+        .get(lineCallbackUrl)
+        .then((response) => {
+            if (response.data.success) {
+                const token = response.data.token;
+
+                if (token) {
+                // 存储 Token
+                localStorage.setItem('token', token);
+                console.log('Token successfully stored:', token);
+
+                // 设置 Axios Authorization Header
+                axiosapi.defaults.headers.Authorization = `Bearer ${token}`;
+                console.log('Authorization header set for axios:', axiosapi.defaults.headers.Authorization);
+
+                // 提示登入成功
+                Swal.fire({
+                    title: response.data.message,
+                    icon: 'success',
+                });
+
+                // 跳轉到用户资料页面
+                router.push({ path: '/secure/Profile' });
+            } else {
+                console.error('Token is missing from the server response.');
+                Swal.fire({
+                        title: '登入失敗: 無法獲取 Token',
+                        icon: 'error',
+                    });
+                    }
+                } else {
+                Swal.fire({
+                    title: 'LINE 登入失败',
+                    text: response.data.message,
+                    icon: 'error',
+                });
+            }
+        })
+        .catch((error) => {
+            console.error('LINE login error:', error);
+            Swal.fire({
+                title: '登入失敗',
+                text: '服務器發生错误，请稍後再试。',
+                icon: 'error',
+            });
+        });
+}
+
 </script>
 
 <style scoped>
@@ -228,5 +288,24 @@ async function login() {
 
 .register-link:hover {
     color: #3a6ea1;
+}
+
+/* LINE 登入按鈕樣式 */
+.line-login-button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  background-color: #00c300;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 20px;
+}
+
+.line-login-button:hover {
+  background-color: #00a300;
 }
 </style>

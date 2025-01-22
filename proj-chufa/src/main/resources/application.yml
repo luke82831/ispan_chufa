@@ -8,6 +8,7 @@ spring:
   mvc:
     converters:
       preferred-json-mapper: jackson
+    static-path-pattern: /static/**
 
   #Hibernate/JPA的相關設定
   jpa:
@@ -36,3 +37,24 @@ spring:
 jwt:
   token:
     expire: 10
+
+#line login
+line:
+  login:
+    channel-id: "2006733552"
+    channel-secret: "2e094b815ed92a5e16cb5938e9576102"
+    callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"
+
+# CORS 設定
+  web:
+    cors:
+      allowed-origins: "http://localhost:5173"
+      allowed-methods: "GET, POST, PUT, DELETE"
+      allowed-headers: "*"
+      allow-credentials: true
+
+# 文件上傳大小限制
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB

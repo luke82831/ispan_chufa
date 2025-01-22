@@ -1,4 +1,4 @@
-package com.ispan.chufa.domain; 
+package com.ispan.chufa.domain;
 
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -24,16 +24,6 @@ public class EventXPlaceBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long eventmappingId;
 
-	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
-	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
-	private EventBean event; // FK_Event_\u884c\u7a0b\u5167\u5bb9id, \u591a\u5c0d\u591a(\u884c\u7a0b\u5167\u5bb9VS\u5730\u9ede)
-
-	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
-	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
-	private PlaceBean place; // FK_\u5730\u9ede_\u5730\u9edeid, \u591a\u5c0d\u591a(\u884c\u7a0b\u5167\u5bb9VS\u5730\u9ede)
-
 	@Column(name = "place_order")
 	private Integer placeOrder;
 
@@ -46,6 +36,16 @@ public class EventXPlaceBean {
 	@Column(name = "notes")
 	@Lob
 	private char[] notes;
+
+	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
+	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
+	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
+
+	@ManyToOne
+	@JsonIgnoreProperties("eventXPlaceBeans")
+	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
+	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
 
 	// Constructors, getters, setters, and toString()
 

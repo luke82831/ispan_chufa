@@ -1,146 +1,159 @@
 <template>
-  <div class="container">
-    <!-- 搜尋區域 -->
+  <div class="map">
+    <div id="map"></div>
     <div class="search">
-      <h1>Google Maps 地點搜尋</h1>
-      <PlaceSearch :onPlaceSelected="handlePlaceChanged" />
+      <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
-    
-    <!-- 地圖區域 -->
-    <div class="map">
-      <div id="map"></div>
-    </div>
+    <!-- 傳遞 selectedPlace 到 PlaceDetail -->
+    <PlaceDetail v-if="false" :place="selectedPlace" />
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
+import PlaceDetail from "./PlaceDetail.vue";
 
-export default {
-  components: {
-    PlaceSearch,
-  },
-  setup() {
-    const map = ref(null); // 地圖實例
-    const markers = ref([]); // 存儲所有標記
-    const selectedPlace = ref(null); // 已選地點
+// 定義事件
+const emit = defineEmits(["place-selected"]);
 
-    onMounted(() => {
-      initMap();
+const map = ref(null); // 地圖實例
+const markers = ref([]); // 存儲所有標記
+const selectedPlace = ref(null); // 已選地點
+
+onMounted(() => {
+  initMap();
+});
+
+// 初始化地圖
+const initMap = async () => {
+  try {
+    const { Map } = await google.maps.importLibrary("maps");
+
+    map.value = new Map(document.getElementById("map"), {
+      zoom: 12,
+      center: { lat: 25.0339643, lng: 121.564468 },
+      mapId: "DEMO_MAP_ID",
+      gestureHandling: "cooperative",
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
     });
+  } catch (error) {
+    console.error("地圖初始化失敗:", error);
+  }
+};
 
-    // 初始化地圖
-    const initMap = async () => {
-      try {
-        const { Map } = await google.maps.importLibrary("maps");
+// 處理地點變更
+const handlePlaceChanged = (place) => {
+  if (!place || !place.geometry || !place.geometry.location) {
+    console.error("無效的地點或缺少幾何資料");
+    return;
+  }
 
-        map.value = new Map(document.getElementById("map"), {
-          zoom: 12,
-          center: { lat: 25.0339643, lng: 121.564468 },
-          mapId: "DEMO_MAP_ID",
-          gestureHandling: "cooperative",
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: true,
-        });
-      } catch (error) {
-        console.error("地圖初始化失敗:", error);
-      }
-    };
+  const { lat, lng } = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+  };
 
-    // 處理地點變更
-    const handlePlaceChanged = (place) => {
-      if (!place || !place.geometry || !place.geometry.location) {
-        console.error("無效的地點或缺少幾何資料");
-        return;
-      }
+  map.value.setCenter(place.geometry.location);
+  map.value.setZoom(17);
 
-      const { lat, lng } = {
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      };
+  updateMarker({ lat, lng }, place);
 
-      map.value.setCenter(place.geometry.location);
-      map.value.setZoom(17);
+  // 根據 priceLevel 數值轉換為中文描述
+  const convertPriceLevel = (priceLevel) => {
+    switch (priceLevel) {
+      case 0:
+        return "便宜";
+      case 1:
+        return "平價";
+      case 2:
+        return "中等";
+      case 3:
+        return "高級";
+      case 4:
+        return "奢華";
+      default:
+        return null;
+    }
+  };
 
-      
+  // 更新 selectedPlace 並發送事件給父組件
+  selectedPlace.value = {
+    displayName: place.name || null,
+    formattedAddress: place.formatted_address || null,
+    location: { lat, lng },
+    rating: place.rating || null,
+    openingHours: place.opening_hours?.weekday_text || null,
+    photos: place.photos || [],
+    types: place.types || [],
+    formattedPhoneNumber: place.formatted_phone_number || null,
+    userRatingsTotal: place.user_ratings_total || 0,
+    website: place.website || null,
+    priceLevel: convertPriceLevel(place.price_level) || null, // 使用函式轉換價格等級
+    url: place.url || null,
+    addressComponents: place.address_components || [],
+  };
 
-      updateMarker({ lat, lng }, place);
+  // 發送 place-selected 事件到父組件，傳遞 selectedPlace
+  emit("place-selected", selectedPlace.value);
+};
 
-      selectedPlace.value = {
-        displayName: place.name || "未知地點",
-        formattedAddress: place.formatted_address || "無地址",
-        location: { lat, lng },
-      };
-    };
+// 更新或新增標記並顯示資訊框
+const updateMarker = (position, place) => {
+  markers.value.forEach((marker) => marker.setMap(null));
+  markers.value = [];
 
-    // 更新或新增標記並顯示資訊框
-    const updateMarker = (position, place) => {
-      markers.value.forEach(marker => marker.setMap(null));
-      markers.value = [];
+  const marker = new google.maps.Marker({
+    map: map.value,
+    position: position,
+    animation: google.maps.Animation.DROP, // 啟用落下動畫
+  });
 
-      const marker = new google.maps.Marker({
-        map: map.value,
-        position: position,
-        animation: google.maps.Animation.DROP, // 啟用落下動畫
-      });
+  // 創建資訊框
+  const infoWindow = new google.maps.InfoWindow({
+    content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
+  });
 
-      // 創建資訊框
-      const infoWindow = new google.maps.InfoWindow({
-        content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
-      });
+  // 設定標記動畫完成後顯示資訊框
+  marker.addListener("animation_changed", () => {
+    if (marker.getAnimation() === null) {
+      // 落下動畫結束後顯示資訊框
+      infoWindow.open(map.value, marker);
+    }
+  });
 
-      // 設定標記動畫完成後顯示資訊框
-      marker.addListener("animation_changed", () => {
-        if (marker.getAnimation() === null) {
-          // 落下動畫結束後顯示資訊框
-          infoWindow.open(map.value, marker);
-        }
-      });
-
-      markers.value.push(marker); // 新增到標記清單
-    };
-
-
-    return {
-      map,
-      markers,
-      selectedPlace,
-      handlePlaceChanged,
-    };
-  },
+  markers.value.push(marker); // 新增到標記清單
 };
 </script>
 
-<style scoped>
-.container {
-  display: flex;
-  height: 100%;
-}
-
+<style>
 .search {
-  height: 500px;
-  width: 500px;
-  padding: 20px;
-  background-color: #e6e6e6e5;
-  overflow-y: auto;
-  border: 2px solid #ddd;
-  border-radius: 5px;
+  position: absolute;
+  top: 20px; /* 距離容器頂部 20px，可根據需要調整 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px; /* 固定寬度，可根據需求調整 */
+  background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加陰影 */
+  border-radius: 8px; /* 圓角設計 */
+  z-index: 10; /* 確保在其他元素之上 */
 }
 
 .map {
-  margin-left: 10px;
+  height: 100%; /* 確保容器滿高 */
+  width: 100%;
   flex-grow: 1;
-  border: 2px solid #ddd;
-  border-radius: 5px;
+  position: relative; /* 確保內部元素的絕對定位相對於 .container */
+  position: relative; /* 為地圖設定定位基準 */
+  height: 100%; /* 確保容器滿高 */
 }
 
 #map {
   height: 100%;
   width: 100%;
-  align-items: center;
-  justify-content: center;
 }
 </style>

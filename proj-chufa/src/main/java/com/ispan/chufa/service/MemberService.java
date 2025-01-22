@@ -199,5 +199,8 @@ public class MemberService {
 			return false;
 		}
 	}
+	public MemberBean getMemberById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
 
 }

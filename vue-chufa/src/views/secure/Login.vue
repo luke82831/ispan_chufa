@@ -48,8 +48,10 @@ import axiosapi from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user.js';
 
 const router = useRouter();
+const userStore = useUserStore();
 
 const email = ref('');
 const password = ref('');
@@ -73,6 +75,8 @@ async function login() {
     }
     if (!valid) return;
 
+    userStore.logout();
+
     const body = {
         email: email.value,
         password: password.value,
@@ -89,9 +93,11 @@ async function login() {
                 localStorage.setItem('token', token);
                 console.log('Token successfully stored:', localStorage.getItem('token'));
 
+                await userStore.fetchProfile();
+
                 // 設置 Axios 預設的 Authorization Header
-                axiosapi.defaults.headers.Authorization = `Bearer ${token}`;
-                console.log('Authorization header set for axios:', axiosapi.defaults.headers.Authorization);
+                // axiosapi.defaults.headers.Authorization = `Bearer ${token}`;
+                // console.log('Authorization header set for axios:', axiosapi.defaults.headers.Authorization);
 
                 await Swal.fire({
                     title: response.data.message,

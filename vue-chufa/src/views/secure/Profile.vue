@@ -97,18 +97,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user.js';
+
+const userStore = useUserStore();
 
 const router = useRouter();
 
 const isEditing = ref(false);
 const profileLoaded = ref(false);
 
-const member = ref({});
-const editMember = ref({});
+// 使用 computed 綁定 Pinia 狀態
+const member = computed(() => userStore.member);
+const editMember = ref({ ...userStore.member }); // 用於編輯時的本地拷貝
 
 // 定義 isAdmin 變數並初始化
 const isAdmin = ref(false);
@@ -132,8 +136,9 @@ const fetchProfile = async () => {
     });
 
     if (response.data.success) {
-      member.value = response.data.user || {};
-      editMember.value = { ...member.value };
+      // 更新 Pinia 狀態
+      userStore.member = response.data.user || {};
+      editMember.value = { ...userStore.member }; // 初始化编辑数据
 
       // 判斷是否為管理員
       isAdmin.value = response.data.user.role === 'ADMIN';
@@ -179,12 +184,12 @@ const navigateToAdmin = () => {
 
 const editProfile = () => {
   isEditing.value = true;
-  editMember.value = { ...member.value }; // 深拷貝資料
+  editMember.value = { ...userStore.member }; // 深拷貝資料
 };
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editMember.value = { ...member.value }; // 恢復到未編輯狀態
+  editMember.value = { ...userStore.member }; // 恢復到未編輯狀態
 };
 
 const saveProfile = async () => {
@@ -199,7 +204,7 @@ const saveProfile = async () => {
     });
 
     if (response.data.success) {
-      member.value = { ...editMember.value }; // 更新畫面資料
+      userStore.member = { ...editMember.value }; // 更新畫面資料
       isEditing.value = false;
       Swal.fire('成功', '資料已更新！', 'success');
       fetchProfile(); // 重新抓取最新資料
@@ -222,7 +227,7 @@ const uploadProfilePicture = async (event) => {
 
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('email', member.value.email);
+  formData.append('email', userStore.member.email);
 
   try {
     const response = await axios.post('/ajax/secure/upload-profile-picture', formData, {
@@ -230,7 +235,7 @@ const uploadProfilePicture = async (event) => {
     });
 
     if (response.data.success) {
-      member.value.profile_picture = response.data.profilePicture; // 更新頭像
+      userStore.member.profile_picture = response.data.profilePicture; // 更新頭像
       Swal.fire('成功', '大頭貼已更新！', 'success');
     } else {
       Swal.fire('錯誤', response.data.message, 'error');
@@ -246,7 +251,6 @@ const logout = () => {
   router.push('/secure/Login');
 };
 
-fetchProfile();
 </script>
 
 <style scoped>

@@ -4,8 +4,8 @@
     <div class="search">
       <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
-    <!-- 傳遞 selectedPlace 到 PlaceDetail -->
-    <PlaceDetail v-if="false" :place="selectedPlace" />
+    <!-- 使用 Pinia store 中的 placeDetails -->
+    <PlaceDetail v-if="placeDetails" />
   </div>
 </template>
 
@@ -13,13 +13,12 @@
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 import PlaceDetail from "./PlaceDetail.vue";
+import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
 
-// 定義事件
-const emit = defineEmits(["place-selected"]);
+const placeStore = usePlaceStore(); // 使用 store
 
 const map = ref(null); // 地圖實例
 const markers = ref([]); // 存儲所有標記
-const selectedPlace = ref(null); // 已選地點
 
 onMounted(() => {
   initMap();
@@ -95,10 +94,7 @@ const handlePlaceChanged = (place) => {
   };
 
   // 格式化訂位資訊
-
-  const selectedPlace = ref({}); // 假設 selectedPlace 是 Vue 的 ref
-
-  selectedPlace.value = {
+  const updatedPlace = {
     displayName: place.placeName || null,
     formattedAddress: place.placeAddress || null,
     location: { lat: place.latitude, lng: place.longitude }, // 確保有 lat 和 lng
@@ -112,33 +108,34 @@ const handlePlaceChanged = (place) => {
     addressComponents: place.address_components || [],
     reservation: place.reservation || null,
   };
-  emit("place-selected", selectedPlace.value);
+
+  // 使用 store 設定 placeDetails
+  placeStore.setPlaceDetails(updatedPlace);
 };
 
 // 更新或新增標記並顯示資訊框
 function updateMarker(position, place) {
-  // 新增新標記
   const marker = new google.maps.Marker({
     map: map.value,
     position: position,
     animation: google.maps.Animation.DROP,
   });
 
-  // 落下動畫結束後顯示資訊框
   const infoWindow = new google.maps.InfoWindow({
     content: `<div><h3>${place.placeName}</h3><p>${place.placeAddress}</p></div>`,
   });
 
-  // 設定標記動畫完成後顯示資訊框
   marker.addListener("animation_changed", () => {
     if (marker.getAnimation() === null) {
       infoWindow.open(map.value, marker);
     }
   });
 
-  // 儲存新標記
   markers.value.push(marker);
 }
+
+// 從 store 中取得 placeDetails
+const placeDetails = placeStore.placeDetails;
 </script>
 
 <style>

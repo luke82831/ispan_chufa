@@ -16,17 +16,19 @@
 </template>
 
 <script setup>
-import { watch } from "vue";
+import { watch, ref } from "vue";
 import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
 
 const placeStore = usePlaceStore();
-const selectedPlace = placeStore.selectedPlace;
 
-// 監聽 selectedPlace 變化
+// 透過 ref 初始化 selectedPlace，這樣我們可以在 watch 中修改它
+const selectedPlace = ref(placeStore.selectedPlace);
+
+// 使用 watch 來監聽 store 中的 selectedPlace
 watch(
   () => placeStore.selectedPlace,
   (newPlace) => {
-    console.log("選擇的地點:", newPlace);
+    selectedPlace.value = newPlace;
   }
 );
 </script>

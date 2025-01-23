@@ -12,11 +12,14 @@
 <script setup>
 import { ref, onMounted, defineEmits } from "vue";
 import Swal from "sweetalert2"; // 確保引入 SweetAlert2
+import { usePlaceStore } from "@/stores/placestore"; // 檢查路徑是否正確
 
 const searchInput = ref(""); // 搜尋框輸入
-const placeDetails = ref(null); // 儲存地點詳細資訊
 const emit = defineEmits(["place-selected"]); // 定義 place-selected 事件
 const API_URL = import.meta.env.VITE_API_URL; // 從環境變數讀取 API 基本路徑
+
+// 使用 Pinia store
+const placeStore = usePlaceStore();
 
 // 初始化 Autocomplete
 const initAutocomplete = async () => {
@@ -59,11 +62,11 @@ const initAutocomplete = async () => {
 
         if (placeExists) {
           // 資料已存在，直接使用後端資料更新
-          placeDetails.value = placeExists; // 儲存後端回傳的地點詳細資料
+          placeStore.setPlaceDetails(placeExists); // 更新 Pinia store 中的 placeDetails
           searchInput.value = placeExists.placeName; // 更新搜尋欄
 
           emit("place-selected", placeExists); // 傳遞資料給父組件
-          console.log("後端已傳遞給父組件");
+          console.log("後端資料傳遞");
         } else {
           // 資料不存在，從 Google Places API 獲取詳細資訊並儲存到後端
           fetchPlaceDetailsFromGoogle(place);
@@ -350,7 +353,7 @@ const submitToBackend = async (details) => {
       // 儲存後重新抓取資料
       const placeFromBackend = await checkPlaceInBackend(details.place_id);
       if (placeFromBackend) {
-        placeDetails.value = placeFromBackend; // 更新前端資料
+        placeStore.setPlaceDetails(placeFromBackend); // 更新 Pinia store 中的 placeDetails
         searchInput.value = placeFromBackend.placeName; // 更新搜尋欄
         emit("place-selected", placeFromBackend); // 傳遞資料給父組件
         console.log("儲存後已更新前端資料並傳遞給父組件");

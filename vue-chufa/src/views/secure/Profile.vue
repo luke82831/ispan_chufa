@@ -51,7 +51,12 @@
       <form @submit.prevent="saveProfile">
         <div class="form-group">
           <label for="profilePicture">上傳大頭貼：</label>
-          <input type="file" id="profilePicture" @change="uploadProfilePicture" class="form-control" />
+          <input
+            type="file"
+            id="profilePicture"
+            @change="uploadProfilePicture"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label for="name">姓名：</label>
@@ -59,11 +64,21 @@
         </div>
         <div class="form-group">
           <label for="nickname">暱稱：</label>
-          <input type="text" id="nickname" v-model="editMember.nickname" class="form-control" />
+          <input
+            type="text"
+            id="nickname"
+            v-model="editMember.nickname"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label for="phoneNumber">手機號碼：</label>
-          <input type="text" id="phoneNumber" v-model="editMember.phone_number" class="form-control" />
+          <input
+            type="text"
+            id="phoneNumber"
+            v-model="editMember.phone_number"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label for="gender">性別：</label>
@@ -74,7 +89,12 @@
         </div>
         <div class="form-group">
           <label for="email">電子郵件：</label>
-          <input type="email" id="email" v-model="editMember.email" class="form-control" />
+          <input
+            type="email"
+            id="email"
+            v-model="editMember.email"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label for="bio">個人簡介：</label>
@@ -92,16 +112,15 @@
       </button>
       <button class="btn btn-logout" @click="logout">登出</button>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import axios from '@/plugins/axios.js';
-import Swal from 'sweetalert2';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/stores/user.js';
+import { ref, computed, onMounted } from "vue";
+import axios from "@/plugins/axios.js";
+import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user.js";
 
 const userStore = useUserStore();
 
@@ -118,68 +137,93 @@ const editMember = ref({ ...userStore.member }); // 用於編輯時的本地拷�
 const isAdmin = ref(false);
 
 const formatDate = (date) => {
-  if (!date) return '';
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-  return new Date(date).toLocaleDateString('zh-TW', options);
+  if (!date) return "";
+  const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+  return new Date(date).toLocaleDateString("zh-TW", options);
 };
 
 const fetchProfile = async () => {
   try {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
+    console.log("line fetch token=" + token);
     if (!token) {
-      Swal.fire('錯誤', '未登入或登入已過期，請重新登入', 'error');
-      router.push('/secure/Login');
+      Swal.fire("錯誤", "未登入或登入已過期，請重新登入", "error");
+      router.push("/secure/Login");
       return;
-      }
-    const response = await axios.get('/ajax/secure/profile', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    }
+    const response = await axios.get("/ajax/secure/profile", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
 
+    console.log("line fetch response", response);
     if (response.data.success) {
       // 更新 Pinia 狀態
-      userStore.member = response.data.user || {};
+      console.log("line fetch if 1", userStore.member);
+      userStore.member = { ...response.data.user };
+      console.log("line fetch if 2", userStore.member);
+      console.log("line fetch if 3", editMember.value);
+
       editMember.value = { ...userStore.member }; // 初始化编辑数据
 
+      console.log("line fetch if 4", editMember.value);
+
       // 判斷是否為管理員
-      isAdmin.value = response.data.user.role === 'ADMIN';
+      isAdmin.value = response.data.user.role === "ADMIN";
       console.log("User Role:", response.data.user.role);
       console.log("Is Admin:", isAdmin.value);
     } else {
-      Swal.fire('錯誤', response.data.message, 'error');
+      Swal.fire("錯誤", response.data.message, "error");
     }
     profileLoaded.value = true;
   } catch (error) {
-    console.error('Fetch profile failed:', error);
-    Swal.fire('錯誤', '無法獲取會員資料', 'error');
+    console.error("Fetch profile failed:", error);
+    Swal.fire("錯誤", "無法獲取會員資料", "error");
   }
+  console.log("fetchProfile finish");
 };
 // 處理頁面載入和回調參數的邏輯
 onMounted(() => {
-    const initialize = async () => {
-        // 定義 urlParams 並從當前窗口的 URL 中解析查詢參數
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+  const initialize = async () => {
+    // 定義 urlParams 並從當前窗口的 URL 中解析查詢參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const source = urlParams.get("source");
 
-        if (token) {
-            // 保存 token 並清理 URL
-            localStorage.setItem('token', token);
-            axios.defaults.headers.Authorization = `Bearer ${token}`;
-            window.history.replaceState({}, document.title, '/secure/Profile'); // 清除查詢參數
-        } else {
-            console.warn("Token not found in URL query parameters.");
-        }
+    if (token) {
+      // 保存 token 並清理 URL
+      localStorage.setItem("token", token);
+      axios.defaults.headers.Authorization = `Bearer ${token}`;
+      window.history.replaceState({}, document.title, "/secure/Profile"); // 清除查詢參數
+    }
+    console.log(source);
+    if (source === "line") {
+      console.log("LINE login detected. Reinitializing...");
 
-        // 嘗試抓取用戶資料
-        await fetchProfile();
-    };
+      // 呼叫 fetchProfile 並重新渲染數據
+      await fetchProfile();
+      console.log("start refresh");
+      console.log(location.href);
+      location.href = location.href;
+    } else {
+      console.log("Not a LINE login. Proceeding normally.");
+      await fetchProfile();
+    }
+  };
+  //   else {
+  //     console.warn("Token not found in URL query parameters.");
+  //   }
 
-    initialize(); // 呼叫初始化函數
+  //   // 嘗試抓取用戶資料
+  //   console.log("line before fetch");
+  //   await fetchProfile();
+  // };
+
+  initialize(); // 呼叫初始化函數
 });
-
 
 // 管理員跳轉到會員管理頁面 (路徑不變)
 const navigateToAdmin = () => {
-  router.push('/admin/Role');
+  router.push("/admin/Role");
 };
 
 const editProfile = () => {
@@ -196,29 +240,31 @@ const saveProfile = async () => {
   try {
     // 格式化生日欄位
     if (editMember.value.birth) {
-      editMember.value.birth = new Date(editMember.value.birth).toISOString().split('T')[0];
+      editMember.value.birth = new Date(editMember.value.birth)
+        .toISOString()
+        .split("T")[0];
     }
 
-    const response = await axios.put('/ajax/secure/profile', editMember.value, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    const response = await axios.put("/ajax/secure/profile", editMember.value, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
 
     if (response.data.success) {
       userStore.member = { ...editMember.value }; // 更新畫面資料
       isEditing.value = false;
-      Swal.fire('成功', '資料已更新！', 'success');
+      Swal.fire("成功", "資料已更新！", "success");
       fetchProfile(); // 重新抓取最新資料
 
       console.log("Sending Updated Member Data:", editMember.value);
     } else {
-      Swal.fire('錯誤', response.data.message, 'error');
+      Swal.fire("錯誤", response.data.message, "error");
     }
   } catch (error) {
-    console.error('Save profile failed:', error);
-    Swal.fire('錯誤', '伺服器錯誤，請稍後再試', 'error');
+    console.error("Save profile failed:", error);
+    Swal.fire("錯誤", "伺服器錯誤，請稍後再試", "error");
   }
 
-  console.log('Submitting data:', editMember.value);
+  console.log("Submitting data:", editMember.value);
 };
 
 const uploadProfilePicture = async (event) => {
@@ -226,31 +272,34 @@ const uploadProfilePicture = async (event) => {
   if (!file) return;
 
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('email', userStore.member.email);
+  formData.append("file", file);
+  formData.append("email", userStore.member.email);
 
   try {
-    const response = await axios.post('/ajax/secure/upload-profile-picture', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+    const response = await axios.post("/ajax/secure/upload-profile-picture", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
 
     if (response.data.success) {
       userStore.member.profile_picture = response.data.profilePicture; // 更新頭像
-      Swal.fire('成功', '大頭貼已更新！', 'success');
+      Swal.fire("成功", "大頭貼已更新！", "success");
     } else {
-      Swal.fire('錯誤', response.data.message, 'error');
+      Swal.fire("錯誤", response.data.message, "error");
     }
   } catch (error) {
-    console.error('圖片上傳失敗:', error);
-    Swal.fire('錯誤', '伺服器錯誤，請稍後再試', 'error');
+    console.error("圖片上傳失敗:", error);
+    Swal.fire("錯誤", "伺服器錯誤，請稍後再試", "error");
   }
 };
 
 const logout = () => {
-  localStorage.removeItem('token');
-  router.push('/secure/Login');
+  localStorage.removeItem("token");
+  userStore.logout();
+  router.push("/secure/Login").then(() => {
+    // 刷新頁面以避免殘留用戶資料
+    window.location.reload();
+  });
 };
-
 </script>
 
 <style scoped>
@@ -258,7 +307,7 @@ const logout = () => {
   max-width: 800px;
   margin: 0 auto;
   padding: 30px;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background: linear-gradient(145deg, #ffffff, #f3f3f3);
   border-radius: 20px;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -313,11 +362,11 @@ const logout = () => {
 .profile-details {
   display: flex;
   flex-wrap: wrap; /* 允許換行 */
-  gap: 20px;       /* 每個欄位的間距 */
+  gap: 20px; /* 每個欄位的間距 */
 }
 
 .detail-item {
-  flex: 1 1 calc(50% - 20px); 
+  flex: 1 1 calc(50% - 20px);
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -338,7 +387,7 @@ const logout = () => {
   color: #495057;
   margin-bottom: 8px;
   font-size: 14px;
-  text-transform: uppercase; 
+  text-transform: uppercase;
   letter-spacing: 1px;
 }
 
@@ -443,8 +492,8 @@ const logout = () => {
 
 .actions-row {
   display: flex;
-  justify-content: flex-end; 
-  gap: 20px;                 
-  margin-top: 30px;          
+  justify-content: flex-end;
+  gap: 20px;
+  margin-top: 30px;
 }
 </style>

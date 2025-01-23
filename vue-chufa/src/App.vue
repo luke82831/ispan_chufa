@@ -4,6 +4,7 @@
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
     <!-- 右側導航區域 -->
+    <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
     <div class="nav-links">
       <!-- 登入後顯示大頭貼和下拉選單 -->
       <div v-if="userStore.isLoggedIn" class="member-section">
@@ -25,7 +26,6 @@
             <RouterLink to="/secure/Profile" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 會員資料
             </RouterLink>
-            <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
             <button @click="logout" class="dropdown-item">
               <i class="fas fa-sign-out-alt"></i> 登出
             </button>
@@ -89,6 +89,7 @@ const toggleDropdown = () => {
 const logout = () => {
   localStorage.removeItem("token");
   userStore.logout(); // 清空 Pinia 狀態
+  isDropdownVisible.value = false; // 關閉下拉選單
   router.push("/secure/Login");
 };
 

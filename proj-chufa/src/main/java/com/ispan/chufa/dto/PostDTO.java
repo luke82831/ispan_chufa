@@ -24,7 +24,7 @@ public class PostDTO {
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 	private Long likeCount;
 	private Long repostCount;
-	
+
 	public Long getRepostCount() {
 		return repostCount;
 	}
@@ -60,13 +60,12 @@ public class PostDTO {
 	public String getTags() {
 		return tags;
 	}
- 
-	
+
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
 
-	//@JsonProperty("tagId")  // 只序列化 memberId
+	// @JsonProperty("tagId") // 只序列化 memberId
 	public Set<TagsBean> getTag() {
 		return tag;
 	}

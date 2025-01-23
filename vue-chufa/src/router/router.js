@@ -32,7 +32,12 @@ const routes = [
     {
         path: "/blog/create",
         name: "BlogCreate",
-        component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
+        component: () => import("@/views/blog/blogCreate.vue"), // 指向 post 組件
+    },
+    {
+        path: "/blog/find/:postid",
+        name: "BlogBrowse",
+        component: () => import("@/views/blog/blogBrowse.vue"), // 指向 post 組件
     },
     { path: "/map", component: Map },
 ]

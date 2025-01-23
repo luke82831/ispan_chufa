@@ -46,7 +46,6 @@ export default {
   },
   methods: {
     async submitArticle() {
-      console.log(this.quill.root.innerHTML);
       try {
         const body = {
           "postTitle":title.value,
@@ -64,10 +63,6 @@ export default {
 </script>
 
 <style>
-  #editor-container {
-    border: 1px solid #ccc;
-    margin-bottom: 16px;
-  }
   .form-group {
       margin-bottom: 15px;
   }

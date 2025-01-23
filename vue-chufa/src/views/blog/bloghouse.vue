@@ -80,7 +80,7 @@ export default {
     // 獲取會員的貼文
     // 向後端發送請求
     const fetchPosts = async () => {
-        try {
+    try {
     const response = await axiosapi.post('/api/posts/post', {
         followerId:member.value.userid, // 確保使用正確的字段名  
     //   }, {

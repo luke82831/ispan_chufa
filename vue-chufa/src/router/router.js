@@ -3,6 +3,7 @@ import CreatePlanning from "@/views/planning/CreatePlanning.vue";
 import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
 import PostDetail from "@/views/blog/PostDetail.vue";
+import blogprofile from "@/views/blog/blogprofile.vue";
 
 
 const routes = [
@@ -50,7 +51,13 @@ const routes = [
         path: "/blog/followblog",
         name: "followblog", // 路由名稱
         component: () => import("@/views/blog/followblog.vue"), // 指向 Role 組件
-    }
+    },
+    {
+        path: '/blog/blogprofile/:bloghomeid',  // 動態路由
+        name: 'blogprofile',
+        component: blogprofile,  // 這是顯示用戶資料的頁面
+        props: true,  // 這樣可以讓路由的參數傳遞給元件
+    },
 
 
 ]

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.InteractionBean;
-import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
@@ -69,7 +68,6 @@ public class PostDaoImpl implements PostDao {
 			Predicate userPredicate = criteriaBuilder.equal(postRoot.get("member").get("userid"), userId);
 			predicates.add(userPredicate);
 		}
-		
 
 		// 根據 postid 查詢
 		if (!param.isNull("postid")) {
@@ -77,16 +75,15 @@ public class PostDaoImpl implements PostDao {
 			Predicate userPredicate = criteriaBuilder.equal(postRoot.get("postid"), postid);
 			predicates.add(userPredicate);
 		}
-		
-		//like
+
+		// like
 		if (!param.isNull("likedBy")) {
-		    Long currentid = param.getLong("likedBy"); // 取得當前用戶 ID
-		    // 過濾點贊用戶和互動類型爲 "LIKE"
-		    Predicate likedByMePredicate = criteriaBuilder.and(
-		        criteriaBuilder.equal(interactionJoin.get("member").get("userid"), currentid),
-		        criteriaBuilder.equal(interactionJoin.get("interactionType"), "LIKE")
-		    );
-		    predicates.add(likedByMePredicate);
+			Long currentid = param.getLong("likedBy"); // 取得當前用戶 ID
+			// 過濾點贊用戶和互動類型爲 "LIKE"
+			Predicate likedByMePredicate = criteriaBuilder.and(
+					criteriaBuilder.equal(interactionJoin.get("member").get("userid"), currentid),
+					criteriaBuilder.equal(interactionJoin.get("interactionType"), "LIKE"));
+			predicates.add(likedByMePredicate);
 		}
 
 		// 根據關注的人查詢，followerId所關注的人查詢
@@ -100,41 +97,31 @@ public class PostDaoImpl implements PostDao {
 
 			// 主查詢條件：Post 的作者 ID 在子查詢結果中
 			Predicate userPredicate = postRoot.get("member").get("userid").in(subquery);
-			predicates.add(userPredicate); 
-			
-			// 根據關注的人的轉發查詢
-		    if (!param.isNull("repost") && param.getBoolean("repost")) {
-		        // 查詢用戶轉發的貼文（即 REPOST）
-		       predicates.add(criteriaBuilder.equal(interactionJoin.get("interactionType"), "REPOST"));
-		    }
+			predicates.add(userPredicate);
 		}
 
 		if (!predicates.isEmpty()) {
 			criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
 		}
-		
+
 		// 分頁設定
-	    int page = param.has("page") ? param.getInt("page") : 1;  // 預設是第1頁
-	    int size = param.has("size") ? param.getInt("size") : 2; // 預設每頁10條
-	    int firstResult = (page - 1) * size;
-	    
+		int page = param.has("page") ? param.getInt("page") : 1; // 預設是第1頁
+		int size = param.has("size") ? param.getInt("size") : 10; // 預設每頁10條
+		int firstResult = (page - 1) * size;
+
 		// 按 postTime 排序（按降序排列最新的貼文）
 		if (!param.isNull("sortByTime") && param.getBoolean("sortByTime")) {
 			criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
 		}
-		
-		String sql = entityManager.createQuery(criteriaQuery)
-			    .unwrap(org.hibernate.query.Query.class)
-			    .getQueryString();
-			System.out.println("Generated SQL: " + sql);
+
+		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
+		System.out.println("Generated SQL: " + sql);
 
 		// 建立查詢並執行
 		TypedQuery<PostBean> query = entityManager.createQuery(criteriaQuery);
-		
-		query.setFirstResult(firstResult);
-	    query.setMaxResults(size);
-		
 
+		query.setFirstResult(firstResult);
+		query.setMaxResults(size);
 
 		List<PostBean> post = query.getResultList();
 
@@ -143,26 +130,28 @@ public class PostDaoImpl implements PostDao {
 			// 將 Post 的屬性複製到 PostDTO
 			PostDTO postDTO = new PostDTO();
 			BeanUtils.copyProperties(postlist, postDTO);
-			
+
+			// 填充作者資訊
+			MemberInfo memberInfo = new MemberInfo();
+			BeanUtils.copyProperties(postlist.getMember(), memberInfo);
+			postDTO.setMember(memberInfo);
 			// 判斷是否為轉發並設置 originalPost 和 repost
-	        // 轉發的貼文應該有指向原始貼文的關聯
-	        if (!param.isNull("repost")&&postlist.getInteractions() != null && postlist.getInteractions().stream().anyMatch(interaction -> "REPOST".equals(interaction.getInteractionType()))) {
-	            // 檢查是否有轉發操作
-	        	 for (InteractionBean interaction : postlist.getInteractions()) {
-	                 if ("REPOST".equals(interaction.getInteractionType())) {
-	                	 MemberInfo repostmem = new MemberInfo();
-	     				 // 複製 Member 屬性到 MemberInfo
-	     				 BeanUtils.copyProperties(interaction.getMember(), repostmem);
-	                	 postDTO.setRepostMember(repostmem);
-	                     postDTO.setRepost(true); // 設定為轉發貼文
-	                     break;
-	                 }
-	        	 }
-	        } else {
-	            postDTO.setRepost(false); // 如果不是轉發則設置為 false
-	        }
-	        
-	        
+			// 轉發的貼文應該有指向原始貼文的關聯
+			if (!param.isNull("repost") && postlist.getForwardedFrom() != null) {
+				// 如果有轉發來源，且深度限制未達上限，繼續處理
+				if (postlist.getForwardedFrom() != null) {
+					PostDTO repostDTO = new PostDTO();
+					BeanUtils.copyProperties(postlist.getForwardedFrom(), repostDTO);
+					MemberInfo repostmem = new MemberInfo();
+					BeanUtils.copyProperties(postlist.getForwardedFrom().getMember(), repostmem);
+					repostDTO.setMember(repostmem);
+					postDTO.setRepostDTO(repostDTO);
+					postDTO.setRepost(true); // 設定為轉發貼文
+				}
+			} else {
+				postDTO.setRepost(false); // 如果不是轉發則設置為 false
+			}
+
 			// 計算點讚數
 			long likeCount = interactionRepository.countByPost_PostidAndInteractionType(postlist.getPostid(), "LIKE");
 			postDTO.setLikeCount(likeCount);
@@ -170,24 +159,6 @@ public class PostDaoImpl implements PostDao {
 					"REPOST");
 			postDTO.setRepostCount(repostCount);
 
-			// 檢查 Post 是否有 Member（假設 Member 是一個巢狀物件）
-			if (postlist.getMember() != null||postlist.getCommentBeans()!=null) {
-				MemberInfo memberDTO = new MemberInfo();
-				// 複製 Member 屬性到 MemberInfo
-				BeanUtils.copyProperties(postlist.getMember(), memberDTO);
-				postDTO.setMember(memberDTO);
-				
-//				 // 如果 CommentBeans 不為空，則轉換每個 CommentBean 為 CommentDTO
-//		        if (postlist.getCommentBeans() != null) {
-//		            List<CommentDTO> commentDTOList = new ArrayList<>();
-//		            for (CommentBean commentBean : postlist.getCommentBeans()) {
-//		                CommentDTO commentDTO = new CommentDTO();
-//		                BeanUtils.copyProperties(commentBean, commentDTO);
-//		                commentDTOList.add(commentDTO);
-//		            }
-//		            postDTO.setCommentDTO(commentDTOList);  // 假設 PostDTO 中有 commentDTOList 來存儲多個 CommentDTO
-//		        }
-			}
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);
 		}
@@ -195,12 +166,10 @@ public class PostDaoImpl implements PostDao {
 		// 根據點讚數排序
 		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
 			postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());
-			// criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("likeCount")));
+			//criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("likeCount")));
 		}
-		
-		if (!param.isNull("sortByTime") && param.getBoolean("sortByTime")) {
-			postDTOList.sort(Comparator.comparing(PostDTO::getPostTime).reversed());
-		}
+
+
 		return postDTOList;
 	}
 }

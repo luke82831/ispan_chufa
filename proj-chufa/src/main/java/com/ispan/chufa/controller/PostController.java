@@ -23,7 +23,6 @@ import com.ispan.chufa.dto.PostDto2;
 import com.ispan.chufa.dto.PostResponse;
 import com.ispan.chufa.dto.TimelinePostDto;
 import com.ispan.chufa.service.PostService;
-import com.ispan.chufa.service.PostShowService;
 import com.ispan.chufa.service.TimelineService;
 
 @RestController
@@ -35,7 +34,7 @@ public class PostController {
     
     @Autowired TimelineService timelineService;
     
-    @Autowired PostShowService postShowService;
+   // @Autowired PostShowService postShowService;
 
     @PostMapping("/post")
     // @JsonView(Views.Public.class)
@@ -115,12 +114,18 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
     
-    @GetMapping("/blog/{followerId}")
-    public ResponseEntity<List<PostDto2>> getPostsForFollower(@PathVariable Long followerId) {
-    	int page = 1; // 第 1 頁
-    	int pageSize = 10;
-        List<PostDto2> posts = postShowService.getPostsForFollower(followerId,page,pageSize);
-        return ResponseEntity.ok(posts);
+//    @GetMapping("/blog/{followerId}")
+//    public ResponseEntity<List<PostDto2>> getPostsForFollower(@PathVariable Long followerId) {
+//    	int page = 1; // 第 1 頁
+//    	int pageSize = 10;
+//        List<PostDto2> posts = postShowService.getPostsForFollower(followerId,page,pageSize);
+//        return ResponseEntity.ok(posts);
+//    }
+    
+    @PostMapping("/repost/forward")
+    public PostDTO forwardPost(@RequestBody String json) {
+    	
+        return postService.forwardPost(json);
     }
     
 //    @GetMapping("/post/{id}")

@@ -44,7 +44,7 @@ Go
 
 -- post
 INSERT INTO post (postStatus, postTitle, postTime, postContent, userid, postLink) VALUES
-('ACTIVE', 'My First Post', '2025-01-20T10:00:00', 'This is the content of my first post.', 1, 'https://example.com/post1'),
+('ACTIVE', 'My hello Post', '2025-01-23T10:00:00', 'This is the content of my first post.', 7, 'https://example.com/post1'),
 ('INACTIVE', 'Another Post', '2025-01-21T14:30:00', 'This is another post content.', 2, 'https://example.com/post2'),
 ('ACTIVE', 'My First Post', '2025-01-20T10:00:00', 'aaaaa', 1, 'https://example.com/post1'),
 ('INACTIVE', 'Another Post', '2025-01-21T14:30:00', 'vvvv', 2, 'https://example.com/post2'),

@@ -1,9 +1,13 @@
 <template>
   <div>
     <h1>文章編輯器</h1>
+    <div class="form-group">
+      <label for="title">標題</label>
+      <input type="text" id="title" name="title" placeholder="請輸入文章標題" v-model="title">
+    </div>
     <!-- Quill 編輯器 -->
     <div id="editor">
-      <p>請輸入</p>
+      <p>請輸入內容</p>
     </div>
     <!-- 提交按鈕 -->
     <button @click="submitArticle">提交文章</button>
@@ -13,6 +17,7 @@
 <script>
 import Quill from "quill";
 import "quill/dist/quill.snow.css"; // Quill 的樣式文件
+import axiosapi from '@/plugins/axios.js';
 
 export default {
   data() {
@@ -40,16 +45,42 @@ export default {
     });
   },
   methods: {
-    submitArticle() {
+    async submitArticle() {
       console.log(this.quill.root.innerHTML);
+      try {
+        const body = {
+          "postTitle":title.value,
+          "postContent":this.quill.root.innerHTML,
+          "userid":"1" //登入功能完成後從user取
+        };
+        const response = await axiosapi.post('/post/create',body);
+        alert(response.data.message);
+      } catch (error) {
+      alert(error);
+      }
     },
   },
 };
 </script>
 
 <style>
-#editor-container {
-  border: 1px solid #ccc;
-  margin-bottom: 16px;
-}
+  #editor-container {
+    border: 1px solid #ccc;
+    margin-bottom: 16px;
+  }
+  .form-group {
+      margin-bottom: 15px;
+  }
+  .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+  }
+  .form-group input {
+      width: 50%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1em;
+  }
 </style>

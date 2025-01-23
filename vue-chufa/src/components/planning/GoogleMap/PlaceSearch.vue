@@ -16,6 +16,7 @@ import Swal from "sweetalert2"; // 確保引入 SweetAlert2
 const searchInput = ref(""); // 搜尋框輸入
 const placeDetails = ref(null); // 儲存地點詳細資訊
 const emit = defineEmits(["place-selected"]); // 定義 place-selected 事件
+const API_URL = import.meta.env.VITE_API_URL; // 從環境變數讀取 API 基本路徑
 
 // 初始化 Autocomplete
 const initAutocomplete = async () => {
@@ -77,7 +78,7 @@ const initAutocomplete = async () => {
 // 從後端查詢地點資料
 const checkPlaceInBackend = async (placeId) => {
   try {
-    const response = await fetch("http://localhost:8080/api/checkPlace", {
+    const response = await fetch(`${API_URL}/api/checkPlace`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -329,7 +330,7 @@ const submitToBackend = async (details) => {
   };
 
   try {
-    const response = await fetch("http://localhost:8080/api/savePlace", {
+    const response = await fetch(`${API_URL}/api/savePlace`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

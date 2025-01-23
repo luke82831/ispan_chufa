@@ -91,10 +91,13 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 輕微陰影 */
   overflow-y: auto; /* 當內容超出高度時，允許垂直滾動 */
   overflow-x: hidden; /* 隱藏水平滾動條 */
-  padding: 16px; /* 內部間距 */
   box-sizing: border-box; /* 包括 padding 在內計算寬高 */
   word-wrap: break-word; /* 自動換行，避免溢出 */
   word-break: break-word; /* 將長單詞或字串強制換行 */
   white-space: normal; /* 確保內容不強制在一行內顯示 */
+}
+
+.place-container::-webkit-scrollbar {
+  display: none; /* 隱藏滾動條 */
 }
 </style>

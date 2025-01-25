@@ -34,7 +34,7 @@ public class EventController {
     
     // GET: 根據 event_id 查詢 Event 資料
     @GetMapping("/event/{eventId}")
-    public ResponseEntity<EventBean> getEventById(@PathVariable("eventId") Long eventId) {
+    public ResponseEntity<EventBean> getEventById(@PathVariable Long eventId) {
         EventBean event = eventService.findEventById(eventId);  // 透過服務查詢 Event 資料
         if (event != null) {
             return new ResponseEntity<>(event, HttpStatus.OK);  // 資料存在，返回 200 和資料
@@ -45,7 +45,7 @@ public class EventController {
     
     // PUT: 更新行程內容資料
     @PutMapping("/event/{eventId}")
-    public ResponseEntity<?> updateEvent(@PathVariable("eventId") Long eventId, @RequestBody EventBean updatedEvent) {
+    public ResponseEntity<?> updateEvent(@PathVariable Long eventId, @RequestBody EventBean updatedEvent) {
         try {
             EventBean existingEvent = eventService.findEventById(eventId);
             if (existingEvent == null) {
@@ -69,7 +69,7 @@ public class EventController {
     
     // DELETE: 根據 eventId 刪除 Event 資料
     @DeleteMapping("/event/{eventId}")
-    public ResponseEntity<?> deleteEvent(@PathVariable("eventId") Long eventId) {
+    public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {
         try {
             eventService.deleteEventById(eventId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 刪除成功，返回 204

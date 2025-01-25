@@ -44,11 +44,11 @@ public class ScheduleController {
     // POST: 創建行程資料
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
-            @RequestParam("tripName") String tripName,
-            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam("coverPhoto") MultipartFile coverPhoto,
-            @RequestParam("userId") Long userId) {
+            @RequestParam String tripName,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam MultipartFile coverPhoto,
+            @RequestParam Long userId) {
 
         System.out.println("Received tripName: " + tripName);
         System.out.println("Received startDate: " + startDate);
@@ -113,7 +113,7 @@ public class ScheduleController {
 
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")
-    public ResponseEntity<ScheduleBean> getScheduleByTripId(@PathVariable("tripId") Long tripId) {
+    public ResponseEntity<ScheduleBean> getScheduleByTripId(@PathVariable Long tripId) {
         Optional<ScheduleBean> schedule = scheduleService.findScheduleById(tripId);
         if (schedule.isPresent()) {
             return new ResponseEntity<>(schedule.get(), HttpStatus.OK);
@@ -124,7 +124,7 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateSchedule(@PathVariable("tripId") Long tripId,
+    public ResponseEntity<?> updateSchedule(@PathVariable Long tripId,
             @RequestBody ScheduleBean updatedSchedule) {
         try {
             ScheduleBean updated = scheduleService.updateSchedule(tripId, updatedSchedule);
@@ -136,7 +136,7 @@ public class ScheduleController {
 
     // DELETE: 根據 tripId 刪除行程資料
     @DeleteMapping("/schedule/{tripId}")
-    public ResponseEntity<?> deleteSchedule(@PathVariable("tripId") Long tripId) {
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long tripId) {
         try {
             scheduleService.deleteSchedule(tripId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 刪除成功，返回 204

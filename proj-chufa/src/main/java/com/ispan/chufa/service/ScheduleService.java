@@ -33,7 +33,7 @@ public class ScheduleService {
     public ScheduleBean updateSchedule(Long tripId, ScheduleBean updatedSchedule) {
         // 檢查資料是否存在
         Optional<ScheduleBean> existingScheduleOpt = scheduleRepository.findById(tripId);
-        if (!existingScheduleOpt.isPresent()) {
+        if (existingScheduleOpt.isEmpty()) {
             throw new IllegalArgumentException("Schedule with ID " + tripId + " does not exist.");
         }
 

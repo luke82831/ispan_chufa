@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title text="#{login.page.title}">Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('https://source.unsplash.com/1600x900/?city,technology') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            padding: 40px;
+        }
+
+        .card-header {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff8c00;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 20px;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #ff8c00;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #ff8c00;
+        }
+
+        .btn-primary {
+            background-color: #ff8c00;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 18px;
+            border-radius: 25px;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #e07b00;
+        }
+
+        .text-center {
+            margin-top: 20px;
+        }
+
+        .language-selector {
+            margin-top: 20px;
+            text-align: center;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .language-selector select {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ff8c00;
+            color: #333;
+        }
+
+        .language-selector button {
+            background-color: #007bff;
+            border-radius: 20px;
+            border: none;
+            padding: 10px 20px;
+            color: #fff;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .language-selector button:hover {
+            background-color: #0056b3;
+        }
+
+        .language-selector label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        a {
+            color: #ff8c00;
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-sign-in-alt"></i> <span th:text="#{login.page.form.title}">登入</span>
+        </div>
+        <form th:action="@{/secure/login/controller}" method="post" id="loginForm" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label th:text="#{login.page.form.email}">Email:</label>
+                <input type="text" name="email" id="email" th:value="${param.email ?: ''}" class="form-control" placeholder="請輸入電子信箱">
+                <small id="emailError" class="error-message" style="display: none;"></small> <!-- 顯示 email 錯誤訊息 -->
+            </div>
+            <div class="form-group">
+                <label th:text="#{login.page.form.password}">密碼:</label>
+                <input type="password" name="password" id="password" th:value="${param.password ?: ''}" class="form-control" placeholder="請輸入密碼">
+                <small id="passwordError" class="error-message" style="display: none;"></small> <!-- 顯示 password 錯誤訊息 -->
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" th:text="#{login.page.form.button}">登入</button>
+            </div>
+        </form>
+        <div class="text-center">
+            <a th:href="@{/secure/register}">還沒有帳號？ 註冊</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function validateForm() {
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            var emailError = document.getElementById("emailError");
+            var passwordError = document.getElementById("passwordError");
+            var valid = true;
+
+            // Reset error messages
+            emailError.style.display = "none";
+            passwordError.style.display = "none";
+
+            // Validate email
+            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (!emailPattern.test(email)) {
+                emailError.style.display = "block";
+                emailError.innerText = "無效的電子郵件地址，請重新輸入。";
+                valid = false;
+            }
+
+            // Validate password
+            if (password.length < 6) {
+                passwordError.style.display = "block";
+                passwordError.innerText = "密碼錯誤，請重新輸入。";
+                valid = false;
+            }
+
+            return valid;
+        }
+    </script>
+</body>
+</html>

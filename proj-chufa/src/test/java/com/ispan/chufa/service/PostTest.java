@@ -22,7 +22,7 @@ import com.ispan.chufa.repository.TagsRepository;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
-public class PostTest {
+class PostTest {
 
     @Autowired
     private PostRepository postRepository;
@@ -36,7 +36,7 @@ public class PostTest {
     @Test
     @Transactional
     @Rollback(false)
-    public void testInsertPostWithTags() {
+    void testInsertPostWithTags() {
         // 建立標籤
         TagsBean tag1 = new TagsBean();
         tag1.setTagName("easy");

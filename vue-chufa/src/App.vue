@@ -3,8 +3,6 @@
     <!-- Logo -->
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
-    <!-- 右側導航區域 -->
-    <RouterLink to="/blog/create" class="nav-link">創建文章</RouterLink>
     <div class="nav-links">
       <!-- 登入後顯示大頭貼和下拉選單 -->
       <div v-if="userStore.isLoggedIn" class="member-section">
@@ -26,8 +24,17 @@
             <RouterLink to="/secure/Profile" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 會員資料
             </RouterLink>
+            <RouterLink to="" class="dropdown-item">
+              <i class="fas fa-user-circle"></i> 我的行程
+            </RouterLink>
+            <RouterLink to="" class="dropdown-item">
+              <i class="fas fa-user-circle"></i> 我的文章
+            </RouterLink>
+            <RouterLink to="" class="dropdown-item">
+              <i class="fas fa-user-circle"></i> 我的優惠券
+            </RouterLink>
             <button @click="logout" class="dropdown-item">
-              <i class="fas fa-sign-out-alt"></i> 登出
+              <i class="fas fa-sign-out-alt"></i>登出
             </button>
           </div>
         </transition>
@@ -35,10 +42,20 @@
 
       <!-- 未登入時顯示登入/註冊 -->
       <div v-else>
-        <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
-        <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink>
+        <RouterLink to="/secure/Login" class="nav-link">會員登入</RouterLink>
+        <!-- <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink> -->
       </div>
     </div>
+  </div>
+   <!-- 發文按鈕 -->
+    <div>
+    <RouterLink
+      v-if="!isPlanningStarted"
+      to="/blog/create"
+      id="blogbutton"
+      @click="hidePlanningButton"
+      >發文
+    </RouterLink>
   </div>
 
   <!-- 開始規劃按鈕 -->
@@ -140,6 +157,35 @@ onMounted(() => {
   transform: scale(1.1);
   background-color: #5a95d5;
   /* 深藍色 */
+}
+
+#blogbutton { 
+  position: fixed; /* 固定位置 */
+  bottom: 200px; /* 比原來的按鈕高一點 */
+  right: 50px; /* 與原本按鈕對齊 */
+  width: 100px;
+  height: 100px;
+  background-color: #85A98F;
+  color: #fff;
+  border-radius: 50%; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000; /* 確保按鈕位於頂層 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#blogbutton:hover {
+  transform: scale(1.1);
+  background-color:#5A6C57;
 }
 
 /* 全局樣式 */
@@ -254,7 +300,6 @@ onMounted(() => {
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 12px;
   padding: 12px 10px;
   font-size: 15px;
   font-weight: 600;

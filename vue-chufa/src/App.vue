@@ -47,8 +47,8 @@
       </div>
     </div>
   </div>
-   <!-- 發文按鈕 -->
-    <div>
+  <!-- 發文按鈕 -->
+  <div>
     <RouterLink
       v-if="!isPlanningStarted"
       to="/blog/create"
@@ -159,15 +159,15 @@ onMounted(() => {
   /* 深藍色 */
 }
 
-#blogbutton { 
+#blogbutton {
   position: fixed; /* 固定位置 */
   bottom: 200px; /* 比原來的按鈕高一點 */
   right: 50px; /* 與原本按鈕對齊 */
   width: 100px;
   height: 100px;
-  background-color: #85A98F;
+  background-color: #85a98f;
   color: #fff;
-  border-radius: 50%; 
+  border-radius: 50%;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
   font-size: 35px;
@@ -185,7 +185,7 @@ onMounted(() => {
 
 #blogbutton:hover {
   transform: scale(1.1);
-  background-color:#5A6C57;
+  background-color: #5a6c57;
 }
 
 /* 全局樣式 */

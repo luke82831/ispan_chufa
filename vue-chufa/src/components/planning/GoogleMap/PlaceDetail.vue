@@ -107,8 +107,8 @@ const addToItinerary = () => {
     Swal.fire("地點資料未正確加載");
     return;
   }
-  placeStore.setSelectedPlace(place.value); // 使用 Pinia 更新全局狀態
-  console.log("加入行程:", placeStore.selectedPlace);
+  placeStore.addToItinerary(place.value); // 呼叫 Pinia store 的方法
+  console.log("加入行程:", place.value);
 };
 </script>
 

@@ -1,29 +1,52 @@
 <template>
   <div>
-    <h1>創建行程規劃</h1>
+    <!-- 標題獨立區塊 -->
+    <div class="title-container">
+      <h1 class="title">出發 ! 來場旅行吧</h1>
+    </div>
+
+    <!-- 表單區塊 -->
+    <div class="form-container">
+      <form @submit.prevent="handleSubmit" class="itinerary-form">
+        <div class="form-group">
+          <label for="coverPhoto">封面照片：</label>
+          <input type="file" @change="onFileChange" id="coverPhoto" class="input-file" />
+        </div>
+
+        <div class="form-group">
+          <label for="itinerary-name">行程名稱：</label>
+          <input
+            type="text"
+            id="itinerary-name"
+            v-model="formData.name"
+            class="input-text"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="start-date">開始日期：</label>
+          <input
+            type="date"
+            id="start-date"
+            v-model="formData.startDate"
+            class="input-date"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="end-date">結束日期：</label>
+          <input
+            type="date"
+            id="end-date"
+            v-model="formData.endDate"
+            class="input-date"
+          />
+        </div>
+
+        <button type="submit" class="submit-button">建立行程</button>
+      </form>
+    </div>
   </div>
-  <form @submit.prevent="handleSubmit">
-    <div>
-      <!-- 封面照片上傳 -->
-      <label for="coverPhoto">封面照片：</label>
-      <input type="file" @change="onFileChange" id="coverPhoto" />
-    </div>
-
-    <div>
-      <label for="itinerary-name">行程名稱：</label>
-      <input type="text" id="itinerary-name" v-model="formData.name" />
-    </div>
-    <div>
-      <label for="start-date">開始日期：</label>
-      <input type="date" id="start-date" v-model="formData.startDate" />
-    </div>
-    <div>
-      <label for="end-date">結束日期：</label>
-      <input type="date" id="end-date" v-model="formData.endDate" />
-    </div>
-
-    <button type="submit">建立行程</button>
-  </form>
 </template>
 
 <script>
@@ -149,4 +172,77 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+/* 標題獨立區塊樣式 */
+.title-container {
+  padding: 20px;
+  text-align: center;
+  border-radius: 8px;
+  color: rgb(27, 27, 27); /* 字體顏色 */
+  margin-bottom: 10px 0px 10px 0px; /* 與表單的間距 */
+}
+
+.title {
+  font-size: 2.5em;
+  margin: 0;
+  font-weight: bold;
+}
+
+/* 表單區塊 */
+.form-container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  max-width: 600px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 表單樣式 */
+.itinerary-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 1em;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+input {
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* 按鈕樣式 */
+.submit-button {
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  font-size: 1.2em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+</style>

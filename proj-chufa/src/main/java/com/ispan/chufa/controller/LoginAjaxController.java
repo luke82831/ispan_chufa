@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -119,8 +120,6 @@ public class LoginAjaxController {
     @GetMapping("/profile")
     public String showProfilePage(@RequestHeader("Authorization") String authorizationHeader) {
         JSONObject responseJson = new JSONObject();
-
-        System.out.println("11111111111authorizationHeader:" + authorizationHeader);
         try {
             if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
                 responseJson.put("success", false);
@@ -393,7 +392,11 @@ public class LoginAjaxController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<String> getAllMembers(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<String> getPagedMembers(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(defaultValue = "0") int page, // 分頁參數：默認第 0 頁
+            @RequestParam(defaultValue = "10") int size // 分頁大小：默認每頁 10 筆)
+    ) {
         JSONObject responseJson = new JSONObject();
         try {
             // 1. 權限檢查（確定當前使用者是管理員）
@@ -418,11 +421,19 @@ public class LoginAjaxController {
             }
 
             // 2. 獲取全部會員
-            List<MemberBean> allMembers = memberService.findAllMembers();
+            // List<MemberBean> allMembers = memberService.findAllMembers();
+
+            // 防範無效參數
+            if (page < 0 || size <= 0) {
+                responseJson.put("success", false);
+                responseJson.put("message", "分頁參數無效");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+            Page<MemberBean> memberPage = memberService.getMembersWithPagination(page, size);
 
             // 3. 把會員資料轉成 JSON
             JSONArray usersArray = new JSONArray();
-            for (MemberBean mb : allMembers) {
+            for (MemberBean mb : memberPage.getContent()) {
                 JSONObject userJson = new JSONObject();
                 userJson.put("userid", mb.getUserid());
                 userJson.put("name", mb.getName());
@@ -434,6 +445,9 @@ public class LoginAjaxController {
 
             responseJson.put("success", true);
             responseJson.put("users", usersArray);
+            responseJson.put("currentPage", memberPage.getNumber());
+            responseJson.put("totalPages", memberPage.getTotalPages());
+            responseJson.put("totalElements", memberPage.getTotalElements());
 
             return ResponseEntity.ok(responseJson.toString());
         } catch (Exception e) {

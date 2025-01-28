@@ -47,22 +47,24 @@ const initMap = async () => {
 
 // 處理地點變更
 const handlePlaceChanged = (place) => {
-  if (!place || !place.geometry || !place.geometry.location) {
+  if (!place || !place.placeId) {
     console.error("無效的地點或缺少幾何資料");
     return;
   }
 
   const { lat, lng } = {
-    lat: place.geometry.location.lat(),
-    lng: place.geometry.location.lng(),
+    lat: place.latitude,
+    lng: place.longitude,
   };
 
-  map.value.setCenter(place.geometry.location);
+  // 更新地圖中心和縮放級別
+  map.value.setCenter({ lat, lng });
   map.value.setZoom(17);
 
+  // 更新標記
   updateMarker({ lat, lng }, place);
 
-  // 根據 priceLevel 數值轉換為中文描述
+  // 格式化地點資料
   const convertPriceLevel = (priceLevel) => {
     switch (priceLevel) {
       case 0:
@@ -80,53 +82,63 @@ const handlePlaceChanged = (place) => {
     }
   };
 
-  // 更新 selectedPlace 並發送事件給父組件
-  selectedPlace.value = {
-    displayName: place.name || null,
-    formattedAddress: place.formatted_address || null,
-    location: { lat, lng },
-    rating: place.rating || null,
-    openingHours: place.opening_hours?.weekday_text || null,
-    photos: place.photos || [],
-    types: place.types || [],
-    formattedPhoneNumber: place.formatted_phone_number || null,
-    userRatingsTotal: place.user_ratings_total || 0,
-    website: place.website || null,
-    priceLevel: convertPriceLevel(place.price_level) || null, // 使用函式轉換價格等級
-    url: place.url || null,
-    addressComponents: place.address_components || [],
+  // 格式化營業時間資料
+  const convertBusinessHours = (openingHours) => {
+    if (!openingHours) return null;
+    return openingHours.split("\n").reduce((acc, line) => {
+      const [day, hours] = line.split(": ");
+      if (day && hours) {
+        acc[day.trim()] = hours.trim();
+      }
+      return acc;
+    }, {});
   };
 
-  // 發送 place-selected 事件到父組件，傳遞 selectedPlace
+  // 格式化訂位資訊
+
+  const selectedPlace = ref({}); // 假設 selectedPlace 是 Vue 的 ref
+
+  selectedPlace.value = {
+    displayName: place.placeName || null,
+    formattedAddress: place.placeAddress || null,
+    location: { lat: place.latitude, lng: place.longitude }, // 確保有 lat 和 lng
+    rating: place.rating || null,
+    openingHours: convertBusinessHours(place.businessHours) || null,
+    photos: place.photos || [],
+    types: place.placeType || null,
+    formattedPhoneNumber: place.placePhone || null,
+    website: place.website || null,
+    priceLevel: convertPriceLevel(place.priceLevel) || null,
+    addressComponents: place.address_components || [],
+    reservation: place.reservation || null,
+  };
   emit("place-selected", selectedPlace.value);
 };
 
 // 更新或新增標記並顯示資訊框
-const updateMarker = (position, place) => {
-  markers.value.forEach((marker) => marker.setMap(null));
-  markers.value = [];
-
+function updateMarker(position, place) {
+  // 新增新標記
   const marker = new google.maps.Marker({
     map: map.value,
     position: position,
-    animation: google.maps.Animation.DROP, // 啟用落下動畫
+    animation: google.maps.Animation.DROP,
   });
 
-  // 創建資訊框
+  // 落下動畫結束後顯示資訊框
   const infoWindow = new google.maps.InfoWindow({
-    content: `<div><h3>${place.name}</h3><p>${place.formatted_address}</p></div>`,
+    content: `<div><h3>${place.placeName}</h3><p>${place.placeAddress}</p></div>`,
   });
 
   // 設定標記動畫完成後顯示資訊框
   marker.addListener("animation_changed", () => {
     if (marker.getAnimation() === null) {
-      // 落下動畫結束後顯示資訊框
       infoWindow.open(map.value, marker);
     }
   });
 
-  markers.value.push(marker); // 新增到標記清單
-};
+  // 儲存新標記
+  markers.value.push(marker);
+}
 </script>
 
 <style>
@@ -136,9 +148,6 @@ const updateMarker = (position, place) => {
   left: 50%;
   transform: translateX(-50%);
   width: 400px; /* 固定寬度，可根據需求調整 */
-  background-color: rgba(255, 255, 255, 0.9); /* 半透明背景 */
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 添加陰影 */
   border-radius: 8px; /* 圓角設計 */
   z-index: 10; /* 確保在其他元素之上 */
 }

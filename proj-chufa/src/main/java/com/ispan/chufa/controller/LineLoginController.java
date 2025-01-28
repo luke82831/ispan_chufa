@@ -138,7 +138,7 @@ public class LineLoginController {
             // 生成 JWT Token
             String token = jsonWebTokenUtility.createToken(email);
             System.out.println("Generated Token: " + token);
-            String redirectUrl = String.format("http://localhost:5173/secure/Profile?token=%s", token);
+            String redirectUrl = String.format("http://localhost:5173/secure/Profile?token=%s&source=line", token);
 
             if (token == null) {
                 responseJson.put("success", false);

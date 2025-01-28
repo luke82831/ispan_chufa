@@ -38,9 +38,9 @@ public class EventBean {
 	@ManyToOne
 	@JoinColumn(name = "FK_calendar", referencedColumnName = "date", nullable = false)
 	private CalendarBean calendar; // 多對一關聯 (行程內容 -> 行事曆)
-
-	@OneToMany(mappedBy = "event")
-	private List<EventXPlaceBean> eventXPlaceBeans; // 一對多關聯
+	
+    @OneToMany(mappedBy = "event")
+    private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 
 	// Constructors, getters, and setters
 

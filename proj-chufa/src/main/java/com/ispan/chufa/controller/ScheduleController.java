@@ -49,16 +49,14 @@ public class ScheduleController {
             @RequestParam("tripName") String tripName,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam("coverPhoto") MultipartFile coverPhoto,
+            @RequestParam("coverPhoto") MultipartFile coverPhoto, // 接收檔案
             @RequestParam("userId") Long userId) {
 
         System.out.println("Received tripName: " + tripName);
         System.out.println("Received startDate: " + startDate);
         System.out.println("Received endDate: " + endDate);
-        System.out.println("Received coverPhoto: " + coverPhoto.getOriginalFilename());
+        System.out.println("Received coverPhoto name: " + coverPhoto.getOriginalFilename());
         System.out.println("userID: " + userId);
-        
-        
 
         try {
             MemberBean user = memberService.getUserById(userId);
@@ -68,39 +66,27 @@ public class ScheduleController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            String filePath = saveFile(coverPhoto);
-
+         // 將 MultipartFile 轉換為 byte[]
+            byte[] coverPhotoBytes = coverPhoto.getBytes();
+            
+            
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
             schedule.setEndDate(endDate);
-            schedule.setCoverPhoto(filePath);
+            schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
+         // 儲存行程資料
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
-            System.err.println("File upload failed: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             System.err.println("Error creating schedule: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-    }
-    
-    private String saveFile(MultipartFile file) throws IOException {
-        Path uploadDir = Paths.get("upload-directory");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-        Path path = uploadDir.resolve(fileName);
-
-        Files.write(path, file.getBytes());
-
-        return path.toString();
     }
 
     // -------PostMan測試程式

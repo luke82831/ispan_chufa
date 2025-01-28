@@ -17,12 +17,13 @@ INSERT INTO members (role, username, password, phone_number, email, name, gender
 Go
 
 -- schedule
-INSERT INTO schedule (cover_photo, trip_name, start_date, end_date, FK_user) VALUES
-('https://example.com/photos/japan_trip.jpg', 'Trip to Japan', '2025-01-20', '2025-01-27', 1),
-('https://example.com/photos/osaka_trip.jpg', 'Osaka Adventure', '2025-02-01', '2025-02-05', 2),
-('https://example.com/photos/bali_trip.jpg', 'Bali Family Vacation', '2025-03-10', '2025-03-15', 3),
-(NULL, 'Weekend Getaway', '2025-04-05', '2025-04-07', 4),
-('https://example.com/photos/europe_trip.jpg', 'Europe Tour', '2025-05-01', '2025-05-15', 5);
+INSERT INTO schedule (cover_photo, trip_name, start_date, end_date, FK_user)
+VALUES 
+(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000001F1F7A1F' AS VARBINARY(MAX)), 'Summer Vacation', '2025-06-15', '2025-06-25', 1),
+(CAST('0x89504E470D0A1A0A0000000D4948445200000010000000100806000000C65A3F3D' AS VARBINARY(MAX)), 'Winter Getaway', '2025-12-01', '2025-12-10', 2),
+(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000002ACBC21E' AS VARBINARY(MAX)), 'Spring Adventure', '2025-03-10', '2025-03-20', 3),
+(CAST('0x89504E470D0A1A0A0000000D4948445200000010000000100806000000479F5C6D' AS VARBINARY(MAX)), 'Autumn Retreat', '2025-09-05', '2025-09-15', 4),
+(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000009E81D7FE' AS VARBINARY(MAX)), 'City Break', '2025-07-20', '2025-07-25', 5);
 Go
 
 -- event
@@ -71,20 +72,37 @@ INSERT INTO interaction (member_id, postid, interction_type, interaction_time) V
 Go
 
 -- place
-INSERT INTO place (placeType, placeName, city, region, placeAddress, longitude, latitude, placePhone, businessHours, placeInfo, rating, website, bookingUrl, price, accommodationType, reservation)
-VALUES
-('餐廳', '城市餐廳', '台北', '中正區', '台北市中正區市府路100號', 121.5074, 25.0300, '02-12345678', '08:00-22:00', '提供各式美食', 4.5, 'http://example.com', 'http://example.com/booking', 1200.50, '餐廳', 1),
-('景點', '台北101', '台北', '信義區', '台北市信義區信義路五段7號', 121.5654, 25.0330, '02-87654321', '09:00-18:00', '台灣的地標建築', 4.8, 'http://taipei101.com', 'http://taipei101.com/booking', 0.00, '景點', 0),
-('旅館', '幸福旅館', '高雄', '左營區', '高雄市左營區自由路1號', 120.2769, 22.6273, '07-12345678', '24小時營業', '提供舒適住宿', 4.3, 'http://happinesshotel.com', 'http://happinesshotel.com/booking', 3000.00, '旅館', 1),
-('餐廳', '海鮮大餐', '台中', '南區', '台中市南區建國路88號', 120.6620, 24.1460, '04-12398765', '10:00-21:00', '新鮮海鮮料理', 4.7, 'http://seafoodrestaurant.com', 'http://seafoodrestaurant.com/booking', 1500.00, '餐廳', 1),
-('景點', '日月潭', '南投', '魚池鄉', '南投縣魚池鄉日月潭', 120.9217, 23.8531, '04-98765432', '08:00-17:00', '台灣著名的風景區', 4.6, 'http://sunmoonlake.com', 'http://sunmoonlake.com/booking', 0.00, '景點', 0);
-
--- place_photos
-INSERT INTO place_photos (place_placeId, photos)
+INSERT INTO dbo.place (
+    googlemapPlaceId, placeType, placeName, city, region, placeAddress, 
+    longitude, latitude, photos, placePhone, businessHours, 
+    placeInfo, rating, website, bookingUrl, priceLevel, 
+    accommodationType, reservation, isClosed
+) 
 VALUES 
-(1, 'http://example.com/photo1.jpg'),
-(1, 'http://example.com/photo2.jpg');
-Go
+('ChIJD7fiBh9u5kcR7tJp0NxA-2c', 'Restaurant', 'The Seafood Place', 'New York', 'NY', '123 Ocean Ave, NY, 10001', 
+-74.0060, 40.7128, '[\"https://image1.jpg\", \"https://image2.jpg\"]', '123-456-7890', 'Mon-Sun 10:00-22:00', 
+'Fresh seafood, great views', 4.5, 'https://www.seafoodplace.com', 'https://www.seafoodplace.com/book', 3, 
+'Restaurant', 1, 0),
+
+('ChIJCzYy5IS16lQR4oQJ6pZlFf0', 'Hotel', 'Sunset Resort', 'Miami', 'FL', '456 Beach Rd, Miami, FL, 33139', 
+-80.1918, 25.7617, '[\"https://image3.jpg\", \"https://image4.jpg\"]', '987-654-3210', 'Mon-Sun 24 hours', 
+'Luxury resort with beach access', 4.7, 'https://www.sunsetresort.com', 'https://www.sunsetresort.com/book', 5, 
+'Resort', 0, 0),
+
+('ChIJwzS0bZVm1jURdX-Ktnklnmo', 'Cafe', 'The Cozy Cafe', 'San Francisco', 'CA', '789 Market St, San Francisco, CA, 94103', 
+-122.4194, 37.7749, '[\"https://image5.jpg\", \"https://image6.jpg\"]', '555-789-1234', 'Mon-Sun 07:00-19:00', 
+'Cozy atmosphere with delicious pastries', 4.2, 'https://www.cozycafe.com', 'https://www.cozycafe.com/book', 2, 
+'Cafe', 1, 0),
+
+('ChIJPVxGlZoUwoARUqtnZQdZlck', 'Museum', 'Art Museum', 'Los Angeles', 'CA', '321 Museum Rd, Los Angeles, CA, 90015', 
+-118.2500, 34.0522, '[\"https://image7.jpg\", \"https://image8.jpg\"]', '222-333-4444', 'Mon-Sun 09:00-17:00', 
+'Art and history exhibitions', 4.8, 'https://www.artmuseum.com', 'https://www.artmuseum.com/book', 4, 
+'Museum', 0, 0),
+
+('ChIJ2Z5sXwFm3FMRkFfb3lJl5Ug', 'Park', 'Central Park', 'New York', 'NY', 'Central Park, New York, NY, 10024', 
+-73.9654, 40.7851, '[\"https://image9.jpg\", \"https://image10.jpg\"]', 'N/A', 'Mon-Sun 06:00-23:00', 
+'Large park with walking trails and ponds', 4.9, 'https://www.centralparknyc.org', 'https://www.centralparknyc.org/book', 1, 
+'Park', 0, 0);
 
 -- comments
 INSERT INTO comments (postid, commentstate, user_id, comment_created_at, content, parentid)
@@ -149,7 +167,7 @@ Go
 -- eventXplace
 INSERT INTO eventXplace (fk_event_id, fk_place_id, place_order, arrival_time, stay_duration, notes)
 VALUES
-(1, 1, 1, '08:00:00', 120, '早上抵達，安排參觀地方A的景點。'),
-(1, 2, 2, '10:30:00', 90, '參觀地點B，包含一小時的導覽。'),
-(1, 3, 3, '13:00:00', 150, '午餐和休息時間，安排在地點C的餐廳。');
+(1, 1, 1, '08:00:00', '09:00:00', '早上抵達，安排參觀地方A的景點。'),
+(1, 2, 2, '10:30:00', '11:30:00', '參觀地點B，包含一小時的導覽。'),
+(1, 3, 3, '13:00:00', '14:00:00', '午餐和休息時間，安排在地點C的餐廳。');
 Go

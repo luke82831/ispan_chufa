@@ -13,6 +13,7 @@ const routes = [
         name: "Login",
         component: () => import("@/views/secure/Login.vue"), // 指向 Login 組件
     },
+
     {
         path: "/secure/Profile",
         name: "Profile",
@@ -28,11 +29,13 @@ const routes = [
         name: "Role", // 路由名稱
         component: () => import("@/views/admin/Role.vue"), // 指向 Role 組件
     },
-
-
-
+    {
+        path: "/blog/create",
+        name: "BlogCreate",
+        component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
+    },
+    { path: "/map", component: Map },
 ]
-
 
 export default createRouter({
     history: createWebHistory(),

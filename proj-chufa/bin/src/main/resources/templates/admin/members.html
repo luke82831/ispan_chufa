@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>會員管理</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>會員管理</h1>
+        <table class="table table-bordered mt-3">
+            <thead class="thead-light">
+                <tr>
+                    <th>使用者ID</th>
+                    <th>姓名</th>
+                    <th>Email</th>
+                    <th>角色</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="member : ${members}">
+                    <td th:text="${member.userid}">1</td>
+                    <td th:text="${member.name}">姓名</td>
+                    <td th:text="${member.email}">Email</td>
+                    <td th:text="${member.role}">角色</td>
+                    <td>
+                        <a th:href="@{'/admin/members/' + ${member.userid} + '/edit'}"
+                            class="btn btn-sm btn-warning">修改角色</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

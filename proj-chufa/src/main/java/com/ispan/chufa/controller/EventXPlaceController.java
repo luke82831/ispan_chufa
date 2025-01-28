@@ -31,7 +31,7 @@ public class EventXPlaceController {
     }
     
     @GetMapping("/eventXPlace/{eventmappingId}")
-    public ResponseEntity<EventXPlaceBean> getEventXPlaceById(@PathVariable("eventmappingId") Long eventmappingId) {
+    public ResponseEntity<EventXPlaceBean> getEventXPlaceById(@PathVariable Long eventmappingId) {
         EventXPlaceBean eventXPlace = eventXPlaceService.findEventXPlaceById(eventmappingId);  // 查詢 EventXPlace 資料
         if (eventXPlace != null) {
             return new ResponseEntity<>(eventXPlace, HttpStatus.OK);  // 資料存在，返回 200 和資料
@@ -42,7 +42,7 @@ public class EventXPlaceController {
     
     // PUT: 更新 EventXPlace 資料
     @PutMapping("/eventXPlace/{eventmappingId}")
-    public ResponseEntity<?> updateEventXPlace(@PathVariable("eventmappingId") Long eventmappingId, @RequestBody EventXPlaceBean updatedEventXPlace) {
+    public ResponseEntity<?> updateEventXPlace(@PathVariable Long eventmappingId, @RequestBody EventXPlaceBean updatedEventXPlace) {
         try {
             // 查詢現有的 EventXPlace 資料
             EventXPlaceBean existingEventXPlace = eventXPlaceService.findEventXPlaceById(eventmappingId);
@@ -69,7 +69,7 @@ public class EventXPlaceController {
     
     // DELETE: 根據 eventmappingId 刪除 EventXPlace 資料
     @DeleteMapping("/eventXPlace/{eventmappingId}")
-    public ResponseEntity<?> deleteEventXPlace(@PathVariable("eventmappingId") Long eventmappingId) {
+    public ResponseEntity<?> deleteEventXPlace(@PathVariable Long eventmappingId) {
         try {
             eventXPlaceService.deleteEventXPlaceById(eventmappingId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 刪除成功，返回 204

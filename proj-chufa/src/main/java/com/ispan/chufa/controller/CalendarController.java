@@ -42,7 +42,7 @@ public class CalendarController {
  
 	 	// GET: 前端輸入date請求資料
 	 	@GetMapping("/calendar/{date}")
-	 		public ResponseEntity<CalendarBean> getCalendarByDate(@PathVariable("date") LocalDate date) {
+	 		public ResponseEntity<CalendarBean> getCalendarByDate(@PathVariable LocalDate date) {
 	 			System.out.println("Received date: " + date);  // 打印日期來檢查
 	 			Optional<CalendarBean> calendar = calendarService.findCalendarByDate(date);
 	 			if (calendar.isPresent()) {

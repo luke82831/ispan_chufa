@@ -1,5 +1,5 @@
 <template>
-  <div>
+
     <!-- 凍結視窗 (上半部) -->
     <div class="fixed-window">
       <div class="trip-name">{{ itinerary.name }}</div>
@@ -48,7 +48,6 @@
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>

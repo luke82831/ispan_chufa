@@ -101,7 +101,7 @@ public class ScheduleController {
 
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")
-    public ResponseEntity<ScheduleBean> getScheduleByTripId(@PathVariable("tripId") Long tripId) {
+    public ResponseEntity<ScheduleBean> getScheduleByTripId(@PathVariable Long tripId) {
         Optional<ScheduleBean> schedule = scheduleService.findScheduleById(tripId);
         if (schedule.isPresent()) {
             return new ResponseEntity<>(schedule.get(), HttpStatus.OK);
@@ -124,7 +124,7 @@ public class ScheduleController {
 
     // DELETE: 根據 tripId 刪除行程資料
     @DeleteMapping("/schedule/{tripId}")
-    public ResponseEntity<?> deleteSchedule(@PathVariable("tripId") Long tripId) {
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long tripId) {
         try {
             scheduleService.deleteSchedule(tripId);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 刪除成功，返回 204

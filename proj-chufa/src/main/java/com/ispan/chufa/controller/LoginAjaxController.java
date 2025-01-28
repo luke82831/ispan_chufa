@@ -238,8 +238,8 @@ public class LoginAjaxController {
     // 處理圖片上傳
     @PostMapping("/upload-profile-picture")
     public ResponseEntity<?> uploadProfilePicture(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("email") String email) {
+            @RequestParam MultipartFile file,
+            @RequestParam String email) {
         JSONObject responseJson = new JSONObject();
 
         try {

@@ -200,6 +200,15 @@ public class MemberService {
 			return false;
 		}
 	}
+	public MemberBean getMemberById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
+
+	// 分頁方法
+	public Page<MemberBean> getMembersWithPagination(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return memberRepository.findAll(pageable);
+	}
 
 	// 分頁方法
 	public Page<MemberBean> getMembersWithPagination(int page, int size) {

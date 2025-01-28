@@ -81,7 +81,7 @@ public class PlaceService {
     public boolean deletePlace(Long placeId) {
         // 確保該 Place 存在
         Optional<PlaceBean> placeOpt = placeRepository.findById(placeId);
-        if (!placeOpt.isPresent()) {
+        if (placeOpt.isEmpty()) {
             return false; // 若找不到該 Place
         }
 

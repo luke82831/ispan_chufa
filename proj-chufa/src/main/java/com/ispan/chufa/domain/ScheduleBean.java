@@ -1,8 +1,7 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.Base64;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -22,9 +22,10 @@ public class ScheduleBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
     @Column(name = "trip_id")
     private Long tripId;
-
-    @Column(name = "cover_photo")
-    private String coverPhoto; // 封面照片（可以存儲圖片URL或者檔案路徑）
+    
+    @Lob
+    @Column(name = "cover_photo", columnDefinition = "VARBINARY(MAX)") 
+    private byte[] coverPhoto; // 封面照片（Base64 編碼數據）
 
     @Column(name = "trip_name", nullable = false)
     private String tripName; // 行程名稱
@@ -36,7 +37,6 @@ public class ScheduleBean {
     private LocalDate endDate; // 行程結束日期
 
     @ManyToOne
-	@JsonIgnoreProperties({"posts","couponBeans"})
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 
@@ -44,7 +44,7 @@ public class ScheduleBean {
     public ScheduleBean() {
     }
 
-    public ScheduleBean(String coverPhoto, String tripName, LocalDate startDate, LocalDate endDate, MemberBean userid) {
+    public ScheduleBean(byte[] coverPhoto, String tripName, LocalDate startDate, LocalDate endDate, MemberBean userid) {
         this.coverPhoto = coverPhoto;
         this.tripName = tripName;
         this.startDate = startDate;
@@ -61,12 +61,20 @@ public class ScheduleBean {
         this.tripId = tripId;
     }
 
-    public String getCoverPhoto() {
+    public byte[] getCoverPhoto() {
         return coverPhoto;
     }
 
-    public void setCoverPhoto(String coverPhoto) {
+    public void setCoverPhoto(byte[] coverPhoto) {
         this.coverPhoto = coverPhoto;
+    }
+    
+    public String getCoverPhotoBase64() {
+        return Base64.getEncoder().encodeToString(this.coverPhoto); // 將 byte[] 轉換成 Base64 字串
+    }
+
+    public void setCoverPhotoBase64(String base64String) {
+        this.coverPhoto = Base64.getDecoder().decode(base64String); // 將 Base64 字串轉換回 byte[]
     }
 
     public String getTripName() {
@@ -103,7 +111,7 @@ public class ScheduleBean {
 
     @Override
     public String toString() {
-        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + coverPhoto + ", tripName=" + tripName +
+        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + (coverPhoto != null ? "Base64 Data" : "null") + ", tripName=" + tripName +
                 ", startDate=" + startDate + ", endDate=" + endDate + "]";
     }
 }

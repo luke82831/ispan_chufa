@@ -80,6 +80,10 @@ public class MemberService {
 	public MemberBean findById(Long userid) {
 		return memberRepository.findById(userid).orElse(null);
 	}
+	
+	public MemberBean getUserById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
 
 	public MemberBean login(String email, String password) {
 		if (email != null && email.length() != 0 && password != null && password.length() != 0) {
@@ -205,5 +209,4 @@ public class MemberService {
 		Pageable pageable = PageRequest.of(page, size);
 		return memberRepository.findAll(pageable);
 	}
-
 }

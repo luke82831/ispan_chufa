@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
 import com.ispan.chufa.service.MemberService;
@@ -44,61 +46,47 @@ public class ScheduleController {
     // POST: 創建行程資料
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
-            @RequestParam String tripName,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam MultipartFile coverPhoto,
-            @RequestParam Long userId) {
+            @RequestParam("tripName") String tripName,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam("coverPhoto") MultipartFile coverPhoto, // 接收檔案
+            @RequestParam("userId") Long userId) {
 
         System.out.println("Received tripName: " + tripName);
         System.out.println("Received startDate: " + startDate);
         System.out.println("Received endDate: " + endDate);
-        System.out.println("Received coverPhoto: " + coverPhoto.getOriginalFilename());
+        System.out.println("Received coverPhoto name: " + coverPhoto.getOriginalFilename());
         System.out.println("userID: " + userId);
-        
-        
 
         try {
-            MemberBean user = memberService.getMemberById(userId);
+            MemberBean user = memberService.getUserById(userId);
 
             if (user == null) {
                 System.err.println("User with ID " + userId + " not found.");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            String filePath = saveFile(coverPhoto);
-
+         // 將 MultipartFile 轉換為 byte[]
+            byte[] coverPhotoBytes = coverPhoto.getBytes();
+            
+            
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
             schedule.setEndDate(endDate);
-            schedule.setCoverPhoto(filePath);
+            schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
+         // 儲存行程資料
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
-            System.err.println("File upload failed: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             System.err.println("Error creating schedule: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-    }
-    
-    private String saveFile(MultipartFile file) throws IOException {
-        Path uploadDir = Paths.get("upload-directory");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-        Path path = uploadDir.resolve(fileName);
-
-        Files.write(path, file.getBytes());
-
-        return path.toString();
     }
 
     // -------PostMan測試程式
@@ -124,7 +112,7 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateSchedule(@PathVariable Long tripId,
+    public ResponseEntity<?> updateSchedule(@PathVariable("tripId") Long tripId,
             @RequestBody ScheduleBean updatedSchedule) {
         try {
             ScheduleBean updated = scheduleService.updateSchedule(tripId, updatedSchedule);

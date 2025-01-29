@@ -1,10 +1,8 @@
 <template>
   <div>
-    <!-- 標題獨立區塊 -->
-    <div class="title-container">
-      <h1 class="title">出發 ! 來場旅行吧</h1>
-    </div>
-
+    <h1>創建行程規劃</h1>
+  </div>
+  <form @submit.prevent="handleSubmit">
     <!-- 表單區塊 -->
     <div class="form-container">
       <form @submit.prevent="handleSubmit" class="itinerary-form">
@@ -46,7 +44,7 @@
         <button type="submit" class="submit-button">建立行程</button>
       </form>
     </div>
-  </div>
+  </form>
 </template>
 
 <script>

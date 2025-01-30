@@ -51,11 +51,9 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import Swal from "sweetalert2";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
 const placeStore = usePlaceStore();
-const selectedTab = ref(0);
-const dateRange = ref([]);
 
 // 接收父組件傳遞的 place prop
 const props = defineProps({
@@ -95,6 +93,8 @@ const savePlace = () => {
   });
 };
 
+let clickCount = 0; // 用來記錄點擊次數
+
 // 加入行程
 const addToItinerary = () => {
   if (!place.value) {
@@ -102,7 +102,25 @@ const addToItinerary = () => {
     Swal.fire("地點資料未正確加載");
     return;
   }
-  placeStore.addToItinerary(place.value); // 呼叫 Pinia store 的方法
+
+  clickCount++; // 每次點擊地點時，clickCount 增加
+
+  // 根據點擊次數來設定 origin 和 destination
+  if (clickCount === 1) {
+    // 第一次點擊，設置為 origin
+    placeStore.setOrigin(place.value.location);
+  } else if (clickCount === 2) {
+    // 第二次點擊，設置為 destination
+    placeStore.setDestination(place.value.location);
+  } else {
+    // 第三次以後，重新設置 origin 為上一個 destination，並設置新的 destination
+    placeStore.setOrigin(place.value.location);
+    clickCount = 1; // 重置點擊次數，為了讓下一個地點再次設置為 destination
+  }
+
+  // 呼叫 Pinia store 的方法來加入行程
+  placeStore.addToItinerary(place.value);
+
   console.log("加入行程:", place.value);
 };
 </script>

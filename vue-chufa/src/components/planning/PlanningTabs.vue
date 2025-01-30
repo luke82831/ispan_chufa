@@ -5,12 +5,9 @@
 
     <!-- 日期分頁 -->
     <div class="date-tabs">
-      <button
-        class="arrow-button"
-        @click="changeDate('prev')"
-        :disabled="isFirstDay"
-      >
-        &lt; <!-- 左箭頭 -->
+      <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
+        &lt;
+        <!-- 左箭頭 -->
       </button>
 
       <button
@@ -23,48 +20,36 @@
       </button>
 
       <!-- 顯示"＋"按鈕，在最後一天顯示 -->
-      <button
-      v-if="isLastDay"
-      @click="addOneMoreDay"
-      class="add-day-btn"
-      >
-      ＋
-      </button>
+      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
 
-      <button
-        class="arrow-button"
-        @click="changeDate('next')"
-        :disabled="isLastDay"
-      >
-        &gt; <!-- 右箭頭 -->
+      <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
+        &gt;
+        <!-- 右箭頭 -->
       </button>
     </div>
 
     <!-- 根據選擇的日期顯示行程 -->
     <div v-for="(date, index) in dateRange" :key="'item-' + index">
       <div v-show="selectedTab === formatDate(date)" class="itinerary-content">
-        <VueDraggableNext
-          v-model="placeStore.itinerariesByDate[formatDate(date)]"
-          item-key="displayName"
-        >
-          <div
-            v-for="(itinerary, index) in placeStore.itinerariesByDate[formatDate(date)]"
-            :key="itinerary.displayName"
-            class="itinerary-item"
-            @dragover="onDragOver"
-            @dragleave="onDragLeave"
-          >
-            <ol>
-              <span class="itinerary-name">{{ itinerary.displayName }}</span>
-              <span class="itinerary-address">{{ itinerary.formattedAddress }}</span>
-              <!-- 刪除按鈕 -->
+        <VueDraggableNext v-model="computedItinerary[formatDate(date)]" item-key="key">
+          <div v-for="(item, index) in computedItinerary[formatDate(date)]" :key="index">
+            <RouteSelector
+              v-if="item.type === 'travel'"
+              :origin="item.origin"
+              :destination="item.destination"
+              :defaultRoute="item.route"
+              :onUpdate="(newRoute) => updateRoute(index, formatDate(date), newRoute)"
+            ></RouteSelector>
+            <div v-else class="itinerary-item">
+              <span class="itinerary-name">{{ item.displayName }}</span>
+              <span class="itinerary-address">{{ item.formattedAddress }}</span>
               <button
                 @click="removeFromItinerary(index, formatDate(date))"
                 class="delete-btn"
               >
                 X
               </button>
-            </ol>
+            </div>
           </div>
         </VueDraggableNext>
       </div>
@@ -73,9 +58,10 @@
 </template>
 
 <script setup>
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 import { ref, onMounted, watch, computed } from "vue";
 import { VueDraggableNext } from "vue-draggable-next";
+import RouteSelector from "./GoogleMap/RouteSelector.vue";
 
 const placeStore = usePlaceStore();
 
@@ -171,25 +157,50 @@ const formattedEndDate = computed(() => {
   return endDate ? endDate.toLocaleDateString("zh-TW") : "";
 });
 
+// **用 computed 產生包含地點與路線的行程**
+const computedItinerary = computed(() => {
+  const itineraryWithRoutes = {};
+
+  for (const date in placeStore.itinerariesByDate) {
+    const places = placeStore.itinerariesByDate[date];
+    itineraryWithRoutes[date] = [];
+
+    places.forEach((place, index) => {
+      itineraryWithRoutes[date].push({
+        ...place,
+        type: "place", // 地點
+      });
+
+      // **在地點之間插入 travel (預設最佳路線)**
+      if (index < places.length - 1) {
+        itineraryWithRoutes[date].push({
+          type: "travel",
+          key: `travel-${index}`,
+          origin: place,
+          destination: places[index + 1],
+          route: place.route || null, // 預設最佳路線
+        });
+      }
+    });
+  }
+
+  return itineraryWithRoutes;
+});
+
+// **當使用者選擇新路線時更新**
+const updateRoute = (index, date, newRoute) => {
+  computedItinerary.value[date][index].route = newRoute;
+};
+
 // 呼叫 store 中的 removeFromItinerary 方法刪除行程
 const removeFromItinerary = (index, date) => {
   placeStore.removeFromItinerary(index, date);
 };
 
-// 處理拖曳事件，改變鼠標樣式
-const onDragOver = (event) => {
-  event.preventDefault(); // 允許拖曳進入目標區域
-  event.target.style.cursor = "move"; // 改變鼠標樣式
-};
-
-const onDragLeave = (event) => {
-  event.target.style.cursor = "default"; // 恢復默認鼠標樣式
-};
-
 // 初始化行程資料
 const initItinerary = () => {
   const storedData = JSON.parse(localStorage.getItem("itineraryData"));
-  
+
   if (storedData && storedData.startDate && storedData.endDate) {
     itineraryTitle.value = storedData.name || "無行程名稱";
     dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
@@ -201,7 +212,7 @@ const initItinerary = () => {
         placeStore.itinerariesByDate[formattedDate] = [];
       }
     });
-    
+
     // 預設選中第一天
     selectedTab.value = formatDate(dateRange.value[0]);
   }
@@ -219,8 +230,6 @@ watch(selectedTab, (newTab) => {
   }
 });
 </script>
-
-
 
 <style scoped>
 .itinerary-item {

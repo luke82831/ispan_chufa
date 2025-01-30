@@ -4,8 +4,11 @@
     <div class="search">
       <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
-    <!-- 使用 Pinia store 中的 placeDetails -->
     <PlaceDetail v-if="placeDetails" />
+    <div class="route-planner">
+      <!-- 按鈕或其他方式觸發路線規劃 -->
+      <button @click="planRoute">規劃路線</button>
+    </div>
   </div>
 </template>
 
@@ -13,23 +16,24 @@
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 import PlaceDetail from "./PlaceDetail.vue";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
+import { initMap, updateMarker, formatPlaceDetails } from "@/utils/placeManager"; // 引入工具函式
 
-const placeStore = usePlaceStore(); // 使用 store
+const placeStore = usePlaceStore();
 
-const map = ref(null); // 地圖實例
-const markers = ref([]); // 存儲所有標記
+const map = ref(null);
+const markers = ref([]);
 
 onMounted(() => {
-  initMap();
+  initMapFunction();
 });
 
-// 初始化地圖
-const initMap = async () => {
+const initMapFunction = async () => {
   try {
     const { Map } = await google.maps.importLibrary("maps");
 
-    map.value = new Map(document.getElementById("map"), {
+    // 使用 utils 中的 initMap 函式
+    map.value = initMap(document.getElementById("map"), {
       zoom: 12,
       center: { lat: 25.0339643, lng: 121.564468 },
       mapId: "DEMO_MAP_ID",
@@ -51,88 +55,19 @@ const handlePlaceChanged = (place) => {
     return;
   }
 
-  const { lat, lng } = {
-    lat: place.latitude,
-    lng: place.longitude,
-  };
+  const { lat, lng } = { lat: place.latitude, lng: place.longitude };
 
   // 更新地圖中心和縮放級別
   map.value.setCenter({ lat, lng });
   map.value.setZoom(17);
 
   // 更新標記
-  updateMarker({ lat, lng }, place);
+  updateMarker(map.value, { lat, lng }, place, markers.value);
 
-  // 格式化地點資料
-  const convertPriceLevel = (priceLevel) => {
-    switch (priceLevel) {
-      case 0:
-        return "便宜";
-      case 1:
-        return "平價";
-      case 2:
-        return "中等";
-      case 3:
-        return "高級";
-      case 4:
-        return "奢華";
-      default:
-        return null;
-    }
-  };
-
-  // 格式化營業時間資料
-  const convertBusinessHours = (openingHours) => {
-    if (!openingHours) return null;
-    return openingHours.split("\n").reduce((acc, line) => {
-      const [day, hours] = line.split(": ");
-      if (day && hours) {
-        acc[day.trim()] = hours.trim();
-      }
-      return acc;
-    }, {});
-  };
-
-  // 格式化訂位資訊
-  const updatedPlace = {
-    displayName: place.placeName || null,
-    formattedAddress: place.placeAddress || null,
-    location: { lat: place.latitude, lng: place.longitude }, // 確保有 lat 和 lng
-    rating: place.rating || null,
-    openingHours: convertBusinessHours(place.businessHours) || null,
-    photos: place.photos || [],
-    types: place.placeType || null,
-    formattedPhoneNumber: place.placePhone || null,
-    website: place.website || null,
-    priceLevel: convertPriceLevel(place.priceLevel) || null,
-    addressComponents: place.address_components || [],
-    reservation: place.reservation || null,
-  };
-
-  // 使用 store 設定 placeDetails
+  // 使用 utils 中的 formatPlaceDetails 來處理地點資料
+  const updatedPlace = formatPlaceDetails(place);
   placeStore.setPlaceDetails(updatedPlace);
 };
-
-// 更新或新增標記並顯示資訊框
-function updateMarker(position, place) {
-  const marker = new google.maps.Marker({
-    map: map.value,
-    position: position,
-    animation: google.maps.Animation.DROP,
-  });
-
-  const infoWindow = new google.maps.InfoWindow({
-    content: `<div><h3>${place.placeName}</h3><p>${place.placeAddress}</p></div>`,
-  });
-
-  marker.addListener("animation_changed", () => {
-    if (marker.getAnimation() === null) {
-      infoWindow.open(map.value, marker);
-    }
-  });
-
-  markers.value.push(marker);
-}
 
 // 從 store 中取得 placeDetails
 const placeDetails = placeStore.placeDetails;

@@ -19,7 +19,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
 import MapDisplay from "@/components/planning/GoogleMap/MapDisplay.vue";
 import PlanningTabs from "@/components/planning/PlanningTabs.vue";

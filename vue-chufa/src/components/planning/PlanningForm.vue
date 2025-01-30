@@ -40,7 +40,7 @@
 <script>
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
-import { usePlaceStore } from "@/stores/placestore";  // 引入 store
+import { usePlaceStore } from "@/stores/PlaceStore";  // 引入 store
 
 export default {
   data() {

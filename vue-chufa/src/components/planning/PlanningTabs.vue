@@ -22,6 +22,15 @@
         {{ formatDate(date) }}
       </button>
 
+      <!-- 顯示"＋"按鈕，在最後一天顯示 -->
+      <button
+      v-if="isLastDay"
+      @click="addOneMoreDay"
+      class="add-day-btn"
+      >
+      ＋
+      </button>
+
       <button
         class="arrow-button"
         @click="changeDate('next')"
@@ -76,8 +85,6 @@ const dateRange = ref([]);
 
 // 記錄行程標題和開始/結束日期
 const itineraryTitle = ref("");
-const formattedStartDate = ref("");
-const formattedEndDate = ref("");
 
 // 計算日期範圍
 const getDateRange = (startDate, endDate) => {
@@ -118,6 +125,25 @@ const changeDate = (direction) => {
   }
 };
 
+// 增加一天到日期範圍
+const addOneMoreDay = () => {
+  const lastDate = dateRange.value[dateRange.value.length - 1]; // 取最後一天
+  const newDate = new Date(lastDate);
+  newDate.setDate(newDate.getDate() + 1); // 增加一天
+
+  // 更新日期範圍
+  dateRange.value.push(newDate); // 加入新的一天
+
+  // 同步更新行程資料
+  const formattedDate = formatDate(newDate);
+  if (!placeStore.itinerariesByDate[formattedDate]) {
+    placeStore.itinerariesByDate[formattedDate] = [];
+  }
+
+  // 設定選擇的日期為新增的日期
+  selectedTab.value = formattedDate;
+};
+
 // 計算是否為第一天
 const isFirstDay = computed(() => {
   const currentDateIndex = dateRange.value.findIndex(
@@ -132,6 +158,17 @@ const isLastDay = computed(() => {
     (date) => formatDate(date) === selectedTab.value
   );
   return currentDateIndex === dateRange.value.length - 1;
+});
+
+// 計算開始日期和結束日期
+const formattedStartDate = computed(() => {
+  const startDate = dateRange.value[0]; // 取日期範圍的第一天
+  return startDate ? startDate.toLocaleDateString("zh-TW") : "";
+});
+
+const formattedEndDate = computed(() => {
+  const endDate = dateRange.value[dateRange.value.length - 1]; // 取日期範圍的最後一天
+  return endDate ? endDate.toLocaleDateString("zh-TW") : "";
 });
 
 // 呼叫 store 中的 removeFromItinerary 方法刪除行程
@@ -149,16 +186,12 @@ const onDragLeave = (event) => {
   event.target.style.cursor = "default"; // 恢復默認鼠標樣式
 };
 
-
-// 根據從 localStorage 讀取的日期初始化行程
-onMounted(() => {
+// 初始化行程資料
+const initItinerary = () => {
   const storedData = JSON.parse(localStorage.getItem("itineraryData"));
   
   if (storedData && storedData.startDate && storedData.endDate) {
     itineraryTitle.value = storedData.name || "無行程名稱";
-    formattedStartDate.value = new Date(storedData.startDate).toLocaleDateString("zh-TW");
-    formattedEndDate.value = new Date(storedData.endDate).toLocaleDateString("zh-TW");
-    
     dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
 
     // 初始化每個日期對應的行程
@@ -172,6 +205,11 @@ onMounted(() => {
     // 預設選中第一天
     selectedTab.value = formatDate(dateRange.value[0]);
   }
+};
+
+// 根據從 localStorage 讀取的日期初始化行程
+onMounted(() => {
+  initItinerary();
 });
 
 // 監聽 selectedTab 的變化，確保在變更後能夠更新相應的行程顯示
@@ -180,8 +218,8 @@ watch(selectedTab, (newTab) => {
     placeStore.setSelectedDate(newTab); // 更新 Pinia 中的 selectedDate
   }
 });
-
 </script>
+
 
 
 <style scoped>

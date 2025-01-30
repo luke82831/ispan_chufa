@@ -40,6 +40,7 @@
 <script>
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
+import { usePlaceStore } from "@/stores/placestore";  // 引入 store
 
 export default {
   data() {
@@ -92,6 +93,11 @@ export default {
         });
         Swal.fire("成功", "行程已成功建立", "success");
         localStorage.setItem("itineraryData", JSON.stringify(this.formData));
+
+        // 這裡調用 reset 清空 Pinia store 資料
+        const placeStore = usePlaceStore();
+        placeStore.reset();
+
         this.$router.push("/planningtabs");
       } catch (error) {
         const errorMessage = error.response?.data?.message || "發生未知錯誤";
@@ -119,6 +125,7 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>

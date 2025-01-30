@@ -38,6 +38,13 @@ export const usePlaceStore = defineStore('place', () => {
     selectedDate.value = date;
   };
 
+  const reset = () => {
+    placeDetails.value = null;
+    itineraries.value = [];
+    selectedDate.value = null;
+    itinerariesByDate.value = {};
+  };
+
   return {
     placeDetails,
     setPlaceDetails,
@@ -46,6 +53,7 @@ export const usePlaceStore = defineStore('place', () => {
     removeFromItinerary,
     selectedDate,
     itinerariesByDate,
-    setSelectedDate,  // 新增的 setSelectedDate 方法
+    setSelectedDate,
+    reset,
   };
 });

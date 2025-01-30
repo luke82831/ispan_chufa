@@ -1,34 +1,39 @@
 <template>
-  <h2>{{ itineraryTitle }}</h2>
-  <p>{{ formattedStartDate }} - {{ formattedEndDate }}</p>
-
   <div>
-    <!-- 顯示當前選擇的日期行程 -->
-    <div>
-      <h3>選擇日期: {{ placeStore.selectedDate }}</h3>
-      <ul>
-        <li
-          v-for="(itinerary, index) in placeStore.itinerariesByDate[
-            placeStore.selectedDate
-          ]"
-          :key="index"
-        >
-          {{ itinerary.displayName }} - {{ itinerary.formattedAddress }}
-        </li>
-      </ul>
+    <h2>{{ itineraryTitle }}</h2>
+    <p>{{ formattedStartDate }} - {{ formattedEndDate }}</p>
+
+    <!-- 日期分頁 -->
+    <div class="date-tabs">
+      <button
+        class="arrow-button"
+        @click="changeDate('prev')"
+        :disabled="isFirstDay"
+      >
+        &lt; <!-- 左箭頭 -->
+      </button>
+
+      <button
+        v-for="(date, index) in dateRange"
+        :key="index"
+        :class="{ active: selectedTab === formatDate(date) }"
+        @click="updateSelectedDate(date)"
+      >
+        {{ formatDate(date) }}
+      </button>
+
+      <button
+        class="arrow-button"
+        @click="changeDate('next')"
+        :disabled="isLastDay"
+      >
+        &gt; <!-- 右箭頭 -->
+      </button>
     </div>
-  </div>
 
-  <!-- 日期分頁 -->
-  <v-tabs v-model="selectedTab" @change="updateSelectedDate">
-    <v-tab v-for="(date, index) in dateRange" :key="index" :value="date">
-      {{ formatDate(date) }}
-    </v-tab>
-
-    <!-- 分頁內容 -->
-    <v-tab-item v-for="(date, index) in dateRange" :key="'item-' + index">
-      <div class="itinerary-content">
-        <!-- 使用 VueDraggableNext 顯示每個日期對應的行程 -->
+    <!-- 根據選擇的日期顯示行程 -->
+    <div v-for="(date, index) in dateRange" :key="'item-' + index">
+      <div v-show="selectedTab === formatDate(date)" class="itinerary-content">
         <VueDraggableNext
           v-model="placeStore.itinerariesByDate[formatDate(date)]"
           item-key="displayName"
@@ -54,19 +59,19 @@
           </div>
         </VueDraggableNext>
       </div>
-    </v-tab-item>
-  </v-tabs>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { ref, onMounted, watch, computed } from "vue";
 import { VueDraggableNext } from "vue-draggable-next";
-import { ref, onMounted, watch } from "vue";
 
 const placeStore = usePlaceStore();
 
 // 記錄日期範圍和當前選中的 tab
-const selectedTab = ref(0);
+const selectedTab = ref(""); // 用來跟蹤當前選擇的日期
 const dateRange = ref([]);
 
 // 記錄行程標題和開始/結束日期
@@ -94,35 +99,40 @@ const formatDate = (date) => {
   return date.toLocaleDateString("zh-TW", options);
 };
 
-// 根據日期範圍初始化行程
-onMounted(() => {
-  const storedData = JSON.parse(localStorage.getItem("itineraryData"));
-
-  if (storedData && storedData.startDate && storedData.endDate) {
-    itineraryTitle.value = storedData.name || "無行程名稱";
-    formattedStartDate.value = new Date(storedData.startDate).toLocaleDateString("zh-TW");
-    formattedEndDate.value = new Date(storedData.endDate).toLocaleDateString("zh-TW");
-
-    dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
-
-    // 初始化每個日期對應的行程
-    dateRange.value.forEach((date) => {
-      const formattedDate = formatDate(date);
-      if (!placeStore.itinerariesByDate[formattedDate]) {
-        placeStore.itinerariesByDate[formattedDate] = [];
-      }
-    });
-  }
-
-  // 初始化 selectedDate，選擇當前的日期
-  const initialDate = formatDate(dateRange.value[selectedTab.value]);
-  placeStore.setSelectedDate(initialDate);
-});
-
 // 更新選擇的日期，並儲存到 Pinia
 const updateSelectedDate = (date) => {
-  placeStore.setSelectedDate(date); // 更新 Pinia 中的 selectedDate
+  selectedTab.value = formatDate(date); // 更新選中的日期
+  placeStore.setSelectedDate(selectedTab.value); // 更新 Pinia 中的 selectedDate
 };
+
+// 切換日期
+const changeDate = (direction) => {
+  const currentDateIndex = dateRange.value.findIndex(
+    (date) => formatDate(date) === selectedTab.value
+  );
+
+  if (direction === "prev" && currentDateIndex > 0) {
+    selectedTab.value = formatDate(dateRange.value[currentDateIndex - 1]);
+  } else if (direction === "next" && currentDateIndex < dateRange.value.length - 1) {
+    selectedTab.value = formatDate(dateRange.value[currentDateIndex + 1]);
+  }
+};
+
+// 計算是否為第一天
+const isFirstDay = computed(() => {
+  const currentDateIndex = dateRange.value.findIndex(
+    (date) => formatDate(date) === selectedTab.value
+  );
+  return currentDateIndex === 0;
+});
+
+// 計算是否為最後一天
+const isLastDay = computed(() => {
+  const currentDateIndex = dateRange.value.findIndex(
+    (date) => formatDate(date) === selectedTab.value
+  );
+  return currentDateIndex === dateRange.value.length - 1;
+});
 
 // 呼叫 store 中的 removeFromItinerary 方法刪除行程
 const removeFromItinerary = (index, date) => {
@@ -139,12 +149,40 @@ const onDragLeave = (event) => {
   event.target.style.cursor = "default"; // 恢復默認鼠標樣式
 };
 
-// 監視 selectedTab，當 tab 改變時，更新日期
-watch(selectedTab, (newTabIndex) => {
-  const selectedDate = formatDate(dateRange.value[newTabIndex]);
-  updateSelectedDate(selectedDate); // 當選擇日期分頁時，更新 Pinia 儲存的日期
+
+// 根據從 localStorage 讀取的日期初始化行程
+onMounted(() => {
+  const storedData = JSON.parse(localStorage.getItem("itineraryData"));
+  
+  if (storedData && storedData.startDate && storedData.endDate) {
+    itineraryTitle.value = storedData.name || "無行程名稱";
+    formattedStartDate.value = new Date(storedData.startDate).toLocaleDateString("zh-TW");
+    formattedEndDate.value = new Date(storedData.endDate).toLocaleDateString("zh-TW");
+    
+    dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
+
+    // 初始化每個日期對應的行程
+    dateRange.value.forEach((date) => {
+      const formattedDate = formatDate(date);
+      if (!placeStore.itinerariesByDate[formattedDate]) {
+        placeStore.itinerariesByDate[formattedDate] = [];
+      }
+    });
+    
+    // 預設選中第一天
+    selectedTab.value = formatDate(dateRange.value[0]);
+  }
 });
+
+// 監聽 selectedTab 的變化，確保在變更後能夠更新相應的行程顯示
+watch(selectedTab, (newTab) => {
+  if (newTab) {
+    placeStore.setSelectedDate(newTab); // 更新 Pinia 中的 selectedDate
+  }
+});
+
 </script>
+
 
 <style scoped>
 .itinerary-item {
@@ -178,5 +216,28 @@ watch(selectedTab, (newTabIndex) => {
 
 .delete-btn:hover {
   color: #f44336; /* 鼠標懸停時顏色改變 */
+}
+
+/* 日期分頁按鈕的樣式 */
+.date-tabs button {
+  padding: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  margin-right: 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s; /* 讓顏色變化過渡 */
+}
+
+.date-tabs button.active {
+  background-color: #007bff; /* 設定選中的日期顏色 */
+  color: white; /* 文字顏色為白色 */
+  font-weight: bold; /* 強調字體 */
+}
+
+/* 當按鈕被懸停時的效果 */
+.date-tabs button:hover {
+  background-color: #0056b3; /* 懸停時的背景顏色 */
+  color: white; /* 懸停時文字顏色 */
 }
 </style>

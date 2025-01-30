@@ -31,8 +31,14 @@
     <!-- 根據選擇的日期顯示行程 -->
     <div v-for="(date, index) in dateRange" :key="'item-' + index">
       <div v-show="selectedTab === formatDate(date)" class="itinerary-content">
-        <VueDraggableNext v-model="computedItinerary[formatDate(date)]" item-key="key">
-          <div v-for="(item, index) in computedItinerary[formatDate(date)]" :key="index">
+        <VueDraggableNext
+          v-model="placeStore.itinerariesByDate[formatDate(date)]"
+          item-key="key"
+        >
+          <div
+            v-for="(item, index) in computedItinerary[formatDate(date)]"
+            :key="item.key"
+          >
             <RouteSelector
               v-if="item.type === 'travel'"
               :origin="item.origin"
@@ -43,12 +49,6 @@
             <div v-else class="itinerary-item">
               <span class="itinerary-name">{{ item.displayName }}</span>
               <span class="itinerary-address">{{ item.formattedAddress }}</span>
-              <button
-                @click="removeFromItinerary(index, formatDate(date))"
-                class="delete-btn"
-              >
-                X
-              </button>
             </div>
           </div>
         </VueDraggableNext>
@@ -166,6 +166,7 @@ const computedItinerary = computed(() => {
     itineraryWithRoutes[date] = [];
 
     places.forEach((place, index) => {
+      // 為每個 place 項目生成唯一的 key
       itineraryWithRoutes[date].push({
         ...place,
         type: "place", // 地點
@@ -190,11 +191,6 @@ const computedItinerary = computed(() => {
 // **當使用者選擇新路線時更新**
 const updateRoute = (index, date, newRoute) => {
   computedItinerary.value[date][index].route = newRoute;
-};
-
-// 呼叫 store 中的 removeFromItinerary 方法刪除行程
-const removeFromItinerary = (index, date) => {
-  placeStore.removeFromItinerary(index, date);
 };
 
 // 初始化行程資料

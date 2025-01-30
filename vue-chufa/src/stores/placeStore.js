@@ -54,12 +54,6 @@ export const usePlaceStore = defineStore('place', () => {
     console.log(`地點已加入到 ${dateKey} 行程`, itinerariesByDate.value[dateKey]);
   };
 
-  const removeFromItinerary = (index, date) => {
-    if (itinerariesByDate.value[date]) {
-      itinerariesByDate.value[date].splice(index, 1);
-    }
-  };
-
   const reset = () => {
     placeDetails.value = null;
     itineraries.value = [];
@@ -79,7 +73,6 @@ export const usePlaceStore = defineStore('place', () => {
     setPlaceDetails,
     setSelectedDate,
     addToItinerary,
-    removeFromItinerary,
     setOrigin,
     setDestination,
     reset,

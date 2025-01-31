@@ -3,11 +3,9 @@
     <h2>{{ itineraryTitle }}</h2>
     <p>{{ formattedStartDate }} - {{ formattedEndDate }}</p>
 
-    <!-- 日期分頁 -->
     <div class="date-tabs">
       <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
         &lt;
-        <!-- 左箭頭 -->
       </button>
 
       <button
@@ -19,34 +17,39 @@
         {{ formatDate(date) }}
       </button>
 
-      <!-- 顯示"＋"按鈕，在最後一天顯示 -->
       <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
 
       <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
         &gt;
-        <!-- 右箭頭 -->
       </button>
     </div>
 
-    <!-- 根據選擇的日期顯示行程 -->
     <div v-for="(date, index) in dateRange" :key="'item-' + index">
       <div v-show="selectedTab === formatDate(date)" class="itinerary-content">
         <VueDraggableNext
           v-model="placeStore.itinerariesByDate[formatDate(date)]"
           item-key="key"
+          @update:modelValue="handleDragUpdate"
         >
           <div
             v-for="(item, index) in computedItinerary[formatDate(date)]"
             :key="item.key"
           >
-            <RouteSelector
-              v-if="item.type === 'travel'"
-              :origin="item.origin"
-              :destination="item.destination"
-              :defaultRoute="item.route"
-              :onUpdate="(newRoute) => updateRoute(index, formatDate(date), newRoute)"
-            ></RouteSelector>
-            <div v-else class="itinerary-item">
+            <div v-if="item.type === 'travel'">
+              <RouteSelector
+                :origin="item.origin"
+                :destination="item.destination"
+                :defaultRoute="item.route"
+                :onUpdate="(newRoute) => updateRoute(index, formatDate(date), newRoute)"
+              ></RouteSelector>
+
+              <!-- 顯示路線時間 -->
+              <div v-if="item.travel && item.travel.travelTime">
+                <p>路線時間: {{ item.travel.travelTime }} 分鐘</p>
+              </div>
+            </div>
+
+            <div v-if="item.type === 'place'" class="itinerary-item">
               <span class="itinerary-name">{{ item.displayName }}</span>
               <span class="itinerary-address">{{ item.formattedAddress }}</span>
             </div>
@@ -66,7 +69,7 @@ import RouteSelector from "./GoogleMap/RouteSelector.vue";
 const placeStore = usePlaceStore();
 
 // 記錄日期範圍和當前選中的 tab
-const selectedTab = ref(""); // 用來跟蹤當前選擇的日期
+const selectedTab = ref("");
 const dateRange = ref([]);
 
 // 記錄行程標題和開始/結束日期
@@ -74,156 +77,149 @@ const itineraryTitle = ref("");
 
 // 計算日期範圍
 const getDateRange = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
   const dates = [];
-
-  while (start <= end) {
-    dates.push(new Date(start));
-    start.setDate(start.getDate() + 1);
+  let currentDate = new Date(startDate);
+  while (currentDate <= new Date(endDate)) {
+    dates.push(new Date(currentDate));
+    currentDate.setDate(currentDate.getDate() + 1);
   }
-
   return dates;
 };
 
 // 格式化日期為 "1/1" 格式
-const formatDate = (date) => {
-  const options = { month: "numeric", day: "numeric" };
-  return date.toLocaleDateString("zh-TW", options);
-};
+const formatDate = (date) =>
+  date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" });
 
 // 更新選擇的日期，並儲存到 Pinia
 const updateSelectedDate = (date) => {
   selectedTab.value = formatDate(date); // 更新選中的日期
+  console.log("Selected Date updated:", selectedTab.value); // Log
   placeStore.setSelectedDate(selectedTab.value); // 更新 Pinia 中的 selectedDate
 };
 
 // 切換日期
 const changeDate = (direction) => {
-  const currentDateIndex = dateRange.value.findIndex(
+  const currentIndex = dateRange.value.findIndex(
     (date) => formatDate(date) === selectedTab.value
   );
+  if (direction === "prev" && currentIndex > 0)
+    selectedTab.value = formatDate(dateRange.value[currentIndex - 1]);
+  if (direction === "next" && currentIndex < dateRange.value.length - 1)
+    selectedTab.value = formatDate(dateRange.value[currentIndex + 1]);
 
-  if (direction === "prev" && currentDateIndex > 0) {
-    selectedTab.value = formatDate(dateRange.value[currentDateIndex - 1]);
-  } else if (direction === "next" && currentDateIndex < dateRange.value.length - 1) {
-    selectedTab.value = formatDate(dateRange.value[currentDateIndex + 1]);
-  }
+  console.log("Date changed:", selectedTab.value); // Log
 };
 
 // 增加一天到日期範圍
 const addOneMoreDay = () => {
-  const lastDate = dateRange.value[dateRange.value.length - 1]; // 取最後一天
-  const newDate = new Date(lastDate);
-  newDate.setDate(newDate.getDate() + 1); // 增加一天
-
-  // 更新日期範圍
-  dateRange.value.push(newDate); // 加入新的一天
-
-  // 同步更新行程資料
+  const newDate = new Date(dateRange.value[dateRange.value.length - 1]);
+  newDate.setDate(newDate.getDate() + 1);
+  dateRange.value.push(newDate);
   const formattedDate = formatDate(newDate);
-  if (!placeStore.itinerariesByDate[formattedDate]) {
-    placeStore.itinerariesByDate[formattedDate] = [];
-  }
-
-  // 設定選擇的日期為新增的日期
+  placeStore.itinerariesByDate[formattedDate] =
+    placeStore.itinerariesByDate[formattedDate] || [];
   selectedTab.value = formattedDate;
+
+  console.log("One more day added:", formattedDate); // Log
 };
 
-// 計算是否為第一天
-const isFirstDay = computed(() => {
-  const currentDateIndex = dateRange.value.findIndex(
+// 判斷是否為第一天或最後一天
+const isDayAtEdge = (isStart) => {
+  const currentIndex = dateRange.value.findIndex(
     (date) => formatDate(date) === selectedTab.value
   );
-  return currentDateIndex === 0;
-});
+  return isStart ? currentIndex === 0 : currentIndex === dateRange.value.length - 1;
+};
 
-// 計算是否為最後一天
-const isLastDay = computed(() => {
-  const currentDateIndex = dateRange.value.findIndex(
-    (date) => formatDate(date) === selectedTab.value
-  );
-  return currentDateIndex === dateRange.value.length - 1;
-});
+const isFirstDay = computed(() => isDayAtEdge(true));
+const isLastDay = computed(() => isDayAtEdge(false));
 
 // 計算開始日期和結束日期
-const formattedStartDate = computed(() => {
-  const startDate = dateRange.value[0]; // 取日期範圍的第一天
-  return startDate ? startDate.toLocaleDateString("zh-TW") : "";
-});
+const formattedStartDate = computed(
+  () => dateRange.value[0]?.toLocaleDateString("zh-TW") || ""
+);
+const formattedEndDate = computed(
+  () => dateRange.value[dateRange.value.length - 1]?.toLocaleDateString("zh-TW") || ""
+);
 
-const formattedEndDate = computed(() => {
-  const endDate = dateRange.value[dateRange.value.length - 1]; // 取日期範圍的最後一天
-  return endDate ? endDate.toLocaleDateString("zh-TW") : "";
-});
-
-// **用 computed 產生包含地點與路線的行程**
+// 計算行程
 const computedItinerary = computed(() => {
-  const itineraryWithRoutes = {};
+  const itinerary = {};
 
   for (const date in placeStore.itinerariesByDate) {
-    const places = placeStore.itinerariesByDate[date];
-    itineraryWithRoutes[date] = [];
-
-    places.forEach((place, index) => {
-      // 為每個 place 項目生成唯一的 key
-      itineraryWithRoutes[date].push({
-        ...place,
-        type: "place", // 地點
-      });
-
-      // **在地點之間插入 travel (預設最佳路線)**
-      if (index < places.length - 1) {
-        itineraryWithRoutes[date].push({
+    itinerary[date] = placeStore.itinerariesByDate[date].map((place, index, arr) => {
+      const result = { ...place, type: "place" }; // 把地點放在這裡
+      // 檢查是否有前一個地點來添加路線
+      if (index < arr.length - 1) {
+        const nextPlace = arr[index + 1];
+        result.travel = {
           type: "travel",
           key: `travel-${index}`,
           origin: place,
-          destination: places[index + 1],
-          route: place.route || null, // 預設最佳路線
-        });
+          destination: nextPlace,
+          route: place.route || {}, // 如果沒有 route 則設為空物件
+          travelTime: calculateTravelTime(place, nextPlace), // 你可以在這裡加入計算路線時間的邏輯
+        };
       }
+      return result;
     });
   }
 
-  return itineraryWithRoutes;
+  console.log("Computed Itinerary with travel info:", itinerary); // Log
+  return itinerary;
 });
 
-// **當使用者選擇新路線時更新**
-const updateRoute = (index, date, newRoute) => {
-  computedItinerary.value[date][index].route = newRoute;
+// 計算路線時間 (這是示範，根據實際情況進行修改)
+const calculateTravelTime = (origin, destination) => {
+  // 這裡可以根據 `origin` 和 `destination` 的座標計算路線時間
+  // 假設有一個 Google Maps API 回傳的資料，或者其他邏輯來計算時間
+  // 這只是一個範例
+  const distanceInMinutes = 30; // 假設每段路程需要 30 分鐘
+  return distanceInMinutes;
 };
 
 // 初始化行程資料
 const initItinerary = () => {
-  const storedData = JSON.parse(localStorage.getItem("itineraryData"));
+  const storedData = JSON.parse(localStorage.getItem("itineraryData")) || {};
+  itineraryTitle.value = storedData.name || "無行程名稱";
+  dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
+  dateRange.value.forEach((date) => {
+    const formattedDate = formatDate(date);
+    placeStore.itinerariesByDate[formattedDate] =
+      placeStore.itinerariesByDate[formattedDate] || [];
+  });
+  selectedTab.value = formatDate(dateRange.value[0]);
 
-  if (storedData && storedData.startDate && storedData.endDate) {
-    itineraryTitle.value = storedData.name || "無行程名稱";
-    dateRange.value = getDateRange(storedData.startDate, storedData.endDate);
-
-    // 初始化每個日期對應的行程
-    dateRange.value.forEach((date) => {
-      const formattedDate = formatDate(date);
-      if (!placeStore.itinerariesByDate[formattedDate]) {
-        placeStore.itinerariesByDate[formattedDate] = [];
-      }
-    });
-
-    // 預設選中第一天
-    selectedTab.value = formatDate(dateRange.value[0]);
-  }
+  console.log("Itinerary initialized:", storedData); // Log
 };
 
-// 根據從 localStorage 讀取的日期初始化行程
-onMounted(() => {
-  initItinerary();
-});
+const handleDragUpdate = (newValue) => {
+  console.log("Drag update triggered with newValue:", newValue); // Log
+  newValue.forEach((item, index) => {
+    // 確保 item 不為 undefined 且包含 type 和 route 屬性
+    if (item && item.type === "travel") {
+      console.log("Item being processed:", item); // Log item
+      // 初始化 route 為空物件，如果沒有的話
+      item.route = item.route || {}; // 設置為空物件，防止 undefined 或 null
+    }
 
-// 監聽 selectedTab 的變化，確保在變更後能夠更新相應的行程顯示
+    // 確保每個 travel 項目有 travelTime
+    if (item.type === "travel" && !item.travel) {
+      item.travel = item.travel || {};
+      item.travel.travelTime = calculateTravelTime(item.origin, item.destination); // 假設有一個方法計算時間
+    }
+  });
+
+  // 更新行程資料
+  placeStore.itinerariesByDate[selectedTab.value] = newValue;
+  console.log("Updated itinerariesByDate:", placeStore.itinerariesByDate); // Log
+};
+
+onMounted(initItinerary);
+
 watch(selectedTab, (newTab) => {
-  if (newTab) {
-    placeStore.setSelectedDate(newTab); // 更新 Pinia 中的 selectedDate
-  }
+  console.log("Selected Tab changed to:", newTab); // Log
+  placeStore.setSelectedDate(newTab);
 });
 </script>
 

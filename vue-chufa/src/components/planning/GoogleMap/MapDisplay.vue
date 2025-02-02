@@ -5,10 +5,6 @@
       <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
     <PlaceDetail v-if="placeDetails" />
-    <div class="route-planner">
-      <!-- 按鈕或其他方式觸發路線規劃 -->
-      <button @click="planRoute">規劃路線</button>
-    </div>
   </div>
 </template>
 
@@ -17,7 +13,7 @@ import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 import PlaceDetail from "./PlaceDetail.vue";
 import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
-import { initMap, updateMarker, formatPlaceDetails } from "@/utils/placeManager"; // 引入工具函式
+import { initMap, updateMarker, formatPlaceDetails } from "@/utils/PlaceManager"; // 引入工具函式
 
 const placeStore = usePlaceStore();
 

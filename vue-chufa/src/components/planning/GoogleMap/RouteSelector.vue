@@ -109,6 +109,15 @@ const fetchRoutes = async () => {
   }
 };
 
+const updateRoute = (event) => {
+  const selected = event.target.value;
+  selectedRoute.value = selected;
+  // 更新路線時間到父組件
+  if (props.onUpdate) {
+    props.onUpdate(selected.duration); // 傳遞選擇的路線時間
+  }
+};
+
 // 初始化時載入路線
 onMounted(fetchRoutes);
 </script>

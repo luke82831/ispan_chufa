@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
-import CreatePlanning from "@/views/planning/CreatePlanning.vue";
-import PlanningTabs from "@/views/planning/PlanningPage.vue";
+import CreateItinerary from "@/views/planning/CreateItinerary.vue";
+import PlanningPage from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
 
 const routes = [
     { path: "/", component: Home },
     { path: "/map", component: Map },
-    { path: "/planningtabs", component: PlanningTabs },
-    { path: "/createplanning", component: CreatePlanning },
+    { path: "/planningpage", component: PlanningPage },
+    { path: "/createplanning", component: CreateItinerary },
     {
         path: "/secure/Login",
         name: "Login",

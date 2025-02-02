@@ -39,6 +39,9 @@
               <span class="itinerary-name">{{ item.displayName }}</span>
               <span class="itinerary-address">{{ item.formattedAddress }}</span>
             </div>
+            <div>
+              <RouteSelector :onUpdate="handleRouteUpdate" />
+            </div>
             <div v-if="item.travel">
               <div v-if="item.travel.travelTime">
                 <p>路線時間: {{ item.travel.travelTime }} 分鐘</p>
@@ -55,12 +58,23 @@
 import { usePlaceStore } from "@/stores/PlaceStore";
 import { ref, onMounted, watch, computed } from "vue";
 import { VueDraggableNext } from "vue-draggable-next";
+import RouteSelector from "@/components/planning/GoogleMap/RouteSelector.vue"; // 確保路徑正確
 
 const placeStore = usePlaceStore();
 
 const selectedTab = ref("");
 const dateRange = ref([]);
 const itineraryTitle = ref("");
+
+// 儲存當前選擇的行程
+const selectedItinerary = ref(null);
+
+// 監聽行程的選擇
+watch(selectedItinerary, (newItinerary) => {
+  if (newItinerary) {
+    console.log("選擇的行程:", newItinerary);
+  }
+});
 
 const getDateRange = (startDate, endDate) => {
   const dates = [];
@@ -163,6 +177,19 @@ const handleDragUpdate = (newValue) => {
     }
   });
   placeStore.itinerariesByDate[selectedTab.value] = newValue;
+};
+
+// 當 RouteSelector 更新時，處理路線時間
+const handleRouteUpdate = (duration) => {
+  if (selectedItinerary.value) {
+    // 更新 selectedItinerary 中的 travelTime
+    selectedItinerary.value.travelTime = duration;
+
+    // 更新到 Pinia store
+    placeStore.updateTravelTime(selectedItinerary.value);
+  } else {
+    console.warn("沒有選擇行程！");
+  }
 };
 
 onMounted(initItinerary);

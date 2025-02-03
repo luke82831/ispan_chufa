@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>創建行程規劃</h1>
+    <h1>出發 ! 來一場旅行吧</h1>
     <form @submit.prevent="handleSubmit" class="itinerary-form">
       <div class="form-group">
         <label for="coverPhoto">封面照片：</label>

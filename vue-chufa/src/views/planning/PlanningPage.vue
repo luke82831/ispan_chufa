@@ -23,7 +23,6 @@ import { computed } from "vue";
 import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
 import MapDisplay from "@/components/planning/GoogleMap/MapDisplay.vue";
-import PlanningTabs from "@/components/planning/Planning/PlanningTabs.vue";
 import PlaceDetail from "@/components/planning/GoogleMap/PlaceDetail.vue";
 import ItineraryTabs from "@/components/planning/Planning/ItineraryTabs.vue";
 

@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { v4 as uuidv4 } from 'uuid'; // 引入 uuid 库
 
 export const useItineraryStore = defineStore("itinerary", {
     state: () => ({
@@ -31,15 +32,35 @@ export const useItineraryStore = defineStore("itinerary", {
 
         // 新增某個日期的行程
         addPlaceToDay(date, place) {
+            // 為每個地點生成唯一的 ID
+            const placeWithId = { ...place, id: uuidv4() };
+
             if (!this.itineraryDates[date]) {
                 this.itineraryDates[date] = []; // 如果該日期尚未有行程，先初始化為空陣列
             }
-            this.itineraryDates[date].push(place); // 新增行程
+            this.itineraryDates[date].push(placeWithId); // 新增行程
         },
 
         // 取得某個日期的行程
         getItineraryForDay(date) {
             return this.itineraryDates[date] || []; // 如果該日期沒有行程，回傳空陣列
         },
+
+        removePlaceFromItinerary(date, index) {
+            // 確保 itineraryDates[date] 不為 undefined
+            if (!this.itineraryDates[date]) {
+                console.warn(`No itinerary found for date: ${date}`);
+                return;
+            }
+
+            // 確保 index 是有效的
+            if (index < 0 || index >= this.itineraryDates[date].length) {
+                console.warn("Invalid index");
+                return;
+            }
+
+            // 根據 index 刪除對應的地點
+            this.itineraryDates[date].splice(index, 1); // 刪除單一地點
+        }
     },
 });

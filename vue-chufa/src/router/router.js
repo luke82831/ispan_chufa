@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import CreatePlanning from "@/views/planning/CreatePlanning.vue";
 import PlanningTabs from "@/views/planning/PlanningPage.vue";
+import Blog from "@/views/blog/blog.vue"; // ✅ 文章列表和編輯器共用
 import Home from "@/views/Home.vue";
 
 const routes = [
@@ -8,6 +9,8 @@ const routes = [
     { path: "/map", component: Map },
     { path: "/planningtabs", component: PlanningTabs },
     { path: "/createplanning", component: CreatePlanning },
+    { path: "/blog", name: "Blog", component: Blog }, // ✅ 文章列表
+    { path: "/blog/create", name: "BlogCreate", component: Blog }, // ✅ 文章編輯模式
     {
         path: "/secure/Login",
         name: "Login",

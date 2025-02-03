@@ -1,55 +1,52 @@
 <template>
   <div>
-    <h1>文章編輯器</h1>
-    <!-- Quill 編輯器 -->
-    <div id="editor">
-      <p>請輸入</p>
+    <h1 v-if="isEditing">文章編輯器</h1>
+    <h1 v-else>部落格文章</h1>
+
+    <!-- 文章列表 -->
+    <div v-if="!isEditing">
+      <button @click="isEditing = true" class="px-4 py-2 bg-blue-500 text-white rounded">新增文章</button>
+      <div v-for="blog in blogs" :key="blog.id" class="bg-white shadow-lg rounded-lg p-4">
+        <h2 class="text-xl font-bold mb-2">{{ blog.title }}</h2>
+        <p class="text-gray-600">{{ blog.content.substring(0, 100) }}...</p>
+      </div>
     </div>
-    <!-- 提交按鈕 -->
-    <button @click="submitArticle">提交文章</button>
+
+    <!-- 文章編輯器 -->
+    <div v-else>
+      <div id="editor"></div>
+      <button @click="submitArticle" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+        提交文章
+      </button>
+      <button @click="isEditing = false" class="mt-4 px-4 py-2 bg-gray-500 text-white rounded">
+        取消
+      </button>
+    </div>
   </div>
 </template>
 
 <script>
+import { ref, onMounted } from "vue";
 import Quill from "quill";
-import "quill/dist/quill.snow.css"; // Quill 的樣式文件
+import "quill/dist/quill.snow.css";
 
 export default {
-  data() {
-    return {
-      quill: null, // Quill 編輯器實例
+  setup() {
+    const isEditing = ref(false);
+    const blogs = ref([]);
+
+    const fetchBlogs = async () => {
+      try {
+        const response = await fetch("https://your-api-endpoint.com/blogs");
+        blogs.value = await response.json();
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      }
     };
-  },
-  mounted() {
-    // 初始化 Quill
-    this.quill = new Quill("#editor", {
-      theme: "snow",
-      modules: {
-        toolbar: {
-          container: [
-            ["bold", "italic", "underline"], // 字體樣式
-            [{ header: [1, 2, 3, false] }], // 標題級別
-            [{ list: "ordered" }, { list: "bullet" }], // 列表
-            ["image", "video"], // 嵌入圖片和視頻
-          ],
-          handlers: {
-            image: this.imageHandler, // 自定義圖片上傳處理器
-          },
-        },
-      },
-    });
-  },
-  methods: {
-    submitArticle() {
-      console.log(this.quill.root.innerHTML);
-    },
+
+    onMounted(fetchBlogs);
+
+    return { isEditing, blogs };
   },
 };
 </script>
-
-<style>
-#editor-container {
-  border: 1px solid #ccc;
-  margin-bottom: 16px;
-}
-</style>

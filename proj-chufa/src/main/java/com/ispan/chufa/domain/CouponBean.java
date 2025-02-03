@@ -36,7 +36,7 @@ public class CouponBean {
     @Column(name="Web")
     private String web;
     @Column(name="Picture")
-    private String picture;
+    private byte[] picture;
     @Column(name="StartTime")
     private LocalDateTime startTime;
     @Column(name="EndTime")
@@ -63,8 +63,7 @@ public class CouponBean {
         return remaining;
     }
 
-
-	public void setRemaining(Integer remaining) {
+    public void setRemaining(Integer remaining) {
         this.remaining = remaining;
     }
 
@@ -108,11 +107,11 @@ public class CouponBean {
         this.web = web;
     }
 
-    public String getPicture() {
+    public byte[] getPicture() {
         return picture;
     }
 
-    public void setPicture(String picture) {
+    public void setPicture(byte[] picture) {
         this.picture = picture;
     }
 
@@ -132,32 +131,32 @@ public class CouponBean {
         this.endTime = endTime;
     }
 
-	public String getCouponCode() {
-		return couponCode;
-	}
+    public String getCouponCode() {
+        return couponCode;
+    }
 
-	public void setCouponCode(String couponCode) {
-		this.couponCode = couponCode;
-	}
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
 
-	public List<MyCouponBean> getMyCoupons() {
-		return myCoupons;
-	}
+    public List<MyCouponBean> getMyCoupons() {
+        return myCoupons;
+    }
 
-	public void setMyCoupons(List<MyCouponBean> myCoupons) {
-		this.myCoupons = myCoupons;
-	}
+    public void setMyCoupons(List<MyCouponBean> myCoupons) {
+        this.myCoupons = myCoupons;
+    }
 
-	public PlaceBean getPlace() {
-		return place;
-	}
+    public PlaceBean getPlace() {
+        return place;
+    }
 
-	public void setPlace(PlaceBean place) {
-		this.place = place;
-	}
+    public void setPlace(PlaceBean place) {
+        this.place = place;
+    }
 
-	public Boolean getState() {
-		return state;
-	}
+    public Boolean getState() {
+        return state;
+    }
     
 }

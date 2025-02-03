@@ -1,5 +1,6 @@
 package com.ispan.chufa.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,19 +9,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ispan.chufa.domain.CouponBean;
 import com.ispan.chufa.repository.CouponRepository;
 import com.ispan.chufa.service.CouponService;
-
 
 @RestController
 @RequestMapping("/api/coupons")
@@ -32,11 +26,19 @@ public class CouponController {
     @Autowired
     private CouponService couponService;
 
-    // 新增優惠券
-    @PostMapping
-    public ResponseEntity<CouponBean> createCoupon(@RequestBody CouponBean couponBean) {
-        CouponBean savedCoupon = couponRepository.save(couponBean);
-        return ResponseEntity.ok(savedCoupon);
+    // 新增優惠券，支援圖片上傳
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<CouponBean> createCoupon(@RequestPart("coupon") CouponBean couponBean,
+                                                   @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        try {
+            if (picture != null && !picture.isEmpty()) {
+                couponBean.setPicture(picture.getBytes());
+            }
+            CouponBean savedCoupon = couponRepository.save(couponBean);
+            return ResponseEntity.ok(savedCoupon);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // 查詢所有優惠券
@@ -54,24 +56,40 @@ public class CouponController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // 修改優惠券
-    @PutMapping("/{id}")
-    public ResponseEntity<CouponBean> updateCoupon(@PathVariable Long id, @RequestBody CouponBean updatedCoupon) {
-        return couponRepository.findById(id).map(coupon -> {
-            coupon.setCouponCode(updatedCoupon.getCouponCode());
-            coupon.setRemaining(updatedCoupon.getRemaining());
-            coupon.setTitle(updatedCoupon.getTitle());
-            coupon.setSubtitle(updatedCoupon.getSubtitle());
-            coupon.setContent(updatedCoupon.getContent());
-            coupon.setState(updatedCoupon.getState());
-            coupon.setWeb(updatedCoupon.getWeb());
-            coupon.setPicture(updatedCoupon.getPicture());
-            coupon.setstartTime(updatedCoupon.getstartTime());
-            coupon.setendTime(updatedCoupon.getendTime());
-            CouponBean savedCoupon = couponRepository.save(coupon);
-            return ResponseEntity.ok(savedCoupon);
-        }).orElseGet(() -> ResponseEntity.notFound().build());
+    // 修改優惠券，支援圖片上傳
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<CouponBean> updateCoupon(@PathVariable Long id,
+                                                   @RequestPart("coupon") CouponBean updatedCoupon,
+                                                   @RequestPart(value = "picture", required = false) MultipartFile picture) {
+        Optional<CouponBean> optionalCoupon = couponRepository.findById(id);
+
+        if (optionalCoupon.isPresent()) {
+            CouponBean coupon = optionalCoupon.get();
+            try {
+                coupon.setCouponCode(updatedCoupon.getCouponCode());
+                coupon.setRemaining(updatedCoupon.getRemaining());
+                coupon.setTitle(updatedCoupon.getTitle());
+                coupon.setSubtitle(updatedCoupon.getSubtitle());
+                coupon.setContent(updatedCoupon.getContent());
+                coupon.setState(updatedCoupon.getState());
+                coupon.setWeb(updatedCoupon.getWeb());
+                coupon.setstartTime(updatedCoupon.getstartTime());
+                coupon.setendTime(updatedCoupon.getendTime());
+
+                if (picture != null && !picture.isEmpty()) {
+                    coupon.setPicture(picture.getBytes());
+                }
+
+                CouponBean savedCoupon = couponRepository.save(coupon);
+                return ResponseEntity.ok(savedCoupon);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 
     // 刪除優惠券
     @DeleteMapping("/{id}")
@@ -92,4 +110,3 @@ public class CouponController {
         }
     }
 }
-

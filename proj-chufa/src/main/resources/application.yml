@@ -36,11 +36,7 @@ spring:
 
 jwt:
   token:
-<<<<<<< HEAD
-    expire: 10000
-=======
     expire: 10
->>>>>>> origin/dev
 
 #line login
 line:

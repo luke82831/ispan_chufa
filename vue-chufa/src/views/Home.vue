@@ -1,5 +1,5 @@
 <template>
-  <div v-if="profileLoaded" class="main-container">
+  <div  class="main-container">
     <div v-for="post in posts" :key="post.postid" class="post-item" :class="{ 'repost': post.repost }">
       <!-- REPOST 版型處理 -->
       <div v-if="post.repost" class="repost-header">
@@ -89,7 +89,7 @@ export default {
           isAdmin.value = response.data.user.role === 'ADMIN';
           userId.value = member.value.userid;
         } else {
-          Swal.fire('錯誤', response.data.message, 'error');
+          Swal.fire('味登入', '登入體驗更好');
         }
         profileLoaded.value = true;
       } catch (error) {
@@ -170,8 +170,8 @@ export default {
     };
 
     onMounted(async () => {
-      await fetchProfile();
       await fetchPosts();
+      await fetchProfile();
     });
 
     return {

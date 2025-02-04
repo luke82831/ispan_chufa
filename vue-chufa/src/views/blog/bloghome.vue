@@ -24,57 +24,45 @@
       </div>
 
       <h3 class="section-title">貼文內容</h3>
-      <div v-if="activeTab === 'myPosts'" class="tab-content">
-        <ul class="post-list">
-          <li v-for="post in posts" :key="post.id" class="post-item">
+      <div class="tab-content">
+        <ul v-if="posts.length > 0" class="post-list">
+          <li v-for="post in posts" :key="post.postid" class="post-item">
             <div class="post-author">
               <img 
-                v-if="post.repostDTO?.member?.profilePicture" 
-                :src="'data:image/jpeg;base64,' + post.member.profile_picture" 
-                alt="Repost Author's Profile Picture" 
+                v-if="post.member?.profilePicture" 
+                :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
+                alt="Author's Profile Picture" 
                 class="profile-picture" 
-              />
+                @error="event.target.src = '/default-profile.png'"
+              /> 
               <div v-else class="default-profile"></div>
               <div class="post-author-name">{{ post.member.name }}</div>
             </div>
             <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-              <h4>{{ post.postTitle }}</h4>
+              <h4>{{ post.postTitle || '無標題' }}</h4>
             </router-link>
             <p class="post-content">{{ post.postContent }}</p>
+
+            <!-- 如果是轉發貼文，顯示被轉發的原始貼文 -->
+            <div v-if="post.repost && post.repostDTO" class="repost-container">
+              <div class="repost-author">
+                <img 
+                  v-if="post.repostDTO.member?.profilePicture" 
+                  :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
+                  alt="Original Author's Profile Picture" 
+                  class="profile-picture" 
+                  @error="event.target.src = '/default-profile.png'"
+                />
+                <div v-else class="default-profile"></div>
+                <div class="repost-author-name">{{ post.repostDTO.member.name }}</div>
+              </div>
+              <p class="repost-content">{{ post.repostDTO.postContent }}</p>
+            </div>
+
             <div class="post-tags">{{ post.tags || '無標籤' }}</div>
           </li>
         </ul>
-      </div>
-
-      <!-- Similar sections for liked, shared, and saved posts -->
-      <div v-if="activeTab === 'likedPosts'" class="tab-content">
-        <div v-if="activeTab === 'likedPosts'" class="tab-content">
-  <ul class="post-list">
-    <li v-for="post in posts" :key="post.id" class="post-item">
-      <div class="post-author">
-        <img 
-          v-if="post.repostDTO?.member?.profilePicture" 
-          :src="'data:image/jpeg;base64,' + post.member.profile_picture" 
-          alt="Repost Author's Profile Picture" 
-          class="profile-picture" 
-        />
-        <div v-else class="default-profile"></div>
-        <div class="post-author-name">{{ post.member.name }}</div>
-      </div>
-      <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-        <h4>{{ post.postTitle }}</h4>
-      </router-link>
-      <p class="post-content">{{ post.postContent }}</p>
-      <div class="post-tags">{{ post.tags || '無標籤' }}</div>
-    </li>
-  </ul>
-</div>
-      </div>
-      <div v-if="activeTab === 'sharedPosts'" class="tab-content">
-        <p>這裡會顯示你轉發的貼文</p>
-      </div>
-      <div v-if="activeTab === 'savedPosts'" class="tab-content">
-        <p>這裡會顯示你收藏的貼文</p>
+        <p v-else class="no-posts">目前沒有相關的貼文。</p>
       </div>
     </div>
     <div v-else class="loading">
@@ -82,7 +70,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
@@ -94,9 +81,7 @@ export default {
     const router = useRouter();
     const member = ref({});
     const posts = ref([]);
-    const isAdmin = ref(false);
-    const profileLoaded = ref(false);
-    const activeTab = ref('myPosts');  // 用來切換頁籤
+    const activeTab = ref('myPosts');
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -111,73 +96,58 @@ export default {
         });
         if (response.data.success) {
           member.value = response.data.user || {};
-          isAdmin.value = response.data.user.role === 'ADMIN';
         } else {
           Swal.fire('錯誤', response.data.message, 'error');
         }
-        profileLoaded.value = true;
       } catch (error) {
         console.error('Fetch profile failed:', error);
         Swal.fire('錯誤', '無法獲取會員資料', 'error');
       }
     };
 
-    const fetchPosts = async () => {
+    const fetchPosts = async (filterType) => {
       try {
-        const response = await axios.post('/api/posts/post', {
-          userid: member.value.userid,
-        });
-        if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto;
-        } else {
-          Swal.fire('沒有貼文', '此用戶暫無貼文。', 'info');
-        }
-      } catch (error) {
-        console.error('Fetch posts failed:', error);
-        Swal.fire('錯誤', '無法取得貼文', 'error');
-      }
-    };
+    const payload = { userid: member.value.userid };
+    if (filterType === 'likedPosts') payload.likedBy = member.value.userid;
+    if (filterType === 'myPosts') {
+      payload.repost = false;  // 不要 repost 的貼文
+    } else if (filterType === 'sharedPosts') {
+      payload.repost = true;  // 只要 repost 的貼文
+    }
 
-    const fetchLikedPosts = async () => {
-      try {
-        const response = await axios.post('/api/posts/post', {
-          "likedBy": member.value.userid, // 傳遞當前用戶的 ID
-          "sortByTime":true,
-        });
+    const response = await axios.post('/api/posts/post', payload);
+    let postData = response.data.postdto || [];
 
-        if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto; // 更新貼文列表
-        } else {
-          Swal.fire('沒有點讚的貼文', '你還沒有點讚任何貼文。', 'info');
-        }
-      } catch (error) {
-        console.error('Fetch liked posts failed:', error);
-        Swal.fire('錯誤', '無法取得點讚的貼文', 'error');
-      }
+    // 過濾條件
+    if (filterType === 'myPosts') {
+      posts.value = postData.filter(post => !post.repost && post.repostDTO === null);
+    } else if (filterType === 'sharedPosts') {
+      posts.value = postData.filter(post => post.repost || post.repostDTO !== null);
+    } else {
+      posts.value = postData;
+    }
+  } catch (error) {
+    console.error('Fetch posts failed:', error);
+    Swal.fire('錯誤', `無法取得${filterType}的貼文`, 'error');
+  }
     };
+    
 
     const setActiveTab = async (tab) => {
       activeTab.value = tab;
-
-      if (tab === 'likedPosts') {
-        await fetchLikedPosts(); // 獲取點讚的貼文
-      } else if (tab === 'myPosts') {
-        await fetchPosts(); // 獲取我的貼文
-      }
+      await fetchPosts(tab);
     };
 
     onMounted(async () => {
       await fetchProfile();
       if (member.value.userid) {
-        await fetchPosts();
+        await fetchPosts('myPosts');
       }
     });
 
     return {
       member,
       posts,
-      isAdmin,
-      profileLoaded,
       formatDate,
       setActiveTab,
       activeTab,
@@ -244,7 +214,6 @@ export default {
   text-decoration: underline;
 }
 
-/* Tab Navigation */
 .tabs-container {
   display: flex;
   justify-content: space-between;
@@ -276,7 +245,6 @@ export default {
   font-weight: 600;
 }
 
-/* Post List Styling */
 .post-list {
   list-style: none;
   padding: 0;
@@ -344,5 +312,39 @@ export default {
   font-size: 1.2em;
   color: #777;
   margin-top: 50px;
+}
+/* 轉發貼文的樣式 */
+.repost-container {
+  background-color: #f9f9f9;
+  border-left: 4px solid #007bff;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+.repost-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.repost-author img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.repost-author-name {
+  font-weight: 500;
+  color: #007bff;
+}
+
+.repost-content {
+  font-size: 0.9em;
+  color: #555;
+  line-height: 1.4;
+  margin: 0;
 }
 </style>

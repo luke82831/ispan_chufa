@@ -21,6 +21,7 @@
     <a :href="post.postLink" target="_blank">查看詳情</a>
     <div>喜歡數: {{ post.likeCount }}</div>
     <div>轉發數: {{ post.repostCount }}</div>
+    
 
 </div>
 </div>

@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.FollowBean;
@@ -32,7 +33,11 @@ public class PostDaoImpl implements PostDao {
 	private EntityManager entityManager;
 
 	@Autowired
-	private InteractionRepository interactionRepository;
+	private InteractionRepository interactionRepository; 
+	
+	@Autowired 
+	@Lazy
+	private PostRepository postRepository;
 
 	@Override
 	public List<PostBean> find(JSONObject param) {
@@ -158,8 +163,7 @@ public class PostDaoImpl implements PostDao {
 			// 計算點讚數
 			long likeCount = interactionRepository.countByPost_PostidAndInteractionType(postlist.getPostid(), "LIKE");
 			postDTO.setLikeCount(likeCount);
-			long repostCount = interactionRepository.countByPost_PostidAndInteractionType(postlist.getPostid(),
-					"REPOST");
+			long repostCount = postRepository.countByForwardedFrom(postlist);
 			postDTO.setRepostCount(repostCount);
 
 			// 把轉換後的 PostDTO 加入列表

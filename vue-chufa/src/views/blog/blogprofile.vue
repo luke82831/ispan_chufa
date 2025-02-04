@@ -58,7 +58,7 @@
             return new Date(date).toLocaleDateString('zh-TW', options);
             };
     
-            const fetchProfile = async () => {
+        const fetchProfile = async () => {
             try {
                 const response = await axios.get('/ajax/secure/profile', {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },

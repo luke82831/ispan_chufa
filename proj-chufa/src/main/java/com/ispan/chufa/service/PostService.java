@@ -16,6 +16,7 @@ import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.InteractionDTO;
+import com.ispan.chufa.dto.MemberDTO;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
 import com.ispan.chufa.repository.InteractionRepository;
@@ -37,6 +38,30 @@ public class PostService {
 
 	@Autowired
 	private PlaceRepository placeRepository;
+	
+	 // 根據 userid 查詢會員資料並轉換成 MemberDTO
+    public MemberDTO getMemberByUserid(Long userid) {
+        MemberBean member = memberRepository.findByUserid(userid);
+        
+        // 檢查是否找到會員資料
+        if (member != null) {
+            // 轉換 Member 到 MemberDTO，只返回需要的字段
+            return new MemberDTO(
+                member.getUserid(),
+                member.getUsername(),
+                member.getPhoneNumber(),
+                member.getEmail(),
+                member.getName(),
+                member.getGender(),
+                member.getNickname(),
+                member.getProfilePicture(),
+                member.getBio(),
+                member.getBirth()
+            );
+        } else {
+            return null; // 或者返回適當的錯誤處理
+        }
+    }
 
 	// 創建一個 Post 並關聯多個 Place
 	public PostBean createPostWithPlaces(PostBean post, Set<Long> placeIds) {

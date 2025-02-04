@@ -31,6 +31,10 @@ public class FollowService {
 
 	@Autowired
 	MemberRepository memberRepository;
+	
+	 public boolean isUserFollowing(Long followerId, Long followedId) {
+	        return followRepository.existsByFollower_UseridAndFollowed_UseridAndFollowStatus(followerId, followedId, "active");
+	    }
 
 	public FollowBean follow(Long followerId, Long followedId) {
 		// TODO Auto-generated method stub

@@ -23,5 +23,7 @@ public interface FollowRepository extends JpaRepository<FollowBean, Long>{
 
 	public Optional<FollowBean> findByFollower_UseridAndFollowed_Userid(Long followerId, Long followedId);
 
+	public boolean existsByFollower_UseridAndFollowed_UseridAndFollowStatus(Long followerId, Long followedId, String string);
+
 
 }

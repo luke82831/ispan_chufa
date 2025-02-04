@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.InteractionDTO;
+import com.ispan.chufa.dto.MemberDTO;
 import com.ispan.chufa.dto.PostDTO;
-import com.ispan.chufa.dto.PostDto2;
 import com.ispan.chufa.dto.PostResponse;
 import com.ispan.chufa.dto.TimelinePostDto;
 import com.ispan.chufa.service.PostService;
@@ -35,6 +35,11 @@ public class PostController {
     @Autowired TimelineService timelineService;
     
    // @Autowired PostShowService postShowService;
+    
+    @GetMapping("/members/{userid}")
+    public MemberDTO getMemberByUserid(@PathVariable Long userid) {
+        return postService.getMemberByUserid(userid);
+    }
 
     @PostMapping("/post")
     public PostResponse find(@RequestBody String json) {

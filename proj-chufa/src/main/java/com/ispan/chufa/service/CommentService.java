@@ -76,6 +76,11 @@ public class CommentService {
         return null;
     }
 
+    // 用postId查詢根留言
+    public List<CommentBean> findByPostId(Long postid) {
+        return commentRepository.findByPostBeanPostid(postid);
+    }
+
     // 用userid查詢根留言
     public List<CommentBean> findByUserid(Long userId) {
         return commentRepository.findByMemberBeanUserid(userId);

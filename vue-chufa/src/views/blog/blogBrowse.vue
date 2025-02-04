@@ -6,32 +6,33 @@
             <div id="container"></div>
         </div>
     </div>
+    <inputComment></inputComment>
+    <rootComment></rootComment>
 </template>
     
-<script>
+<script setup>
+    import inputComment from "@/components/planning/Comment/inputComment.vue";
+    import rootComment from "@/components/planning/Comment/rootComment.vue";
     import axiosapi from '@/plugins/axios.js';
-    export default {
-        data() {
-            return {
-                title: null,
-            };
-        },
-        methods: {
-            async findPost() {
-                const response = await axiosapi.get(`/post/findById/${this.$route.params.postid}`);
-                console.log(response.data.message);
-                if (response.data.successs) {
-                    this.title=response.data.list[0].postTitle
-                    container.innerHTML = response.data.list[0].postContent
-                }else{
-                    alert(response.data.message);
-                }
-            }
-        },
-        mounted() {
-            this.findPost(); // 在元件掛載後執行
+    import { ref, onMounted } from 'vue';
+    import { useRoute } from 'vue-router';
+
+    const route = useRoute();
+    const postid = ref(route.params.postid); // 取得動態路由參數
+
+    const title=ref('');
+    const findPost=async ()=>{
+        const response =await axiosapi.get(`/post/findById/${postid.value}`);
+        if (response.data.successs) {
+            title.value=response.data.list[0].postTitle
+            container.innerHTML = response.data.list[0].postContent
+        }else{
+            alert(response.data.message);
         }
-    };
+    }
+    onMounted(()=>{
+        findPost()
+    })
 </script>
     
 <style>

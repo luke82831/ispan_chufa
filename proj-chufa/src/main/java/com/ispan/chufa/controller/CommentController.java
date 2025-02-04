@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -317,6 +318,56 @@ public class CommentController {
         return response;
     }
 
+    // 用postId查詢留言
+    // 測試 http://localhost:8080/comment/findByPostId/{postId}
+    @GetMapping("/findByPostId/{postid}")
+    public Response findByPostId(@PathVariable String postid) {
+        Response response = new Response();
+
+        Long longPostid;
+        // 驗證request資料(防呆)
+        {
+            if (postid != null && postid != "") {
+                try {
+                    longPostid = Long.parseLong(postid);
+                } catch (NumberFormatException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("postid請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postid");
+                return response;
+            }
+        }
+
+        // 用commentId查詢留言
+        {
+            List<CommentBean> beans = commentService.findByPostId(longPostid);
+            for (int i = 0; i < beans.size(); i++) {
+                if (beans.get(i).getParentId() != null) {
+                    beans.remove(i);
+                } else {
+                    // 將Bean映射到DTO用的
+                    CommentDTO dto = modelMapper.map(beans.get(i), CommentDTO.class);
+                    response.getList().add(dto);
+                }
+            }
+
+            if (beans.size() != 0) {
+                response.setSuccesss(true);
+                response.setMessage("查到資料");
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("沒查到資料");
+            }
+
+        }
+
+        return response;
+    }
+
     // 用commentId查詢留言
     // 測試 http://localhost:8080/comment/findById
     // 測試 RequestBody => {"commentId":"1"}
@@ -421,20 +472,18 @@ public class CommentController {
     }
 
     // 用parentId查詢留言
-    // 測試 http://localhost:8080/comment/findByParentId
-    // 測試 RequestBody => {"parentId":"1"}
-    @GetMapping("/findByParentId")
-    public Response findByParentId(@RequestBody String json) {
-        JSONObject requestJson = new JSONObject(json);
+    // 測試 http://localhost:8080/comment/findByParentId/{parentId}
+    @GetMapping("/findByParentId/{parentId}")
+    public Response findByParentId(@PathVariable String parentId) {
         Response response = new Response();
 
-        Long parentId;
+        Long longParentId;
         // 驗證request資料(防呆)
         {
-            if (!requestJson.isNull("parentId")) {
+            if (parentId != null && parentId != "") {
                 try {
-                    parentId = requestJson.getLong("parentId");
-                } catch (JSONException e) {
+                    longParentId = Long.parseLong(parentId);
+                } catch (NumberFormatException e) {
                     response.setSuccesss(false);
                     response.setMessage("parentId請輸入整數");
                     return response;
@@ -448,7 +497,7 @@ public class CommentController {
 
         // 用parentId查詢留言
         {
-            List<CommentBean> beans = commentService.findByParentId(parentId);
+            List<CommentBean> beans = commentService.findByParentId(longParentId);
             if (beans.size() != 0) {
                 for (int i = 0; i < beans.size(); i++) {
                     // 將Bean映射到DTO用的

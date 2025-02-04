@@ -77,7 +77,7 @@ public class PostService {
 		Optional<MemberBean> optionalMember = memberRepository.findById(userId);
 		Optional<PostBean> optionalPost = postRepository.findById(postid);
 
-		if (!optionalMember.isPresent() || !optionalPost.isPresent()) {
+		if (optionalMember.isEmpty() || optionalPost.isEmpty()) {
 			return null;
 		}
 		// Member 和 Post 的資料

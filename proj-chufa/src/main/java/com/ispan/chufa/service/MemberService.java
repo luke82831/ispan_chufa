@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,12 +121,6 @@ public class MemberService {
 		return memberRepository.existsByEmail(email);
 	}
 
-	// public void register(MemberBean member) {
-	//
-	// // 儲存會員資料
-	// memberRepository.save(member);
-	// }
-
 	public void saveMember(MemberBean memberBean) {
 		if (memberBean.getPassword() == null || memberBean.getPassword().length < 6) {
 			throw new IllegalArgumentException("密碼長度必須至少為 6 個字元");
@@ -198,6 +195,15 @@ public class MemberService {
 			// 4. 不存在，回傳 false
 			return false;
 		}
+	}
+	public MemberBean getMemberById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
+
+	// 分頁方法
+	public Page<MemberBean> getMembersWithPagination(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return memberRepository.findAll(pageable);
 	}
 
 }

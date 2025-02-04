@@ -63,13 +63,15 @@ public class LineLoginController {
         System.out.println("Session ID (lineLogin): " + session.getId());
         System.out.println("Generated state: " + state);
 
-        String authorizeUrl = String.format(
-                "https://access.line.me/oauth2/v2.1/authorize"
-                        + "?response_type=code"
-                        + "&client_id=%s"
-                        + "&redirect_uri=%s"
-                        + "&state=%s"
-                        + "&scope=openid%%20profile",
+        String authorizeUrl = (
+                """
+                https://access.line.me/oauth2/v2.1/authorize\
+                ?response_type=code\
+                &client_id=%s\
+                &redirect_uri=%s\
+                &state=%s\
+                &scope=openid%%20profile\
+                """).formatted(
                 channelId,
                 callbackUrl,
                 state);
@@ -87,8 +89,8 @@ public class LineLoginController {
      * Step 2: Handle LINE callback
      */
     @GetMapping("/callback/api/auth/line-login")
-    public ResponseEntity<?> callback(@RequestParam("code") String code,
-            @RequestParam("state") String state,
+    public ResponseEntity<?> callback(@RequestParam String code,
+            @RequestParam String state,
             HttpSession session) {
         JSONObject responseJson = new JSONObject(); // 提升变量作用域
         System.out.println("hahahahaha");
@@ -138,7 +140,7 @@ public class LineLoginController {
             // 生成 JWT Token
             String token = jsonWebTokenUtility.createToken(email);
             System.out.println("Generated Token: " + token);
-            String redirectUrl = String.format("http://localhost:5173/secure/Profile?token=%s", token);
+            String redirectUrl = "http://localhost:5173/secure/Profile?token=%s&source=line".formatted(token);
 
             if (token == null) {
                 responseJson.put("success", false);

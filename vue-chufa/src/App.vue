@@ -4,6 +4,16 @@
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
     <div class="nav-links">
+      <!-- 只有管理員才顯示後臺管理按鈕 -->
+      <!-- <RouterLink
+        v-if="userStore.isLoggedIn && userStore.member.isAdmin"
+        to="/admin/Role"
+        class="admin-button"
+      > -->
+      <RouterLink to="/admin" class="admin-button">
+        <i class="fas fa-cog"></i> 後台管理
+      </RouterLink>
+
       <!-- 登入後顯示大頭貼和下拉選單 -->
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
@@ -45,10 +55,10 @@
       <!-- 未登入時顯示登入/註冊 -->
       <div v-else>
         <RouterLink to="/secure/Login" class="nav-link">會員登入</RouterLink>
-        <!-- <RouterLink to="/secure/Register" class="nav-link">註冊功能</RouterLink> -->
       </div>
     </div>
   </div>
+
   <!-- 發文按鈕 -->
   <div>
     <RouterLink
@@ -337,5 +347,28 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.admin-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e74c3c; /* 紅色 */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  text-decoration: none;
+}
+
+.admin-button i {
+  font-size: 18px;
+}
+
+.admin-button:hover {
+  background-color: #c0392b;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 </style>

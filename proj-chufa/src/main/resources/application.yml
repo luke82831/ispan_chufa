@@ -2,7 +2,7 @@
 spring:  
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:9433;database=chufa;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
     username: sa
     password: P@ssw0rd
   mvc:
@@ -18,7 +18,7 @@ spring:
       ddl-auto: update
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpllsof -i :8080
 
 #thymeleaf
   thymeleaf:

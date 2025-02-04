@@ -4,6 +4,7 @@ import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
 import PostDetail from "@/views/blog/PostDetail.vue";
 import blogprofile from "@/views/blog/blogprofile.vue";
+import followlist from "@/views/blog/followlist.vue";
 
 
 const routes = [
@@ -25,6 +26,12 @@ const routes = [
         path: "/secure/Register",
         name: "Register",
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
+    },
+    {
+        path: "/blog/followlist/:id",
+        name: "followlist",
+        component: followlist,
+        props:true,
     },
     {
         path: "/blog/bloghouse",

@@ -4,6 +4,7 @@ import { useUserStore } from "@/stores/user.js";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import App from "./App.vue";
 import router from "./router/router.js";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 const app = createApp(App);
 const pinia = createPinia();

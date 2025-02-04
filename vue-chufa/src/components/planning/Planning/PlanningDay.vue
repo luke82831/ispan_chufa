@@ -2,6 +2,12 @@
   <div class="space-y-4">
     <h3 class="text-xl font-bold">{{ selectedDate }} 的行程</h3>
 
+    <!-- 設定出發時間 -->
+    <div class="flex items-center space-x-2">
+      <label class="font-bold">出發時間：</label>
+      <input type="time" v-model="departureTime" class="border p-1 w-24" />
+    </div>
+
     <!-- 列印經緯度資料按鈕 -->
     <!-- <button
       @click="logRouteCoordinates"
@@ -30,6 +36,31 @@
               }}</strong>
               <p class="text-gray-600">{{ element.formattedAddress }}</p>
 
+              <!-- 設定停留時間（點擊進入編輯模式） -->
+              <div class="flex items-center space-x-2 mt-2">
+                <label>停留時間：</label>
+
+                <!-- 顯示超連結模式 -->
+                <a
+                  v-if="!element.isEditingStay"
+                  href="#"
+                  @click.prevent="editStayTime(element)"
+                  class="text-blue-500 underline"
+                >
+                  {{ element.stayDuration }} 分
+                </a>
+
+                <!-- 編輯模式 -->
+                <input
+                  v-else
+                  type="number"
+                  v-model="element.tempStayDuration"
+                  class="border p-1 w-16"
+                  @blur="saveStayTime(element)"
+                  @keyup.enter="saveStayTime(element)"
+                />
+              </div>
+
               <!-- 刪除按鈕 -->
               <button
                 class="text-red-500 mt-2 text-sm"
@@ -54,6 +85,11 @@
     <div v-else class="text-gray-500">
       <p>今天還沒有新增行程！</p>
     </div>
+    <!-- 傳遞到 staytime 組件 -->
+    <StayTime
+      :departureTime="departureTime"
+      :itinerary="itineraryForSelectedDay"
+    />
   </div>
 </template>
 
@@ -63,6 +99,7 @@ import { useItineraryStore } from "@/stores/ItineraryStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
 import RouteTime from "./RouteTime.vue";
 import draggable from "vuedraggable";
+import StayTime from "./StayTime.vue";
 
 // 取得傳入的日期參數
 const props = defineProps({
@@ -128,6 +165,20 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+// 時間相關 //
+
+// **進入編輯模式**
+const editStayTime = (place) => {
+  place.isEditingStay = true; // 開啟編輯模式
+  place.tempStayDuration = place.stayDuration; // 暫存原本的值
+};
+
+// **儲存新值**
+const saveStayTime = (place) => {
+  place.stayDuration = Number(place.tempStayDuration); // 更新值
+  place.isEditingStay = false; // 退出編輯模式
+};
 
 // **列印所有經緯度資料到 Console**
 // const logRouteCoordinates = () => {

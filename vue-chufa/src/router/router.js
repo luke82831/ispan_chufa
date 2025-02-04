@@ -28,6 +28,12 @@ const routes = [
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
     {
+        path: "/blog/followlist/:id",
+        name: "followlist",
+        component: followlist,
+        props:true,
+    },
+    {
         path: "/blog/bloghouse",
         name: "bloghouse",
         component: () => import("@/views/blog/bloghouse.vue"), // 指向 bloghouse 組件

@@ -3,6 +3,8 @@ package com.ispan.chufa.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,6 +48,7 @@ public class CouponBean {
     private List<MyCouponBean> myCoupons; 
     
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "placeId")
     private PlaceBean place;
 

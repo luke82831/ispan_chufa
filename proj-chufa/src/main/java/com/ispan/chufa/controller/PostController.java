@@ -27,6 +27,13 @@ import com.ispan.chufa.service.PostService;
 public class PostController {
     @Autowired
     private PostService postService;
+    
+    // 獲取所有貼文
+    @GetMapping
+    public ResponseEntity<List<PostBean>> getAllPosts() {
+        List<PostBean> posts = postService.getAllPosts();
+        return ResponseEntity.ok(posts);
+    }
 
     @PostMapping("/post")
     // @JsonView(Views.Public.class)

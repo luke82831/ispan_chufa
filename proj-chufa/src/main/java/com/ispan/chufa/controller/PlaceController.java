@@ -1,5 +1,6 @@
 package com.ispan.chufa.controller;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -68,4 +69,12 @@ public class PlaceController {
             return ResponseEntity.notFound().build();  // 如果找不到對應的 Place
         }
     }
+    
+    @GetMapping
+    public ResponseEntity<List<PlaceBean>> getAllPlaces() {
+        List<PlaceBean> places = placeService.getAllPlaces();
+        System.out.println("📢 查詢所有地點，共 " + places.size() + " 筆資料");
+        return ResponseEntity.ok(places);
+    }
+    
 }

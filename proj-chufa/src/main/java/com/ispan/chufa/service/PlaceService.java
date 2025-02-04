@@ -134,4 +134,12 @@ public class PlaceService {
         // 儲存到資料庫
         placeRepository.save(place);
     }
+    
+    
+    
+    
+    public List<PlaceBean> getAllPlaces() {
+        return placeRepository.findAll();
+    }
+    
 }

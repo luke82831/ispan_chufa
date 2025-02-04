@@ -14,6 +14,7 @@ INSERT INTO members (role, username, password, phone_number, email, name, gender
 ('USER', 'user3', 0x636465, '0934567890', 'user3@example.com', 'User Three', NULL, 'U3', NULL, '1994-03-03'),
 ('USER', 'user4', 0x646566, '0945678901', 'user4@example.com', 'User Four', 'Male', 'U4', 'I love traveling.', '1996-04-04'),
 ('USER', 'user5', 0x656667, '0956789012', 'user5@example.com', 'User Five', 'Female', 'U5', 'I enjoy reading books.', '1998-05-05');
+
 Go
 
 -- schedule
@@ -80,27 +81,27 @@ INSERT INTO dbo.place (
 ) 
 VALUES 
 ('ChIJD7fiBh9u5kcR7tJp0NxA-2c', 'Restaurant', 'The Seafood Place', 'New York', 'NY', '123 Ocean Ave, NY, 10001', 
--74.0060, 40.7128, '[\"https://image1.jpg\", \"https://image2.jpg\"]', '123-456-7890', 'Mon-Sun 10:00-22:00', 
+-74.0060, 40.7128, '["https://image1.jpg", "https://image2.jpg"]', '123-456-7890', 'Mon-Sun 10:00-22:00', 
 'Fresh seafood, great views', 4.5, 'https://www.seafoodplace.com', 'https://www.seafoodplace.com/book', 3, 
 'Restaurant', 1, 0),
 
 ('ChIJCzYy5IS16lQR4oQJ6pZlFf0', 'Hotel', 'Sunset Resort', 'Miami', 'FL', '456 Beach Rd, Miami, FL, 33139', 
--80.1918, 25.7617, '[\"https://image3.jpg\", \"https://image4.jpg\"]', '987-654-3210', 'Mon-Sun 24 hours', 
+-80.1918, 25.7617, '["https://image3.jpg", "https://image4.jpg"]', '987-654-3210', 'Mon-Sun 24 hours', 
 'Luxury resort with beach access', 4.7, 'https://www.sunsetresort.com', 'https://www.sunsetresort.com/book', 5, 
 'Resort', 0, 0),
 
 ('ChIJwzS0bZVm1jURdX-Ktnklnmo', 'Cafe', 'The Cozy Cafe', 'San Francisco', 'CA', '789 Market St, San Francisco, CA, 94103', 
--122.4194, 37.7749, '[\"https://image5.jpg\", \"https://image6.jpg\"]', '555-789-1234', 'Mon-Sun 07:00-19:00', 
+-122.4194, 37.7749, '["https://image5.jpg", "https://image6.jpg"]', '555-789-1234', 'Mon-Sun 07:00-19:00', 
 'Cozy atmosphere with delicious pastries', 4.2, 'https://www.cozycafe.com', 'https://www.cozycafe.com/book', 2, 
 'Cafe', 1, 0),
 
 ('ChIJPVxGlZoUwoARUqtnZQdZlck', 'Museum', 'Art Museum', 'Los Angeles', 'CA', '321 Museum Rd, Los Angeles, CA, 90015', 
--118.2500, 34.0522, '[\"https://image7.jpg\", \"https://image8.jpg\"]', '222-333-4444', 'Mon-Sun 09:00-17:00', 
+-118.2500, 34.0522, '["https://image7.jpg", "https://image8.jpg"]', '222-333-4444', 'Mon-Sun 09:00-17:00', 
 'Art and history exhibitions', 4.8, 'https://www.artmuseum.com', 'https://www.artmuseum.com/book', 4, 
 'Museum', 0, 0),
 
 ('ChIJ2Z5sXwFm3FMRkFfb3lJl5Ug', 'Park', 'Central Park', 'New York', 'NY', 'Central Park, New York, NY, 10024', 
--73.9654, 40.7851, '[\"https://image9.jpg\", \"https://image10.jpg\"]', 'N/A', 'Mon-Sun 06:00-23:00', 
+-73.9654, 40.7851, '["https://image9.jpg", "https://image10.jpg"]', 'N/A', 'Mon-Sun 06:00-23:00', 
 'Large park with walking trails and ponds', 4.9, 'https://www.centralparknyc.org', 'https://www.centralparknyc.org/book', 1, 
 'Park', 0, 0);
 
@@ -116,11 +117,16 @@ Go
 
 -- coupon
 INSERT INTO coupon (coupon_code, remaining, Title, Subtitle, Content, State, Web, Picture, starttime, endtime, placeId) VALUES
-('NEWYEAR2025', 500, 'New Year Sale', 'NY Sale', 'Get 20% off on all items this New Year', 1, 'https://newyear.com', 'newyear2025.jpg', '2025-01-01T00:00:00', '2025-01-31T23:59:59', 1),  -- New Year Sale
-('SUMMER25', 1000, 'Summer Discount', 'Summer Deal', 'Save 25% on all summer products', 1, 'https://summerdeal.com', 'summer25.jpg', '2025-06-01T00:00:00', '2025-08-31T23:59:59', 2),  -- Summer Discount
-('FALL2025', 300, 'Fall Promotion', 'Fall Offer', 'Get $10 off your purchase over $50', 1, 'https://fallpromo.com', 'fall2025.jpg', '2025-09-01T00:00:00', '2025-11-30T23:59:59', 3),  -- Fall Promotion
-('WINTER2025', 200, 'Winter Clearance', 'Winter Sale', 'Up to 50% off on winter clothes', 1, 'https://wintersale.com', 'winter2025.jpg', '2025-12-01T00:00:00', '2025-12-31T23:59:59', 4),  -- Winter Clearance
-('BLACKFRIDAY25', 1500, 'Black Friday Sale', 'BF Deal', 'Get 25% off on selected items this Black Friday', 1, 'https://blackfriday.com', 'blackfriday25.jpg', '2025-11-27T00:00:00', '2025-11-27T23:59:59', 5);  -- Black Friday Sale
+('DISCOUNT50', 100, '限時折扣50%', '僅限本月', '使用此優惠券可享 50% 折扣', 1, 'https://example.com/discount50', NULL, '2024-02-01 00:00:00', '2024-02-28 23:59:59', 1),
+
+('FREESHIP', 500, '免運費優惠', '消費滿千免運', '在本店消費滿 1000 元，即可享免運優惠', 1, 'https://example.com/freeship', NULL, '2024-02-01 00:00:00', '2024-03-31 23:59:59', 2),
+
+('WELCOME10', 300, '新會員專屬 10% 折扣', '首次購物優惠', '新會員註冊後首筆訂單可享 10% 折扣', 1, 'https://example.com/welcome10', NULL, '2024-02-01 00:00:00', '2024-06-30 23:59:59', 3),
+
+('HOLIDAY20', 200, '節日特惠 20% 折扣', '限量200張', '使用此優惠券可在節日期間獲得 20% 折扣', 1, 'https://example.com/holiday20', NULL, '2024-12-01 00:00:00', '2024-12-31 23:59:59', 4),
+
+('FLASHSALE', 50, '限時閃購 30% OFF', '限時限量', '限量 50 張的 30% 折扣優惠券，先搶先贏', 1, 'https://example.com/flashsale', NULL, '2024-02-10 00:00:00', '2024-02-15 23:59:59', 5);
+
 GO
 
 -- mycoupon

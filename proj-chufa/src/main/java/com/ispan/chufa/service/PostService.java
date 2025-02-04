@@ -49,6 +49,10 @@ public class PostService {
 	public PostBean getPostById(Long id) {
 		return postRepository.findById(id).orElse(null);
 	}
+	
+	public List<PostBean> getAllPosts() {
+        return postRepository.findAll();
+    }
 
 	public List<PostDTO> findPostsByCriteria(String param) {
 		try {

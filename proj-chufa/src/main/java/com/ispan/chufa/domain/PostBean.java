@@ -22,6 +22,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "post")
@@ -39,9 +40,10 @@ public class PostBean {
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
 	@JsonBackReference
-	MemberBean member;
+	private MemberBean member;
 
 	@OneToMany(mappedBy = "postBean")
+	@JsonManagedReference
 	private Set<CommentBean> commentBeans;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -57,6 +59,7 @@ public class PostBean {
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
+	@JsonIgnore
 	private Set<PlaceBean> place = new HashSet<>();
 
 	public Long getPostid() {

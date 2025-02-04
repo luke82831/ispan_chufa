@@ -4,13 +4,15 @@ import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Blog from "@/views/blog/blog.vue"; // ✅ 文章列表和編輯器共用
 import Home from "@/views/Home.vue";
 
+import Places from "@/views/admin/PlaceManagement.vue";// ✅ 新增地點管理頁面
+
 const routes = [
     { path: "/", component: Home },
     { path: "/map", component: Map },
     { path: "/planningtabs", component: PlanningTabs },
     { path: "/createplanning", component: CreatePlanning },
     { path: "/blog", name: "Blog", component: Blog }, // ✅ 文章列表
-    { path: "/blog/create", name: "BlogCreate", component: Blog }, // ✅ 文章編輯模式
+    { path: "/places", component: Places },
     {
         path: "/secure/Login",
         name: "Login",

@@ -37,7 +37,6 @@ public class PostController {
    // @Autowired PostShowService postShowService;
 
     @PostMapping("/post")
-    // @JsonView(Views.Public.class)
     public PostResponse find(@RequestBody String json) {
         PostResponse responseBean = new PostResponse();
 

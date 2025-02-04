@@ -4,6 +4,7 @@ import PlanningTabs from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
 import PostDetail from "@/views/blog/PostDetail.vue";
 import blogprofile from "@/views/blog/blogprofile.vue";
+import followlist from "@/views/blog/followlist.vue";
 
 
 const routes = [
@@ -56,6 +57,12 @@ const routes = [
         path: '/blog/blogprofile/:bloghomeid',  // 動態路由
         name: 'blogprofile',
         component: blogprofile,  // 這是顯示用戶資料的頁面
+        props: true,  // 這樣可以讓路由的參數傳遞給元件
+    },
+    {
+        path: '/blog/followlist/:followid',  // 動態路由
+        name: 'followlist',
+        component: followlist,  // 這是顯示用戶資料的頁面
         props: true,  // 這樣可以讓路由的參數傳遞給元件
     },
 

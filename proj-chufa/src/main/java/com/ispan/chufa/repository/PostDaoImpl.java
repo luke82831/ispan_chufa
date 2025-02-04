@@ -76,7 +76,7 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(userPredicate);
 		}
 
-		// like
+		// 顯示用戶like的貼文
 		if (!param.isNull("likedBy")) {
 			Long currentid = param.getLong("likedBy"); // 取得當前用戶 ID
 			// 過濾點贊用戶和互動類型爲 "LIKE"
@@ -85,6 +85,9 @@ public class PostDaoImpl implements PostDao {
 					criteriaBuilder.equal(interactionJoin.get("interactionType"), "LIKE"));
 			predicates.add(likedByMePredicate);
 		}
+		
+	
+		
 
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID

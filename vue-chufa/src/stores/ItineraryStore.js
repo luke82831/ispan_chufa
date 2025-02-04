@@ -62,5 +62,13 @@ export const useItineraryStore = defineStore("itinerary", {
       // 根據 index 刪除對應的地點
       this.itineraryDates[date].splice(index, 1); // 刪除單一地點
     },
+
+    // 新增 updateRouteTimesForDay 方法，用來更新該天的路徑時間結果
+    updateRouteTimesForDay(selectedDate, routeTimes) {
+      if (!this.routeTimes[selectedDate]) {
+        this.routeTimes[selectedDate] = [];
+      }
+      this.routeTimes[selectedDate] = routeTimes;
+    },
   },
 });

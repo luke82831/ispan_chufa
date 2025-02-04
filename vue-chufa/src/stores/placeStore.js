@@ -5,8 +5,7 @@ import { useItineraryStore } from "./ItineraryStore"; // 引入 ItineraryStore
 export const usePlaceStore = defineStore("place", () => {
   const placeDetails = ref(null);
   const itineraries = ref([]); // 儲存行程列表
-  const origin = ref(null);  // 儲存起點
-  const destination = ref(null);  // 儲存終點
+  const routePairs = ref({}); // 存放起點與終點的配對，格式 { date: { index: { origin, destination } } }
 
   const itineraryStore = useItineraryStore(); // 使用 ItineraryStore
 
@@ -14,18 +13,20 @@ export const usePlaceStore = defineStore("place", () => {
     placeDetails.value = details;
   };
 
-  const setOrigin = (place) => {
-    origin.value = place;
-    console.log("origin", origin.value);
-  };
+  const updateRoutePair = (date, index, origin, destination) => {
+    if (!routePairs.value[date]) {
+      routePairs.value[date] = {};
+    }
+    routePairs.value[date][index] = { origin, destination };
 
-  const setDestination = (place) => {
-    destination.value = place;
-    console.log("destination", destination.value);
+    // console.log(`📌 updateRoutePair 更新: ${date} - ${index}`);
+    // console.log(
+    //   "🔍 當前 routePairs:",
+    //   JSON.stringify(routePairs.value, null, 2)
+    // );
   };
 
   const addToItinerary = async (place) => {
-    // 使用 ItineraryStore 來處理行程加入
     itineraryStore.addPlaceToDay(itineraryStore.selectedDate, place);
     console.log("地點已加入行程:", place);
   };
@@ -33,11 +34,9 @@ export const usePlaceStore = defineStore("place", () => {
   return {
     placeDetails,
     itineraries,
-    origin,
-    destination,
+    routePairs,
     setPlaceDetails,
-    setOrigin,
-    setDestination,
+    updateRoutePair,
     addToItinerary,
   };
 });

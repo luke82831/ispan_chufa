@@ -8,7 +8,9 @@
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
           <img
-            :src="userStore.member.profile_picture || '/path/to/default-avatar.png'"
+            :src="
+              userStore.member.profile_picture || '/path/to/default-avatar.png'
+            "
             alt="會員大頭貼"
             class="avatar"
             @error="onAvatarError"

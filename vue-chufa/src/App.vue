@@ -33,8 +33,9 @@
             <RouterLink to="" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的優惠券
             </RouterLink>
-            <button @click="logout" class="dropdown-item">
-              <i class="fas fa-sign-out-alt"></i>登出
+            <!-- 修改：下拉選單中登出按鈕 -->
+            <button @click="logout" class="dropdown-item logout-item">
+              <i class="fas fa-sign-out-alt"></i> 登出
             </button>
           </div>
         </transition>
@@ -54,8 +55,8 @@
       to="/blog/create"
       id="blogbutton"
       @click="hidePlanningButton"
-      >發文
-    </RouterLink>
+      >發文</RouterLink
+    >
   </div>
 
   <!-- 開始規劃按鈕 -->
@@ -65,8 +66,8 @@
       to="/createPlanning"
       id="planningbutton"
       @click="hidePlanningButton"
-      >開始規劃
-    </RouterLink>
+      >開始規劃</RouterLink
+    >
   </div>
 
   <RouterView></RouterView>
@@ -79,9 +80,14 @@ import { useUserStore } from "@/stores/user.js"; // 引入 Pinia Store
 
 const userStore = useUserStore(); // 使用 Pinia 的狀態
 const router = useRouter();
+const route = useRoute();
+
 const isDropdownVisible = ref(false);
 const isPlanningStarted = ref(false);
-const route = useRoute();
+
+const toggleDropdown = () => {
+  isDropdownVisible.value = !isDropdownVisible.value;
+};
 
 const hidePlanningButton = () => {
   isPlanningStarted.value = true;
@@ -96,11 +102,6 @@ watch(
     }
   }
 );
-
-// 下拉選單行為
-const toggleDropdown = () => {
-  isDropdownVisible.value = !isDropdownVisible.value;
-};
 
 // 登出行為
 const logout = () => {
@@ -124,84 +125,14 @@ onMounted(() => {
 </script>
 
 <style>
-#planningbutton {
-  position: fixed;
-  bottom: 50px;
-  right: 50px;
-  width: 100px;
-  height: 100px;
-  background-color: #84baf5;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  /* 根據需要調整字體大小 */
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* 使文字在圓形按鈕中垂直與水平居中 */
-  white-space: normal;
-  /* 允許文字換行 */
-  overflow-wrap: break-word;
-  /* 防止文字溢出圓形範圍 */
-  padding: 10px;
-  /* 內邊距，讓文字不會貼到圓形的邊緣 */
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#planningbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a95d5;
-  /* 深藍色 */
-}
-
-#blogbutton {
-  position: fixed; /* 固定位置 */
-  bottom: 200px; /* 比原來的按鈕高一點 */
-  right: 50px; /* 與原本按鈕對齊 */
-  width: 100px;
-  height: 100px;
-  background-color: #85a98f;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000; /* 確保按鈕位於頂層 */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 10px;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#blogbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a6c57;
-}
-
-/* 全局樣式 */
+/* Navbar 相關 */
 .navbar {
   background-color: #5a95d5;
-  /* 背景色 */
   padding: 10px 20px;
-  /* 上下和左右的內邊距 */
   display: flex;
-  /* 啟用 Flexbox */
   justify-content: space-between;
-  /* 讓兩個區域分開，左側是 logo 右側是導航 */
   align-items: center;
-  /* 垂直置中 */
   height: 60px;
-  /* 設定導覽列高度 */
 }
 
 .logo {
@@ -214,27 +145,21 @@ onMounted(() => {
 .nav-links {
   display: flex;
   align-items: center;
-  /* 垂直置中 */
 }
 
 .nav-link {
   margin-left: 20px;
-  /* 讓鏈接之間有間隔 */
   color: white;
-  /* 文字顏色 */
   text-decoration: none;
-  /* 去掉下劃線 */
   font-size: 16px;
-  /* 文字大小 */
   transition: color 0.3s;
-  /* 設置平滑過渡 */
 }
 
 .nav-link:hover {
   color: #ffd700;
 }
 
-/* 會員區域樣式 */
+/* 會員區域 */
 .member-section {
   position: relative;
 }
@@ -281,7 +206,7 @@ onMounted(() => {
   transform: rotate(180deg);
 }
 
-/* 整體下拉選單容器樣式 */
+/* 下拉選單 */
 .dropdown-menu {
   position: absolute;
   top: 60px;
@@ -296,7 +221,6 @@ onMounted(() => {
   animation: fadeIn 0.3s ease;
 }
 
-/* 個別選項樣式 */
 .dropdown-item {
   display: flex;
   align-items: center;
@@ -316,7 +240,6 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 左側圖標樣式 */
 .dropdown-icon-left {
   font-size: 16px;
   color: #666;
@@ -327,7 +250,25 @@ onMounted(() => {
   color: white;
 }
 
-/* 動畫效果 */
+/* 登出按鈕美化 */
+.dropdown-menu .logout-item {
+  text-align: right; /* 文字靠右 */
+  padding-right: 20px; /* 右邊內邊距 */
+  font-weight: bold;
+  color: #dc3545; /* 紅色文字 */
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-menu .logout-item:hover {
+  background-color: #f8d7da; /* 淡紅背景 */
+  color: #c82333;
+}
+
+/* 其他動畫 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -335,5 +276,64 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 發文/規劃按鈕 */
+#planningbutton {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #84baf5;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#planningbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a95d5;
+}
+
+#blogbutton {
+  position: fixed;
+  bottom: 200px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #85a98f;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#blogbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a6c57;
 }
 </style>

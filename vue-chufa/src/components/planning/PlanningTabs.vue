@@ -22,7 +22,7 @@
 </template>
 
 <script setup>
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/placeStore"; // 引入 Pinia store
 import { VueDraggableNext } from "vue-draggable-next";
 
 const placeStore = usePlaceStore();

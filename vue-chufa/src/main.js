@@ -4,6 +4,8 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import App from './App.vue';
 import router from './router/router.js';
 import { useUserStore } from '@/stores/user.js';
+// 引入 Font Awesome 的 CSS
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const app = createApp(App);
 const pinia = createPinia();

@@ -4,7 +4,12 @@
     <form @submit.prevent="handleSubmit" class="itinerary-form">
       <div class="form-group">
         <label for="coverPhoto">封面照片：</label>
-        <input type="file" @change="onFileChange" id="coverPhoto" class="input-file" />
+        <input
+          type="file"
+          @change="onFileChange"
+          id="coverPhoto"
+          class="input-file"
+        />
       </div>
 
       <div class="form-group">
@@ -18,23 +23,27 @@
         />
       </div>
 
+      <!-- 起始日期：只允許明天或之後的日期 -->
       <div class="form-group">
         <label for="start-date">開始日期：</label>
         <input
           type="date"
           id="start-date"
           v-model="itineraryStore.startDate"
+          :min="minStartDate"
           class="input-date"
           required
         />
       </div>
 
+      <!-- 結束日期：必須大於起始日期 -->
       <div class="form-group">
         <label for="end-date">結束日期：</label>
         <input
           type="date"
           id="end-date"
           v-model="itineraryStore.endDate"
+          :min="minEndDate"
           class="input-date"
           required
         />
@@ -46,7 +55,7 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 import axios from "@/plugins/axios.js";
@@ -76,6 +85,33 @@ const fetchProfile = async () => {
 onMounted(() => {
   fetchProfile();
 });
+
+// 計算明天的日期（即「今天之後」的最小日期）
+const minStartDate = computed(() => {
+  const today = new Date();
+  today.setDate(today.getDate());
+  return today.toISOString().split("T")[0];
+});
+
+// 計算結束日期的最小值：當有選擇起始日期時，最小值為起始日期的隔天；若尚未選擇則預設為 minStartDate
+const minEndDate = computed(() => {
+  if (itineraryStore.startDate) {
+    const start = new Date(itineraryStore.startDate);
+    start.setDate(start.getDate() + 1);
+    return start.toISOString().split("T")[0];
+  }
+  return minStartDate.value;
+});
+
+// 如果起始日期改變，且已選的結束日期小於新限制，則清除結束日期
+watch(
+  () => itineraryStore.startDate,
+  (newStartDate) => {
+    if (itineraryStore.endDate && itineraryStore.endDate < minEndDate.value) {
+      itineraryStore.endDate = "";
+    }
+  }
+);
 
 // 處理提交
 const handleSubmit = async () => {

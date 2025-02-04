@@ -13,13 +13,17 @@
       <button v-if="isEditing" @click="saveTitle">儲存</button>
     </div>
 
-    <div v-if="coverPhotoUrl">
-      <img :src="coverPhotoUrl" alt="Cover Photo" />
+    <div v-if="coverPhotoUrl" class="cover-photo-container">
+      <img :src="coverPhotoUrl" alt="Cover Photo" class="cover-photo" />
     </div>
     <p>{{ itineraryStore.startDate }} - {{ itineraryStore.endDate }}</p>
 
     <div class="date-tabs">
-      <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
+      <button
+        class="arrow-button"
+        @click="changeDate('prev')"
+        :disabled="isFirstDay"
+      >
         &lt;
       </button>
 
@@ -32,9 +36,15 @@
         {{ formatDate(date) }}
       </button>
 
-      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
+      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
+        ＋
+      </button>
 
-      <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
+      <button
+        class="arrow-button"
+        @click="changeDate('next')"
+        :disabled="isLastDay"
+      >
         &gt;
       </button>
     </div>
@@ -109,7 +119,10 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
+  } else if (
+    direction === "next" &&
+    currentIndex < dateRange.value.length - 1
+  ) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -124,9 +137,13 @@ const addOneMoreDay = () => {
   updateSelectedDate(newDate);
 };
 
-const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
+const isFirstDay = computed(
+  () => selectedDate.value === formatDate(dateRange.value[0])
+);
 const isLastDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
+  () =>
+    selectedDate.value ===
+    formatDate(dateRange.value[dateRange.value.length - 1])
 );
 
 watch(
@@ -187,5 +204,17 @@ button:hover {
 .date-tabs button:hover {
   background-color: #0056b3;
   color: white;
+}
+
+.cover-photo-container {
+  width: 100%; /* 設定最大寬度為 100% */
+  height: 300px; /* 可以調整為想要的固定高度 */
+  overflow: hidden; /* 防止超出範圍的圖片部分被顯示 */
+}
+
+.cover-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* 等比例放大或縮小圖片，保持原始比例 */
 }
 </style>

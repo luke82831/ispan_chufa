@@ -3,7 +3,10 @@
     <h2 style="padding-left: 20px">{{ place.displayName }}</h2>
     <div class="place-details">
       <!-- 照片區域 -->
-      <div v-if="place.photos && place.photos.length" class="photo-gallery-container">
+      <div
+        v-if="place.photos && place.photos.length"
+        class="photo-gallery-container"
+      >
         <div class="photo-gallery">
           <img
             v-for="(photo, index) in place.photos"
@@ -18,9 +21,11 @@
       <!-- 文字資訊區 -->
       <div class="text-info">
         <p>{{ place.formattedAddress }}</p>
-        <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p>
+        <!-- <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p> -->
         <p v-if="place.rating">評分: {{ place.rating }}</p>
-        <p v-if="place.formattedPhoneNumber">電話: {{ place.formattedPhoneNumber }}</p>
+        <p v-if="place.formattedPhoneNumber">
+          電話: {{ place.formattedPhoneNumber }}
+        </p>
         <p v-if="place.priceLevel">價位資訊: {{ place.priceLevel }}</p>
         <p v-if="place.openingHours">營業時間:</p>
         <ul v-if="place.openingHours">
@@ -33,7 +38,9 @@
         </p>
         <p v-if="place.url">
           是否可訂位:
-          <a :href="place.reservation" target="_blank">{{ place.reservation }}</a>
+          <a :href="place.reservation" target="_blank">{{
+            place.reservation
+          }}</a>
         </p>
       </div>
     </div>

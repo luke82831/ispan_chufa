@@ -1,53 +1,47 @@
 <template>
-  <div class="mt-4">
-    <h3 class="text-lg font-bold">計算後的行程時間</h3>
-    <ul class="mt-2">
-      <li
-        v-for="(place, index) in computedItinerary"
-        :key="place.id"
-        class="p-4 border rounded-lg shadow-md bg-gray-100"
-      >
-        <strong>{{ place.displayName }}</strong>
-        <p>{{ place.formattedAddress }}</p>
-        <p class="text-gray-600">
-          🕒 {{ formatTime(place.startTime) }} - {{ formatTime(place.endTime) }}
-        </p>
-      </li>
-    </ul>
+  <div v-if="currentPlaceTime" class="text-gray-500">
+    🕒 {{ formatTime(currentPlaceTime.startTime) }} -
+    {{ formatTime(currentPlaceTime.endTime) }}
   </div>
 </template>
 
 <script setup>
 import { computed } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
-import { usePlaceStore } from "@/stores/PlaceStore";
 
 const props = defineProps({
-  departureTime: String, // "HH:MM" 格式
+  date: String, // 日期
+  departureTime: String, // 出發時間 "HH:MM"
   itinerary: Array, // 當天行程列表
-  stayDurations: Object, // 每個地點的停留時間
+  stayDurations: Object, // 停留時間
+  index: Number, // 當前地點的索引
 });
 
-const placeStore = usePlaceStore();
+const itineraryStore = useItineraryStore();
 
-// 計算包含時間資訊的行程
+// **計算每個地點的到達與離開時間**
 const computedItinerary = computed(() => {
+  if (!props.departureTime || !props.itinerary.length) return [];
+
   let currentTime = new Date(
     Date.UTC(2023, 0, 1, ...props.departureTime.split(":"))
   );
   let itineraryWithTimes = [];
 
-  props.itinerary.forEach((place, index) => {
-    let stayTime = props.stayDurations[place.id] || 0;
-    let travelTime = 0;
+  const routeTimes = itineraryStore.routeTimes[props.date] || {}; // 取得行車時間
 
+  props.itinerary.forEach((place, index) => {
+    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0; // 取得行車時間
+    let stayTime = props.stayDurations[place.id] || 0; // 停留時間
+
+    // 第二個地點開始才加上 `travelTime`
     if (index > 0) {
-      let prevPlaceId = props.itinerary[index - 1].id;
-      travelTime = placeStore.routePairs[prevPlaceId]?.[place.id] || 30; // 預設30分鐘
+      currentTime.setMinutes(currentTime.getMinutes() + travelTime);
     }
 
-    // 計算到達與離開時間
     let startTime = new Date(currentTime);
+
+    // 加上 `stayTime`
     currentTime.setMinutes(currentTime.getMinutes() + stayTime);
     let endTime = new Date(currentTime);
 
@@ -56,15 +50,17 @@ const computedItinerary = computed(() => {
       startTime,
       endTime,
     });
-
-    // 更新當前時間，加上行車時間
-    currentTime.setMinutes(currentTime.getMinutes() + travelTime);
   });
 
   return itineraryWithTimes;
 });
 
-// 格式化時間 (HH:MM)
+// 取得對應 `index` 的地點時間
+const currentPlaceTime = computed(() => {
+  return computedItinerary.value[props.index] || null;
+});
+
+// **格式化時間 (HH:MM)**
 const formatTime = (date) => {
   return date.toISOString().substr(11, 5); // 轉成 "HH:MM"
 };

@@ -1,97 +1,95 @@
 <template>
-  <div class="space-y-4">
-    <h3 class="text-xl font-bold">{{ selectedDate }} 的行程</h3>
+  <div class="space-y-6">
+    <h3 class="text-2xl font-semibold text-gray-900">
+      {{ selectedDate }} 的行程
+    </h3>
 
     <!-- 設定出發時間 -->
-    <div class="flex items-center space-x-2">
-      <label class="font-bold">出發時間：</label>
-      <input type="time" v-model="departureTime" class="border p-1 w-24" />
+    <div class="departure-time">
+      <label>出發時間：</label>
+      <input type="time" v-model="departureTime" />
     </div>
 
-    <!-- 列印經緯度資料按鈕 -->
-    <!-- <button
-      @click="logRouteCoordinates"
-      class="bg-blue-500 text-white py-1 px-3 rounded mb-4"
-    >
-      列出所有經緯度資料
-    </button> -->
-
     <!-- 顯示當天的行程 -->
-    <div v-if="itineraryForSelectedDay.length">
+    <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
       <draggable
         v-model="itineraryForSelectedDay"
         :group="{ name: 'places', pull: 'clone', put: true }"
-        :animation="200"
+        :animation="250"
         item-key="id"
         @end="handleDragEnd"
       >
         <template #item="{ element, index }">
-          <ul class="space-y-4">
-            <li
-              class="bg-white p-4 rounded-xl shadow-lg border border-gray-200"
-              :key="element.id"
-            >
-              <strong class="text-lg text-gray-800">{{
-                element.displayName
-              }}</strong>
-              <p class="text-gray-600">{{ element.formattedAddress }}</p>
-
-              <!-- 設定停留時間（點擊進入編輯模式） -->
-              <div class="flex items-center space-x-2 mt-2">
-                <label>停留時間：</label>
-
-                <!-- 顯示超連結模式 -->
-                <a
-                  v-if="!element.isEditingStay"
-                  href="#"
-                  @click.prevent="editStayTime(element)"
-                  class="text-blue-500 underline"
-                >
-                  {{ itineraryStore.getStayDuration(selectedDate, element.id) }}
-                  分
-                </a>
-
-                <!-- 編輯模式 -->
-                <input
-                  v-else
-                  type="number"
-                  v-model="element.tempStayDuration"
-                  class="border p-1 w-16"
-                  @blur="saveStayTime(element)"
-                  @keyup.enter="saveStayTime(element)"
-                />
-              </div>
-
-              <!-- 刪除按鈕 -->
-              <button
-                class="text-red-500 mt-2 text-sm"
-                @click="deletePlace(index)"
-              >
-                刪除行程
+          <ul class="itinerary-item-list">
+            <li class="itinerary-item">
+              <button @click="deletePlace(index)" class="delete-button">
+                ✖
               </button>
+              <div class="itinerary-details">
+                <div class="stay-time-header">
+                  <StayTime
+                    :date="selectedDate"
+                    :departureTime="departureTime"
+                    :itinerary="itineraryForSelectedDay"
+                    :stayDurations="
+                      itineraryStore.stayDurations[selectedDate] || {}
+                    "
+                    :index="index"
+                  />
+                  <!-- 顯示超連結模式 -->
+                  <a
+                    v-if="!element.isEditingStay"
+                    href="#"
+                    @click.prevent="editStayTime(element)"
+                    class="stay-duration-link"
+                  >
+                    {{
+                      itineraryStore.getStayDuration(selectedDate, element.id)
+                    }}
+                    分鐘
+                  </a>
+                  <!-- 編輯模式 -->
+                  <input
+                    v-else
+                    type="number"
+                    v-model="element.tempStayDuration"
+                    class="stay-duration-input"
+                    @blur="saveStayTime(element)"
+                    @keyup.enter="saveStayTime(element)"
+                  />
+                </div>
+                <div class="itinerary-info">
+                  <img
+                    :src="getPhotoUrl(element.photos[0])"
+                    v-if="element.photos && element.photos.length"
+                    alt="Location Image"
+                    class="location-image"
+                  />
+                  <div>
+                    <h4 class="location-title">{{ element.displayName }}</h4>
+                    <p class="location-address">
+                      {{ element.formattedAddress }}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </li>
 
             <!-- 顯示路徑時間 -->
-            <div v-if="index < itineraryForSelectedDay.length - 1" class="mt-2">
-              <route-time
-                :date="selectedDate"
-                :index="index"
-                class="p-2 bg-gray-100 rounded-lg shadow-md"
-              />
+            <div
+              v-if="index < itineraryForSelectedDay.length - 1"
+              class="route-time"
+            >
+              <route-time :date="selectedDate" :index="index" />
             </div>
           </ul>
         </template>
       </draggable>
     </div>
-    <div v-else class="text-gray-500">
+
+    <div v-else class="no-itinerary">
       <p>今天還沒有新增行程！</p>
     </div>
-    <!-- 傳遞到 staytime 組件 -->
-    <StayTime
-      :departureTime="departureTime"
-      :itinerary="itineraryForSelectedDay"
-      :stayDurations="itineraryStore.stayDurations[selectedDate] || {}"
-    />
   </div>
 </template>
 
@@ -159,6 +157,11 @@ const saveStayTime = (place) => {
   place.isEditingStay = false;
 };
 
+// 獲取照片 URL 的方法
+const getPhotoUrl = (photo) => {
+  return photo; // 假設你有其他方法處理 URL
+};
+
 // **監聽 routePairs 的變化，確保時間重新計算**
 watch(
   () => placeStore.routePairs[props.selectedDate],
@@ -172,28 +175,84 @@ watch(
 </script>
 
 <style scoped>
-li {
-  background: white;
-  padding: 16px;
+.itinerary-item {
+  background: #fff;
+  padding: 12px;
   border-radius: 12px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
-  list-style-type: none;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+  list-style: none;
 }
 
-.route-time {
-  padding: 8px;
-  background: #f7fafc;
+.itinerary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.itinerary-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.location-image {
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 8px;
+  object-fit: cover;
 }
 
-.draggable-item {
-  cursor: move;
+.stay-time-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* 確保內容垂直置中 */
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  padding-right: 30px; /* 預留空間，避免與刪除按鈕重疊 */
 }
 
-.draggable-placeholder {
-  border: 2px dashed #ccc;
+.stay-duration-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.stay-duration-input {
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  width: 50px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.location-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.location-address {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.delete-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  color: #d32f2f;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.delete-button:hover {
+  color: #b91c1c;
 }
 </style>

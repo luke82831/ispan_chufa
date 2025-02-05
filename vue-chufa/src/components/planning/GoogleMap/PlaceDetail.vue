@@ -21,7 +21,7 @@
       <!-- 文字資訊區 -->
       <div class="text-info">
         <p>{{ place.formattedAddress }}</p>
-        <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p>
+        <!-- <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p> -->
         <p v-if="place.rating">評分: {{ place.rating }}</p>
         <p v-if="place.formattedPhoneNumber">
           電話: {{ place.formattedPhoneNumber }}
@@ -43,24 +43,12 @@
           }}</a>
         </p>
       </div>
-
-      <!-- 按鈕區域 -->
-      <div class="button-container">
-        <div class="action-buttons">
-          <button @click="savePlace">儲存地點</button>
-          <button @click="addToItinerary">加入行程</button>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from "vue";
-import Swal from "sweetalert2";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
-
-const placeStore = usePlaceStore();
 
 // 接收父組件傳遞的 place prop
 const props = defineProps({
@@ -83,93 +71,74 @@ watch(
 const getPhotoUrl = (photo) => {
   return photo; // 假設你有其他方法處理 URL
 };
-
-// 儲存地點
-const savePlace = () => {
-  if (!place.value) {
-    console.error("Place is not defined");
-    Swal.fire("地點資料未正確加載");
-    return;
-  }
-  console.log("儲存地點:", place.value);
-  Swal.fire({
-    title: "已儲存景點",
-    icon: "success",
-    timer: 1500, // 設定訊息顯示時間為 1.5 秒
-    showConfirmButton: false, // 隱藏確認按鈕
-  });
-};
-
-// 加入行程
-const addToItinerary = () => {
-  if (!place.value) {
-    console.error("Place is not defined");
-    Swal.fire("地點資料未正確加載");
-    return;
-  }
-  placeStore.addToItinerary(place.value); // 呼叫 Pinia store 的方法
-  console.log("加入行程:", place.value);
-};
 </script>
 
-<style scoped>
+<style>
 .place-details {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px); /* 減去 navbar 高度 */
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  overflow-y: auto; /* 讓內容可滾動 */
+  position: relative;
+  padding-bottom: 80px; /* 預留空間，避免內容被按鈕遮住 */
 }
 
+/* 讓內容區域不額外滾動 */
 .text-info {
-  flex: 1; /* 讓文字區域占據剩餘空間 */
-  padding: 0px 20px 0px 20px;
+  padding: 20px;
 }
 
+/* 照片區塊 - 恢復原本的橫向排列 */
 .photo-gallery-container {
   display: flex;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden; /* 隱藏超出範圍的部分 */
+  flex-direction: column;
+  align-items: center;
+  width: 95%;
+  padding: 10px;
+  max-height: 340px; /* 增加高度，給滾動條留點空間 */
+  overflow: hidden; /* 防止多餘空白 */
+  position: relative; /* 讓內部的按鈕區域可以依附 */
 }
 
+/* 圖片橫向滾動區域 */
 .photo-gallery {
   display: flex;
   gap: 10px;
-  overflow-x: auto; /* 啟用橫向滾動 */
-  scroll-behavior: smooth; /* 使滾動平滑 */
-}
-
-.photo-gallery img {
-  width: 100%; /* 設定圖片的寬度 */
-  height: 300px;
-  object-fit: cover;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.button-container {
-  position: sticky;
-  bottom: 0;
-  background-color: white;
+  overflow-x: auto; /* 保持可滾動 */
+  scroll-behavior: smooth;
+  max-width: 100%;
   padding: 10px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* 按鈕區域陰影 */
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px; /* 控制按鈕之間的間距 */
+/* 自訂橫向滾動條 */
+.photo-gallery::-webkit-scrollbar {
+  height: 8px; /* 設定滾動條的高度 */
 }
 
-.action-buttons button {
-  padding: 15px 20px; /* 增加按鈕的內邊距，讓按鈕更大 */
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px; /* 增大字體 */
+.photo-gallery::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border-radius: 10px;
 }
 
-.action-buttons button:hover {
-  background-color: #0056b3;
+.photo-gallery::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+/* 圖片樣式 */
+.photo-gallery img {
+  width: auto;
+  height: 300px; /* 恢復你原本的圖片高度 */
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
+}
+
+.photo-gallery img:hover {
+  transform: scale(1.05);
 }
 </style>

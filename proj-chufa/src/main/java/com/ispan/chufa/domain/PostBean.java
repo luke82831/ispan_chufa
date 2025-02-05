@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,10 +37,12 @@ public class PostBean {
 
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
-	@JsonBackReference
+	// @JsonManagedReference
+	@JsonIgnoreProperties("place")
 	MemberBean member;
 
 	@OneToMany(mappedBy = "postBean")
+	// @JsonIgnore
 	private Set<CommentBean> commentBeans;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,10 +55,24 @@ public class PostBean {
 			joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
 			inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
 	)
+	@JsonIgnore
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
+	// private Set<TagsBean> tag;
+
+	@ManyToOne
+	@JoinColumn(name = "forwarded_from_id")
+	private PostBean forwardedFrom;
+
+	public PostBean getForwardedFrom() {
+		return forwardedFrom;
+	}
+
+	public void setForwardedFrom(PostBean forwardedFrom) {
+		this.forwardedFrom = forwardedFrom;
+	}
 
 	public Long getPostid() {
 		return postid;

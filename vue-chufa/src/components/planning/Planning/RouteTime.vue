@@ -1,0 +1,70 @@
+<template>
+  <div class="route-time-container">
+    <p v-if="routeTime !== null">🚗 {{ routeTime }} 分鐘</p>
+    <p v-else>正在計算行程時間...</p>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch } from "vue";
+import { usePlaceStore } from "@/stores/PlaceStore";
+import { useItineraryStore } from "@/stores/ItineraryStore";
+
+const props = defineProps({
+  date: String,
+  index: Number,
+});
+
+const placeStore = usePlaceStore();
+const itineraryStore = useItineraryStore();
+const routeTime = ref(null);
+
+// 計算路徑時間
+const calculateRouteTime = () => {
+  const routePair = placeStore.routePairs[props.date]?.[props.index];
+
+  if (!routePair || !routePair.origin || !routePair.destination) {
+    console.warn("🚨 起點或終點資訊缺失，無法計算路徑時間");
+    return;
+  }
+
+  const directionsService = new google.maps.DirectionsService();
+  const request = {
+    origin: new google.maps.LatLng(routePair.origin.lat, routePair.origin.lng),
+    destination: new google.maps.LatLng(
+      routePair.destination.lat,
+      routePair.destination.lng
+    ),
+    travelMode: google.maps.TravelMode.DRIVING,
+  };
+
+  directionsService.route(request, (result, status) => {
+    if (status === "OK") {
+      routeTime.value = Math.round(
+        result.routes[0].legs[0].duration.value / 60
+      );
+      itineraryStore.setRouteTime(props.date, props.index, routeTime.value); // 存入 ItineraryStore
+      console.log(`✅ 計算成功：${routeTime.value} 分鐘`);
+    } else {
+      console.error("❌ 無法計算路徑時間:", status);
+      routeTime.value = null;
+    }
+  });
+};
+
+// 監聽 routePairs 變更，重新計算時間
+watch(
+  () => placeStore.routePairs[props.date]?.[props.index],
+  (newVal) => {
+    if (newVal && newVal.origin && newVal.destination) {
+      console.log("✅ 觸發計算，開始 calculateRouteTime()");
+      calculateRouteTime();
+    } else {
+      console.warn("⚠️ newVal 為空，未能觸發 calculateRouteTime");
+    }
+  },
+  { immediate: true, deep: true }
+);
+</script>
+
+<style scoped></style>

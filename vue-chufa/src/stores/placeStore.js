@@ -1,42 +1,42 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { useItineraryStore } from "./ItineraryStore"; // 引入 ItineraryStore
 
-export const usePlaceStore = defineStore('place', () => {
+export const usePlaceStore = defineStore("place", () => {
   const placeDetails = ref(null);
   const itineraries = ref([]); // 儲存行程列表
+  const routePairs = ref({}); // 存放起點與終點的配對，格式 { date: { index: { origin, destination } } }
+
+  const itineraryStore = useItineraryStore(); // 使用 ItineraryStore
 
   const setPlaceDetails = (details) => {
     placeDetails.value = details;
   };
 
-  // 加入行程
-  const addToItinerary = (place) => {
-    // 檢查是否已有相同的行程
-    const existingPlace = itineraries.value.find(
-      (itinerary) => itinerary.displayName === place.displayName && itinerary.formattedAddress === place.formattedAddress
-    );
-
-    if (!existingPlace) {
-      itineraries.value.push({
-        displayName: place.displayName,
-        formattedAddress: place.formattedAddress,
-      });
-    } else {
-      console.log("這個行程已經存在，不會重複加入");
+  const updateRoutePair = (date, index, origin, destination) => {
+    if (!routePairs.value[date]) {
+      routePairs.value[date] = {};
     }
+    routePairs.value[date][index] = { origin, destination };
+
+    // console.log(`📌 updateRoutePair 更新: ${date} - ${index}`);
+    // console.log(
+    //   "🔍 當前 routePairs:",
+    //   JSON.stringify(routePairs.value, null, 2)
+    // );
   };
 
-
-  // 刪除行程
-  const removeFromItinerary = (index) => {
-    itineraries.value.splice(index, 1);
+  const addToItinerary = async (place) => {
+    itineraryStore.addPlaceToDay(itineraryStore.selectedDate, place);
+    console.log("地點已加入行程:", place);
   };
 
   return {
     placeDetails,
-    setPlaceDetails,
     itineraries,
+    routePairs,
+    setPlaceDetails,
+    updateRoutePair,
     addToItinerary,
-    removeFromItinerary,
   };
 });

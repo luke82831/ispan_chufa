@@ -13,7 +13,7 @@
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 import PlaceDetail from "./PlaceDetail.vue";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
 const placeStore = usePlaceStore(); // 使用 store
 
@@ -153,9 +153,7 @@ const placeDetails = placeStore.placeDetails;
   height: 100%; /* 確保容器滿高 */
   width: 100%;
   flex-grow: 1;
-  position: relative; /* 確保內部元素的絕對定位相對於 .container */
   position: relative; /* 為地圖設定定位基準 */
-  height: 100%; /* 確保容器滿高 */
 }
 
 #map {

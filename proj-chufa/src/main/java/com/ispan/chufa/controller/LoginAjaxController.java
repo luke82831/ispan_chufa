@@ -1,7 +1,6 @@
 package com.ispan.chufa.controller;
 
 import java.util.Base64;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -156,7 +155,8 @@ public class LoginAjaxController {
                         .put("phone_number", member.getPhoneNumber())
                         .put("username", member.getUsername())
                         .put("gender", member.getGender())
-                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"));
+                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"))
+                        .put("socialLinks", member.getSocialLinks());
             } else {
                 responseJson.put("success", false);
                 responseJson.put("message", "會員資料未找到");
@@ -205,6 +205,11 @@ public class LoginAjaxController {
             existingMember.setBirth(updatedMember.getBirth());
             existingMember.setBio(updatedMember.getBio());
 
+            // 新增：更新社群連結，如果有傳來 socialLinks 則更新
+            if (updatedMember.getSocialLinks() != null) {
+                existingMember.setSocialLinks(updatedMember.getSocialLinks());
+            }
+
             memberService.saveMember(existingMember);
 
             responseJson.put("success", true);
@@ -217,6 +222,7 @@ public class LoginAjaxController {
                     .put("gender", existingMember.getGender())
                     .put("birth", existingMember.getBirth())
                     .put("bio", existingMember.getBio()))
+                    .put("socialLinks", existingMember.getSocialLinks()) // 回傳更新後的社群連結
                     .put("role", existingMember.getRole().toString());
 
             System.out.println("Response JSON: " + responseJson.toString());

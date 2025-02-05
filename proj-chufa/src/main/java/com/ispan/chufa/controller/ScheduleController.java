@@ -1,12 +1,8 @@
 package com.ispan.chufa.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,76 +36,62 @@ public class ScheduleController {
     @Autowired
     private MemberService memberService; // 注入 MemberService
 
-    
     // POST: 創建行程資料
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
-            @RequestParam String tripName,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam MultipartFile coverPhoto,
-            @RequestParam Long userId) {
+            @RequestParam("tripName") String tripName,
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam("coverPhoto") MultipartFile coverPhoto, // 接收檔案
+            @RequestParam("userId") Long userId) {
 
         System.out.println("Received tripName: " + tripName);
         System.out.println("Received startDate: " + startDate);
         System.out.println("Received endDate: " + endDate);
-        System.out.println("Received coverPhoto: " + coverPhoto.getOriginalFilename());
+        System.out.println("Received coverPhoto name: " + coverPhoto.getOriginalFilename());
         System.out.println("userID: " + userId);
-        
-        
 
         try {
-            MemberBean user = memberService.getMemberById(userId);
+            MemberBean user = memberService.getUserById(userId);
 
             if (user == null) {
                 System.err.println("User with ID " + userId + " not found.");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            String filePath = saveFile(coverPhoto);
+            // 將 MultipartFile 轉換為 byte[]
+            byte[] coverPhotoBytes = coverPhoto.getBytes();
 
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
             schedule.setEndDate(endDate);
-            schedule.setCoverPhoto(filePath);
+            schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
+            // 儲存行程資料
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
-            System.err.println("File upload failed: " + e.getMessage());
+            System.err.println("Error reading file: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
             System.err.println("Error creating schedule: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        
-    }
-    
-    private String saveFile(MultipartFile file) throws IOException {
-        Path uploadDir = Paths.get("upload-directory");
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
-        }
-
-        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-        Path path = uploadDir.resolve(fileName);
-
-        Files.write(path, file.getBytes());
-
-        return path.toString();
     }
 
     // -------PostMan測試程式
 
-//    // POST: 創建行程資料
-//    @PostMapping("/schedule")
-//    public ResponseEntity<ScheduleBean> createSchedule(@RequestBody ScheduleBean schedule) {
-//        System.out.println("Received schedule with end date: " + schedule.getEndDate());
-//        ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
-//        return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
-//    }
+    // // POST: 創建行程資料
+    // @PostMapping("/schedule")
+    // public ResponseEntity<ScheduleBean> createSchedule(@RequestBody ScheduleBean
+    // schedule) {
+    // System.out.println("Received schedule with end date: " +
+    // schedule.getEndDate());
+    // ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
+    // return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
+    // }
 
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")
@@ -124,7 +106,7 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateSchedule(@PathVariable Long tripId,
+    public ResponseEntity<?> updateSchedule(@PathVariable("tripId") Long tripId,
             @RequestBody ScheduleBean updatedSchedule) {
         try {
             ScheduleBean updated = scheduleService.updateSchedule(tripId, updatedSchedule);

@@ -1,13 +1,17 @@
 package com.ispan.chufa.domain;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,6 +22,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -71,7 +76,7 @@ public class MemberBean {
 	private String lineUserId; // 用於存儲 LINE 的 User ID
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
+	@JsonBackReference
 	private List<PostBean> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -100,6 +105,14 @@ public class MemberBean {
 			inverseJoinColumns = @JoinColumn(name = "fk_couponid", referencedColumnName = "couponId") // 優惠券欄位
 	)
 	private List<CouponBean> couponBeans; // 使用者領取的優惠券列表
+
+	// 新增社群連結欄位
+	@ElementCollection
+	@CollectionTable(name = "member_social_links", // 中介表名稱
+			joinColumns = @JoinColumn(name = "member_id"))
+	@MapKeyColumn(name = "platform") // 存放平台名稱的欄位
+	@Column(name = "url") // 存放 URL 的欄位
+	private Map<String, String> socialLinks = new HashMap<>();
 
 	// Getters and Setters
 
@@ -271,6 +284,14 @@ public class MemberBean {
 
 	public void setCouponBeans(List<CouponBean> couponBeans) {
 		this.couponBeans = couponBeans;
+	}
+
+	public Map<String, String> getSocialLinks() {
+		return socialLinks;
+	}
+
+	public void setSocialLinks(Map<String, String> socialLinks) {
+		this.socialLinks = socialLinks;
 	}
 
 }

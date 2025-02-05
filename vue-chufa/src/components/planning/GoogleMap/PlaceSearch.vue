@@ -12,7 +12,7 @@
 <script setup>
 import { ref, onMounted, defineEmits } from "vue";
 import Swal from "sweetalert2"; // 確保引入 SweetAlert2
-import { usePlaceStore } from "@/stores/placestore"; // 檢查路徑是否正確
+import { usePlaceStore } from "@/stores/PlaceStore"; // 檢查路徑是否正確
 
 const searchInput = ref(""); // 搜尋框輸入
 const emit = defineEmits(["place-selected"]); // 定義 place-selected 事件

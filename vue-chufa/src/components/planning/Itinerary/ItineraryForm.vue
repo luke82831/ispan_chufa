@@ -55,36 +55,19 @@
 </template>
 
 <script setup>
-import { onMounted, computed, watch } from "vue";
+import { computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useItineraryStore } from "@/stores/ItineraryStore";
+import { useUserStore } from "@/stores/user"; // 使用 Pinia 的 userStore
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 
 const router = useRouter();
 const itineraryStore = useItineraryStore();
+const userStore = useUserStore(); // 直接使用 userStore
 
-// 取得使用者 ID
-const fetchProfile = async () => {
-  try {
-    const { data } = await axios.get("/ajax/secure/profile", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-
-    if (data.success) {
-      itineraryStore.userId = data.user?.userid;
-    } else {
-      Swal.fire("錯誤", data.message, "error");
-    }
-  } catch (error) {
-    Swal.fire("錯誤", "無法獲取會員資料", "error");
-  }
-};
-
-// 初始化獲取會員資訊
-onMounted(() => {
-  fetchProfile();
-});
+// **使用 Pinia 的 userId**
+const userId = computed(() => userStore.member?.userid);
 
 // 計算明天的日期（即「今天之後」的最小日期）
 const minStartDate = computed(() => {
@@ -93,7 +76,7 @@ const minStartDate = computed(() => {
   return today.toISOString().split("T")[0];
 });
 
-// 計算結束日期的最小值：當有選擇起始日期時，最小值為起始日期的隔天；若尚未選擇則預設為 minStartDate
+// 計算結束日期的最小值
 const minEndDate = computed(() => {
   if (itineraryStore.startDate) {
     const start = new Date(itineraryStore.startDate);
@@ -103,7 +86,7 @@ const minEndDate = computed(() => {
   return minStartDate.value;
 });
 
-// 如果起始日期改變，且已選的結束日期小於新限制，則清除結束日期
+// 如果起始日期改變，則清除不符合條件的結束日期
 watch(
   () => itineraryStore.startDate,
   (newStartDate) => {
@@ -113,12 +96,12 @@ watch(
   }
 );
 
-// 處理提交
+// 提交行程
 const handleSubmit = async () => {
-  if (!itineraryStore.userId || !itineraryStore.coverPhoto) {
+  if (!userId.value || !itineraryStore.coverPhoto) {
     Swal.fire(
       "錯誤",
-      itineraryStore.userId ? "封面照片是必填的" : "無法找到使用者ID",
+      userId.value ? "封面照片是必填的" : "無法找到使用者ID",
       "error"
     );
     return;
@@ -129,7 +112,7 @@ const handleSubmit = async () => {
   formData.append("tripName", itineraryStore.itineraryTitle);
   formData.append("startDate", itineraryStore.startDate);
   formData.append("endDate", itineraryStore.endDate);
-  formData.append("userId", itineraryStore.userId);
+  formData.append("userId", userId.value);
 
   try {
     await axios.post("/api/schedule", formData, {
@@ -138,14 +121,14 @@ const handleSubmit = async () => {
 
     Swal.fire("成功", "行程已成功建立", "success");
 
-    // 將行程資料存入 Pinia store
+    // 存入行程資料
     itineraryStore.setItinerary(
       itineraryStore.itineraryTitle,
       itineraryStore.startDate,
       itineraryStore.endDate
     );
 
-    // 導航到規劃頁面
+    // 跳轉到行程規劃頁面
     router.push("/planningpage");
   } catch (error) {
     Swal.fire("錯誤", error.response?.data?.message || "發生未知錯誤", "error");

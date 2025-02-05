@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="header">
+      <button class="back-button" @click="goBack">⬅ 返回</button>
       <h2 v-if="!isEditing">{{ itineraryStore.itineraryTitle }}</h2>
       <input
         v-if="isEditing"
@@ -9,8 +10,8 @@
         class="edit-input"
         type="text"
       />
-      <button v-if="!isEditing" @click="editTitle">✏️</button>
-      <button v-if="isEditing" @click="saveTitle">儲存</button>
+      <button v-if="!isEditing" class="button" @click="editTitle">✏️</button>
+      <button v-if="isEditing" class="button" @click="saveTitle">儲存</button>
     </div>
 
     <div v-if="coverPhotoUrl" class="cover-photo-container">
@@ -56,8 +57,15 @@
 
 <script setup>
 import { computed, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 import PlanningDay from "./PlanningDay.vue";
+
+const router = useRouter();
+
+const goBack = () => {
+  router.push("/myitineraries");
+};
 
 // 在此初始化 itineraryStore
 const itineraryStore = useItineraryStore();
@@ -162,7 +170,25 @@ watch(
   display: flex;
   align-items: center;
 }
-
+.back-button {
+  background: white;
+  border: 2px solid #007bff;
+  color: #007bff;
+  font-size: 1.2rem;
+  padding: 8px 12px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 20px;
+}
+.back-button:hover {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
 .edit-input {
   padding: 5px;
   margin-left: 10px;
@@ -171,8 +197,34 @@ watch(
   border-radius: 4px;
   width: auto;
 }
+.edit-button {
+  background: white;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-/* button {
+.edit-button:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+}
+
+.edit-button svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+button {
   background: none;
   border: none;
   cursor: pointer;
@@ -182,7 +234,7 @@ watch(
 
 button:hover {
   color: #007bff;
-} */
+}
 
 /* 日期分頁按鈕的樣式 */
 .date-tabs button {
@@ -207,14 +259,17 @@ button:hover {
 }
 
 .cover-photo-container {
-  width: 100%; /* 設定最大寬度為 100% */
-  height: 300px; /* 可以調整為想要的固定高度 */
-  overflow: hidden; /* 防止超出範圍的圖片部分被顯示 */
+  width: 100%;
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .cover-photo {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* 等比例放大或縮小圖片，保持原始比例 */
+  object-fit: cover;
 }
 </style>

@@ -19,6 +19,7 @@
         v-for="schedule in schedules"
         :key="schedule.tripId"
         class="itinerary-card"
+        @click="goToPlanningPage(schedule.tripId)"
       >
         <div class="itinerary-image-container">
           <!-- 圖片 -->
@@ -97,12 +98,18 @@ export default {
       });
     };
 
+    //跳轉planningpage
+    const goToPlanningPage = (tripId) => {
+      router.push({ path: "/planningpage", query: { tripId } });
+    };
+
     onMounted(fetchSchedules);
 
     return {
       schedules,
       loading,
       goToItineraryForm,
+      goToPlanningPage,
       getImageSource,
       confirmDelete,
     };

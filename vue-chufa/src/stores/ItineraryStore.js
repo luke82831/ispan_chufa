@@ -11,6 +11,7 @@ export const useItineraryStore = defineStore("itinerary", {
     itineraryDates: {}, // 每一天的行程資料，鍵是日期，值是行程細節
     routeTimes: {}, // 存儲行車時間
     stayDurations: {}, // 存儲每個地點的停留時間
+    itineraries: [],
   }),
 
   actions: {

@@ -3,17 +3,20 @@
     <!-- Logo -->
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
-
-
     <div class="search-bar">
-    <input
-      v-model="searchTitle"
-      type="text"
-      placeholder="搜尋文章..."
-      class="p-2 border rounded w-full"
-    />
-    <button @click="navigateToSearch" class="p-2 bg-blue-500 text-white rounded"> 搜索</button>
-  </div>
+      <input
+        v-model="searchTitle"
+        type="text"
+        placeholder="搜尋文章..."
+        class="p-2 border rounded w-full"
+      />
+      <button
+        @click="navigateToSearch"
+        class="p-2 bg-blue-500 text-white rounded"
+      >
+        搜索
+      </button>
+    </div>
 
     <div class="nav-links">
       <!-- 只有管理員才顯示後臺管理按鈕 -->
@@ -48,7 +51,7 @@
             <RouterLink to="/secure/Profile" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 會員資料
             </RouterLink>
-            <RouterLink to="" class="dropdown-item">
+            <RouterLink to="/myitineraries" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的行程
             </RouterLink>
             <RouterLink to="/blog/bloghome" class="dropdown-item">
@@ -87,7 +90,7 @@
   <div>
     <RouterLink
       v-if="!isPlanningStarted"
-      to="/createPlanning"
+      to="/myitineraries"
       id="planningbutton"
       @click="hidePlanningButton"
       >開始規劃</RouterLink
@@ -117,13 +120,15 @@ const hidePlanningButton = () => {
   isPlanningStarted.value = true;
 };
 
-
-const searchTitle = ref('');
+const searchTitle = ref("");
 //const router = useRouter();
 
 const navigateToSearch = () => {
   if (searchTitle.value.trim()) {
-    router.push({ path: '/search-results', query: { title: searchTitle.value } });
+    router.push({
+      path: "/search-results",
+      query: { title: searchTitle.value },
+    });
   }
 };
 
@@ -431,5 +436,4 @@ onMounted(() => {
   background-color: #477ab2;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
-
 </style>

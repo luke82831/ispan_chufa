@@ -37,7 +37,7 @@ const routes = [
     {
         path: "/blog/find/:postid",
         name: "BlogBrowse",
-        component: () => import("@/views/blog/blogBrowse.vue"), // 指向 post 組件
+        component: () => import("@/views/blog/blogPostBrowse.vue"), // 指向 post 組件
     },
     { path: "/map", component: Map },
 ]

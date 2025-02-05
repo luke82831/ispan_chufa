@@ -14,68 +14,102 @@
     </div>
 </template>
 
-<script>
+<script >
 import Quill from "quill";
 import "quill/dist/quill.snow.css"; // Quill 的樣式文件
 import axiosapi from '@/plugins/axios.js';
+import Swal from "sweetalert2";
+import { ref, onMounted } from 'vue';
+import { useUserStore } from '@/stores/user'
+import { useRouter } from "vue-router";
 
 export default {
-    data() {
-        return {
-        quill: null, // Quill 編輯器實例
-        };
-    },
-    mounted() {
-        // 初始化 Quill
-        this.quill = new Quill("#editor", {
-        theme: "snow",
-        modules: {
-            toolbar: {
-            container: [
-                ["bold", "italic", "underline"], // 字體樣式
-                [{ header: [1, 2, 3, false] }], // 標題級別
-                [{ list: "ordered" }, { list: "bullet" }], // 列表
-                ["image", "video"], // 嵌入圖片和視頻
-            ],
-            handlers: {
-                image: this.imageHandler, // 自定義圖片上傳處理器
-            },
-            },
-        },
-        });
-    },
-    methods: {
-        async submitArticle() {
-        try {
-            const body = {
-            "postTitle":title.value,
-            "postContent":this.quill.root.innerHTML,
-            "userid":"1" //登入功能完成後從user取
-            };
-            const response = await axiosapi.post('/post/create',body);
-            alert(response.data.message);
-        } catch (error) {
-        alert(error);
+    setup(){
+        const quill = ref()
+        const title = ref()
+        const router = useRouter();
+
+        const toolbarOptions = [
+            [{ header: [1, 2, false] }], // 標題級別
+            ['bold', 'italic', 'underline'], // 字體樣式
+            [{ list: 'ordered' }, { list: 'bullet' }], // 列表
+            ['link', 'image', "video"], // 嵌入超連接和圖片和視頻
+        ]
+
+        const CheckLogin = async () => {
+            if (!isLoggedIn) {
+                router.push("/");
+                Swal.fire({
+                    title: '錯誤,請先登入再創建貼文',
+                    text: '是否跳到登入畫面',
+                    icon: 'error', // success, error, warning, info, question
+                    confirmButtonText: '是的',
+                    confirmButtonColor: 'blue',
+                    cancelButtonText: '取消',
+                    cancelButtonColor: 'red',
+                    showCancelButton: true,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        router.push("/secure/Login");
+                    }
+                })
+                return;
+            }
         }
-        },
+
+        onMounted(()=>{
+            CheckLogin()
+            // 初始化 Quill
+            quill.value = new Quill("#editor", {
+                theme: "snow",
+                modules: {
+                    toolbar: toolbarOptions 
+                },
+            });
+        })
+
+        const user = useUserStore()
+        const { member, isLoggedIn } = user
+        const submitArticle= async () => {
+            if(isLoggedIn){
+                try {
+                    const body = {
+                    "postTitle":title.value,
+                    "postContent":quill.value.root.innerHTML,
+                    "userid":member.userid,
+                    };
+                    const response = await axiosapi.post('/post/create',body);
+                    alert(response.data.message);
+                } catch (error) {
+                alert(error);
+                }
+            }else{
+                alert("請登入帳號");
+            }
+        }
+
+        return{
+            quill, title, submitArticle
+        }
     },
-    };
+
+}
 </script>
 
 <style>
-  .form-group {
-      margin-bottom: 15px;
-  }
-  .form-group label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: bold;
-  }
-  .form-group input {
-      width: 50%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1em;
-  }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .form-group input {
+        width: 50%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1em;
+    }
 </style>

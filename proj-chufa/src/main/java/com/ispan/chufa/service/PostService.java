@@ -168,10 +168,14 @@ public class PostService {
 		List<InteractionBean> existActions = interactionRepository.findByMemberAndPost(performer, postAction);
 
 		// 過濾出 LIKE 的互動
-		InteractionBean likeAction = existActions.stream().filter(action -> "LIKE".equals(action.getInteractionType()))
-				.findFirst().orElse(null);
+//		InteractionBean likeAction = existActions.stream().filter(action -> "LIKE".equals(action.getInteractionType()))
+//				.findFirst().orElse(null);
+		InteractionBean likeAction = existActions.stream()
+		        .filter(action -> interactionType.equals(action.getInteractionType()))
+		        .findFirst()
+		        .orElse(null);
 
-		if ("LIKE".equals(interactionType) && likeAction != null) {
+		if ("LIKE".equals(interactionType) || "COLLECT".equals(interactionType)&& likeAction != null) {
 			// 如果是點讚操作，檢查是否已有 LIKE 記錄
 			// 如果已存在 LIKE，則刪除該互動並返回取消狀態
 			if (likeAction != null) {

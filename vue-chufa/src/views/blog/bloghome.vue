@@ -109,6 +109,7 @@ export default {
       try {
     const payload = { userid: member.value.userid };
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
+    if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
       payload.repost = false;  // 不要 repost 的貼文
     } else if (filterType === 'sharedPosts') {

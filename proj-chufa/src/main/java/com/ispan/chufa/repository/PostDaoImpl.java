@@ -91,6 +91,17 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(likedByMePredicate);
 		}
 		
+		// 顯示用戶collect的貼文
+		if (!param.isNull("collectBy")) {
+			Long currentid = param.getLong("collectBy"); // 取得當前用戶 ID
+			// 過濾點贊用戶和互動類型爲 "LIKE"
+			Predicate likedByMePredicate = criteriaBuilder.and(
+					criteriaBuilder.equal(interactionJoin.get("member").get("userid"), currentid),
+					criteriaBuilder.equal(interactionJoin.get("interactionType"), "collect"));
+			predicates.add(likedByMePredicate);
+		}
+		
+
 	
 		
 

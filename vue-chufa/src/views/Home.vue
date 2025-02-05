@@ -20,8 +20,10 @@
             <div class="profile-picture-container">
               <router-link :to="`/blog/blogprofile/${post.member.userid}`">
                 <!-- 顯示發文者的頭像 -->
-                <img v-if="post.repostDTO?.member?.profilePicture" 
-                    :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
+                <!-- v-if="post.repostDTO?.member?.profilePicture"  -->
+                <!-- post.repostDTO.member.profilePicture -->
+                <img  v-if="post.member.profilePicture"
+                    :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
                     alt="Author's Profile Picture" 
                     class="profile-picture">
                 <div v-else class="default-profile"></div>
@@ -55,6 +57,12 @@
           <button @click="collectPost(post.postid)" class="action-btn collect-btn" @click.stop>❤️ 收藏</button>
         </div>
       </div>
+      <!-- 分頁控制 -->
+      <div class="pagination">
+        <button @click="prevPage" :disabled="currentPage === 1">上一頁</button>
+        <span>第 {{ currentPage }} 頁</span>
+        <button @click="nextPage" >下一頁</button>
+      </div>
     </div>
 </template>
 
@@ -72,6 +80,7 @@ export default {
     const posts = ref([]);
     const isAdmin = ref(false);
     const userId = ref(null);
+    const currentPage = ref(1); // 當前頁數
 
 
     const navigateToDetail = (postid) => {
@@ -108,6 +117,7 @@ export default {
         const response = await axios.post('/api/posts/post', {
           "sortByLikes": true,
           "repost":true,
+          "page": currentPage.value, // 添加分頁參數
         }, {
           headers: {
             'Content-Type': 'application/json',
@@ -117,11 +127,26 @@ export default {
         if (response.data.postdto && response.data.postdto.length > 0) {
           posts.value = response.data.postdto.filter(post => !post.repost && post.repostDTO === null);
         } else {
-          Swal.fire('沒有貼文', 'no post。', 'info');
+          currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
+          Swal.fire('已經到底啦!', 'no post。', 'info');
         }
       } catch (error) {
         console.error('Fetch posts failed:', error);
         Swal.fire('錯誤', '無法取得貼文', 'error');
+      }
+    };
+    
+
+    //分頁
+    const nextPage = () => {
+        currentPage.value++;
+        fetchPosts();
+    };
+
+    const prevPage = () => {
+      if (currentPage.value > 1) {
+        currentPage.value--;
+        fetchPosts();
       }
     };
 
@@ -175,6 +200,33 @@ export default {
       }
     };
 
+
+    const collectPost = async (postid) => {
+      try {
+        const data = {
+          postid: postid,
+          userid: member.value.userid,
+          interactionType: "COLLECT",
+        };
+
+        const response = await axios.post('/api/posts/insertinteraction', data, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.data.success) {
+          await fetchPosts();
+        } else {
+          Swal.fire('錯誤', '點讚失敗！', 'error');
+        }
+      } catch (error) {
+        console.error('點讚請求失敗:', error);
+        Swal.fire('錯誤', '無法執行點讚操作', 'error');
+      }
+    };
+
+
     onMounted(async () => {
       await fetchPosts();
       await fetchProfile();
@@ -186,9 +238,13 @@ export default {
       isAdmin,
       formatDate,
       likePost,
+      collectPost,
       repostPost,
       posts,
       navigateToDetail,
+      currentPage,
+      nextPage,
+      prevPage,
     };
   }
 };
@@ -344,4 +400,39 @@ export default {
   height: 30px;
   object-fit: cover;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.pagination button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 0 8px;
+  transition: background 0.3s;
+}
+
+.pagination button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.pagination span {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+
 </style>

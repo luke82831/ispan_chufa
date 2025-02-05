@@ -3,7 +3,7 @@
         <div v-if="member" class="profile-container">
             <h2 class="section-title">會員資料</h2>
             <div class="profile-details">
-            <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" />
+            <img :src="'data:image/jpeg;base64,' + member.profilePicture" alt="Profile Picture" v-if="member.profilePicture" class="profile-picture" />
             <div class="info">
                 <p><strong>姓名:</strong> {{ member.name }}</p>
                 <p><strong>Email:</strong> {{ member.email }}</p>
@@ -60,20 +60,18 @@
     
         const fetchProfile = async () => {
             try {
-                const response = await axios.get('/ajax/secure/profile', {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-                });
-                if (response.data.success) {
-                member.value = response.data.user || {};
-                isAdmin.value = response.data.user.role === 'ADMIN';
-                } else {
-                Swal.fire('錯誤', response.data.message, 'error');
+                const response = await axios.get(`/api/posts/members/${bloghomeid}`);
+
+                if (response.data) {
+                    member.value = response.data; // 存储用户资料
+                    } else {
+                    Swal.fire('沒有用戶資料', '無法獲取該用戶的資料', 'info');
+                    }
+                } catch (error) {
+                    console.error('Fetch user profile failed:', error);
+                    Swal.fire('錯誤', '無法獲取用戶資料', 'error');
                 }
-                profileLoaded.value = true;
-            } catch (error) {
-                console.error('Fetch profile failed:', error);
-                Swal.fire('錯誤', '無法獲取會員資料', 'error');
-            }
+            
         };
     
         const fetchPosts = async () => {

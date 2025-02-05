@@ -14,6 +14,7 @@
     import Swal from "sweetalert2";
     import eventBus from '@/eventBus';
 
+    import DOMPurify from "dompurify" // 用來過濾使用者輸入的資料
     import { useUserStore } from '@/stores/user'
     const user = useUserStore()
     const { member, isLoggedIn } = user
@@ -46,10 +47,11 @@
     const outputComment = async () => {
         if(isLoggedIn){
             console.log("送出Root留言")
+            const safeHTML = ref(DOMPurify.sanitize(comment.value))  // 过滤 HTML
             const body = {
                 "postId":postid.value,
                 "userId":member.userid,
-                "content":comment.value,
+                "content":`${safeHTML.value}`,
                 "parentId":""
             }
             const response =await axiosapi.post(`/comment/create`,body);

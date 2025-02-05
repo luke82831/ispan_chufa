@@ -3,11 +3,13 @@
         <button v-show="haveReply" @click="openReply">{{lookReply}}{{ dataLength }}則回覆</button>
         <div v-show="lookReply=='▼'" class="Reply">
             <div v-for="comment in replyData">
-                <h3>{{comment.memberBean.name}}</h3>
-                <p>{{comment.content}}</p>
-                <p v-if="comment.commentUpdatedAt==null">創建留言時間:{{comment.commentCreatedAt}}</p>
-                <p v-else>更新留言時間:{{comment.commentCreatedAt}}</p>
-                <CommentFunction :parentId="comment.parentId" :replyUser="comment.memberBean"></CommentFunction>
+                <div :id="`commentId:${comment.commentId}`">
+                    <h3>{{comment.memberBean.name}}</h3>
+                    <div v-html="comment.content"></div>
+                    <p v-if="comment.commentUpdatedAt==null">創建留言時間:{{comment.commentCreatedAt}}</p>
+                    <p v-else>更新留言時間:{{comment.commentCreatedAt}}</p>
+                    <CommentFunction :parentId="comment.parentId" :replyUser="comment.memberBean" :replyCommentId="comment.commentId"></CommentFunction>
+                </div>
             </div>
         </div>
     </div>
@@ -52,6 +54,7 @@
             haveReply.value = response.data.successs
             replyData.value = response.data.list
             dataLength.value = replyData.value.length
+
         }
     }
     

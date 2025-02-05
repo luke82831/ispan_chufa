@@ -8,11 +8,13 @@
 
 </template>
     
-<script>
+<script setup>
     import axiosapi from '@/plugins/axios.js';
-    import { ref, onMounted } from 'vue';
+    import { ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import Swal from "sweetalert2";
+    
+    import DOMPurify from "dompurify" // 用來過濾使用者輸入的資料
 
     import eventBus from '@/eventBus';
 
@@ -20,20 +22,10 @@
     const user = useUserStore()
     const { member, isLoggedIn } = user
 
-    export default {
-        props:[
-            'parentId',
-            'replyUser',
-        ],
-        setup(props){
+    const props = defineProps(['parentId','replyUser','replyCommentId'])
             const route = useRoute();
             const postid = ref(route.params.postid); // 取得動態路由參數
 
-            onMounted(()=>{
-                if(props.replyUser!=null){
-                    comment.value = `@${props.replyUser.name}：`
-                }
-            })
             const comment = ref()
             const replyInput = ref(false)
 
@@ -72,10 +64,17 @@
             const outputReply = async () => {
                 if(isLoggedIn){
                     console.log("送出Reply留言")
+                    const replyUser = ref()
+                    const safeHTML = ref(DOMPurify.sanitize(comment.value))  // 过滤 HTML
+
+                    if(props.replyUser!=null){ // 如果是從回復來回覆的話 前面會加超連接
+                        replyUser.value = `<a href="#commentId:${props.replyCommentId}">@${props.replyUser.name}:</a>`
+                    }
+
                     const body = {
                         "postId":postid.value,
                         "userId":member.userid,
-                        "content":comment.value,
+                        "content":`${replyUser.value}`+`${safeHTML.value}`,
                         "parentId":`${props.parentId}`
                     }
                     console.log(body)
@@ -92,13 +91,6 @@
                     alert("請登入帳號");
                 }
             }
-
-            return{
-                comment, replyInput,
-                reply, outputReply,
-            }
-        }
-    }
     
 </script>
     

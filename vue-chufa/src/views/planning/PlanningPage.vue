@@ -66,11 +66,14 @@ const addToItinerary = () => {
     return;
   }
 
-  const itineraryForSelectedDay = itineraryStore.getItineraryForDay(selectedDate);
+  const itineraryForSelectedDay =
+    itineraryStore.getItineraryForDay(selectedDate);
   const newIndex = itineraryForSelectedDay.length;
 
   itineraryStore.addPlaceToDay(selectedDate, placeDetails.value);
-  console.log(`📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`);
+  console.log(
+    `📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`
+  );
 
   if (newIndex > 0) {
     const previousPlace = itineraryForSelectedDay[newIndex - 1].location;
@@ -95,12 +98,11 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* 防止整個頁面滾動 */
 }
 
 .container {
   display: flex;
-  height: calc(100vh - 60px); /* 填滿視窗高度，扣除導覽列 60px */
+  height: calc(100vh - 80px); /* 填滿視窗高度，扣除導覽列 60px */
   width: 100%; /* 填滿視窗寬度 */
   margin: 0;
   padding: 0;
@@ -164,7 +166,6 @@ body {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 20px; /* 讓按鈕與底部留出空間 */
 }
 
 /* 按鈕樣式 */

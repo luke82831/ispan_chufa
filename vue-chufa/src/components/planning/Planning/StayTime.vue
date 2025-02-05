@@ -10,7 +10,7 @@
         <strong>{{ place.displayName }}</strong>
         <p>{{ place.formattedAddress }}</p>
         <p class="text-gray-600">
-          🕒 {{ place.startTime }} - {{ place.endTime }}
+          🕒 {{ formatTime(place.startTime) }} - {{ formatTime(place.endTime) }}
         </p>
       </li>
     </ul>
@@ -18,46 +18,54 @@
 </template>
 
 <script setup>
-import { computed, watch, ref } from "vue";
+import { computed } from "vue";
+import { useItineraryStore } from "@/stores/ItineraryStore";
+import { usePlaceStore } from "@/stores/PlaceStore";
 
-// Props 接收來自 `planningday.vue` 的資料
 const props = defineProps({
-  departureTime: String,
-  itinerary: Array,
+  departureTime: String, // "HH:MM" 格式
+  itinerary: Array, // 當天行程列表
+  stayDurations: Object, // 每個地點的停留時間
 });
 
-// 計算後的行程時間
-const computedItinerary = ref([]);
+const placeStore = usePlaceStore();
 
-// 計算每個地點的時間
-const calculateTimes = () => {
-  let currentTime = props.departureTime; // 從出發時間開始
-  computedItinerary.value = props.itinerary.map((place, index) => {
-    const startTime = currentTime;
+// 計算包含時間資訊的行程
+const computedItinerary = computed(() => {
+  let currentTime = new Date(
+    Date.UTC(2023, 0, 1, ...props.departureTime.split(":"))
+  );
+  let itineraryWithTimes = [];
 
-    // 計算結束時間 (開始時間 + 停留時間)
-    const endTime = addMinutes(startTime, place.stayDuration);
+  props.itinerary.forEach((place, index) => {
+    let stayTime = props.stayDurations[place.id] || 0;
+    let travelTime = 0;
 
-    // 計算下一個地點的開始時間 (本地點結束時間 + 行車時間)
-    currentTime = addMinutes(endTime, place.routeDuration);
+    if (index > 0) {
+      let prevPlaceId = props.itinerary[index - 1].id;
+      travelTime = placeStore.routePairs[prevPlaceId]?.[place.id] || 30; // 預設30分鐘
+    }
 
-    return { ...place, startTime, endTime };
+    // 計算到達與離開時間
+    let startTime = new Date(currentTime);
+    currentTime.setMinutes(currentTime.getMinutes() + stayTime);
+    let endTime = new Date(currentTime);
+
+    itineraryWithTimes.push({
+      ...place,
+      startTime,
+      endTime,
+    });
+
+    // 更新當前時間，加上行車時間
+    currentTime.setMinutes(currentTime.getMinutes() + travelTime);
   });
-};
 
-// 監聽 props 變化，自動重新計算時間
-watch(() => [props.departureTime, props.itinerary], calculateTimes, {
-  deep: true,
-  immediate: true,
+  return itineraryWithTimes;
 });
 
-// **時間計算函式**
-const addMinutes = (time, minutes) => {
-  if (!time) return "";
-  const [hours, mins] = time.split(":").map(Number);
-  const date = new Date();
-  date.setHours(hours, mins);
-  date.setMinutes(date.getMinutes() + minutes);
-  return date.toTimeString().slice(0, 5);
+// 格式化時間 (HH:MM)
+const formatTime = (date) => {
+  return date.toISOString().substr(11, 5); // 轉成 "HH:MM"
 };
 </script>

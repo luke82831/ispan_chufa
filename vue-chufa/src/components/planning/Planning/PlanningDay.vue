@@ -47,7 +47,8 @@
                   @click.prevent="editStayTime(element)"
                   class="text-blue-500 underline"
                 >
-                  {{ element.stayDuration }} 分
+                  {{ itineraryStore.getStayDuration(selectedDate, element.id) }}
+                  分
                 </a>
 
                 <!-- 編輯模式 -->
@@ -89,12 +90,13 @@
     <StayTime
       :departureTime="departureTime"
       :itinerary="itineraryForSelectedDay"
+      :stayDurations="itineraryStore.stayDurations[selectedDate] || {}"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
 import RouteTime from "./RouteTime.vue";
@@ -108,6 +110,7 @@ const props = defineProps({
 
 const itineraryStore = useItineraryStore();
 const placeStore = usePlaceStore();
+const departureTime = ref("08:00"); // 預設早上 08:00
 
 const itineraryForSelectedDay = computed({
   get: () => itineraryStore.getItineraryForDay(props.selectedDate),
@@ -116,19 +119,15 @@ const itineraryForSelectedDay = computed({
   },
 });
 
-// **處理地點刪除後更新 routePairs**
+// **刪除地點並更新 routePairs**
 const deletePlace = (index) => {
   console.log(`🗑 刪除行程: ${index}`);
-
   itineraryStore.removePlaceFromItinerary(props.selectedDate, index);
-
-  // **確保刪除後的 routePairs 正確更新**
   updateRoutePairs();
 };
 
-// **更新地點順序時，更新 placeStore.routePairs**
+// **拖曳地點後，更新 routePairs 和停留時間**
 const handleDragEnd = () => {
-  // console.log("🛠 拖曳結束，更新 placeStore.routePairs");
   updateRoutePairs();
 };
 
@@ -142,48 +141,34 @@ const updateRoutePairs = () => {
 
     placeStore.updateRoutePair(props.selectedDate, i, origin, destination);
   }
+};
 
-  // console.log(
-  //   "🔄 更新後的 routePairs:",
-  //   JSON.stringify(placeStore.routePairs, null, 2)
-  // );
+// **編輯停留時間**
+const editStayTime = (place) => {
+  place.isEditingStay = true;
+  place.tempStayDuration = itineraryStore.getStayDuration(
+    props.selectedDate,
+    place.id
+  );
+};
+
+// **儲存新的停留時間**
+const saveStayTime = (place) => {
+  const newDuration = Number(place.tempStayDuration);
+  itineraryStore.setStayDuration(props.selectedDate, place.id, newDuration);
+  place.isEditingStay = false;
 };
 
 // **監聽 routePairs 的變化，確保時間重新計算**
 watch(
   () => placeStore.routePairs[props.selectedDate],
   (newVal) => {
-    // console.log(
-    //   `🔍 監聽到 routePairs 變更:`,
-    //   JSON.stringify(placeStore.routePairs, null, 2)
-    // );
     if (newVal) {
       console.log("✅ 觸發計算，開始更新路徑時間");
-    } else {
-      // console.warn("⚠️ newVal 為空，未能觸發計算");
     }
   },
   { immediate: true, deep: true }
 );
-
-// 時間相關 //
-
-// **進入編輯模式**
-const editStayTime = (place) => {
-  place.isEditingStay = true; // 開啟編輯模式
-  place.tempStayDuration = place.stayDuration; // 暫存原本的值
-};
-
-// **儲存新值**
-const saveStayTime = (place) => {
-  place.stayDuration = Number(place.tempStayDuration); // 更新值
-  place.isEditingStay = false; // 退出編輯模式
-};
-
-// **列印所有經緯度資料到 Console**
-// const logRouteCoordinates = () => {
-//   console.log("📍 當前行程經緯度：", itineraryForSelectedDay.value);
-// };
 </script>
 
 <style scoped>

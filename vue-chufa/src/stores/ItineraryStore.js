@@ -10,6 +10,7 @@ export const useItineraryStore = defineStore("itinerary", {
     coverPhoto: null, // 存封面圖片
     itineraryDates: {}, // 每一天的行程資料，鍵是日期，值是行程細節
     selectedDate: "", // 儲存選擇的日期
+    stayDurations: {}, // { date: { placeId: duration } }
   }),
 
   actions: {
@@ -69,6 +70,15 @@ export const useItineraryStore = defineStore("itinerary", {
         this.routeTimes[selectedDate] = [];
       }
       this.routeTimes[selectedDate] = routeTimes;
+    },
+    setStayDuration(date, placeId, duration) {
+      if (!this.stayDurations[date]) {
+        this.stayDurations[date] = {};
+      }
+      this.stayDurations[date][placeId] = duration;
+    },
+    getStayDuration(date, placeId) {
+      return this.stayDurations[date]?.[placeId] || 0;
     },
   },
 });

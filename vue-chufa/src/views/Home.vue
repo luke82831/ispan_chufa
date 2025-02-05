@@ -4,14 +4,12 @@
       v-for="post in posts"
       :key="post.postid"
       class="post-item"
-      :class="{ repost: post.repost }"
-      @click="navigateToDetail(post.postid)"
+      @click="navigateToDetail(post.postid, $event)"
     >
       <!-- REPOST 版型處理 -->
       <div v-if="post.repost" class="repost-header">
         <div class="interaction-info">
           <div class="repost-profile-container">
-            <!-- 顯示轉發者的頭像 (較小) -->
             <img
               v-if="post.member?.profilePicture"
               :src="'data:image/jpeg;base64,' + post.member.profilePicture"
@@ -29,9 +27,6 @@
         <div class="author-header">
           <div class="profile-picture-container">
             <router-link :to="`/blog/blogprofile/${post.member.userid}`">
-              <!-- 顯示發文者的頭像 -->
-              <!-- v-if="post.repostDTO?.member?.profilePicture"  -->
-              <!-- post.repostDTO.member.profilePicture -->
               <img
                 v-if="post.member.profilePicture"
                 :src="'data:image/jpeg;base64,' + post.member.profilePicture"
@@ -42,45 +37,30 @@
             </router-link>
           </div>
           <div class="author-name" @click.stop>
-            <strong
-              >{{
-                post.repostDTO
-                  ? post.repostDTO.member.nickname
-                  : post.member.nickname
-              }}
-              ({{ post.repostDTO?.member?.name || post.member.name }})</strong
-            >
+            <strong>
+              {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
+              ({{ post.repostDTO?.member?.name || post.member.name }})
+            </strong>
           </div>
         </div>
         <h3>
-          {{
-            post.repostDTO
-              ? post.repostDTO.postTitle
-              : post.postTitle || "無標題"
-          }}
+          {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
         </h3>
       </div>
 
       <p class="post-content">{{ post.postContent }}</p>
-      <a
-        v-if="post.postLink"
-        :href="post.postLink"
-        target="_blank"
-        class="read-more"
+      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more"
         >閱讀更多</a
       >
       <div class="post-meta">
         <p>
           發佈時間:
-          {{
-            formatDate(post.repost ? post.repostDTO.postTime : post.postTime)
-          }}
+          {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
         </p>
         <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
         <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
       </div>
 
-      <!-- 轉發次數和點讚數放到右下角 -->
       <div class="post-stats">
         <p>轉發次數: {{ post.repostCount }}</p>
         <p>點讚數: {{ post.likeCount }}</p>
@@ -88,25 +68,13 @@
 
       <!-- 按鈕區域 -->
       <div class="post-actions" @click.stop>
-        <button
-          @click="likePost(post.postid)"
-          class="action-btn like-btn"
-          @click.stop
-        >
+        <button @click.stop="likePost(post.postid)" class="action-btn like-btn">
           👍 點讚
         </button>
-        <button
-          @click="repostPost(post.postid)"
-          class="action-btn repost-btn"
-          @click.stop
-        >
+        <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
           🔁 轉發
         </button>
-        <button
-          @click="collectPost(post.postid)"
-          class="action-btn collect-btn"
-          @click.stop
-        >
+        <button @click.stop="collectPost(post.postid)" class="action-btn collect-btn">
           ❤️ 收藏
         </button>
       </div>
@@ -136,7 +104,13 @@ export default {
     const userId = ref(null);
     const currentPage = ref(1); // 當前頁數
 
-    const navigateToDetail = (postid) => {
+    const navigateToDetail = (postid, event) => {
+      const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+      for (let selector of excludedElements) {
+        if (event.target.closest(selector)) {
+          return; // 如果點擊的是按鈕、連結，就不觸發跳轉
+        }
+      }
       router.push(`/blog/find/${postid}`);
     };
 
@@ -241,15 +215,11 @@ export default {
           interactionType: "LIKE",
         };
 
-        const response = await axios.post(
-          "/api/posts/insertinteraction",
-          data,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.post("/api/posts/insertinteraction", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.data.success) {
           await fetchPosts();
@@ -270,15 +240,11 @@ export default {
           interactionType: "COLLECT",
         };
 
-        const response = await axios.post(
-          "/api/posts/insertinteraction",
-          data,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axios.post("/api/posts/insertinteraction", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (response.data.success) {
           await fetchPosts();
@@ -320,7 +286,7 @@ export default {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 500px;
   padding: 20px;
   margin: 0 auto;
 }
@@ -336,6 +302,7 @@ export default {
   width: 100%;
   box-sizing: border-box;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .post-item:hover {

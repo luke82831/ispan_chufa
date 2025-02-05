@@ -66,14 +66,11 @@ const addToItinerary = () => {
     return;
   }
 
-  const itineraryForSelectedDay =
-    itineraryStore.getItineraryForDay(selectedDate);
+  const itineraryForSelectedDay = itineraryStore.getItineraryForDay(selectedDate);
   const newIndex = itineraryForSelectedDay.length;
 
   itineraryStore.addPlaceToDay(selectedDate, placeDetails.value);
-  console.log(
-    `📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`
-  );
+  console.log(`📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`);
 
   if (newIndex > 0) {
     const previousPlace = itineraryForSelectedDay[newIndex - 1].location;

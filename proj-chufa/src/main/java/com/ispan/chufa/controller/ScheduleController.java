@@ -36,8 +36,8 @@ public class ScheduleController {
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
-    
     // POST: 創建行程資料
+
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
             @RequestParam("tripName") String tripName,
@@ -60,10 +60,9 @@ public class ScheduleController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-         // 將 MultipartFile 轉換為 byte[]
+            // 將 MultipartFile 轉換為 byte[]
             byte[] coverPhotoBytes = coverPhoto.getBytes();
-            
-            
+
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
@@ -71,7 +70,7 @@ public class ScheduleController {
             schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
-         // 儲存行程資料
+            // 儲存行程資料
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
@@ -89,7 +88,7 @@ public class ScheduleController {
         List<ScheduleBean> schedules = scheduleService.findAllSchedules();
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
-    
+
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")
     public ResponseEntity<ScheduleBean> getScheduleByTripId(@PathVariable Long tripId) {

@@ -90,9 +90,71 @@ const routes = [
     props: true,
   },
   {
+    path: "/blog/followlist/:id",
+    name: "followlist",
+    component: followlist,
+    props: true,
+  },
+  {
     path: "/blog/create",
     name: "BlogCreate",
-    component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
+    component: () => import("@/views/blog/blogCreate.vue"), // 指向 post 組件
+    meta: { requiresAuth: true }, //需要登入才可使用
+  },
+  {
+    path: "/blog/find/:postid",
+    name: "BlogBrowse",
+    component: () => import("@/views/blog/blogPostBrowse.vue"), // 指向 post 組件
+  },
+  {
+    path: "/blog/bloghouse",
+    name: "bloghouse",
+    component: () => import("@/views/blog/bloghouse.vue"), // 指向 bloghouse 組件
+  },
+  {
+    path: "/blog/bloghome",
+    name: "bloghome",
+    component: () => import("@/views/blog/bloghome.vue"), // 指向 bloghouse 組件
+  },
+  //路由
+  {
+    path: '/post/:id',
+    name: 'PostDetail',
+    component: PostDetail,
+    props: true,
+  },
+  {
+    path: "/blog/followblog",
+    name: "followblog", // 路由名稱
+    component: () => import("@/views/blog/followblog.vue"), // 指向 Role 組件
+  },
+  {
+    path: '/blog/blogprofile/:bloghomeid',  // 動態路由
+    name: 'blogprofile',
+    component: blogprofile,  // 這是顯示用戶資料的頁面
+    props: true,  // 這樣可以讓路由的參數傳遞給元件
+  },
+  {
+    path: '/blog/followlist/:followid',  // 動態路由
+    name: 'followlist',
+    component: followlist,  // 這是顯示用戶資料的頁面
+    props: true,  // 這樣可以讓路由的參數傳遞給元件
+  },
+  {
+    path: '/search-results',
+    name: 'SearchResults',
+    component: searchresult,
+    props: (route) => ({ query: route.query }), // 将查询参数作为 props 传递
+  },
+  {
+    path: "/secure/Profile",
+    name: "Profile",
+    component: () => import("@/views/secure/Profile.vue"), // 指向 Profile 組件
+  },
+  {
+    path: "/secure/Register",
+    name: "Register",
+    component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
   },
   {
     path: "/search-results",

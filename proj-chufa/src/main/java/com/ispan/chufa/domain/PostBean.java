@@ -7,7 +7,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -66,8 +65,6 @@ public class PostBean {
 	@ManyToOne
 	@JoinColumn(name = "forwarded_from_id")
 	private PostBean forwardedFrom;
-	
-	
 
 	public PostBean getForwardedFrom() {
 		return forwardedFrom;

@@ -156,7 +156,7 @@ export default {
           isAdmin.value = response.data.user.role === "ADMIN";
           userId.value = member.value.userid;
         } else {
-          Swal.fire("味登入", "登入體驗更好");
+          // Swal.fire("味登入", "登入體驗更好");
         }
         profileLoaded.value = true;
       } catch (error) {

@@ -1,6 +1,15 @@
 <template>
   <div class="navbar">
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
+    <div class="search-bar">
+    <input
+      v-model="searchTitle"
+      type="text"
+      placeholder="搜尋文章..."
+      class="p-2 border rounded w-full"
+    />
+    <button @click="navigateToSearch" class="p-2 bg-blue-500 text-white rounded">搜索</button>
+  </div>
     <div class="nav-links">
       <RouterLink to="/secure/Login" class="nav-link">登入功能</RouterLink>
       <RouterLink to="/secure/Profile" class="nav-link">會員資料</RouterLink>
@@ -17,20 +26,39 @@
     >
   </div>
   <RouterView></RouterView>
+
 </template>
 
+
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
-import { ref, watch } from "vue";
+import { RouterLink, RouterView,useRouter } from "vue-router";
+import { ref, watch,onMounted } from "vue";
 import { useRoute } from "vue-router";
+
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 // 使用 ref 來管理按鈕顯示狀態
 const isPlanningStarted = ref(false);
 const route = useRoute();
 
+
 // 點擊後隱藏「開始規劃」按鈕
 const hidePlanningButton = () => {
   isPlanningStarted.value = true;
+};
+
+
+
+
+// 导航到搜索结果页面
+const searchTitle = ref('');
+const router = useRouter();
+
+const navigateToSearch = () => {
+  if (searchTitle.value.trim()) {
+    router.push({ path: '/search-results', query: { title: searchTitle.value } });
+  }
 };
 
 // 監聽路由變化，當路由變為首頁時，顯示按鈕
@@ -42,6 +70,8 @@ watch(
     }
   }
 );
+
+//onMounted(fetchPosts);
 </script>
 
 <style>
@@ -109,5 +139,26 @@ watch(
 /* 滑鼠懸停時的樣式 */
 .nav-link:hover {
   color: #ffd700; /* 滑鼠懸停時改變文字顏色 */
+}
+
+/* search bar */
+.search-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  padding: 0.5rem 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 </style>

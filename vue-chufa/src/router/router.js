@@ -5,6 +5,7 @@ import Home from "@/views/Home.vue";
 import PostDetail from "@/views/blog/PostDetail.vue";
 import blogprofile from "@/views/blog/blogprofile.vue";
 import followlist from "@/views/blog/followlist.vue";
+import searchresult from "@/views/blog/searchresult.vue";
 
 
 const routes = [
@@ -70,6 +71,12 @@ const routes = [
         name: 'followlist',
         component: followlist,  // 這是顯示用戶資料的頁面
         props: true,  // 這樣可以讓路由的參數傳遞給元件
+    },
+    {
+        path: '/search-results',
+        name: 'SearchResults',
+        component:searchresult,
+        props: (route) => ({ query: route.query }), // 将查询参数作为 props 传递
     },
 
 

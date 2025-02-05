@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 保留原有樣式 */
+        body {
+            background: url('https://source.unsplash.com/1600x900/?city,technology') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            padding: 40px;
+        }
+
+        .card-header {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff8c00;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-sign-in-alt"></i> 登入
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="text" name="email" id="email" class="form-control" placeholder="請輸入電子信箱">
+                <small id="emailError" class="error-message" style="display: none;"></small>
+            </div>
+            <div class="form-group">
+                <label for="password">密碼:</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="請輸入密碼">
+                <small id="passwordError" class="error-message" style="display: none;"></small>
+            </div>
+            <div class="form-group">
+                <small id="serverError" class="error-message" style="display: none;"></small>
+                <button type="button" id="loginButton" class="btn btn-primary">登入</button>
+            </div>
+        </form>
+        <div class="text-center">
+            <a href="/secure/register">還沒有帳號？ 註冊</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.getElementById("loginButton").addEventListener("click", function () {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const emailError = document.getElementById("emailError");
+            const passwordError = document.getElementById("passwordError");
+            const serverError = document.getElementById("serverError");
+
+            // 清除舊的錯誤訊息
+            emailError.style.display = "none";
+            passwordError.style.display = "none";
+            serverError.style.display = "none";
+
+            // 表單驗證
+            let valid = true;
+            if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
+                emailError.style.display = "block";
+                emailError.innerText = "無效的電子郵件地址，請重新輸入。";
+                valid = false;
+            }
+            if (password.length < 6) {
+                passwordError.style.display = "block";
+                passwordError.innerText = "密碼錯誤，請重新輸入。";
+                valid = false;
+            }
+
+            if (!valid) {
+                return;
+            }
+
+            // 使用 AJAX 發送請求
+            fetch('/ajax/secure/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("登入成功，歡迎回來！");
+                        window.location.href = "/secure/profile"; // 登入成功後跳轉
+                    } else {
+                        serverError.style.display = "block";
+                        serverError.innerText = data.message; // 顯示後端返回的錯誤訊息
+                    }
+                })
+                .catch(error => {
+                    serverError.style.display = "block";
+                    serverError.innerText = "伺服器發生錯誤，請稍後再試！";
+                });
+        });
+    </script>
+</body>
+
+</html>

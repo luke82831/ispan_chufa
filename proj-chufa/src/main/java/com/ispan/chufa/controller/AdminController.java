@@ -35,7 +35,7 @@ public class AdminController {
 
     // 處理表單送出，修改會員角色
     @PostMapping("/members/{userid}/updateRole")
-    public String updateMemberRole(@PathVariable Long userid, @RequestParam("role") MemberBean.Role role) {
+    public String updateMemberRole(@PathVariable Long userid, @RequestParam MemberBean.Role role) {
         MemberBean member = memberService.findById(userid);
         if (member != null) {
             member.setRole(role);

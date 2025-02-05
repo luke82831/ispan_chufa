@@ -6,6 +6,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -145,7 +146,7 @@ public class LoginAjaxController {
 
                 responseJson.put("success", true);
                 responseJson.put("user", new JSONObject()
-                		.put("userid", member.getUserid())
+                        .put("userid", member.getUserid())
                         .put("name", member.getName())
                         .put("email", member.getEmail())
                         .put("nickname", member.getNickname())
@@ -155,7 +156,8 @@ public class LoginAjaxController {
                         .put("phone_number", member.getPhoneNumber())
                         .put("username", member.getUsername())
                         .put("gender", member.getGender())
-                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"));
+                        .put("role", member.getRole() != null ? member.getRole().toString() : "USER"))
+                        .put("socialLinks", member.getSocialLinks());
             } else {
                 responseJson.put("success", false);
                 responseJson.put("message", "會員資料未找到");
@@ -204,6 +206,11 @@ public class LoginAjaxController {
             existingMember.setBirth(updatedMember.getBirth());
             existingMember.setBio(updatedMember.getBio());
 
+            // 新增：更新社群連結，如果有傳來 socialLinks 則更新
+            if (updatedMember.getSocialLinks() != null) {
+                existingMember.setSocialLinks(updatedMember.getSocialLinks());
+            }
+
             memberService.saveMember(existingMember);
 
             responseJson.put("success", true);
@@ -216,6 +223,7 @@ public class LoginAjaxController {
                     .put("gender", existingMember.getGender())
                     .put("birth", existingMember.getBirth())
                     .put("bio", existingMember.getBio()))
+                    .put("socialLinks", existingMember.getSocialLinks()) // 回傳更新後的社群連結
                     .put("role", existingMember.getRole().toString());
 
             System.out.println("Response JSON: " + responseJson.toString());
@@ -237,8 +245,8 @@ public class LoginAjaxController {
     // 處理圖片上傳
     @PostMapping("/upload-profile-picture")
     public ResponseEntity<?> uploadProfilePicture(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("email") String email) {
+            @RequestParam MultipartFile file,
+            @RequestParam String email) {
         JSONObject responseJson = new JSONObject();
 
         try {
@@ -391,7 +399,11 @@ public class LoginAjaxController {
     }
 
     @GetMapping("/members")
-    public ResponseEntity<String> getAllMembers(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<String> getPagedMembers(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(defaultValue = "0") int page, // 分頁參數：默認第 0 頁
+            @RequestParam(defaultValue = "10") int size // 分頁大小：默認每頁 10 筆)
+    ) {
         JSONObject responseJson = new JSONObject();
         try {
             // 1. 權限檢查（確定當前使用者是管理員）
@@ -416,11 +428,19 @@ public class LoginAjaxController {
             }
 
             // 2. 獲取全部會員
-            List<MemberBean> allMembers = memberService.findAllMembers();
+            // List<MemberBean> allMembers = memberService.findAllMembers();
+
+            // 防範無效參數
+            if (page < 0 || size <= 0) {
+                responseJson.put("success", false);
+                responseJson.put("message", "分頁參數無效");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+            Page<MemberBean> memberPage = memberService.getMembersWithPagination(page, size);
 
             // 3. 把會員資料轉成 JSON
             JSONArray usersArray = new JSONArray();
-            for (MemberBean mb : allMembers) {
+            for (MemberBean mb : memberPage.getContent()) {
                 JSONObject userJson = new JSONObject();
                 userJson.put("userid", mb.getUserid());
                 userJson.put("name", mb.getName());
@@ -432,6 +452,9 @@ public class LoginAjaxController {
 
             responseJson.put("success", true);
             responseJson.put("users", usersArray);
+            responseJson.put("currentPage", memberPage.getNumber());
+            responseJson.put("totalPages", memberPage.getTotalPages());
+            responseJson.put("totalElements", memberPage.getTotalElements());
 
             return ResponseEntity.ok(responseJson.toString());
         } catch (Exception e) {

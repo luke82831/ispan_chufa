@@ -1,61 +1,61 @@
 <template>
   <div  class="main-container">
-    <div v-for="post in posts" :key="post.postid" class="post-item" :class="{ 'repost': post.repost }">
-      <!-- REPOST 版型處理 -->
-      <div v-if="post.repost" class="repost-header">
-        <div class="interaction-info">
-          <div class="repost-profile-container">
-            <!-- 顯示轉發者的頭像 (較小) -->
-            <img v-if="post.member?.profilePicture" 
-                 :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
-                 alt="Interaction Profile Picture" 
-                 class="profile-picture small-profile">
-          </div>
-          <p class="interaction-name">{{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文</p>
-        </div>
-      </div>
-
-      <div class="author-info">
-        <div class="author-header">
-          <div class="profile-picture-container">
-            <router-link :to="`/blog/blogprofile/${post.member.userid}`">
-              <!-- 顯示發文者的頭像 -->
-              <img v-if="post.repostDTO?.member?.profilePicture" 
-                   :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
-                   alt="Author's Profile Picture" 
-                   class="profile-picture">
-              <div v-else class="default-profile"></div>
-            </router-link>
-          </div>
-          <div class="author-name">
-            <strong>{{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }} ({{ post.repostDTO?.member?.name || post.member.name }})</strong>
+      <div v-for="post in posts" :key="post.postid" class="post-item" :class="{ 'repost': post.repost }"   @click="navigateToDetail(post.postid)">
+        <!-- REPOST 版型處理 -->
+        <div v-if="post.repost" class="repost-header">
+          <div class="interaction-info">
+            <div class="repost-profile-container">
+              <!-- 顯示轉發者的頭像 (較小) -->
+              <img v-if="post.member?.profilePicture" 
+                  :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
+                  alt="Interaction Profile Picture" 
+                  class="profile-picture small-profile">
+            </div>
+            <p class="interaction-name">{{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文</p>
           </div>
         </div>
-        <h3>{{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || '無標題' }}</h3>
-      </div>
 
-      <p class="post-content">{{ post.postContent }}</p>
-      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more">閱讀更多</a>
-      <div class="post-meta">
-        <p>發佈時間: {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}</p>
-        <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-        <p>貼文類型: {{ post.repost ? 'REPOST' : '原創' }}</p>
-      </div>
+        <div class="author-info" @click.stop>
+          <div class="author-header">
+            <div class="profile-picture-container">
+              <router-link :to="`/blog/blogprofile/${post.member.userid}`">
+                <!-- 顯示發文者的頭像 -->
+                <img v-if="post.repostDTO?.member?.profilePicture" 
+                    :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
+                    alt="Author's Profile Picture" 
+                    class="profile-picture">
+                <div v-else class="default-profile"></div>
+              </router-link>
+            </div>
+          <div class="author-name" @click.stop>
+              <strong>{{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }} ({{ post.repostDTO?.member?.name || post.member.name }})</strong>
+          </div>
+          </div>
+          <h3>{{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || '無標題' }}</h3>
+        </div>
 
-      <!-- 轉發次數和點讚數放到右下角 -->
-      <div class="post-stats">
-        <p>轉發次數: {{ post.repostCount }}</p>
-        <p>點讚數: {{ post.likeCount }}</p>
-      </div>
+        <p class="post-content">{{ post.postContent }}</p>
+        <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more">閱讀更多</a>
+        <div class="post-meta">
+          <p>發佈時間: {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}</p>
+          <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
+          <p>貼文類型: {{ post.repost ? 'REPOST' : '原創' }}</p>
+        </div>
 
-      <!-- 按鈕區域 -->
-      <div class="post-actions">
-        <button @click="likePost(post.postid)" class="action-btn like-btn">👍 點讚</button>
-        <button @click="repostPost(post.postid)" class="action-btn repost-btn">🔁 轉發</button>
-        <button @click="collectPost(post.postid)" class="action-btn collect-btn">❤️ 收藏</button>
+        <!-- 轉發次數和點讚數放到右下角 -->
+        <div class="post-stats">
+          <p>轉發次數: {{ post.repostCount }}</p>
+          <p>點讚數: {{ post.likeCount }}</p>
+        </div>
+
+        <!-- 按鈕區域 -->
+        <div class="post-actions" @click.stop>
+          <button @click="likePost(post.postid)" class="action-btn like-btn" @click.stop>👍 點讚</button>
+          <button @click="repostPost(post.postid)" class="action-btn repost-btn" @click.stop>🔁 轉發</button>
+          <button @click="collectPost(post.postid)" class="action-btn collect-btn" @click.stop>❤️ 收藏</button>
+        </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -72,6 +72,11 @@ export default {
     const posts = ref([]);
     const isAdmin = ref(false);
     const userId = ref(null);
+
+
+    const navigateToDetail = (postid) => {
+      router.push(`/post/${postid}`);
+    };
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -102,6 +107,7 @@ export default {
       try {
         const response = await axios.post('/api/posts/post', {
           "sortByLikes": true,
+          "repost":true,
         }, {
           headers: {
             'Content-Type': 'application/json',
@@ -109,7 +115,7 @@ export default {
         });
 
         if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto;
+          posts.value = response.data.postdto.filter(post => !post.repost && post.repostDTO === null);
         } else {
           Swal.fire('沒有貼文', 'no post。', 'info');
         }
@@ -182,6 +188,7 @@ export default {
       likePost,
       repostPost,
       posts,
+      navigateToDetail,
     };
   }
 };

@@ -1,6 +1,7 @@
 package com.ispan.chufa.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -48,6 +49,7 @@ public class PlaceService {
  // 更新指定 ID 的 Place
     public PlaceBean updatePlace(Long id, PlaceBean placeBean) {
         return placeRepository.findById(id).map(place -> {
+            place.setGooglemapPlaceId(placeBean.getGooglemapPlaceId());
             place.setPlaceName(placeBean.getPlaceName());
             place.setPlaceAddress(placeBean.getPlaceAddress());
             place.setCity(placeBean.getCity());
@@ -66,7 +68,7 @@ public class PlaceService {
             place.setRating(placeBean.getRating());
             place.setWebsite(placeBean.getWebsite());
             place.setBookingUrl(placeBean.getBookingUrl());
-            place.setPrice(placeBean.getPrice());
+            place.setPriceLevel(placeBean.getPriceLevel());
             place.setPlaceName(placeBean.getPlaceName());
             place.setAccommodationType(placeBean.getAccommodationType());
             place.setReservation(placeBean.isReservation());
@@ -79,7 +81,7 @@ public class PlaceService {
     public boolean deletePlace(Long placeId) {
         // 確保該 Place 存在
         Optional<PlaceBean> placeOpt = placeRepository.findById(placeId);
-        if (!placeOpt.isPresent()) {
+        if (placeOpt.isEmpty()) {
             return false; // 若找不到該 Place
         }
 
@@ -111,5 +113,25 @@ public class PlaceService {
         placeRepository.deleteById(placeId);
 
         return true;  // 成功刪除
+    }
+
+	public PlaceBean findPlaceByAddress(String placeAddress) {
+        return placeRepository.findByPlaceAddress(placeAddress); // 呼叫 Repository 方法
+	}
+
+	public PlaceBean findPlaceByGooglemapPlaceId(String googlemapPlaceId) {
+        return placeRepository.findPlaceByGooglemapPlaceId(googlemapPlaceId); // 呼叫 Repository 方法
+	}
+
+	 // 保存 Place 詳細資訊的方法，接收名稱和圖片 URL 列表
+    public void savePlaceDetails(String name, List<String> photosUrls) {
+        PlaceBean place = new PlaceBean();
+        place.setPlaceName(name);
+
+        // 將照片 URL 列表轉換為 JSON 字串並儲存
+        place.setPhotos(photosUrls);
+
+        // 儲存到資料庫
+        placeRepository.save(place);
     }
 }

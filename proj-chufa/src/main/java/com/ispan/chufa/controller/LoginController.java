@@ -94,12 +94,12 @@ public class LoginController {
     // 處理會員資料更新
     @PostMapping("/secure/profile")
     public String updateProfile(
-            @RequestParam("name") String name,
-            @RequestParam("nickname") String nickname,
-            @RequestParam("phoneNumber") String phoneNumber,
-            @RequestParam("email") String email,
-            @RequestParam("gender") String gender,
-            @RequestParam(value = "bio", required = false) String bio,
+            @RequestParam String name,
+            @RequestParam String nickname,
+            @RequestParam String phoneNumber,
+            @RequestParam String email,
+            @RequestParam String gender,
+            @RequestParam(required = false) String bio,
             @RequestParam(value = "profilePicture", required = false) MultipartFile file,
             HttpSession session,
             Model model) {
@@ -152,12 +152,12 @@ public class LoginController {
     // 處理註冊表單提交
     @PostMapping("/secure/register")
     public String register(
-            @RequestParam("username") String username,
-            @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            @RequestParam("confirmPassword") String confirmPassword,
-            @RequestParam("name") String name,
-            @RequestParam("birth") String birth,
+            @RequestParam String username,
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam String confirmPassword,
+            @RequestParam String name,
+            @RequestParam String birth,
             Model model,
             Locale locale) {
         // 密碼驗證
@@ -193,7 +193,7 @@ public class LoginController {
 
     // 上傳頭像 (可有可無)
     @PostMapping("/{id}/upload-profile-picture")
-    public String uploadProfilePicture(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+    public String uploadProfilePicture(@PathVariable Long id, @RequestParam MultipartFile file) {
         try {
             memberService.saveProfilePicture(file, id);
             return "Profile picture uploaded successfully";

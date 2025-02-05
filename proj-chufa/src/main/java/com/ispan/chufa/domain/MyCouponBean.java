@@ -23,12 +23,11 @@ public class MyCouponBean {
     private Long myCouponId;
 
     @ManyToOne
-    @JsonIgnoreProperties("mycoupon")
+    @JsonIgnoreProperties("myCoupons")
     @JoinColumn(name = "fk_couponid", referencedColumnName = "couponId", nullable = true)
     private CouponBean couponBean; // FK_優惠券ID
 
     @ManyToOne
-    @JsonIgnoreProperties("mycoupon")
     @JoinColumn(name = "fk_userid", referencedColumnName = "userid", nullable = false)
     private MemberBean memberBean; // FK_使用者ID
 

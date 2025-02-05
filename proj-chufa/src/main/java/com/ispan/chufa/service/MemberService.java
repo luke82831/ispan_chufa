@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +80,10 @@ public class MemberService {
 	public MemberBean findById(Long userid) {
 		return memberRepository.findById(userid).orElse(null);
 	}
+	
+	public MemberBean getUserById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
 
 	public MemberBean login(String email, String password) {
 		if (email != null && email.length() != 0 && password != null && password.length() != 0) {
@@ -117,12 +124,6 @@ public class MemberService {
 	public boolean isEmailExists(String email) {
 		return memberRepository.existsByEmail(email);
 	}
-
-	// public void register(MemberBean member) {
-	//
-	// // 儲存會員資料
-	// memberRepository.save(member);
-	// }
 
 	public void saveMember(MemberBean memberBean) {
 		if (memberBean.getPassword() == null || memberBean.getPassword().length < 6) {
@@ -199,5 +200,13 @@ public class MemberService {
 			return false;
 		}
 	}
+	public MemberBean getMemberById(Long userId) {
+		return memberRepository.findById(userId).orElse(null);
+	}
 
+	// 分頁方法
+	public Page<MemberBean> getMembersWithPagination(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return memberRepository.findAll(pageable);
+	}
 }

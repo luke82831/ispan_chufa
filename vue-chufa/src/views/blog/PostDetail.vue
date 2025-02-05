@@ -1,4 +1,5 @@
 <template>
+    <p>hello</p>
     <div v-if="post">
         <p>{{ id }}</p>
         <h1>{{ post.postTitle }}</h1>

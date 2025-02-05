@@ -15,7 +15,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "eventXplace")
 public class EventXPlaceBean {
@@ -32,12 +31,12 @@ public class EventXPlaceBean {
 	private LocalTime arrivalTime;
 
 	@Column(name = "stay_duration")
-	private Integer stayDuration;
+	private LocalTime stayDuration;
 
 	@Column(name = "notes")
 	@Lob
 	private char[] notes;
-	
+
 	@ManyToOne
 	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
@@ -48,14 +47,13 @@ public class EventXPlaceBean {
 	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
 	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
 
-	
 	// Constructors, getters, setters, and toString()
-	
+
 	public EventXPlaceBean() {
 	}
 
 	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
-			Integer stayDuration, char[] notes) {
+			LocalTime stayDuration, char[] notes) {
 		this.event = event;
 		this.place = place;
 		this.placeOrder = placeOrder;
@@ -104,11 +102,11 @@ public class EventXPlaceBean {
 		this.arrivalTime = arrivalTime;
 	}
 
-	public Integer getStayDuration() {
+	public LocalTime getStayDuration() {
 		return stayDuration;
 	}
 
-	public void setStayDuration(Integer stayDuration) {
+	public void setStayDuration(LocalTime stayDuration) {
 		this.stayDuration = stayDuration;
 	}
 

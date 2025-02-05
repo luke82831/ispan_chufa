@@ -108,7 +108,15 @@ const props = defineProps({
 
 const itineraryStore = useItineraryStore();
 const placeStore = usePlaceStore();
-const departureTime = ref("08:00"); // 預設早上 08:00
+
+// 存儲每個日期的出發時間
+const departureTimes = ref({});
+const departureTime = computed({
+  get: () => departureTimes.value[props.selectedDate] || "08:00",
+  set: (newTime) => {
+    departureTimes.value[props.selectedDate] = newTime;
+  },
+});
 
 const itineraryForSelectedDay = computed({
   get: () => itineraryStore.getItineraryForDay(props.selectedDate),
@@ -171,6 +179,16 @@ watch(
     }
   },
   { immediate: true, deep: true }
+);
+watch(
+  () => props.selectedDate,
+  (newDate) => {
+    // 如果這個日期還沒有設定出發時間，就初始化為 08:00
+    if (!(newDate in departureTimes.value)) {
+      departureTimes.value[newDate] = "08:00";
+    }
+  },
+  { immediate: true }
 );
 </script>
 

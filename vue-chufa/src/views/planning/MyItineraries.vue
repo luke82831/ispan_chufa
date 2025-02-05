@@ -11,9 +11,7 @@
 
     <!-- 行程列表 -->
     <div v-if="loading" class="loading-text">載入中...</div>
-    <div v-else-if="schedules.length === 0" class="no-schedules">
-      目前沒有行程
-    </div>
+    <div v-else-if="schedules.length === 0" class="no-schedules">目前沒有行程</div>
     <div v-else class="itineraries-grid">
       <div
         v-for="schedule in paginatedSchedules"
@@ -29,10 +27,7 @@
           />
 
           <!-- 右上角垃圾桶按鈕 -->
-          <button
-            class="delete-btn"
-            @click.stop="confirmDelete(schedule.tripId)"
-          >
+          <button class="delete-btn" @click.stop="confirmDelete(schedule.tripId)">
             🗑️
           </button>
         </div>
@@ -51,10 +46,7 @@
         &lt; 上一頁
       </button>
       <span>第 {{ currentPage }} / {{ totalPages }} 頁</span>
-      <button
-        @click="changePage('next')"
-        :disabled="currentPage === totalPages"
-      >
+      <button @click="changePage('next')" :disabled="currentPage === totalPages">
         下一頁 &gt;
       </button>
     </div>
@@ -84,9 +76,7 @@ export default {
     const itemsPerPage = 8; // 每頁顯示 6 個行程
 
     // 計算總頁數
-    const totalPages = computed(() =>
-      Math.ceil(schedules.value.length / itemsPerPage)
-    );
+    const totalPages = computed(() => Math.ceil(schedules.value.length / itemsPerPage));
 
     // 取得當前頁面的行程清單
     const paginatedSchedules = computed(() => {
@@ -103,13 +93,12 @@ export default {
       }
     };
 
-    const getImageSource = (coverPhoto) => {
-      if (!coverPhoto) return "";
-      return coverPhoto.startsWith("data:image") ||
-        coverPhoto.startsWith("/9j/")
-        ? `data:image/jpeg;base64,${coverPhoto}`
-        : coverPhoto;
-    };
+    const getImageSource = (coverPhoto) =>
+      coverPhoto
+        ? coverPhoto.startsWith("data:image")
+          ? coverPhoto
+          : `data:image/jpeg;base64,${coverPhoto}`
+        : "";
 
     const goToItineraryForm = () => {
       router.push("/itineraryform");
@@ -117,7 +106,7 @@ export default {
 
     // 刪除行程（使用 SweetAlert2）
     const confirmDelete = async (tripId) => {
-      Swal.fire({
+      const result = await Swal.fire({
         title: "確定要刪除這個行程嗎？",
         text: "刪除後將無法恢復！",
         icon: "warning",
@@ -126,21 +115,17 @@ export default {
         cancelButtonColor: "#d33",
         confirmButtonText: "是的，刪除！",
         cancelButtonText: "取消",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          await scheduleStore.deleteSchedule(tripId);
-          Swal.fire({
-            title: "已刪除！",
-            text: "您的行程已被成功刪除。",
-            icon: "success",
-          });
-
-          // 如果刪除後當前頁沒有內容，則回到上一頁
-          if (paginatedSchedules.value.length === 0 && currentPage.value > 1) {
-            currentPage.value--;
-          }
-        }
       });
+
+      if (result.isConfirmed) {
+        await scheduleStore.deleteSchedule(tripId);
+        await Swal.fire("已刪除！", "您的行程已成功刪除。", "success");
+
+        // 確保刪除後頁面更新
+        if (schedules.value.length % itemsPerPage === 1 && currentPage.value > 1) {
+          currentPage.value--;
+        }
+      }
     };
 
     // 跳轉至行程規劃頁面

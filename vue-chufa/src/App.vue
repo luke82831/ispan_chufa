@@ -10,10 +10,7 @@
         placeholder="搜尋文章..."
         class="p-2 border rounded w-full"
       />
-      <button
-        @click="navigateToSearch"
-        class="p-2 bg-blue-500 text-white rounded"
-      >
+      <button @click="navigateToSearch" class="p-2 bg-blue-500 text-white rounded">
         搜索
       </button>
     </div>
@@ -33,9 +30,7 @@
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
           <img
-            :src="
-              userStore.member.profile_picture || '/path/to/default-avatar.png'
-            "
+            :src="userStore.member.profile_picture || '/path/to/default-avatar.png'"
             alt="會員大頭貼"
             class="avatar"
             @error="onAvatarError"
@@ -56,9 +51,6 @@
             </RouterLink>
             <RouterLink to="/blog/bloghome" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的文章
-            </RouterLink>
-            <RouterLink to="" class="dropdown-item">
-              <i class="fas fa-user-circle"></i> 我的優惠券
             </RouterLink>
             <!-- 修改：下拉選單中登出按鈕 -->
             <button @click="logout" class="dropdown-item logout-item">

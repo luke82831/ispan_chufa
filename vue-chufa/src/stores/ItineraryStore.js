@@ -6,6 +6,7 @@ export const useItineraryStore = defineStore("itinerary", {
     itineraryTitle: "",
     startDate: "",
     endDate: "",
+    selectedDate: "",
     userId: null,
     coverPhoto: null, // 存封面圖片
     itineraryDates: {}, // 每一天的行程資料，鍵是日期，值是行程細節
@@ -67,9 +68,6 @@ export const useItineraryStore = defineStore("itinerary", {
 
     // 新增 updateRouteTimesForDay 方法，用來更新該天的路徑時間結果
     updateRouteTimesForDay(selectedDate, routeTimes) {
-      if (!this.routeTimes[selectedDate]) {
-        this.routeTimes[selectedDate] = [];
-      }
       this.routeTimes[selectedDate] = routeTimes;
     },
 

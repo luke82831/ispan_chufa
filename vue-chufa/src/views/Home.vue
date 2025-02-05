@@ -137,7 +137,7 @@ export default {
     const currentPage = ref(1); // 當前頁數
 
     const navigateToDetail = (postid) => {
-      router.push(`/post/${postid}`);
+      router.push(`/blog/find/${postid}`);
     };
 
     const formatDate = (date) => {

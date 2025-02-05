@@ -19,7 +19,6 @@ spring:
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
 #thymeleaf
   thymeleaf:
     enabled: true
@@ -36,7 +35,7 @@ spring:
 
 jwt:
   token:
-    expire: 1000
+    expire: 10
 
 #line login
 line:
@@ -44,3 +43,4 @@ line:
     channel-id: "2006733552"
     channel-secret: "2e094b815ed92a5e16cb5938e9576102"
     callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"
+

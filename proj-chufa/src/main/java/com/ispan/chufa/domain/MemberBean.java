@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -76,7 +77,7 @@ public class MemberBean {
 	private String lineUserId; // 用於存儲 LINE 的 User ID
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonManagedReference
+	@JsonBackReference
 	private List<PostBean> posts;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)

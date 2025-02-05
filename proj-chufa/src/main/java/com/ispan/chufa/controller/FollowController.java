@@ -5,6 +5,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,10 +20,16 @@ import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.service.FollowService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/follow")
 public class FollowController {
 	@Autowired
 	private FollowService followService;
+	
+	@PostMapping("/isFollowing")
+	public boolean isUserFollowing(@RequestBody FollowRequest followRequest) {
+	       return followService.isUserFollowing(followRequest.getFollowerid(), followRequest.getFollowedid());
+	}
 
 	@PostMapping("/verb")
 	public FollowResponse follow(@RequestBody FollowRequest followRequest) {
@@ -37,7 +44,7 @@ public class FollowController {
 				return responseBean;
 			}
 			if (follow == null) {
-				responseBean.setSuccess(false);
+				responseBean.setSuccess(true);
 				responseBean.setMessage("取消關注");
 			} else {
 				responseBean.setSuccess(true);
@@ -68,5 +75,16 @@ public class FollowController {
 	public List<MemberInfo> getFollowerList(@PathVariable Long followedId) {
 		return followService.getFollowerList(followedId);
 	}
+	//count
+	@GetMapping("/followercount/{followedId}")
+	public Long followercount(@PathVariable Long followedId) {
+		return followService.followercount(followedId);	
+	}
+	//count
+	@GetMapping("/followingcount/{followingId}")
+	public Long followingcount(@PathVariable Long followingId) {
+		return followService.followingcount(followingId);	
+	}
+	
 
 }

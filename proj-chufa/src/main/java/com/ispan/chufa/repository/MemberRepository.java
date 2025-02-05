@@ -15,4 +15,8 @@ public interface MemberRepository extends JpaRepository<MemberBean, Long> {
 
     // 檢查電子郵件是否已存在
     boolean existsByEmail(String email);
+
+	MemberBean findByUserid(Long userid);
+
+	
 }

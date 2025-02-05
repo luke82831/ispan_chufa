@@ -4,13 +4,12 @@
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
     <div class="nav-links">
-      <!-- 只有管理員才顯示後臺管理按鈕 -->
-      <!-- <RouterLink
-        v-if="userStore.isLoggedIn && userStore.member.isAdmin"
+      <!-- 只有管理員才顯示後台管理按鈕 -->
+      <RouterLink
+        v-if="userStore.isLoggedIn && userStore.member.role === 'ADMIN'"
         to="/admin"
         class="admin-button"
-      > -->
-      <RouterLink to="/admin" class="admin-button">
+      >
         <i class="fas fa-cog"></i> 後台管理
       </RouterLink>
 
@@ -18,9 +17,7 @@
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
           <img
-            :src="
-              userStore.member.profile_picture || '/path/to/default-avatar.png'
-            "
+            :src="userStore.member.profile_picture || '/path/to/default-avatar.png'"
             alt="會員大頭貼"
             class="avatar"
             @error="onAvatarError"

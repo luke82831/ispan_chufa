@@ -13,17 +13,11 @@
         <div class="info-row">
           <div class="text-info">
             <h1>{{ member.name || "會員名稱" }}</h1>
-            <p class="welcome-text">
-              歡迎回來，{{ member.nickname || "暱稱" }}！
-            </p>
+            <p class="welcome-text">歡迎回來，{{ member.nickname || "暱稱" }}！</p>
           </div>
           <div class="header-actions">
             <button class="btn btn-edit" @click="editProfile">編輯資料</button>
-            <button
-              class="btn btn-admin"
-              v-if="isAdmin"
-              @click="navigateToAdmin"
-            >
+            <button class="btn btn-admin" v-if="isAdmin" @click="navigateToAdmin">
               管理會員資料
             </button>
           </div>
@@ -102,12 +96,7 @@
         </div>
         <div class="form-group">
           <label for="name">姓名：</label>
-          <input
-            type="text"
-            id="name"
-            v-model="editMember.name"
-            class="form-control"
-          />
+          <input type="text" id="name" v-model="editMember.name" class="form-control" />
         </div>
         <div class="form-group">
           <label for="nickname">暱稱：</label>
@@ -145,11 +134,7 @@
         </div>
         <div class="form-group">
           <label for="bio">個人簡介：</label>
-          <textarea
-            id="bio"
-            v-model="editMember.bio"
-            class="form-control"
-          ></textarea>
+          <textarea id="bio" v-model="editMember.bio" class="form-control"></textarea>
         </div>
         <!-- 社群連結輸入欄位 -->
         <h4>社群連結</h4>
@@ -174,9 +159,7 @@
           />
         </div>
         <button type="submit" class="btn btn-save">儲存變更</button>
-        <button type="button" class="btn btn-secondary" @click="cancelEdit">
-          取消
-        </button>
+        <button type="button" class="btn btn-secondary" @click="cancelEdit">取消</button>
       </form>
     </div>
   </div>
@@ -251,7 +234,7 @@ onMounted(() => {
     if (token) {
       localStorage.setItem("token", token);
       axios.defaults.headers.Authorization = `Bearer ${token}`;
-      window.history.replaceState({}, document.title, "/secure/Profile");
+      window.history.replaceState({}, document.title, "/");
     }
     if (source === "line") {
       await fetchProfile();
@@ -320,13 +303,9 @@ const uploadProfilePicture = async (event) => {
   formData.append("file", file);
   formData.append("email", userStore.member.email);
   try {
-    const response = await axios.post(
-      "/ajax/secure/upload-profile-picture",
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    const response = await axios.post("/ajax/secure/upload-profile-picture", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     if (response.data.success) {
       userStore.member.profile_picture = response.data.profilePicture;
       Swal.fire("成功", "大頭貼已更新！", "success");

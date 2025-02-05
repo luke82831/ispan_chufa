@@ -36,6 +36,7 @@ export const useScheduleStore = defineStore("scheduleStore", {
       }
     },
 
+    // 刪除行程
     async deleteSchedule(tripId) {
       try {
         await axios.delete(`${API_BASE_URL}/api/schedule/${tripId}`);

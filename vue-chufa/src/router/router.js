@@ -45,7 +45,7 @@ const routes = [
     meta: { requiresAuth: true }, //需要登入才可使用
   },
   {
-    path: "/planningpage",
+    path: "/planningpage/:tripId",
     component: PlanningPage,
     meta: { requiresAuth: true }, //需要登入才可使用
   },

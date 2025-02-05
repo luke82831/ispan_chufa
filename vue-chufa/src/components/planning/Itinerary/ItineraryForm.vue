@@ -115,9 +115,17 @@ const handleSubmit = async () => {
   formData.append("userId", userId.value);
 
   try {
-    await axios.post("/api/schedule", formData, {
+    const response = await axios.post("/api/schedule", formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
+
+    // 從後端獲取 tripId
+    const tripId = response.data.tripId;
+
+    // 確保 tripId 存在
+    if (!tripId) {
+      throw new Error("行程 ID 未正確返回");
+    }
 
     Swal.fire("成功", "行程已成功建立", "success");
 
@@ -128,8 +136,8 @@ const handleSubmit = async () => {
       itineraryStore.endDate
     );
 
-    // 跳轉到行程規劃頁面
-    router.push("/planningpage");
+    // **修改這裡，帶入 tripId 進行跳轉**
+    router.push(`/planningpage/${tripId}`);
   } catch (error) {
     Swal.fire("錯誤", error.response?.data?.message || "發生未知錯誤", "error");
   }

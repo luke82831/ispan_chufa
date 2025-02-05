@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div v-if="scheduleStore.currentSchedule">
     <div class="header">
       <button class="back-button" @click="goBack">⬅ 返回</button>
-      <h2 v-if="!isEditing">{{ itineraryStore.itineraryTitle }}</h2>
+      <h2 v-if="!isEditing">{{ scheduleStore.currentSchedule.tripName }}</h2>
       <input
         v-if="isEditing"
         v-model="newTitle"
@@ -14,11 +14,24 @@
       <button v-if="isEditing" class="button" @click="saveTitle">儲存</button>
     </div>
 
-    <div v-if="coverPhotoUrl" class="cover-photo-container">
-      <img :src="coverPhotoUrl" alt="Cover Photo" class="cover-photo" />
+    <!-- 封面圖片 -->
+    <div
+      v-if="scheduleStore.currentSchedule.coverPhoto"
+      class="cover-photo-container"
+    >
+      <img
+        :src="`data:image/jpeg;base64,${scheduleStore.currentSchedule.coverPhoto}`"
+        alt="封面照片"
+        class="cover-photo"
+      />
     </div>
-    <p>{{ itineraryStore.startDate }} - {{ itineraryStore.endDate }}</p>
 
+    <p>
+      {{ scheduleStore.currentSchedule.startDate }} -
+      {{ scheduleStore.currentSchedule.endDate }}
+    </p>
+
+    <!-- 日期分頁 -->
     <div class="date-tabs">
       <button
         class="arrow-button"
@@ -37,6 +50,7 @@
         {{ formatDate(date) }}
       </button>
 
+      <!-- 新增一天的按鈕 -->
       <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
         ＋
       </button>
@@ -50,54 +64,55 @@
       </button>
     </div>
 
-    <!-- 傳遞 selectedDate 到 PlanningDay 組件 -->
+    <!-- 當前選擇的日期對應的行程 -->
     <PlanningDay :selectedDate="selectedDate" />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useItineraryStore } from "@/stores/ItineraryStore";
+import { computed, ref, watch, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useScheduleStore } from "@/stores/useScheduleStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();
+const route = useRoute();
+const scheduleStore = useScheduleStore();
 
-const goBack = () => {
-  router.push("/myitineraries");
-};
+const tripId = route.params.tripId;
 
-// 在此初始化 itineraryStore
-const itineraryStore = useItineraryStore();
+onMounted(() => {
+  if (tripId) {
+    scheduleStore.fetchScheduleById(tripId);
+  }
+});
+
 const isEditing = ref(false);
-const newTitle = ref(itineraryStore.itineraryTitle);
+const newTitle = ref("");
 
-// 進入編輯模式
+// 編輯標題
 const editTitle = () => {
   isEditing.value = true;
+  newTitle.value = scheduleStore.currentSchedule?.tripName || "";
 };
 
-// 儲存新的標題
 const saveTitle = () => {
-  itineraryStore.itineraryTitle = newTitle.value;
+  scheduleStore.currentSchedule.tripName = newTitle.value;
   isEditing.value = false;
 };
 
-const coverPhotoUrl = computed(() => {
-  const coverPhoto = itineraryStore.coverPhoto;
-  if (coverPhoto && coverPhoto instanceof File) {
-    return URL.createObjectURL(coverPhoto);
-  }
-  return null;
-});
-
-const selectedDate = ref(""); // 當前選擇的日期
+// 選擇的日期
+const selectedDate = ref("");
 
 const startDate = computed(() =>
-  itineraryStore.startDate ? new Date(itineraryStore.startDate) : null
+  scheduleStore.currentSchedule?.startDate
+    ? new Date(scheduleStore.currentSchedule.startDate)
+    : null
 );
 const endDate = computed(() =>
-  itineraryStore.endDate ? new Date(itineraryStore.endDate) : null
+  scheduleStore.currentSchedule?.endDate
+    ? new Date(scheduleStore.currentSchedule.endDate)
+    : null
 );
 
 const dateRange = computed(() => {
@@ -116,11 +131,12 @@ const formatDate = (date) => {
   return date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" });
 };
 
+// 更新選擇的日期
 const updateSelectedDate = (date) => {
   selectedDate.value = formatDate(date);
-  itineraryStore.setSelectedDate(selectedDate.value);
 };
 
+// 切換日期
 const changeDate = (direction) => {
   const currentIndex = dateRange.value.findIndex(
     (date) => formatDate(date) === selectedDate.value
@@ -135,16 +151,7 @@ const changeDate = (direction) => {
   }
 };
 
-const addOneMoreDay = () => {
-  if (!endDate.value) return;
-
-  const newDate = new Date(endDate.value);
-  newDate.setDate(newDate.getDate() + 1);
-  itineraryStore.endDate = newDate.toISOString().split("T")[0];
-
-  updateSelectedDate(newDate);
-};
-
+// 是否為第一天 / 最後一天
 const isFirstDay = computed(
   () => selectedDate.value === formatDate(dateRange.value[0])
 );
@@ -154,6 +161,18 @@ const isLastDay = computed(
     formatDate(dateRange.value[dateRange.value.length - 1])
 );
 
+// 新增一天
+const addOneMoreDay = () => {
+  if (!endDate.value) return;
+
+  const newDate = new Date(endDate.value);
+  newDate.setDate(newDate.getDate() + 1);
+  scheduleStore.currentSchedule.endDate = newDate.toISOString().split("T")[0];
+
+  updateSelectedDate(newDate);
+};
+
+// 頁面載入時設定初始選擇日期
 watch(
   dateRange,
   (newDates) => {
@@ -163,6 +182,11 @@ watch(
   },
   { immediate: true }
 );
+
+// 返回上一頁
+const goBack = () => {
+  router.push("/myitineraries");
+};
 </script>
 
 <style scoped>

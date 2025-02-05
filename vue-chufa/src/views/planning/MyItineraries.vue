@@ -16,13 +16,12 @@
     </div>
     <div v-else class="itineraries-grid">
       <div
-        v-for="schedule in schedules"
+        v-for="schedule in paginatedSchedules"
         :key="schedule.tripId"
         class="itinerary-card"
         @click="goToPlanningPage(schedule.tripId)"
       >
         <div class="itinerary-image-container">
-          <!-- 圖片 -->
           <img
             :src="getImageSource(schedule.coverPhoto)"
             alt="行程封面"
@@ -30,7 +29,10 @@
           />
 
           <!-- 右上角垃圾桶按鈕 -->
-          <button class="delete-btn" @click="confirmDelete(schedule.tripId)">
+          <button
+            class="delete-btn"
+            @click.stop="confirmDelete(schedule.tripId)"
+          >
             🗑️
           </button>
         </div>
@@ -41,6 +43,20 @@
           <p>{{ schedule.startDate }} - {{ schedule.endDate }}</p>
         </div>
       </div>
+    </div>
+
+    <!-- 🔹 分頁按鈕 -->
+    <div class="pagination">
+      <button @click="changePage('prev')" :disabled="currentPage === 1">
+        &lt; 上一頁
+      </button>
+      <span>第 {{ currentPage }} / {{ totalPages }} 頁</span>
+      <button
+        @click="changePage('next')"
+        :disabled="currentPage === totalPages"
+      >
+        下一頁 &gt;
+      </button>
     </div>
   </div>
 </template>
@@ -61,6 +77,30 @@ export default {
     const fetchSchedules = async () => {
       await scheduleStore.fetchSchedules();
       loading.value = false;
+    };
+
+    // 分頁設定
+    const currentPage = ref(1); // 當前頁數
+    const itemsPerPage = 8; // 每頁顯示 6 個行程
+
+    // 計算總頁數
+    const totalPages = computed(() =>
+      Math.ceil(schedules.value.length / itemsPerPage)
+    );
+
+    // 取得當前頁面的行程清單
+    const paginatedSchedules = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage;
+      return schedules.value.slice(start, start + itemsPerPage);
+    });
+
+    // 切換頁面
+    const changePage = (direction) => {
+      if (direction === "prev" && currentPage.value > 1) {
+        currentPage.value--;
+      } else if (direction === "next" && currentPage.value < totalPages.value) {
+        currentPage.value++;
+      }
     };
 
     const getImageSource = (coverPhoto) => {
@@ -94,13 +134,18 @@ export default {
             text: "您的行程已被成功刪除。",
             icon: "success",
           });
+
+          // 如果刪除後當前頁沒有內容，則回到上一頁
+          if (paginatedSchedules.value.length === 0 && currentPage.value > 1) {
+            currentPage.value--;
+          }
         }
       });
     };
 
-    //跳轉planningpage
+    // 跳轉至行程規劃頁面
     const goToPlanningPage = (tripId) => {
-      router.push({ path: "/planningpage", query: { tripId } });
+      router.push({ path: `/planningpage/${tripId}` });
     };
 
     onMounted(fetchSchedules);
@@ -108,10 +153,15 @@ export default {
     return {
       schedules,
       loading,
+      currentPage,
+      totalPages,
+      itemsPerPage,
+      paginatedSchedules,
       goToItineraryForm,
       goToPlanningPage,
       getImageSource,
       confirmDelete,
+      changePage,
     };
   },
 };
@@ -227,5 +277,33 @@ export default {
   text-align: center;
   color: #777;
   margin-top: 16px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  margin: 0 10px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #0056b3;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 </style>

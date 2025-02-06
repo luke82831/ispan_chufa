@@ -31,7 +31,7 @@ public class InteractionBean {
 	@JsonManagedReference
 	private PostBean post; // 貼文 (多對一關聯)
 
-	@Column(name = "interction_type")
+	@Column(name = "interaction_type")
 	private String interactionType; // 收藏(COLLECT)、轉發(SHARE)、點讚(LIKE)
 
 	@Column(name = "interaction_time")

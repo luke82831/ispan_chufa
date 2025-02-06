@@ -35,7 +35,7 @@ const member = computed(() => userStore.member);
 <style scoped>
 .admin-layout {
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 80px);
   background: #e0ecff; /* 淡藍背景，讓視覺更柔和 */
 }
 

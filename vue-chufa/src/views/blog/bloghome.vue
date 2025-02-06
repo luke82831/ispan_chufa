@@ -133,15 +133,16 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { userid: member.value.userid };
+    const payload = { };
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
     if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
-      payload.repost = false;  // 不要 repost 的貼文
+      payload.repost = false;  // 不要 repost 的貼文\
+      payload.userid=member.value.userid;
     } else if (filterType === 'sharedPosts') {
       payload.repost = true;  // 只要 repost 的貼文
     }
-
+    //userid: member.value.userid 
     const response = await axios.post('/api/posts/post', payload);
     let postData = response.data.postdto || [];
 

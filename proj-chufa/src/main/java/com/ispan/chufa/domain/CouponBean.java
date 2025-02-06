@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,29 +26,29 @@ public class CouponBean {
 
     @Column(name = "coupon_code", unique = true, nullable = false)
     private String couponCode; // 優惠券代碼，要求唯一且不能為空
-    @Column(name="remaining")
+    @Column(name = "remaining")
     private Integer remaining;
-    @Column(name="Title")
+    @Column(name = "Title")
     private String title;
-    @Column(name="Subtitle")
+    @Column(name = "Subtitle")
     private String subtitle;
-    @Column(name="Content")
+    @Column(name = "Content")
     private String content;
-    @Column(name="State")
+    @Column(name = "State")
     private Boolean state;
-    @Column(name="Web")
+    @Column(name = "Web")
     private String web;
-    @Column(name="Picture")
+    @Column(name = "Picture")
     private String picture;
-    @Column(name="StartTime")
+    @Column(name = "StartTime")
     private LocalDateTime startTime;
-    @Column(name="EndTime")
+    @Column(name = "EndTime")
     private LocalDateTime endTime;
-    
+
     @ManyToMany(mappedBy = "couponBean")
     @JsonIgnore
-    private List<MyCouponBean> myCoupons; 
-    
+    private List<MyCouponBean> myCoupons;
+
     @ManyToOne
     @JoinColumn(name = "placeId")
     @JsonBackReference
@@ -58,19 +57,18 @@ public class CouponBean {
     // Getters and Setters
 
     public Long getCouponId() {
-    	return couponId;
+        return couponId;
     }
-    
+
     public void setCouponId(Long couponId) {
-    	this.couponId = couponId;
+        this.couponId = couponId;
     }
 
     public Integer getRemaining() {
         return remaining;
     }
 
-
-	public void setRemaining(Integer remaining) {
+    public void setRemaining(Integer remaining) {
         this.remaining = remaining;
     }
 
@@ -138,32 +136,32 @@ public class CouponBean {
         this.endTime = endTime;
     }
 
-	public String getCouponCode() {
-		return couponCode;
-	}
+    public String getCouponCode() {
+        return couponCode;
+    }
 
-	public void setCouponCode(String couponCode) {
-		this.couponCode = couponCode;
-	}
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
+    }
 
-	public List<MyCouponBean> getMyCoupons() {
-		return myCoupons;
-	}
+    public List<MyCouponBean> getMyCoupons() {
+        return myCoupons;
+    }
 
-	public void setMyCoupons(List<MyCouponBean> myCoupons) {
-		this.myCoupons = myCoupons;
-	}
+    public void setMyCoupons(List<MyCouponBean> myCoupons) {
+        this.myCoupons = myCoupons;
+    }
 
-	public PlaceBean getPlace() {
-		return place;
-	}
+    public PlaceBean getPlace() {
+        return place;
+    }
 
-	public void setPlace(PlaceBean place) {
-		this.place = place;
-	}
+    public void setPlace(PlaceBean place) {
+        this.place = place;
+    }
 
-	public Boolean getState() {
-		return state;
-	}
-    
+    public Boolean getState() {
+        return state;
+    }
+
 }

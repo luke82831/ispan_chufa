@@ -36,14 +36,15 @@ Go
 
 -- followlist
 INSERT INTO followlist (follower_id, followed_id, followTime, followStatus) VALUES
-(1, 2, '2025-01-20T10:00:00', 'ACTIVE'),  -- user1 Ãöª` user2
-(2, 3, '2025-01-21T14:30:00', 'ACTIVE'),  -- user2 Ãöª` user3
-(3, 1, '2025-01-22T09:15:00', 'BLOCKED'), -- user3 ³Q user1 Ãöª`¨Ãªý¾×
-(1, 3, '2025-01-23T16:45:00', 'ACTIVE');  -- user1 Ãöª` user3
+(1, 2, '2025-01-20T10:00:00', 'ACTIVE'),  -- user1 ï¿½ï¿½ï¿½` user2
+(2, 3, '2025-01-21T14:30:00', 'ACTIVE'),  -- user2 ï¿½ï¿½ï¿½` user3
+(3, 1, '2025-01-22T09:15:00', 'BLOCKED'), -- user3 ï¿½Q user1 ï¿½ï¿½ï¿½`ï¿½Ãªï¿½ï¿½ï¿½
+(1, 3, '2025-01-23T16:45:00', 'ACTIVE');  -- user1 ï¿½ï¿½ï¿½` user3
 Go
 
 -- post
 INSERT INTO post (postStatus, postTitle, postTime, postContent, userid, postLink) VALUES
+('ACTIVE', 'My First Post', '2025-01-20T10:00:00', 'This is the content of my first post.', 1, 'https://example.com/post1'),
 ('INACTIVE', 'Another Post', '2025-01-21T14:30:00', 'This is another post content.', 2, 'https://example.com/post2'),
 ('ACTIVE', 'My First Post', '2025-01-20T10:00:00', 'aaaaa', 1, 'https://example.com/post1'),
 ('INACTIVE', 'Another Post', '2025-01-21T14:30:00', 'vvvv', 2, 'https://example.com/post2'),
@@ -54,19 +55,19 @@ Go
 -- tags
 INSERT INTO tags (tag_state, tag_name, tag_created_at, tag_updated_at)
 VALUES
-('ACTIVE', '®È¹C', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('ACTIVE', '¬ü­¹', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('INACTIVE', '¹B°Ê', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('ACTIVE', '­µ¼Ö', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('INACTIVE', '¹q¼v', '2025-01-19 01:08:07', '2025-01-19 01:08:07');
+('ACTIVE', 'ï¿½È¹C', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('ACTIVE', 'ï¿½ï¿½ï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('INACTIVE', 'ï¿½Bï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('ACTIVE', 'ï¿½ï¿½ï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('INACTIVE', 'ï¿½qï¿½v', '2025-01-19 01:08:07', '2025-01-19 01:08:07');
 Go
 
 -- interaction
 INSERT INTO interaction (member_id, postid, interction_type, interaction_time) VALUES
-(1, 1, 'LIKE', '2025-01-20T10:00:00'),  -- user1 ÂIÆg¶K¤å 1
-(2, 1, 'SHARE', '2025-01-21T14:30:00'), -- user2 Âàµo¶K¤å 1
-(1, 2, 'COLLECT', '2025-01-22T09:15:00'), -- user1 ¦¬ÂÃ¶K¤å 2
-(2, 2, 'LIKE', '2025-01-23T16:45:00');   -- user2 ÂIÆg¶K¤å 2
+(1, 1, 'LIKE', '2025-01-20T10:00:00'),  -- user1 ï¿½Iï¿½gï¿½Kï¿½ï¿½ 1
+(2, 1, 'SHARE', '2025-01-21T14:30:00'), -- user2 ï¿½ï¿½oï¿½Kï¿½ï¿½ 1
+(1, 2, 'COLLECT', '2025-01-22T09:15:00'), -- user1 ï¿½ï¿½ï¿½Ã¶Kï¿½ï¿½ 2
+(2, 2, 'LIKE', '2025-01-23T16:45:00');   -- user2 ï¿½Iï¿½gï¿½Kï¿½ï¿½ 2
 Go
 
 -- place
@@ -105,11 +106,11 @@ VALUES
 -- comments
 INSERT INTO comments (postid, commentstate, user_id, comment_created_at, content, parentid)
 VALUES 
-(1, 'active', 1, '2025-01-19 10:00:00', '³o¬O²Ä¤@±ø¯d¨¥ªº¤º®e', NULL),
-(1, 'active', 2, '2025-01-19 11:00:00', '³o¬O²Ä¤G±ø¯d¨¥ªº¤º®e', NULL),
-(1, 'active', 3, '2025-01-19 12:00:00', '³o¬O²Ä¤T±ø¯d¨¥ªº¤º®e', NULL),
-(1, 'active', 2, '2025-01-19 13:00:00', '³o¬O¹ï²Ä¤@±ø¯d¨¥ªº¦^ÂÐ', 1),
-(1, 'active', 3, '2025-01-19 14:00:00', '³o¬O¹ï²Ä¤G±ø¯d¨¥ªº¦^ÂÐ', 2);
+(1, 'active', 1, '2025-01-19 10:00:00', 'ï¿½oï¿½Oï¿½Ä¤@ï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
+(1, 'active', 2, '2025-01-19 11:00:00', 'ï¿½oï¿½Oï¿½Ä¤Gï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
+(1, 'active', 3, '2025-01-19 12:00:00', 'ï¿½oï¿½Oï¿½Ä¤Tï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
+(1, 'active', 2, '2025-01-19 13:00:00', 'ï¿½oï¿½Oï¿½ï¿½Ä¤@ï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½ï¿½', 1),
+(1, 'active', 3, '2025-01-19 14:00:00', 'ï¿½oï¿½Oï¿½ï¿½Ä¤Gï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½ï¿½', 2);
 Go
 
 -- coupon
@@ -123,21 +124,21 @@ GO
 
 -- mycoupon
 INSERT INTO mycoupon (fk_couponid, fk_userid, gettime) VALUES
-(1, 1, '2025-01-01T10:00:00'),  -- ¨Ï¥ÎªÌ user1 »â¨úÀu´f¨é NEWYEAR2025
-(2, 2, '2025-06-02T14:30:00'),  -- ¨Ï¥ÎªÌ user2 »â¨úÀu´f¨é SUMMER25
-(3, 3, '2025-09-03T09:00:00'),  -- ¨Ï¥ÎªÌ user3 »â¨úÀu´f¨é FALL2025
-(4, 4, '2025-12-04T16:45:00'),  -- ¨Ï¥ÎªÌ user4 »â¨úÀu´f¨é WINTER2025
-(5, 5, '2025-11-05T11:30:00');  -- ¨Ï¥ÎªÌ user5 »â¨úÀu´f¨é BLACKFRIDAY25
+(1, 1, '2025-01-01T10:00:00'),  -- ï¿½Ï¥Îªï¿½ user1 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ NEWYEAR2025
+(2, 2, '2025-06-02T14:30:00'),  -- ï¿½Ï¥Îªï¿½ user2 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ SUMMER25
+(3, 3, '2025-09-03T09:00:00'),  -- ï¿½Ï¥Îªï¿½ user3 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ FALL2025
+(4, 4, '2025-12-04T16:45:00'),  -- ï¿½Ï¥Îªï¿½ user4 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ WINTER2025
+(5, 5, '2025-11-05T11:30:00');  -- ï¿½Ï¥Îªï¿½ user5 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ BLACKFRIDAY25
 GO
 
 -- placewithposts
 INSERT INTO placewithposts (fk_place_id, fk_post_id)
 VALUES
-    (1, 1),  -- ±N placeId ¬° 1 ªº¦aÂI»P postId ¬° 101 ªº¶K¤åÃöÁp
-    (2, 2),  -- ±N placeId ¬° 2 ªº¦aÂI»P postId ¬° 102 ªº¶K¤åÃöÁp
-    (3, 3),  -- ±N placeId ¬° 3 ªº¦aÂI»P postId ¬° 103 ªº¶K¤åÃöÁp
-    (4, 4),  -- ±N placeId ¬° 4 ªº¦aÂI»P postId ¬° 104 ªº¶K¤åÃöÁp
-    (5, 5);  -- ±N placeId ¬° 5 ªº¦aÂI»P postId ¬° 105 ªº¶K¤åÃöÁp
+    (1, 1),  -- ï¿½N placeId ï¿½ï¿½ 1 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 101 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
+    (2, 2),  -- ï¿½N placeId ï¿½ï¿½ 2 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 102 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
+    (3, 3),  -- ï¿½N placeId ï¿½ï¿½ 3 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 103 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
+    (4, 4),  -- ï¿½N placeId ï¿½ï¿½ 4 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 104 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
+    (5, 5);  -- ï¿½N placeId ï¿½ï¿½ 5 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 105 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
 Go
 
 -- post_tags
@@ -148,24 +149,24 @@ Go
 
 -- Tags_Members
 INSERT INTO Tags_Members (tagsBean_tagId, memberBean_userid) VALUES
-(1, 1),  -- ¼ÐÅÒ Travel »P ¦¨­û user1
-(2, 2);  -- ¼ÐÅÒ Adventure »P ¦¨­û user2
+(1, 1),  -- ï¿½ï¿½ï¿½ï¿½ Travel ï¿½P ï¿½ï¿½ï¿½ï¿½ user1
+(2, 2);  -- ï¿½ï¿½ï¿½ï¿½ Adventure ï¿½P ï¿½ï¿½ï¿½ï¿½ user2
 Go
 
 -- member_place
 INSERT INTO myplace (userid, placeId) 
 VALUES
-(1, 1),  -- ¦¨­ûID 1 »P ¦aÂIID 101
-(1, 2),  -- ¦¨­ûID 1 »P ¦aÂIID 102
-(2, 3),  -- ¦¨­ûID 2 »P ¦aÂIID 103
-(3, 4),  -- ¦¨­ûID 3 »P ¦aÂIID 104
-(4, 5);  -- ¦¨­ûID 4 »P ¦aÂIID 105
+(1, 1),  -- ï¿½ï¿½ï¿½ï¿½ID 1 ï¿½P ï¿½aï¿½IID 101
+(1, 2),  -- ï¿½ï¿½ï¿½ï¿½ID 1 ï¿½P ï¿½aï¿½IID 102
+(2, 3),  -- ï¿½ï¿½ï¿½ï¿½ID 2 ï¿½P ï¿½aï¿½IID 103
+(3, 4),  -- ï¿½ï¿½ï¿½ï¿½ID 3 ï¿½P ï¿½aï¿½IID 104
+(4, 5);  -- ï¿½ï¿½ï¿½ï¿½ID 4 ï¿½P ï¿½aï¿½IID 105
 Go
 
 -- eventXplace
 INSERT INTO eventXplace (fk_event_id, fk_place_id, place_order, arrival_time, stay_duration, notes)
 VALUES
-(1, 1, 1, '08:00:00', 120, '¦­¤W©è¹F¡A¦w±Æ°ÑÆ[¦a¤èAªº´ºÂI¡C'),
-(1, 2, 2, '10:30:00', 90, '°ÑÆ[¦aÂIB¡A¥]§t¤@¤p®Éªº¾ÉÄý¡C'),
-(1, 3, 3, '13:00:00', 150, '¤ÈÀ\©M¥ð®§®É¶¡¡A¦w±Æ¦b¦aÂICªºÀ\ÆU¡C');
+(1, 1, 1, '08:00:00', 120, 'ï¿½ï¿½ï¿½Wï¿½ï¿½Fï¿½Aï¿½wï¿½Æ°ï¿½ï¿½[ï¿½aï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½C'),
+(1, 2, 2, '10:30:00', 90, 'ï¿½ï¿½ï¿½[ï¿½aï¿½IBï¿½Aï¿½]ï¿½tï¿½@ï¿½pï¿½Éªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½C'),
+(1, 3, 3, '13:00:00', 150, 'ï¿½ï¿½ï¿½\ï¿½Mï¿½ð®§®É¶ï¿½ï¿½Aï¿½wï¿½Æ¦bï¿½aï¿½ICï¿½ï¿½ï¿½\ï¿½Uï¿½C');
 Go

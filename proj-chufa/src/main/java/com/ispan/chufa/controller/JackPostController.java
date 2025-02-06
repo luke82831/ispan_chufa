@@ -4,9 +4,11 @@ import java.util.NoSuchElementException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.dto.JackPostDTO;
 import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.service.JackPostService;
@@ -26,6 +29,9 @@ public class JackPostController {
     private JackPostService postService;
     @Autowired
     private MemberRepository memberRepository;
+
+    // 將Bean映射到DTO用的
+    private final ModelMapper modelMapper = new ModelMapper();
 
     // 創建貼文
     // 測試 http://localhost:8080/post/create
@@ -169,21 +175,20 @@ public class JackPostController {
     }
 
     // 查詢貼文
-    // 測試 http://localhost:8080/post/findById
-    // 測試 RequestBody => {"postid":"1"}
-    @GetMapping("/findById")
-    public Response findById(@RequestBody String json) {
-        JSONObject requestJson = new JSONObject(json);
+    // 測試 http://localhost:8080/post/findById/{postid}
+    @GetMapping("/findById/{postid}")
+    public Response findById(@PathVariable String postid) {
         Response response = new Response();
         PostBean bean;
 
-        Long postid;
+        Long longPostid;
         // 驗證request資料(防呆)
+        System.out.println(postid);
         {
-            if (!requestJson.isNull("postid")) {
+            if (postid != null && postid != "") {
                 try {
-                    postid = requestJson.getLong("postid");
-                } catch (JSONException e) {
+                    longPostid = Long.parseLong(postid);
+                } catch (NumberFormatException e) {
                     response.setSuccesss(false);
                     response.setMessage("postid請輸入整數");
                     return response;
@@ -196,14 +201,16 @@ public class JackPostController {
         }
 
         // 查詢貼文
-        bean = postService.findById(postid);
+        bean = postService.findById(longPostid);
 
         // 設定response
         {
             if (bean != null) {
+                // 將Bean映射到DTO用的
+                JackPostDTO dto = modelMapper.map(bean, JackPostDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("查尋成功");
-                response.getList().add(bean);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆貼文");

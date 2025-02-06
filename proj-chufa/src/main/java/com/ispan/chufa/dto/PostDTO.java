@@ -7,9 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ispan.chufa.domain.CommentBean;
 import com.ispan.chufa.domain.InteractionBean;
-import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.domain.TagsBean;
 
 public class PostDTO {
@@ -29,7 +27,7 @@ public class PostDTO {
 	private Long repostCount;
 	@JsonIgnoreProperties({ "memberBeans", "postBeans" })
 	private Set<TagsBean> tagsBeans = new HashSet<>();
-//private List<CommentDTO>CommentDTO ;
+	// private List<CommentDTO>CommentDTO ;
 	private boolean isRepost;
 	private MemberInfo repostMember; // 如果是轉發貼文，則會包含原貼文數據
 
@@ -37,13 +35,13 @@ public class PostDTO {
 
 	private PostDTO repostDTO;
 
-//	public List<CommentDTO> getCommentDTO() {
-//		return CommentDTO;
-//	}
-//
-//	public void setCommentDTO(List<CommentDTO> commentDTO) {
-//		CommentDTO = commentDTO;
-//	}
+	// public List<CommentDTO> getCommentDTO() {
+	// return CommentDTO;
+	// }
+	//
+	// public void setCommentDTO(List<CommentDTO> commentDTO) {
+	// CommentDTO = commentDTO;
+	// }
 
 	public boolean isRepost() {
 		return isRepost;

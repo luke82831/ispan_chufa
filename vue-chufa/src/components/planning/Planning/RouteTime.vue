@@ -8,6 +8,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { usePlaceStore } from "@/stores/PlaceStore";
+import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const props = defineProps({
   date: String,
@@ -15,6 +16,7 @@ const props = defineProps({
 });
 
 const placeStore = usePlaceStore();
+const itineraryStore = useItineraryStore();
 const routeTime = ref(null);
 
 // 計算路徑時間
@@ -41,6 +43,7 @@ const calculateRouteTime = () => {
       routeTime.value = Math.round(
         result.routes[0].legs[0].duration.value / 60
       );
+      itineraryStore.setRouteTime(props.date, props.index, routeTime.value); // 存入 ItineraryStore
       console.log(`✅ 計算成功：${routeTime.value} 分鐘`);
     } else {
       console.error("❌ 無法計算路徑時間:", status);
@@ -64,12 +67,4 @@ watch(
 );
 </script>
 
-<style scoped>
-.route-time-container {
-  padding: 8px;
-  background: #f7fafc;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 8px;
-}
-</style>
+<style scoped></style>

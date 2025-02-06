@@ -136,17 +136,6 @@ const dateRange = computed(() => {
   return dates;
 });
 
-// **頁面載入時設定初始選擇日期**
-watch(
-  dateRange,
-  (newDates) => {
-    if (newDates.length > 0 && !selectedDate.value) {
-      updateSelectedDate(newDates[0]);
-    }
-  },
-  { immediate: true }
-);
-
 // **格式化日期**
 const formatDate = (date) => {
   if (!(date instanceof Date) || isNaN(date)) return "";
@@ -169,6 +158,17 @@ const changeDate = (direction) => {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
+
+// **頁面載入時設定初始選擇日期**
+watch(
+  dateRange,
+  (newDates) => {
+    if (newDates.length > 0 && !selectedDate.value) {
+      updateSelectedDate(newDates[0]);
+    }
+  },
+  { immediate: true }
+);
 
 // **新增一天**
 const addOneMoreDay = async () => {

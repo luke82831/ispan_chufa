@@ -13,7 +13,12 @@ export const useScheduleStore = defineStore("scheduleStore", {
   }),
 
   actions: {
-    /** 🔹 獲取所有行程 */
+    /** 🔹 設定當前選擇的schedule日期 */
+    setSelectedDate(date) {
+      this.selectedDate = date;
+    },
+
+    /** 🔹 獲取所有schedule */
     async fetchSchedules() {
       try {
         console.log("開始請求 API...", API_BASE_URL);
@@ -25,7 +30,7 @@ export const useScheduleStore = defineStore("scheduleStore", {
       }
     },
 
-    /** 🔹 獲取特定行程 */
+    /** 🔹 獲取特定schedule */
     async fetchScheduleById(tripId) {
       try {
         const response = await axios.get(
@@ -37,46 +42,7 @@ export const useScheduleStore = defineStore("scheduleStore", {
       }
     },
 
-    /** 🔹 設定當前選擇的行程日期 */
-    setSelectedDate(date) {
-      this.selectedDate = date;
-    },
-
-    /** 🔹 加入地點到行程 */
-    async addPlaceToSchedule(date, placeDetails) {
-      if (!this.currentSchedule?.tripId) {
-        console.error("❌ currentSchedule.tripId 未設定，無法加入行程");
-        return;
-      }
-
-      const itineraryData = {
-        tripId: this.currentSchedule.tripId,
-        date: date,
-        placeId: placeDetails.id,
-        placeName: placeDetails.displayName,
-        latitude: placeDetails.location.lat,
-        longitude: placeDetails.location.lng,
-        stayDuration: 60, // 預設停留 60 分鐘
-        placeOrder: this.itinerary[date]?.length || 0, // 設定地點順序
-      };
-
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/itinerary/add`,
-          itineraryData
-        );
-        const newPlace = response.data;
-        console.log("✅ 加入行程成功:", newPlace);
-
-        // **更新 Pinia store**
-        if (!this.itinerary[date]) this.itinerary[date] = [];
-        this.itinerary[date].push(newPlace);
-      } catch (error) {
-        console.error("❌ 無法加入行程:", error);
-      }
-    },
-
-    /** 🔹 刪除行程 */
+    /** 🔹 刪除schedule */
     async deleteSchedule(tripId) {
       try {
         await axios.delete(`${API_BASE_URL}/api/schedule/${tripId}`);
@@ -86,6 +52,23 @@ export const useScheduleStore = defineStore("scheduleStore", {
         console.log(`行程 ${tripId} 已刪除`);
       } catch (error) {
         console.error("刪除行程失敗:", error);
+      }
+    },
+
+    /** 🔹 修改schedule */
+    async updateScheduleEndDate(tripId, newEndDate) {
+      try {
+        await axios.put(`${API_BASE_URL}/api/schedule/${tripId}`, {
+          endDate: newEndDate,
+        });
+
+        // 更新本地 store
+        if (this.currentSchedule) {
+          this.currentSchedule.endDate = newEndDate;
+        }
+      } catch (error) {
+        console.error("更新行程結束日期失敗:", error);
+        throw error;
       }
     },
   },

@@ -154,15 +154,13 @@ watch(
       newDate
     );
 
-    if (!event) {
-      console.log(`⚠️ ${newDate} 沒有行程，建立新的行程內容`);
-      event = await eventStore.addEvent(
-        scheduleStore.currentSchedule.tripId,
-        newDate
-      );
+    if (event) {
+      eventData.value = { ...event }; // ✅ 確保 eventData.value 存入 API 回傳的值
+      console.log(`🚀 從後端載入 startTime: ${eventData.value.startTime}`);
+    } else {
+      console.warn(`⚠️ ${newDate} 沒有行程內容`);
+      eventData.value = {};
     }
-
-    eventData.value = event || {}; // 🛑 確保 eventData 不為 undefined
   },
   { immediate: true }
 );
@@ -180,19 +178,27 @@ watch(
 );
 
 // **更新 Start Time**
-const updateStartTime = async () => {
+const updateStartTime = async (newTime) => {
   if (!eventData.value) return;
+
+  console.log(`🔄 更新後端 startTime 為: ${newTime}`);
   await eventStore.updateEvent(eventData.value.event_id, {
-    startTime: eventData.value.startTime,
+    startTime: newTime,
   });
+
+  console.log(`✅ 更新完成`);
 };
 
 // 存儲每個日期的出發時間
 const departureTimes = ref({});
 const departureTime = computed({
-  get: () => departureTimes.value[formattedSelectedDate.value] || "08:00",
-  set: (newTime) => {
-    departureTimes.value[formattedSelectedDate.value] = newTime;
+  get: () => {
+    return eventData.value?.startTime || "08:00"; // ✅ 預設值 08:00
+  },
+  set: async (newTime) => {
+    if (!eventData.value) return;
+    eventData.value.startTime = newTime; // 更新本地資料
+    await updateStartTime(newTime); // ✅ 更新後端
   },
 });
 

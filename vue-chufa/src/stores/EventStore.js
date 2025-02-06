@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import { format } from "date-fns";
 import axios from "axios";
 
 // API 伺服器 URL
@@ -15,36 +14,27 @@ export const useEventStore = defineStore("eventStore", {
 
     async fetchEventByDate(tripId, date) {
       try {
-        // ✅ 確保 `date` 為 `YYYY-MM-DD`
-        const formattedDate =
-          typeof date === "string" && date.includes("-")
-            ? date // **如果已經是 `YYYY-MM-DD`，則不轉換**
-            : format(new Date(date), "yyyy-MM-dd"); // **否則轉換為 `YYYY-MM-DD`**
-
-        console.log(
-          `🔍 發送 API 請求: /api/event/${tripId}/date/${formattedDate}`
-        );
+        console.log(`🔍 發送 API 請求: /api/event/${tripId}/date/${date}`);
 
         const response = await axios.get(
-          `${API_BASE_URL}/api/event/${tripId}/date/${formattedDate}`
+          `${API_BASE_URL}/api/event/${tripId}/date/${date}`
         );
-
         console.log("📥 伺服器回應:", response.data);
 
         if (!response.data || response.data.length === 0) {
-          console.warn(`⚠️ 沒有找到 ${formattedDate} 的行程內容`);
-          this.events[formattedDate] = null;
+          console.warn(`⚠️ 沒有找到 ${date} 的行程內容`);
           return null;
         }
 
-        response.data.forEach((event) => {
-          console.log(
-            `✅ 事件 ID: ${event.eventId}, 日期: ${event.calendar.date}`
-          );
-        });
+        const event = response.data[0]; // **取第一筆資料**
+        console.log(
+          `✅ 事件 ID: ${event.eventId}, startTime: ${event.startTime}`
+        );
 
-        this.events[formattedDate] = response.data;
-        return response.data;
+        return {
+          ...event,
+          startTime: event.startTime || "08:00:00", // ✅ 確保 `startTime` 不為 `undefined`
+        };
       } catch (error) {
         console.error("❌ 無法取得行程內容:", error);
         return null;
@@ -62,14 +52,32 @@ export const useEventStore = defineStore("eventStore", {
           notes: "",
         };
 
-        const response = await axios.post(
+        console.log(
+          "📡 發送 API 請求:",
           `${API_BASE_URL}/api/event/`,
           eventData
         );
-        this.events[date] = response.data;
+
+        const response = await axios.post(
+          `${API_BASE_URL}/api/event/`, // 確保這裡的 URL 正確
+          eventData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        console.log("✅ API 回應:", response.data);
+
+        if (!this.events[date]) {
+          this.events[date] = [];
+        }
+        this.events[date].push(response.data);
+
         return response.data;
       } catch (error) {
-        console.error("❌ 無法新增行程內容:", error);
+        console.error("❌ 無法新增行程內容:", error.response || error);
       }
     },
 

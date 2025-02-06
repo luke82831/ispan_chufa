@@ -3,6 +3,7 @@ package com.ispan.chufa.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
+import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
 import com.ispan.chufa.service.MemberService;
 import com.ispan.chufa.service.ScheduleService;
@@ -32,7 +34,10 @@ import com.ispan.chufa.service.ScheduleService;
 @RequestMapping("/api")
 public class ScheduleController {
 
-    @Autowired
+	@Autowired
+	private ScheduleRepository scheduleRepository;
+	
+	@Autowired
     private ScheduleService scheduleService;
     
     @Autowired
@@ -112,13 +117,15 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateSchedule(@PathVariable("tripId") Long tripId,
-            @RequestBody ScheduleBean updatedSchedule) {
-        try {
-            ScheduleBean updated = scheduleService.updateSchedule(tripId, updatedSchedule);
-            return new ResponseEntity<>(updated, HttpStatus.OK); // 更新成功，返回 200 和更新後的資料
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 資料不存在，返回 404 和錯誤訊息
+    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId, @RequestBody Map<String, String> request) {
+        Optional<ScheduleBean> scheduleOptional = scheduleRepository.findById(tripId);
+        if (scheduleOptional.isPresent()) {
+        	ScheduleBean schedule = scheduleOptional.get();
+            schedule.setEndDate(LocalDate.parse(request.get("endDate")));
+            scheduleRepository.save(schedule);
+            return ResponseEntity.ok().body("行程結束日期已更新");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
     }
 

@@ -73,11 +73,13 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useScheduleStore } from "@/stores/ScheduleStore";
+import { useEventStore } from "@/stores/EventStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();
 const route = useRoute();
 const scheduleStore = useScheduleStore();
+const eventStore = useEventStore();
 
 // 從 URL 取得行程 ID
 const tripId = route.params.tripId;
@@ -171,12 +173,29 @@ const changeDate = (direction) => {
 };
 
 // **新增一天**
-const addOneMoreDay = () => {
+const addOneMoreDay = async () => {
   if (!endDate.value) return;
 
   const newDate = new Date(endDate.value);
   newDate.setDate(newDate.getDate() + 1);
-  scheduleStore.currentSchedule.endDate = newDate.toISOString().split("T")[0];
+  const formattedDate = newDate.toISOString().split("T")[0];
+
+  console.log("🗓️ 新增一天:", formattedDate);
+
+  // 更新行程結束日期
+  scheduleStore.currentSchedule.endDate = formattedDate;
+
+  try {
+    console.log("🔄 更新 `endDate`:", formattedDate);
+    await scheduleStore.updateScheduleEndDate(tripId, formattedDate);
+
+    console.log("🚀 新增事件 `addEvent`:", tripId, formattedDate);
+    // await eventStore.addEvent(tripId, formattedDate);
+
+    console.log("✅ `addEvent` 成功");
+  } catch (error) {
+    console.error("❌ 更新行程結束日期或新增事件失敗:", error);
+  }
 
   updateSelectedDate(newDate);
 };

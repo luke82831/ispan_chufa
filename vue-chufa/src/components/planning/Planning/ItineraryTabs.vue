@@ -72,7 +72,7 @@
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useScheduleStore } from "@/stores/useScheduleStore";
+import { useScheduleStore } from "@/stores/ScheduleStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();

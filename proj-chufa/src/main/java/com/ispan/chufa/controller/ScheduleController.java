@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
+import com.ispan.chufa.service.EventService;
 import com.ispan.chufa.service.MemberService;
 import com.ispan.chufa.service.ScheduleService;
 
@@ -33,6 +34,10 @@ public class ScheduleController {
 
     @Autowired
     private ScheduleService scheduleService;
+    
+    @Autowired
+    private EventService eventService;
+
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
@@ -43,7 +48,7 @@ public class ScheduleController {
             @RequestParam("tripName") String tripName,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam("coverPhoto") MultipartFile coverPhoto, // 接收檔案
+            @RequestParam("coverPhoto") MultipartFile coverPhoto,
             @RequestParam("userId") Long userId) {
 
         System.out.println("Received tripName: " + tripName);
@@ -54,15 +59,15 @@ public class ScheduleController {
 
         try {
             MemberBean user = memberService.getUserById(userId);
-
             if (user == null) {
                 System.err.println("User with ID " + userId + " not found.");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            // 將 MultipartFile 轉換為 byte[]
+            // 轉換 MultipartFile 為 byte[]
             byte[] coverPhotoBytes = coverPhoto.getBytes();
 
+            // **建立行程 (Schedule)**
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
@@ -70,8 +75,12 @@ public class ScheduleController {
             schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
-            // 儲存行程資料
+            // **儲存行程**
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
+
+            // **自動建立 event**
+            eventService.createEventFromSchedule(savedSchedule);
+
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
@@ -81,6 +90,7 @@ public class ScheduleController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     // 取得所有行程
     @GetMapping("/schedules")

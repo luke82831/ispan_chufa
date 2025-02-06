@@ -11,7 +11,9 @@
 
     <!-- 行程列表 -->
     <div v-if="loading" class="loading-text">載入中...</div>
-    <div v-else-if="schedules.length === 0" class="no-schedules">目前沒有行程</div>
+    <div v-else-if="schedules.length === 0" class="no-schedules">
+      目前沒有行程
+    </div>
     <div v-else class="itineraries-grid">
       <div
         v-for="schedule in paginatedSchedules"
@@ -27,7 +29,10 @@
           />
 
           <!-- 右上角垃圾桶按鈕 -->
-          <button class="delete-btn" @click.stop="confirmDelete(schedule.tripId)">
+          <button
+            class="delete-btn"
+            @click.stop="confirmDelete(schedule.tripId)"
+          >
             🗑️
           </button>
         </div>
@@ -46,7 +51,10 @@
         &lt; 上一頁
       </button>
       <span>第 {{ currentPage }} / {{ totalPages }} 頁</span>
-      <button @click="changePage('next')" :disabled="currentPage === totalPages">
+      <button
+        @click="changePage('next')"
+        :disabled="currentPage === totalPages"
+      >
         下一頁 &gt;
       </button>
     </div>
@@ -56,7 +64,7 @@
 <script>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { useScheduleStore } from "@/stores/useScheduleStore";
+import { useScheduleStore } from "@/stores/ScheduleStore";
 import Swal from "sweetalert2";
 
 export default {
@@ -76,7 +84,9 @@ export default {
     const itemsPerPage = 8; // 每頁顯示 6 個行程
 
     // 計算總頁數
-    const totalPages = computed(() => Math.ceil(schedules.value.length / itemsPerPage));
+    const totalPages = computed(() =>
+      Math.ceil(schedules.value.length / itemsPerPage)
+    );
 
     // 取得當前頁面的行程清單
     const paginatedSchedules = computed(() => {
@@ -122,7 +132,10 @@ export default {
         await Swal.fire("已刪除！", "您的行程已成功刪除。", "success");
 
         // 確保刪除後頁面更新
-        if (schedules.value.length % itemsPerPage === 1 && currentPage.value > 1) {
+        if (
+          schedules.value.length % itemsPerPage === 1 &&
+          currentPage.value > 1
+        ) {
           currentPage.value--;
         }
       }

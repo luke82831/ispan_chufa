@@ -70,7 +70,10 @@ public class ScheduleBean {
     }
     
     public String getCoverPhotoBase64() {
-        return Base64.getEncoder().encodeToString(this.coverPhoto); // 將 byte[] 轉換成 Base64 字串
+        if (this.coverPhoto != null) {
+            return Base64.getEncoder().encodeToString(this.coverPhoto);
+        }
+        return ""; // 或者返回 null，根據需求而定
     }
 
     public void setCoverPhotoBase64(String base64String) {

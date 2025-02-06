@@ -56,11 +56,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import Swal from "sweetalert2";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore";
+import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const placeStore = usePlaceStore();
+const itineraryStore = useItineraryStore();
 
 // 接收父組件傳遞的 place prop
 const props = defineProps({
@@ -107,8 +109,52 @@ const addToItinerary = () => {
     Swal.fire("地點資料未正確加載");
     return;
   }
-  placeStore.addToItinerary(place.value); // 呼叫 Pinia store 的方法
-  console.log("加入行程:", place.value);
+
+  // 取得當前選擇的行程日期
+  const selectedDate = itineraryStore.selectedDate;
+  if (!selectedDate) {
+    Swal.fire("請先選擇行程日期");
+    return;
+  }
+
+  // 取得當前行程的地點列表
+  const itineraryForSelectedDay =
+    itineraryStore.getItineraryForDay(selectedDate);
+
+  // 找到新地點的索引位置
+  const newIndex = itineraryForSelectedDay.length;
+
+  // 呼叫 Pinia store 的方法來加入行程
+  itineraryStore.addPlaceToDay(selectedDate, place.value);
+
+  console.log(
+    `📌 新增行程地點: ${place.value.displayName} (索引: ${newIndex})`
+  );
+
+  // **自動更新 `origin` 和 `destination`**
+  if (newIndex > 0) {
+    // 取得上一個地點作為新的起點
+    const previousPlace = itineraryForSelectedDay[newIndex - 1].location;
+    const newPlaceLocation = place.value.location;
+
+    // 更新 `routePairs`（確保新的 `origin` 和 `destination` 被記錄）
+    placeStore.updateRoutePair(
+      selectedDate,
+      newIndex - 1,
+      previousPlace,
+      newPlaceLocation
+    );
+    console.log(
+      `🚗 設定路徑: ${previousPlace.lat}, ${previousPlace.lng} ➡ ${newPlaceLocation.lat}, ${newPlaceLocation.lng}`
+    );
+  }
+
+  // Swal.fire({
+  //   title: "已加入行程",
+  //   icon: "success",
+  //   timer: 1000,
+  //   showConfirmButton: false,
+  // });
 };
 </script>
 
@@ -116,60 +162,88 @@ const addToItinerary = () => {
 .place-details {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - 60px); /* 減去 navbar 高度 */
+  overflow: hidden;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  position: relative; /* 讓 .button-container 絕對對齊底部 */
 }
 
+/* 讓內容區域可以滾動 */
 .text-info {
-  flex: 1; /* 讓文字區域占據剩餘空間 */
-  padding: 0px 20px 0px 20px;
+  flex: 1; /* 讓內容區域佔滿剩餘空間 */
+  padding: 20px;
+  overflow-y: auto; /* 內容超出時可滾動 */
+  min-height: 0; /* 避免內容過長撐開 */
 }
 
+/* 照片區塊 */
 .photo-gallery-container {
   display: flex;
   justify-content: center;
   width: 100%;
-  overflow: hidden; /* 隱藏超出範圍的部分 */
+  padding: 10px;
+  max-height: 320px; /* 限制最大高度 */
+  overflow: hidden; /* 防止多餘空白 */
 }
 
 .photo-gallery {
   display: flex;
   gap: 10px;
-  overflow-x: auto; /* 啟用橫向滾動 */
-  scroll-behavior: smooth; /* 使滾動平滑 */
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  max-width: 100%;
+  padding: 10px;
 }
 
 .photo-gallery img {
-  width: 100%; /* 設定圖片的寬度 */
+  width: auto;
   height: 300px;
   object-fit: cover;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
 }
 
+.photo-gallery img:hover {
+  transform: scale(1.05);
+}
+
+/* 按鈕區域固定置底，不影響滾動 */
 .button-container {
   position: sticky;
   bottom: 0;
-  background-color: white;
-  padding: 10px;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* 按鈕區域陰影 */
+  left: 0;
+  width: 100%;
+  background: white;
+  padding: 15px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 0 0 12px 12px;
+  z-index: 10;
 }
 
+/* 按鈕樣式 */
 .action-buttons {
   display: flex;
   justify-content: center;
-  gap: 20px; /* 控制按鈕之間的間距 */
+  gap: 20px;
 }
 
 .action-buttons button {
-  padding: 15px 20px; /* 增加按鈕的內邊距，讓按鈕更大 */
-  background-color: #007bff;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 16px; /* 增大字體 */
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .action-buttons button:hover {
-  background-color: #0056b3;
+  background: #0056b3;
+  transform: scale(1.05);
 }
 </style>

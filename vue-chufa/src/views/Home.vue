@@ -1,8 +1,5 @@
 <template>
-  <div class="home-container">
-    <h1>首頁</h1>
-    <router-link to="/places" class="manage-button">管理地點</router-link>
-  </div>
+  
 </template>
 
 <style scoped>

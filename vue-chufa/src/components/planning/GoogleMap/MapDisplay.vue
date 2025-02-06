@@ -13,7 +13,7 @@
 import { ref, onMounted } from "vue";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 import PlaceDetail from "./PlaceDetail.vue";
-import { usePlaceStore } from "@/stores/placestore"; // 引入 Pinia store
+import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
 const placeStore = usePlaceStore(); // 使用 store
 

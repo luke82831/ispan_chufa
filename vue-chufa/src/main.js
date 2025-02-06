@@ -1,9 +1,10 @@
-import { createApp } from 'vue';
-import { createPinia } from 'pinia';
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
-import App from './App.vue';
-import router from './router/router.js';
-import { useUserStore } from '@/stores/user.js';
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import { useUserStore } from "@/stores/user.js";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+import App from "./App.vue";
+import router from "./router/router.js";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import { createVuetify } from 'vuetify';
 import 'vuetify/styles'; // 引入 Vuetify 樣式
@@ -24,5 +25,5 @@ app.use(vuetify);
 
 const userStore = useUserStore();
 userStore.fetchProfile().finally(() => {
-    app.mount('#app'); // 等待初始化後再掛載應用
+  app.mount("#app"); // 等待初始化後再掛載應用
 });

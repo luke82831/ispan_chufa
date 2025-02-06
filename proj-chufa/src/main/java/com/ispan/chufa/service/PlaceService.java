@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.ispan.chufa.domain.CouponBean;
@@ -141,5 +143,11 @@ public class PlaceService {
     public List<PlaceBean> getAllPlaces() {
         return placeRepository.findAll();
     }
+    
+ // 取得分頁數據
+    public Page<PlaceBean> getPlacesWithPagination(int page, int size) {
+        return placeRepository.findAll(PageRequest.of(page, size));
+    }
+
     
 }

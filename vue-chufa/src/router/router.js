@@ -1,18 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
-import CreatePlanning from "@/views/planning/CreatePlanning.vue";
-import PlanningTabs from "@/views/planning/PlanningPage.vue";
-import Blog from "@/views/blog/blog.vue"; // ✅ 文章列表和編輯器共用
+import CreateItinerary from "@/views/planning/CreateItinerary.vue";
+import PlanningPage from "@/views/planning/PlanningPage.vue";
 import Home from "@/views/Home.vue";
-
-import Places from "@/views/admin/PlaceManagement.vue";// ✅ 新增地點管理頁面
+import AdminLayout from "@/layout/AdminLayout.vue";
+import MemberManagement from "@/views/admin/MemberManagement.vue";
+import PlaceManagement from "@/views/admin/PlaceManagement.vue";
+import PostManagement from "@/views/admin/PostManagement.vue";
 
 const routes = [
     { path: "/", component: Home },
-    { path: "/map", component: Map },
-    { path: "/planningtabs", component: PlanningTabs },
-    { path: "/createplanning", component: CreatePlanning },
-    { path: "/blog", name: "Blog", component: Blog }, // ✅ 文章列表
-    { path: "/places", component: Places },
+    { path: "/planningpage", component: PlanningPage },
+    { path: "/createplanning", component: CreateItinerary },
     {
         path: "/secure/Login",
         name: "Login",
@@ -30,17 +28,21 @@ const routes = [
         component: () => import("@/views/secure/Register.vue"), // 指向 Register 組件
     },
     {
-        path: "/admin/Role",
-        name: "Role", // 路由名稱
-        component: () => import("@/views/admin/Role.vue"), // 指向 Role 組件
-    },
-    {
         path: "/blog/create",
         name: "BlogCreate",
         component: () => import("@/views/blog/blog.vue"), // 指向 post 組件
     },
-    { path: "/map", component: Map },
-]
+    {
+        path: "/admin",
+        component: AdminLayout,
+        children: [
+            { path: "members", component: MemberManagement },
+            { path: "places", component: PlaceManagement },
+            { path: "post", component: PostManagement },
+            { path: "", redirect: "/admin/members" }, // 預設顯示會員管理
+        ],
+    },
+];
 
 export default createRouter({
     history: createWebHistory(),

@@ -209,5 +209,4 @@ public class MemberService {
 		Pageable pageable = PageRequest.of(page, size);
 		return memberRepository.findAll(pageable);
 	}
-
 }

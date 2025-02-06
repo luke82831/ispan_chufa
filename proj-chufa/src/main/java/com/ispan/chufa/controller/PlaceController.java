@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.PlaceBean;
@@ -76,5 +78,19 @@ public class PlaceController {
         System.out.println("📢 查詢所有地點，共 " + places.size() + " 筆資料");
         return ResponseEntity.ok(places);
     }
+    
+ // 取得 Place 分頁數據
+    @GetMapping("/paged")
+    public ResponseEntity<Page<PlaceBean>> getPagedPlaces(
+            @RequestParam(defaultValue = "0") int page,  // 預設第 0 頁
+            @RequestParam(defaultValue = "10") int size  // 預設每頁 10 筆
+    ) {
+        if (page < 0 || size <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        Page<PlaceBean> placePage = placeService.getPlacesWithPagination(page, size);
+        return ResponseEntity.ok(placePage);
+    }
+
     
 }

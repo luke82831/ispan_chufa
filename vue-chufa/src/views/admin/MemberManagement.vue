@@ -152,7 +152,10 @@ fetchUsers();
   font-family: "Microsoft JhengHei", sans-serif;
   background: linear-gradient(145deg, #ffffff, #f3f3f3);
   border-radius: 20px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.2), /* 主要陰影 */
+    0 5px 15px rgba(0, 0, 0, 0.15); /* 次要陰影，增加層次感 */
+  
   overflow: hidden;
 }
 

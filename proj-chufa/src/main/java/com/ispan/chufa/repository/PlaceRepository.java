@@ -1,5 +1,8 @@
 package com.ispan.chufa.repository;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +15,6 @@ public interface PlaceRepository extends JpaRepository<PlaceBean, Long> {
 
 	PlaceBean findPlaceByGooglemapPlaceId(String googlemapPlaceId);
 
+	 Page<PlaceBean> findAll(Pageable pageable);
+	
 }

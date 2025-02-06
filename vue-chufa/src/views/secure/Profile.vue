@@ -9,8 +9,25 @@
         @error="onImageError"
       />
       <div class="user-info">
-        <h1>{{ member.name || "會員名稱" }}</h1>
-        <p class="welcome-text">歡迎回來，{{ member.nickname || "暱稱" }}！</p>
+        <!-- 左側文字區（會員名稱與歡迎文字）與右側操作按鈕區 -->
+        <div class="info-row">
+          <div class="text-info">
+            <h1>{{ member.name || "會員名稱" }}</h1>
+            <p class="welcome-text">
+              歡迎回來，{{ member.nickname || "暱稱" }}！
+            </p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-edit" @click="editProfile">編輯資料</button>
+            <button
+              class="btn btn-admin"
+              v-if="isAdmin"
+              @click="navigateToAdmin"
+            >
+              管理會員資料
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -42,7 +59,32 @@
           <dd>{{ member.bio || "個人簡介" }}</dd>
         </div>
       </dl>
-      <button class="btn btn-primary" @click="editProfile">編輯資料</button>
+      <!-- 顯示社群連結 -->
+      <div v-if="member.socialLinks" class="social-links-section">
+        <h3>社群連結</h3>
+        <ul class="social-icons">
+          <li v-if="member.socialLinks.facebook">
+            <a
+              :href="member.socialLinks.facebook"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="facebook"
+            >
+              <i class="fab fa-facebook-f"></i>
+            </a>
+          </li>
+          <li v-if="member.socialLinks.instagram">
+            <a
+              :href="member.socialLinks.instagram"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="instagram"
+            >
+              <i class="fab fa-instagram"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <!-- Edit Form -->
@@ -60,7 +102,12 @@
         </div>
         <div class="form-group">
           <label for="name">姓名：</label>
-          <input type="text" id="name" v-model="editMember.name" class="form-control" />
+          <input
+            type="text"
+            id="name"
+            v-model="editMember.name"
+            class="form-control"
+          />
         </div>
         <div class="form-group">
           <label for="nickname">暱稱：</label>
@@ -98,19 +145,39 @@
         </div>
         <div class="form-group">
           <label for="bio">個人簡介：</label>
-          <textarea id="bio" v-model="editMember.bio" class="form-control"></textarea>
+          <textarea
+            id="bio"
+            v-model="editMember.bio"
+            class="form-control"
+          ></textarea>
+        </div>
+        <!-- 社群連結輸入欄位 -->
+        <h4>社群連結</h4>
+        <div class="form-group">
+          <label for="facebook">Facebook URL:</label>
+          <input
+            type="url"
+            id="facebook"
+            v-model="editMember.socialLinks.facebook"
+            class="form-control"
+            placeholder="https://facebook.com/yourpage"
+          />
+        </div>
+        <div class="form-group">
+          <label for="instagram">Instagram URL:</label>
+          <input
+            type="url"
+            id="instagram"
+            v-model="editMember.socialLinks.instagram"
+            class="form-control"
+            placeholder="https://instagram.com/yourprofile"
+          />
         </div>
         <button type="submit" class="btn btn-save">儲存變更</button>
-        <button type="button" class="btn btn-secondary" @click="cancelEdit">取消</button>
+        <button type="button" class="btn btn-secondary" @click="cancelEdit">
+          取消
+        </button>
       </form>
-    </div>
-
-    <!-- 將管理員功能按鈕與登出按鈕放在同一排 -->
-    <div class="actions-row">
-      <button class="btn btn-secondary" v-if="isAdmin" @click="navigateToAdmin">
-        管理會員資料
-      </button>
-      <button class="btn btn-logout" @click="logout">登出</button>
     </div>
   </div>
 </template>
@@ -123,17 +190,19 @@ import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 
 const userStore = useUserStore();
-
 const router = useRouter();
 
 const isEditing = ref(false);
 const profileLoaded = ref(false);
 
-// 使用 computed 綁定 Pinia 狀態
+// 從 Pinia store 取得會員資料
 const member = computed(() => userStore.member);
-const editMember = ref({ ...userStore.member }); // 用於編輯時的本地拷貝
+// 初始化編輯資料時，確保 socialLinks 不為 undefined
+const editMember = ref({
+  ...userStore.member,
+  socialLinks: { ...(userStore.member.socialLinks || {}) },
+});
 
-// 定義 isAdmin 變數並初始化
 const isAdmin = ref(false);
 
 const formatDate = (date) => {
@@ -145,32 +214,25 @@ const formatDate = (date) => {
 const fetchProfile = async () => {
   try {
     const token = localStorage.getItem("token");
-    console.log("line fetch token=" + token);
     if (!token) {
       Swal.fire("錯誤", "未登入或登入已過期，請重新登入", "error");
       router.push("/secure/Login");
       return;
     }
     const response = await axios.get("/ajax/secure/profile", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
-    console.log("line fetch response", response);
     if (response.data.success) {
-      // 更新 Pinia 狀態
-      console.log("line fetch if 1", userStore.member);
-      userStore.member = { ...response.data.user };
-      console.log("line fetch if 2", userStore.member);
-      console.log("line fetch if 3", editMember.value);
-
-      editMember.value = { ...userStore.member }; // 初始化编辑数据
-
-      console.log("line fetch if 4", editMember.value);
-
-      // 判斷是否為管理員
+      let memberData = { ...response.data.user };
+      if (response.data.socialLinks) {
+        memberData.socialLinks = response.data.socialLinks;
+      }
+      userStore.member = memberData;
+      editMember.value = {
+        ...userStore.member,
+        socialLinks: { ...(userStore.member.socialLinks || {}) },
+      };
       isAdmin.value = response.data.user.role === "ADMIN";
-      console.log("User Role:", response.data.user.role);
-      console.log("Is Admin:", isAdmin.value);
     } else {
       Swal.fire("錯誤", response.data.message, "error");
     }
@@ -179,82 +241,67 @@ const fetchProfile = async () => {
     console.error("Fetch profile failed:", error);
     Swal.fire("錯誤", "無法獲取會員資料", "error");
   }
-  console.log("fetchProfile finish");
 };
-// 處理頁面載入和回調參數的邏輯
+
 onMounted(() => {
   const initialize = async () => {
-    // 定義 urlParams 並從當前窗口的 URL 中解析查詢參數
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
     const source = urlParams.get("source");
-
     if (token) {
-      // 保存 token 並清理 URL
       localStorage.setItem("token", token);
       axios.defaults.headers.Authorization = `Bearer ${token}`;
-      window.history.replaceState({}, document.title, "/secure/Profile"); // 清除查詢參數
+      window.history.replaceState({}, document.title, "/secure/Profile");
     }
-    console.log(source);
     if (source === "line") {
-      console.log("LINE login detected. Reinitializing...");
-
-      // 呼叫 fetchProfile 並重新渲染數據
       await fetchProfile();
-      console.log("start refresh");
-      console.log(location.href);
       location.href = location.href;
     } else {
-      console.log("Not a LINE login. Proceeding normally.");
       await fetchProfile();
     }
   };
-  //   else {
-  //     console.warn("Token not found in URL query parameters.");
-  //   }
-
-  //   // 嘗試抓取用戶資料
-  //   console.log("line before fetch");
-  //   await fetchProfile();
-  // };
-
-  initialize(); // 呼叫初始化函數
+  initialize();
 });
 
-// 管理員跳轉到會員管理頁面 (路徑不變)
 const navigateToAdmin = () => {
-  router.push("/admin/Role");
+  router.push("/admin/members");
 };
 
 const editProfile = () => {
   isEditing.value = true;
-  editMember.value = { ...userStore.member }; // 深拷貝資料
+  editMember.value = {
+    ...userStore.member,
+    socialLinks: { ...(userStore.member.socialLinks || {}) },
+  };
 };
 
 const cancelEdit = () => {
   isEditing.value = false;
-  editMember.value = { ...userStore.member }; // 恢復到未編輯狀態
+  editMember.value = {
+    ...userStore.member,
+    socialLinks: { ...(userStore.member.socialLinks || {}) },
+  };
 };
 
 const saveProfile = async () => {
   try {
-    // 格式化生日欄位
     if (editMember.value.birth) {
       editMember.value.birth = new Date(editMember.value.birth)
         .toISOString()
         .split("T")[0];
     }
-
     const response = await axios.put("/ajax/secure/profile", editMember.value, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
-
     if (response.data.success) {
-      userStore.member = { ...editMember.value }; // 更新畫面資料
+      let updatedUser = { ...response.data.user };
+      if (response.data.socialLinks) {
+        updatedUser.socialLinks = response.data.socialLinks;
+      }
+      userStore.member = updatedUser;
       isEditing.value = false;
       Swal.fire("成功", "資料已更新！", "success");
-      fetchProfile(); // 重新抓取最新資料
-
+      fetchProfile();
       console.log("Sending Updated Member Data:", editMember.value);
     } else {
       Swal.fire("錯誤", response.data.message, "error");
@@ -263,25 +310,25 @@ const saveProfile = async () => {
     console.error("Save profile failed:", error);
     Swal.fire("錯誤", "伺服器錯誤，請稍後再試", "error");
   }
-
   console.log("Submitting data:", editMember.value);
 };
 
 const uploadProfilePicture = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
-
   const formData = new FormData();
   formData.append("file", file);
   formData.append("email", userStore.member.email);
-
   try {
-    const response = await axios.post("/ajax/secure/upload-profile-picture", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
+    const response = await axios.post(
+      "/ajax/secure/upload-profile-picture",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
     if (response.data.success) {
-      userStore.member.profile_picture = response.data.profilePicture; // 更新頭像
+      userStore.member.profile_picture = response.data.profilePicture;
       Swal.fire("成功", "大頭貼已更新！", "success");
     } else {
       Swal.fire("錯誤", response.data.message, "error");
@@ -296,9 +343,12 @@ const logout = () => {
   localStorage.removeItem("token");
   userStore.logout();
   router.push("/secure/Login").then(() => {
-    // 刷新頁面以避免殘留用戶資料
     window.location.reload();
   });
+};
+
+const onImageError = (event) => {
+  event.target.src = "預設圖片連結";
 };
 </script>
 
@@ -322,9 +372,11 @@ const logout = () => {
   padding-bottom: 20px;
 }
 
+/* 保持圖片大小，不受右側區塊影響 */
 .profile-picture {
   width: 130px;
   height: 130px;
+  flex-shrink: 0; /* 防止圖片因 flex 收縮 */
   border-radius: 50%;
   object-fit: cover;
   margin-right: 25px;
@@ -337,20 +389,76 @@ const logout = () => {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
-.user-info h1 {
+/* 會員資訊區：分為左右兩欄 */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* info-row：會員名稱與按鈕各自獨立 */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* 左側文字區 */
+.text-info {
+  /* 讓文字區不被影響 */
+}
+.text-info h1 {
   margin: 0;
   font-size: 28px;
   font-weight: bold;
   color: #343a40;
 }
-
 .welcome-text {
-  margin-top: 5px;
   font-size: 16px;
   color: #555;
   font-style: italic;
 }
 
+/* 右側操作按鈕區 */
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit,
+.btn-admin {
+  padding: 14px 26px;
+  font-size: 18px;
+  border-radius: 12px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.btn-edit {
+  background: linear-gradient(45deg, #007bff, #00c6ff);
+  color: #fff;
+}
+.btn-edit:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(45deg, #0056b3, #0086d1);
+}
+
+.btn-admin {
+  background: linear-gradient(45deg, #6a11cb, #2575fc);
+  color: #fff;
+}
+.btn-admin:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(45deg, #5a0fb5, #1f63e0);
+}
+
+/* Profile details container */
 .profile-details-container {
   margin-top: 20px;
   padding: 20px;
@@ -361,8 +469,8 @@ const logout = () => {
 
 .profile-details {
   display: flex;
-  flex-wrap: wrap; /* 允許換行 */
-  gap: 20px; /* 每個欄位的間距 */
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .detail-item {
@@ -446,54 +554,124 @@ const logout = () => {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn-primary {
-  background: #007bff;
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover {
-  background: #0056b3;
-  box-shadow: 0 4px 10px rgba(0, 91, 187, 0.4);
-}
-
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-  box-shadow: 0 4px 10px rgba(90, 98, 104, 0.4);
-}
-
-.btn-logout {
-  background: #dc3545;
-  color: white;
-  border: none;
-}
-
-.btn-logout:hover {
-  background: #c82333;
-  box-shadow: 0 4px 10px rgba(200, 35, 51, 0.4);
-}
-
-.btn-save {
-  background: #28a745;
-  color: white;
-  border: none;
-}
-
-.btn-save:hover {
-  background: #218838;
-  box-shadow: 0 4px 10px rgba(33, 136, 56, 0.4);
-}
+/* 其他按鈕樣式保持不變 */
 
 .actions-row {
   display: flex;
   justify-content: flex-end;
   gap: 20px;
   margin-top: 30px;
+}
+
+/* 社群連結區塊 */
+.social-links-section {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.social-links-section h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #333;
+}
+
+.social-icons {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social-icons li a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  color: #fff;
+  text-decoration: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.social-icons li a.facebook {
+  background-color: #3b5998;
+}
+
+.social-icons li a.instagram {
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285aeb 90%
+  );
+}
+
+.social-icons li a:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+/* 發文/規劃按鈕 (保持原有) */
+#planningbutton {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #84baf5;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#planningbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a95d5;
+}
+
+#blogbutton {
+  position: fixed;
+  bottom: 200px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #85a98f;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#blogbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a6c57;
 }
 </style>

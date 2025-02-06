@@ -22,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
+import com.ispan.chufa.repository.EventRepository;
 import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
 import com.ispan.chufa.service.MemberService;
@@ -38,11 +40,13 @@ public class ScheduleController {
 	private ScheduleRepository scheduleRepository;
 	
 	@Autowired
+	private EventRepository eventRepository;
+		
+	@Autowired
     private ScheduleService scheduleService;
     
     @Autowired
     private EventService eventService;
-
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
@@ -119,16 +123,24 @@ public class ScheduleController {
     @PutMapping("/schedule/{tripId}")
     public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId, @RequestBody Map<String, String> request) {
         Optional<ScheduleBean> scheduleOptional = scheduleRepository.findById(tripId);
+        
         if (scheduleOptional.isPresent()) {
-        	ScheduleBean schedule = scheduleOptional.get();
-            schedule.setEndDate(LocalDate.parse(request.get("endDate")));
+            ScheduleBean schedule = scheduleOptional.get();
+            LocalDate newEndDate = LocalDate.parse(request.get("endDate"));
+
+            // 更新行程結束日期
+            schedule.setEndDate(newEndDate);
             scheduleRepository.save(schedule);
-            return ResponseEntity.ok().body("行程結束日期已更新");
+
+            // ✅ 自動新增對應的 Event
+            eventService.createEventFromSchedule(schedule);
+
+            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增對應的事件");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
     }
-
+    
     // DELETE: 根據 tripId 刪除行程資料
     @DeleteMapping("/schedule/{tripId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long tripId) {

@@ -1,17 +1,11 @@
 <template>
   <div class="space-y-6">
-    <h3 class="text-2xl font-semibold text-gray-900">
-      {{ selectedDate }} 的行程
-    </h3>
+    <h3 class="text-2xl font-semibold text-gray-900">{{ selectedDate }} 的行程</h3>
 
     <!-- 設定出發時間 -->
     <div class="departure-time">
       <label>出發時間：</label>
-      <input
-        type="time"
-        v-model="eventData.startTime"
-        @blur="updateStartTime"
-      />
+      <input type="time" v-model="eventData.startTime" @blur="updateStartTime" />
     </div>
 
     <!-- 顯示當天的行程 -->
@@ -26,18 +20,14 @@
         <template #item="{ element, index }">
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
-              <button @click="deletePlace(index)" class="delete-button">
-                ✖
-              </button>
+              <button @click="deletePlace(index)" class="delete-button">✖</button>
               <div class="itinerary-details">
                 <div class="stay-time-header">
                   <StayTime
                     :date="selectedDate"
                     :departureTime="departureTime"
                     :itinerary="itineraryForSelectedDay"
-                    :stayDurations="
-                      itineraryStore.stayDurations[selectedDate] || {}
-                    "
+                    :stayDurations="itineraryStore.stayDurations[selectedDate] || {}"
                     :index="index"
                   />
                   <!-- 顯示超連結模式 -->
@@ -47,9 +37,7 @@
                     @click.prevent="editStayTime(element)"
                     class="stay-duration-link"
                   >
-                    {{
-                      itineraryStore.getStayDuration(selectedDate, element.id)
-                    }}
+                    {{ itineraryStore.getStayDuration(selectedDate, element.id) }}
                     分鐘
                   </a>
                   <!-- 編輯模式 -->
@@ -80,10 +68,7 @@
             </li>
 
             <!-- 顯示路徑時間 -->
-            <div
-              v-if="index < itineraryForSelectedDay.length - 1"
-              class="route-time"
-            >
+            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
               <route-time :date="selectedDate" :index="index" />
             </div>
           </ul>
@@ -130,13 +115,10 @@ const formattedSelectedDate = computed(() => {
 
   // **從 schedule.startDate 取得年份**
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
-    new Date().getFullYear();
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
 
   // **確保 `M/D` 變成 `MM-DD`（補 0）**
-  const [month, day] = cleanedDate
-    .split("/")
-    .map((num) => num.padStart(2, "0"));
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
 
   // **回傳 `YYYY-MM-DD` 格式**
   return `${baseYear}-${month}-${day}`;
@@ -229,12 +211,7 @@ const updateRoutePairs = () => {
     const origin = itineraryForSelectedDay.value[i].location;
     const destination = itineraryForSelectedDay.value[i + 1].location;
 
-    placeStore.updateRoutePair(
-      formattedSelectedDate.value,
-      i,
-      origin,
-      destination
-    );
+    placeStore.updateRoutePair(formattedSelectedDate.value, i, origin, destination);
   }
 };
 
@@ -250,11 +227,7 @@ const editStayTime = (place) => {
 // **儲存新的停留時間**
 const saveStayTime = (place) => {
   const newDuration = Number(place.tempStayDuration);
-  itineraryStore.setStayDuration(
-    formattedSelectedDate.value,
-    place.id,
-    newDuration
-  );
+  itineraryStore.setStayDuration(formattedSelectedDate.value, place.id, newDuration);
   place.isEditingStay = false;
 };
 

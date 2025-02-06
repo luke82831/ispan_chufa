@@ -31,11 +31,7 @@
 
     <!-- 日期分頁 -->
     <div class="date-tabs">
-      <button
-        class="arrow-button"
-        @click="changeDate('prev')"
-        :disabled="isFirstDay"
-      >
+      <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
         &lt;
       </button>
 
@@ -48,15 +44,9 @@
         {{ formatDate(date) }}
       </button>
 
-      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
-        ＋
-      </button>
+      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
 
-      <button
-        class="arrow-button"
-        @click="changeDate('next')"
-        :disabled="isLastDay"
-      >
+      <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
         &gt;
       </button>
     </div>
@@ -146,6 +136,17 @@ const dateRange = computed(() => {
   return dates;
 });
 
+// **頁面載入時設定初始選擇日期**
+watch(
+  dateRange,
+  (newDates) => {
+    if (newDates.length > 0 && !selectedDate.value) {
+      updateSelectedDate(newDates[0]);
+    }
+  },
+  { immediate: true }
+);
+
 // **格式化日期**
 const formatDate = (date) => {
   if (!(date instanceof Date) || isNaN(date)) return "";
@@ -164,10 +165,7 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (
-    direction === "next" &&
-    currentIndex < dateRange.value.length - 1
-  ) {
+  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -188,37 +186,20 @@ const addOneMoreDay = async () => {
   try {
     console.log("🔄 更新 `endDate`:", formattedDate);
     await scheduleStore.updateScheduleEndDate(tripId, formattedDate);
+    console.log("✅ `endDate` 更新成功");
 
-    console.log("🚀 新增事件 `addEvent`:", tripId, formattedDate);
-    // await eventStore.addEvent(tripId, formattedDate);
-
-    console.log("✅ `addEvent` 成功");
+    // ✅ 不需要手動更新 eventStore，因為切換日期時會自動查詢
   } catch (error) {
-    console.error("❌ 更新行程結束日期或新增事件失敗:", error);
+    console.error("❌ 更新行程結束日期失敗:", error);
   }
 
-  updateSelectedDate(newDate);
+  updateSelectedDate(newDate); // 切換到新日期，自動觸發事件查詢
 };
 
 // **是否為第一天 / 最後一天**
-const isFirstDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[0])
-);
+const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
 const isLastDay = computed(
-  () =>
-    selectedDate.value ===
-    formatDate(dateRange.value[dateRange.value.length - 1])
-);
-
-// **頁面載入時設定初始選擇日期**
-watch(
-  dateRange,
-  (newDates) => {
-    if (newDates.length > 0 && !selectedDate.value) {
-      updateSelectedDate(newDates[0]);
-    }
-  },
-  { immediate: true }
+  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
 );
 
 // **返回行程列表**

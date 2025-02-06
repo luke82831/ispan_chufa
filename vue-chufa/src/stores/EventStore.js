@@ -45,8 +45,8 @@ export const useEventStore = defineStore("eventStore", {
     async addEvent(tripId, date) {
       try {
         const eventData = {
-          tripId,
-          date,
+          schedule: { tripId: tripId },
+          calendar: { date: date },
           startTime: "08:00", // 預設 08:00 出發
           endTime: null,
           notes: "",

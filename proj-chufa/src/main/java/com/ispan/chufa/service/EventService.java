@@ -64,7 +64,7 @@ public class EventService {
         event.setSchedule(schedule);
         event.setCalendar(calendar);
         event.setStartTime(LocalTime.of(8, 0)); // **預設 08:00 出發**
-        event.setNotes("行程開始");
+        event.setNotes(null);
 
         eventRepository.save(event);
         System.out.println("✅ Event created for date: " + date);

@@ -1,15 +1,23 @@
 <template>
+
     <div>
-        <p>{{ member }}</p><!-- Post創建者 -->
-        <p class="title">{{ postData.postTitle }}</p><!-- 標題 -->
-        <p>===========</p>
+        <h1 class="title">標題:{{ postData.postTitle }}</h1><!-- 標題 -->
+        <EditPost v-show="member.userid == memberId" :postData="postData"></EditPost>
+        <p>作者:{{ memberName }}</p><!-- Post作者 -->
+        <p><strong>文章狀態：</strong>{{ postData.postStatus }}</p>
         <div v-html="htmlContent"></div><!-- 內容 -->
+        <p><strong>連結：</strong><a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
+        <p><strong>發布時間：</strong>{{ postData.postTime }}</p>
     </div>
-    <InputComment></InputComment>
-    <Comment></Comment>
+    =============
+    <div>
+        <InputComment></InputComment>
+        <Comment></Comment>
+    </div>
 </template>
     
 <script setup>
+    import EditPost from "@/components/planning/Post/EditPost.vue";
     import InputComment from "@/components/planning/Comment/InputComment.vue";
     import Comment from "@/components/planning/Comment/Comment.vue";
 
@@ -18,11 +26,17 @@
     import { useRoute, useRouter } from 'vue-router';
     import Swal from "sweetalert2";
 
+    import { useUserStore } from '@/stores/user'
+    const user = useUserStore()
+    const { member, isLoggedIn } = user
+
+
     const router = useRouter();
     const route = useRoute();
     const postid = ref(route.params.postid); // 取得動態路由參數
 
-    const member=ref('')
+    const memberName=ref('')
+    const memberId=ref('')
     const postData = ref('')
     const htmlContent = ref('')
 
@@ -45,7 +59,8 @@
         const response =await axiosapi.get(`/post/findById/${postid.value}`);
         if (response.data.successs) {
             postData.value = response.data.list[0]
-            member.value = postData.value.member.name
+            memberName.value = postData.value.member.name
+            memberId.value = postData.value.member.userid
             htmlContent.value = response.data.list[0].postContent
         } else {
             Check()

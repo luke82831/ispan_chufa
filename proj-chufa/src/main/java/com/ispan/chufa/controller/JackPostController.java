@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -137,7 +136,7 @@ public class JackPostController {
     // 刪除貼文
     // 測試 http://localhost:8080/post/delete
     // 測試 RequestBody => {"postid":"1"}
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         Response response = new Response();
@@ -232,6 +231,7 @@ public class JackPostController {
         Long postid;
         String postTitle;
         String postContent;
+
         // 驗證request資料(防呆)
         {
             if (!requestJson.isNull("postid")) {
@@ -278,13 +278,14 @@ public class JackPostController {
 
         // 更新貼文
         bean = postService.updatePost(postid, postTitle, postContent);
-
         // 設定response
         {
             if (bean != null) {
+                // 將Bean映射到DTO用的
+                JackPostDTO dto = modelMapper.map(bean, JackPostDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("更新成功");
-                response.getList().add(bean);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");

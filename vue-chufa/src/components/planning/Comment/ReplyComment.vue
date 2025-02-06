@@ -5,6 +5,7 @@
             <div v-for="comment in replyData">
                 <div :id="`commentId:${comment.commentId}`">
                     <h3>{{comment.memberBean.name}}</h3>
+                    <editComment :comment="comment"></editComment>
                     <div v-html="comment.content"></div>
                     <p v-if="comment.commentUpdatedAt==null">創建留言時間:{{comment.commentCreatedAt}}</p>
                     <p v-else>更新留言時間:{{comment.commentCreatedAt}}</p>
@@ -16,6 +17,7 @@
 </template>
     
 <script setup>
+import editComment from './editComment.vue';
     import CommentFunction from '@/components/planning/Comment/CommentFunction.vue'
     import axiosapi from '@/plugins/axios.js';
     import { ref,onMounted } from 'vue';
@@ -43,6 +45,16 @@
                 findReply()
             }
         });
+        eventBus.on('deleteComment', (deleteCommentParentId)=>{
+            if(props.parentId==deleteCommentParentId){
+                findReply()
+            }
+        });
+        eventBus.on('editComment', (editCommentParentId)=>{
+            if(props.parentId==editCommentParentId){
+                findReply()
+            }
+        });
     })
 
     const replyData = ref()
@@ -52,9 +64,12 @@
         const response =await axiosapi.get(`/comment/findByParentId/${props.parentId}`);
         if (response.data.successs) {
             haveReply.value = response.data.successs
+            dataLength.value = response.data.list.length
             replyData.value = response.data.list
-            dataLength.value = replyData.value.length
-
+        }else{
+            haveReply.value = response.data.successs
+            dataLength.value = response.data.list.length
+            replyData.value = response.data.list
         }
     }
     

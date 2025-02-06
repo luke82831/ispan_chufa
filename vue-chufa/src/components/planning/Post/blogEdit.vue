@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h1>發文</h1>
         <div class="form-group">
+        <button @click="hahaha">重置文章</button>
             <label for="title">標題</label>
             <input type="text" id="title" name="title" placeholder="請輸入文章標題" v-model="title">
         </div>
@@ -10,7 +10,7 @@
         
         </div>
         <!-- 提交按鈕 -->
-        <button @click="submitArticle">提交文章</button>
+        <button @click="outputEditPost">確認編輯</button>
     </div>
 </template>
 
@@ -19,18 +19,20 @@ import { onMounted, ref } from "vue";
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import axiosapi from '@/plugins/axios.js';
-import { useRouter } from "vue-router";
-import { useUserStore } from '@/stores/user'
 
+const props = defineProps(['postData'])
 const title = ref()
-const router = useRouter();
 
-const user = useUserStore()
-const { member, isLoggedIn } = user
 const editorContainer = ref(null);
 let quill;
 
-onMounted(() => {
+const hahaha = () => {
+    console.log("重置文章")
+    title.value = props.postData.postTitle
+    quill.root.innerHTML = props.postData.postContent
+}
+
+onMounted( () => {
     quill = new Quill(editorContainer.value, {
         theme: "snow",
         placeholder: "請輸入內容...",
@@ -43,19 +45,24 @@ onMounted(() => {
         ],
         },
     });
-});
 
-const submitArticle= async () => {
+    hahaha()
+})
+
+const outputEditPost = async () => {
     const body = {
+        "postid":props.postData.postid,
         "postTitle":title.value,
         "postContent":quill.root.innerHTML,
-        "userid":member.userid,
     }
-    const response = await axiosapi.post('/post/create',body);
+    console.log(body)
+    const response = await axiosapi.put('/post/update',body);
+    console.log(response.data)
+
     alert(response.data.message);
     if(response.data.successs){
         console.log(response.data)
-        router.push("/");
+        window.location.reload();
     }
 }
 </script>

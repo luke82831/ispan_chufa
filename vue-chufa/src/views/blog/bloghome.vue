@@ -83,6 +83,32 @@ export default {
     const posts = ref([]);
     const activeTab = ref('myPosts');
 
+    const followersCount = ref(0); // 使用 ref 來定義自適應資料
+    const followingCount = ref(0);
+
+    // 用來從後端取得關注者和被關注者的人數
+    const fetchCount = async (type) => {
+      const url = type === 'followers'
+        ? `/follow/followercount/${member.value.userid}`
+        : `/follow/followingcount/${member.value.userid}`;
+
+      try {
+        const response = await axios.get(url);
+        // 假設返回的資料是一個物件，包含 `count` 資料欄
+        return response.data.count || 0; // 如果沒有資料則返回0
+      } catch (error) {
+        console.error(`Error fetching ${type}:`, error);
+        return 0;
+      }
+    };
+
+    // 載入關注人數和被關注人數
+    const loadCounts = async () => {
+      followersCount.value = await fetchCount('followers');
+      followingCount.value = await fetchCount('followed');
+    };
+
+
     const formatDate = (date) => {
       if (!date) return '';
       const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
@@ -141,6 +167,7 @@ export default {
 
     onMounted(async () => {
       await fetchProfile();
+      await loadCounts();
       if (member.value.userid) {
         await fetchPosts('myPosts');
       }
@@ -152,6 +179,8 @@ export default {
       formatDate,
       setActiveTab,
       activeTab,
+      followersCount,
+      followingCount,
     };
   },
 };

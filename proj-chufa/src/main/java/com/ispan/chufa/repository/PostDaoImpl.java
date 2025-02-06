@@ -101,10 +101,6 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(likedByMePredicate);
 		}
 		
-
-	
-		
-
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID
 		Subquery<Long> subquery = criteriaQuery.subquery(Long.class);

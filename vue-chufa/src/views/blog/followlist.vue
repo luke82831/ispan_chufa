@@ -98,11 +98,11 @@ export default {
         if (response.data.success) {
           member.value = response.data.user || {};
         } else {
-          Swal.fire('錯誤', response.data.message, 'error');
+          //Swal.fire('錯誤', response.data.message, 'error');
         }
       } catch (error) {
         console.error('Fetch profile failed:', error);
-        Swal.fire('錯誤', '無法獲取會員資料', 'error');
+        //Swal.fire('錯誤', '無法獲取會員資料', 'error');
       }
     };
 
@@ -141,7 +141,7 @@ export default {
     };
 
 
-        // 查詢是否關注
+    // 查詢是否關注
     const checkFollowingStatus = async (item) => {
       try {
         const response = await axiosapi.post('/follow/isFollowing', {
@@ -156,7 +156,7 @@ export default {
     };
 
     // 切換關注狀態
-      const toggleFollow = async (item) => {
+    const toggleFollow = async (item) => {
     try {
       const action = item.isFollowing ? 'unfollow' : 'follow';
       const response = await axiosapi.post('/follow/verb', {
@@ -169,6 +169,7 @@ export default {
         // 切換狀態
         item.isFollowing = !item.isFollowing;
         console.log(`User ${item.userid} is now ${item.isFollowing ? 'following' : 'not following'}`);
+        await fetchData(); // 重新加載列表
       } else {
         console.error('Failed to toggle follow status:', response.data.message);
       }

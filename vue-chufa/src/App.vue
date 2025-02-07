@@ -96,7 +96,7 @@ const navigateToSearch = () => {
 
 // 監聽路由變化，動態顯示規劃按鈕
 watch(
-  () => route.path,
+  () => router.path,
   (newPath) => {
     if (newPath === "/") {
       isPlanningStarted.value = false;

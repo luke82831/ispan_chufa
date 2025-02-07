@@ -1,7 +1,7 @@
 <template>
     <div>
         <button @click="reply">回覆</button>
-        <button>分享</button>
+        <button>讚</button>
     </div>
     <input v-show="replyInput" type="text" placeholder="請輸入留言" v-model="comment">
     <button v-show="replyInput" @click="outputReply">送出</button>
@@ -69,12 +69,13 @@
 
                     if(props.replyUser!=null){ // 如果是從回復來回覆的話 前面會加超連接
                         replyUser.value = `<a href="#commentId:${props.replyCommentId}">@${props.replyUser.name}:</a>`
+                        safeHTML.value = replyUser.value + safeHTML.value
                     }
 
                     const body = {
                         "postId":postid.value,
                         "userId":member.userid,
-                        "content":`${replyUser.value}`+`${safeHTML.value}`,
+                        "content":`${safeHTML.value}`,
                         "parentId":`${props.parentId}`
                     }
                     console.log(body)

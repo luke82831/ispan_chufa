@@ -91,6 +91,17 @@
       <span>第 {{ currentPage }} 頁</span>
       <button @click="nextPage">下一頁</button>
     </div>
+
+    <!-- 發文按鈕 -->
+    <div v-if="userStore.isLoggedIn">
+      <RouterLink to="/blog/create" id="blogbutton">發文</RouterLink>
+    </div>
+
+    <!-- 開始規劃按鈕 -->
+    <div v-if="userStore.isLoggedIn">
+      <RouterLink to="/myitineraries" id="planningbutton">開始規劃</RouterLink>
+    </div>
+    <RouterView></RouterView>
   </div>
 </template>
 
@@ -100,6 +111,7 @@ import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { usePostStore } from "@/stores/usePostStore";
+import {useUserStore } from "@/stores/user"
 
 export default {
   setup() {
@@ -116,6 +128,7 @@ export default {
     const visiblePosts = computed(() => {
       return posts.value.filter((post) => !postStore.getHiddenReason(post.postid));
     });
+    const userStore = useUserStore(); // 使用 Pinia 的狀態
 
     const navigateToDetail = (postid, event) => {
       const excludedElements = [".post-actions", ".action-btn", "a", "button"];
@@ -270,6 +283,7 @@ export default {
       currentPage,
       nextPage,
       prevPage,
+      userStore,
     };
   },
 };
@@ -459,5 +473,64 @@ export default {
 .pagination span {
   font-size: 1.1rem;
   color: #333;
+}
+
+/* 發文/規劃按鈕 */
+#planningbutton {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #84baf5;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#planningbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a95d5;
+}
+
+#blogbutton {
+  position: fixed;
+  bottom: 200px;
+  right: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: #85a98f;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 35px;
+  font-weight: bold;
+  text-decoration: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  padding: 10px;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+#blogbutton:hover {
+  transform: scale(1.1);
+  background-color: #5a6c57;
 }
 </style>

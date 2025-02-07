@@ -21,6 +21,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -65,6 +66,9 @@ public class PostBean {
 	// private Set<TagsBean> tag;
 
 	@ManyToOne(cascade = CascadeType.ALL)
+	private ScheduleBean scheduleBean;
+
+	@ManyToOne
 	@JoinColumn(name = "forwarded_from_id")
 	private PostBean forwardedFrom;
 
@@ -178,6 +182,14 @@ public class PostBean {
 				+ postTime + ", postContent=" + postContent + ", postLink=" + postLink + ", member=" + member
 				+ ", commentBeans=" + commentBeans + ", interactions=" + interactions + ", tagsBeans=" + tagsBeans
 				+ ", place=" + place + "]";
+	}
+
+	public ScheduleBean getScheduleBean() {
+		return scheduleBean;
+	}
+
+	public void setScheduleBean(ScheduleBean scheduleBean) {
+		this.scheduleBean = scheduleBean;
 	}
 
 }

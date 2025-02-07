@@ -22,10 +22,10 @@ public class EventBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long eventId; // 行程內容id (PK)
 
-	@Column(name = "start_time", nullable = false)
+	@Column(name = "start_time")
 	private LocalTime startTime; // 行程開始日期
 
-	@Column(name = "end_time", nullable = false)
+	@Column(name = "end_time")
 	private LocalTime endTime; // 行程結束日期
 
 	@Column(name = "notes")

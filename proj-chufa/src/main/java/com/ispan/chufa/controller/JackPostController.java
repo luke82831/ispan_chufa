@@ -6,7 +6,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.domain.ScheduleBean;
 import com.ispan.chufa.dto.JackPostDTO;
 import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.service.JackPostService;
+import com.ispan.chufa.service.ScheduleService;
 
 @RestController
 @RequestMapping("/post")
@@ -30,13 +31,15 @@ public class JackPostController {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private ScheduleService scheduleService;
     // 將Bean映射到DTO用的
     private final ModelMapper modelMapper = new ModelMapper();
 
     // 創建貼文
     // 測試 http://localhost:8080/post/create
     // 測試 RequestBody =>
-    // {"postTitle":"標題","postContent":"內容","postLink":"超連結","userid":"1"}
+    // {"postTitle":"標題","postContent":"內容","postLink":"超連結","userid":"1","tripId":"1"}
     @PostMapping("/create")
     public Response create(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
@@ -48,8 +51,21 @@ public class JackPostController {
         String postContent;
         String postLink;
         Long userid;
+        Long tripId;
         // 驗證request資料(防呆)
         {
+            if (!requestJson.isNull("tripId") && requestJson.getString("tripId").length() != 0) {
+                try {
+                    tripId = requestJson.getLong("tripId");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("tripId請輸入整數");
+                    return response;
+                }
+            } else {
+                tripId = null;
+            }
+
             if (!requestJson.isNull("postTitle")) {
                 postTitle = requestJson.getString("postTitle");
                 if (postTitle.length() == 0) {
@@ -118,17 +134,36 @@ public class JackPostController {
                 response.setMessage("沒有這個userid");
                 return response;
             }
+
+            if (tripId != null) {
+                try {
+                    ScheduleBean scheduleBean = scheduleService.findScheduleById(tripId).get();
+                    bean.setScheduleBean(scheduleBean);
+                } catch (NoSuchElementException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("沒有這個行程");
+                    return response;
+                }
+            }
+
             bean.setMember(memberBean);
         }
 
         // 創建貼文
-        postService.createPost(bean);
+        try {
+            postService.createPost(bean);
+        } catch (NoSuchElementException e) {
+            response.setSuccesss(false);
+            response.setMessage("這個行程有人使用了");
+            return response;
+        }
 
         // 設定response
         {
             response.setSuccesss(true);
             response.setMessage("創建貼文成功");
-            response.getList().add(bean);
+            JackPostDTO dto = modelMapper.map(bean, JackPostDTO.class);
+            response.getList().add(dto);
         }
 
         return response;
@@ -137,7 +172,7 @@ public class JackPostController {
     // 刪除貼文
     // 測試 http://localhost:8080/post/delete
     // 測試 RequestBody => {"postid":"1"}
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         Response response = new Response();
@@ -232,6 +267,7 @@ public class JackPostController {
         Long postid;
         String postTitle;
         String postContent;
+
         // 驗證request資料(防呆)
         {
             if (!requestJson.isNull("postid")) {
@@ -278,13 +314,14 @@ public class JackPostController {
 
         // 更新貼文
         bean = postService.updatePost(postid, postTitle, postContent);
-
         // 設定response
         {
             if (bean != null) {
+                // 將Bean映射到DTO用的
+                JackPostDTO dto = modelMapper.map(bean, JackPostDTO.class);
                 response.setSuccesss(true);
                 response.setMessage("更新成功");
-                response.getList().add(bean);
+                response.getList().add(dto);
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");

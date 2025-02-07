@@ -28,8 +28,8 @@ public class EventXPlaceBean {
 	@Column(name = "place_order")
 	private Integer placeOrder;
 
-	@Column(name = "arrival_time")
-	private LocalTime arrivalTime;
+	@Column(name = "travel_time")
+	private LocalTime travelTime;
 
 	@Column(name = "stay_duration")
 	private LocalTime stayDuration;
@@ -54,12 +54,12 @@ public class EventXPlaceBean {
 	public EventXPlaceBean() {
 	}
 
-	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
+	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime travelTime,
 			LocalTime stayDuration, char[] notes) {
 		this.event = event;
 		this.place = place;
 		this.placeOrder = placeOrder;
-		this.arrivalTime = arrivalTime;
+		this.travelTime = travelTime;
 		this.stayDuration = stayDuration;
 		this.notes = notes;
 	}
@@ -96,12 +96,12 @@ public class EventXPlaceBean {
 		this.placeOrder = placeOrder;
 	}
 
-	public LocalTime getArrivalTime() {
-		return arrivalTime;
+	public LocalTime getTravelTime() {
+		return travelTime;
 	}
 
-	public void setArrivalTime(LocalTime arrivalTime) {
-		this.arrivalTime = arrivalTime;
+	public void setTravelTime(LocalTime travelTime) {
+		this.travelTime = travelTime;
 	}
 
 	public LocalTime getStayDuration() {
@@ -123,7 +123,7 @@ public class EventXPlaceBean {
 	@Override
 	public String toString() {
 		return "EventXPlaceBean [eventmappingId=" + eventmappingId + ", event=" + event + ", place=" + place
-				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + arrivalTime + ", stayDuration=" + stayDuration
+				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + travelTime + ", stayDuration=" + stayDuration
 				+ ", notes=" + Arrays.toString(notes) + "]";
 	}
 }

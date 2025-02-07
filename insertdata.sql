@@ -9,7 +9,7 @@ Go
 
 -- members
 INSERT INTO members (role, username, password, phone_number, email, name, gender, nickname, bio, birth) VALUES
-('USER', 'user1', 0x616263, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
+('USER', 'user1', 0x616161616161, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
 ('USER', 'user2', 0x626364, '0923456789', 'user2@example.com', 'User Two', 'Female', 'U2', 'Hello, I am User Two.', '1992-02-02'),
 ('USER', 'user3', 0x636465, '0934567890', 'user3@example.com', 'User Three', NULL, 'U3', NULL, '1994-03-03'),
 ('USER', 'user4', 0x646566, '0945678901', 'user4@example.com', 'User Four', 'Male', 'U4', 'I love traveling.', '1996-04-04'),
@@ -29,11 +29,11 @@ Go
 
 -- event
 INSERT INTO event (start_time, end_time, notes, FK_schedule, FK_calendar) VALUES
-('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 1, '2025-01-20'),
-('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 1, '2025-01-23'),
-('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 1, '2025-01-26'),
-('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 2, '2025-02-01'),
-('22:00:00', '23:00:00', 'Family vacation in Bali.', 3, '2025-03-10');
+('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 8, '2025-01-20'),
+('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 8, '2025-01-23'),
+('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 8, '2025-01-26'),
+('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 8, '2025-02-01'),
+('22:00:00', '23:00:00', 'Family vacation in Bali.', 8, '2025-03-10');
 Go
 
 -- followlist

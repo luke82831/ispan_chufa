@@ -66,54 +66,24 @@
       </div>
     </div>
   </div>
-
-  <!-- 發文按鈕 -->
-  <div>
-    <RouterLink
-      v-if="!isPlanningStarted"
-      to="/blog/create"
-      id="blogbutton"
-      @click="hidePlanningButton"
-      >發文</RouterLink
-    >
-  </div>
-
-  <!-- 開始規劃按鈕 -->
-  <div>
-    <RouterLink
-      v-if="!isPlanningStarted"
-      to="/myitineraries"
-      id="planningbutton"
-      @click="hidePlanningButton"
-      >開始規劃</RouterLink
-    >
-  </div>
-
   <RouterView></RouterView>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 
 const userStore = useUserStore(); // 使用 Pinia 的狀態
 const router = useRouter();
-const route = useRoute();
 
 const isDropdownVisible = ref(false);
-const isPlanningStarted = ref(false);
 
 const toggleDropdown = () => {
   isDropdownVisible.value = !isDropdownVisible.value;
 };
 
-const hidePlanningButton = () => {
-  isPlanningStarted.value = true;
-};
-
 const searchTitle = ref("");
-//const router = useRouter();
 
 const navigateToSearch = () => {
   if (searchTitle.value.trim()) {
@@ -123,16 +93,6 @@ const navigateToSearch = () => {
     });
   }
 };
-
-// 監聽路由變化，動態顯示規劃按鈕
-watch(
-  () => route.path,
-  (newPath) => {
-    if (newPath === "/") {
-      isPlanningStarted.value = false;
-    }
-  }
-);
 
 // 登出行為
 const logout = () => {
@@ -332,65 +292,6 @@ onMounted(() => {
   background-color: #c0392b;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-/* 發文/規劃按鈕 */
-#planningbutton {
-  position: fixed;
-  bottom: 50px;
-  right: 50px;
-  width: 100px;
-  height: 100px;
-  background-color: #84baf5;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 10px;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#planningbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a95d5;
-}
-
-#blogbutton {
-  position: fixed;
-  bottom: 200px;
-  right: 50px;
-  width: 100px;
-  height: 100px;
-  background-color: #85a98f;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 10px;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#blogbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a6c57;
-}
-
 .search-bar {
   display: flex;
   align-items: center;

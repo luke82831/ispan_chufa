@@ -35,7 +35,7 @@
                 設為會員
               </button>
               <!-- 刪除會員按鈕 -->
-              <button @click="deleteMember(user.userid)" class="btn delete-btn">
+              <button @click="deleteMember(user.userid)" class="btn deletebtn">
                 刪除會員
               </button>
             </td>
@@ -275,11 +275,11 @@ fetchUsers();
 }
 
 /* 刪除按鈕 */
-.delete-btn {
+.deletebtn {
   background-color: #dc3545;
 }
 
-.delete-btn:hover {
+.deletebtn:hover {
   background-color: #c82333;
   box-shadow: 0 4px 10px rgba(200, 35, 51, 0.4);
 }

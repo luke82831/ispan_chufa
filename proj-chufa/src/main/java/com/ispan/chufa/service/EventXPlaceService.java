@@ -43,7 +43,7 @@ public class EventXPlaceService {
 
 		// 更新非外鍵欄位
 		existingEventXPlace.setPlaceOrder(updatedEventXPlace.getPlaceOrder());
-		existingEventXPlace.setArrivalTime(updatedEventXPlace.getArrivalTime());
+		existingEventXPlace.setTravelTime(updatedEventXPlace.getTravelTime());
 		existingEventXPlace.setStayDuration(updatedEventXPlace.getStayDuration());
 		existingEventXPlace.setNotes(updatedEventXPlace.getNotes());
 
@@ -60,22 +60,3 @@ public class EventXPlaceService {
 	}
 
 }
-
-// if (eventXPlaceBean.getEvent() == null || eventXPlaceBean.getPlace() == null)
-// {
-// throw new IllegalArgumentException("Event and Place must be provided.");
-// }
-//
-// // 確保 event 和 place 不是 null
-// EventBean event =
-// eventService.findEventById(eventXPlaceBean.getEvent().getEventId());
-// PlaceBean place =
-// placeService.findPlaceById(eventXPlaceBean.getPlace().getPlaceId());
-//
-// if (event == null || place == null) {
-// throw new IllegalArgumentException("Event or Place not found.");
-// }
-//
-// // 如果找到相應的實例，則將它們設置到 EventXPlaceBean 中
-// eventXPlaceBean.setEvent(event);
-// eventXPlaceBean.setPlace(place);

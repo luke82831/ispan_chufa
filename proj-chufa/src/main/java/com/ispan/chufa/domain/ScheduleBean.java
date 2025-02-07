@@ -2,7 +2,9 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,6 +38,9 @@ public class ScheduleBean {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
+    
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventBean> events;
 
     @ManyToOne
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)

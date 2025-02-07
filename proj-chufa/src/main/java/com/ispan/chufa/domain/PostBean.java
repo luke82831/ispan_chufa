@@ -62,7 +62,7 @@ public class PostBean {
 	@ManyToMany(mappedBy = "posts")
 	private Set<PlaceBean> place = new HashSet<>();
 	// private Set<TagsBean> tag;
-
+    //轉發的貼文的id
 	@ManyToOne
 	@JoinColumn(name = "forwarded_from_id")
 	private PostBean forwardedFrom;

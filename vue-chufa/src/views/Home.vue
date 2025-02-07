@@ -1,5 +1,6 @@
 <template>
   <div class="main-container">
+    <!-- 標籤切換 -->
     <div class="tabs-container">
       <button class="tab" :class="{ active: selectedPlace === null }" @click="switchPlace(null)">
         首頁
@@ -18,94 +19,116 @@
       </button>
     </div>
 
-    <div
-      v-for="post in posts"
-      :key="post.postid"
-      class="post-item"
-      @click="navigateToDetail(post.postid, $event)"
-    >
-      <!-- REPOST 版型處理 -->
-      <div v-if="post.repost" class="repost-header">
-        <div class="interaction-info">
-          <div class="repost-profile-container">
-            <img
-              v-if="post.member?.profilePicture"
-              :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-              alt="Interaction Profile Picture"
-              class="profile-picture small-profile"
-            />
-          </div>
-          <p class="interaction-name">
-            {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
-          </p>
-        </div>
-      </div>
-
-      <div class="author-info" @click.stop>
-        <div class="author-header">
-          <div class="profile-picture-container">
-            <router-link :to="`/blog/blogprofile/${post.member.userid}`">
-              <img
-                v-if="post.member.profilePicture"
-                :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-                alt="Author's Profile Picture"
-                class="profile-picture"
-              />
-              <div v-else class="default-profile"></div>
-            </router-link>
-          </div>
-          <div class="author-name" @click.stop>
-            <strong>
-              {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-              ({{ post.repostDTO?.member?.name || post.member.name }})
-            </strong>
-          </div>
-        </div>
-        <h3>
-          {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-        </h3>
-      </div>
-
-      <p class="post-content">{{ post.postContent }}</p>
-      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more"
-        >閱讀更多</a
+    <!-- 貼文網格布局 -->
+    <div class="posts-grid">
+      <div
+        v-for="post in posts"
+        :key="post.postid"
+        class="post-card"
+        @click="navigateToDetail(post.postid, $event)"
       >
-      <div class="post-meta">
-        <p>
-          發佈時間:
-          {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
+        <!-- REPOST 版型處理 -->
+        <div v-if="post.repost" class="repost-header">
+          <div class="interaction-info">
+            <div class="repost-profile-container">
+              <img
+                v-if="post.member?.profilePicture"
+                :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+                alt="Interaction Profile Picture"
+                class="profile-picture small-profile"
+              />
+            </div>
+            <p class="interaction-name">
+              {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
+            </p>
+          </div>
+        </div>
+
+        <!-- 作者信息 -->
+        <div class="author-info" >
+          <div class="author-header">
+            <div class="profile-picture-container">
+              <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
+                <img
+                  v-if="post.member.profilePicture"
+                  :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+                  alt="Author's Profile Picture"
+                  class="profile-picture"
+                />
+                <div v-else class="default-profile"></div>
+              </router-link>
+            </div>
+            <div class="author-name">
+              <strong>
+                {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
+                ({{ post.repostDTO?.member?.name || post.member.name }})
+              </strong>
+            </div>
+          </div>
+          <h3>
+            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+          </h3>
+        </div>
+
+        <!-- 顯示第一張圖片 -->
+        <div v-if="getFirstImage(post.postContent)" class="post-image-container" >
+          <img :src="getFirstImage(post.postContent)" class="post-image" />
+        </div>
+<!-- 
+        移除圖片後的內容
+        <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
+        <p class="post-content-preview">
+        {{ getTextPreview(post.postContent, 30) }}
         </p>
-        <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-        <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
-      </div>
 
-      <div class="post-stats">
-        <p>轉發次數: {{ post.repostCount }}</p>
-        <p>點讚數: {{ post.likeCount }}</p>
-      </div>
+        <!-- 閱讀更多連結
+        <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more"
+          >閱讀更多</a
+        > -->
 
-      <!-- 按鈕區域 -->
-      <div class="post-actions" @click.stop>
-        <button @click.stop="likePost(post.postid)" class="action-btn like-btn">
-          👍 點讚
-        </button>
-        <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-          🔁 轉發
-        </button>
-        <button @click.stop="collectPost(post.postid)" class="action-btn collect-btn">
-          ❤️ 收藏
-        </button>
+        <!-- 貼文元信息 -->
+        <div class="post-meta">
+          <p>
+            發佈時間:
+            {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
+          </p>
+          <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
+          <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
+        </div>
+
+        <!-- 貼文統計 -->
+        <div class="post-stats">
+          <p>轉發次數: {{ post.repostCount }}</p>
+          <p>點讚數: {{ post.likeCount }}</p>
+        </div>
+
+        <!-- 互動按鈕 -->
+        <div class="post-actions" @click.stop>
+          <button
+            @click.stop="likePost(post.postid)"
+            class="action-btn like-btn"
+            :class="{ active: post.likedByCurrentUser }"
+          >
+            👍 {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
+          </button>
+          <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
+            🔁 轉發
+          </button>
+          <button @click.stop="collectPost(post.postid)" class="action-btn collect-btn">
+            ❤️ 收藏
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+
     <!-- 分頁控制 -->
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">上一頁</button>
       <span>第 {{ currentPage }} 頁</span>
       <button @click="nextPage">下一頁</button>
     </div>
+  </div>
 </template>
-
 <script>
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
@@ -131,7 +154,20 @@ export default {
       { id: 3, name: "Chicago" },
     ]);
 
-    
+    const getFirstImage = (content) => {
+      const match = content.match(/<img[^>]+src="([^">]+)"/);
+      return match ? match[1] : null;
+    };
+
+    // const getContentWithoutImages = (content) => {
+    //   return content.replace(/<img[^>]*>/g, "");
+    // };
+
+    const getTextPreview = (content, length) => {
+      // 移除圖片和其他 HTML 標籤
+      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
+      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+    };
 
     const navigateToDetail = (postid, event) => {
       const excludedElements = [".post-actions", ".action-btn", "a", "button"];
@@ -171,12 +207,14 @@ export default {
     const fetchPosts = async () => {
       try {
         const requestData = {
-          sortByLike: true,
+          sortByLikes: true,
           page: currentPage.value,
-          size: 5,
+          size: 100,
+          checklike:member.value.userid,
         };
 
       if (selectedPlace.value === 'follow') {
+        requestData.repost=true;
         requestData.followerId = member.value.userid;  
       } else if (selectedPlace.value !== null) {
         // 只有選擇地點時才加入 place
@@ -188,14 +226,15 @@ export default {
           {
             headers: {
               "Content-Type": "application/json",
+              "Cache-Control": "no-cache",
             },
           }
         );
 
         if (response.data.postdto && response.data.postdto.length > 0) {
           posts.value = response.data.postdto.filter(
-            (post) => !post.repost && post.repostDTO === null
-          );
+            (post) => !post.repost && post.repostDTO === null      
+          ).sort((a, b) => b.likes - a.likes);
           noPosts.value = false; 
         } else {
           posts.value = [];
@@ -211,7 +250,7 @@ export default {
     //tab
     const switchPlace = (placeName) => {
       if (placeName === 'follow') {
-    selectedPlace.value = 'follow';
+      selectedPlace.value = 'follow';
     } else{
       selectedPlace.value = placeName; 
     }
@@ -331,130 +370,205 @@ export default {
       places,
       switchPlace,
       selectedPlace,
-      
+      getFirstImage,
+      //getContentWithoutImages,
+      getTextPreview,
     };
   },
 };
 </script>
-
 <style scoped>
 .main-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 500px;
   padding: 20px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-.post-item {
-  background: linear-gradient(145deg, #ffffff, #f9f9f9);
-  padding: 25px;
+.tabs-container {
+  display: flex;
+  gap: 10px;
   margin-bottom: 20px;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 20px;
+  border: none;
+  background-color: #f0f0f0;
+  border-radius: 20px;
   cursor: pointer;
-}
-
-.post-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-}
-
-.post-item h3 {
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 14px;
   color: #333;
-  margin-bottom: 10px;
+  transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
 }
 
-.post-content {
-  font-size: 16px;
+.tab:hover {
+  background-color: #e0e0e0;
+}
+
+.tab.active {
+  background-color: #005AB5;
+  color: white;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.post-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+}
+
+.post-image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.post-image-container:hover .post-image {
+  transform: scale(1.05);
+}
+
+.post-content-preview{
+  padding: 16px;
+  font-size: 14px;
   color: #555;
-  line-height: 1.6;
-  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.post-content h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
 }
 
 .read-more {
-  color: #007bff;
+  display: inline-block;
+  margin: 10px 0;
+  color: #ff4757;
   text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s ease;
+  font-weight: 500;
+  transition: color 0.3s;
 }
 
 .read-more:hover {
-  color: #0056b3;
+  color: #ff6b81;
 }
 
-.post-meta {
-  font-size: 14px;
-  color: #777;
-  margin-bottom: 15px;
-}
-
+.post-meta,
 .post-stats {
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
+  padding: 0 16px 10px;
   font-size: 12px;
   color: #888;
 }
 
+.post-meta p,
 .post-stats p {
-  margin: 0;
-  line-height: 1.2;
+  margin: 5px 0;
 }
 
 .post-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  justify-content: space-around;
+  padding: 10px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
 }
 
 .action-btn {
-  padding: 10px 20px;
   border: none;
-  border-radius: 25px;
-  font-size: 14px;
+  background: none;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s;
 }
 
 .action-btn:hover {
-  transform: scale(1.05);
+  color: #ff4757;
 }
 
-.like-btn {
-  background-color: #28a745;
+.action-btn.active {
+  color: #ff4757;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #ff4757;
   color: white;
 }
 
-.repost-btn {
-  background-color: #17a2b8;
-  color: white;
+.pagination button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
 }
 
-.collect-btn {
-  background-color: #dc3545;
-  color: white;
+.pagination span {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 作者信息樣式 */
+.author-info {
+  padding: 16px;
+}
+
+.author-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .profile-picture-container {
-  display: inline-block;
-  position: relative;
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid #ddd;
-  background-color: #f0f0f0;
-  margin-top: 10px;
 }
 
 .profile-picture {
@@ -466,80 +580,44 @@ export default {
 .default-profile {
   width: 100%;
   height: 100%;
-  background-color: #ddd;
+  background-color: #ccc;
+  border-radius: 50%;
+}
+
+.author-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* REPOST 樣式 */
+.repost-header {
+  padding: 10px 16px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.interaction-info {
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 18px;
-  color: #fff;
-  font-weight: bold;
+  gap: 8px;
 }
 
 .repost-profile-container {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   overflow: hidden;
 }
 
-.repost-profile-container img.small-profile {
-  width: 30px;
-  height: 30px;
+.small-profile {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 16px;
+.interaction-name {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
 }
-
-.pagination button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin: 0 8px;
-  transition: background 0.3s;
-}
-
-.pagination button:disabled {
-  background: #cccccc;
-  cursor: not-allowed;
-}
-
-.pagination button:hover:not(:disabled) {
-  background: #0056b3;
-}
-
-.pagination span {
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.tabs-container {
-  display: flex;
-  margin-bottom: 15px;
-  gap: 10px;
-}
-
-.tab {
-  background: none;
-  border: 1px solid #ddd;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: background 0.3s;
-  border-radius: 4px;
-}
-
-.tab.active {
-  background: #007bff;
-  color: white;
-}
-
 </style>

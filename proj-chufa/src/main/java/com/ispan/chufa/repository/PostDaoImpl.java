@@ -62,6 +62,8 @@ public class PostDaoImpl implements PostDao {
 		// Join 到點贊表 (interaction 表)
 		Join<PostBean, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
 
+		Long currentUserId = param.isNull("checklike") ? null : param.getLong("checklike");
+		
 		if (!param.isNull("postTitle")) {
 			String titleKeyword = param.getString("postTitle");
 			Predicate titleLike = criteriaBuilder.like(postRoot.get("postTitle"), "%" + titleKeyword + "%");
@@ -194,6 +196,15 @@ public class PostDaoImpl implements PostDao {
 			postDTO.setLikeCount(likeCount);
 			long repostCount = postRepository.countByForwardedFrom(postlist);
 			postDTO.setRepostCount(repostCount);
+			
+			  // 檢查是否已點讚
+		    boolean likedByCurrentUser = false;
+		    if (currentUserId != null) {
+		        likedByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
+		            postlist.getPostid(), currentUserId, "LIKE"
+		        );
+		    }
+		    postDTO.setLikedByCurrentUser(likedByCurrentUser);
 
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);

@@ -36,15 +36,15 @@ import com.ispan.chufa.service.ScheduleService;
 @RequestMapping("/api")
 public class ScheduleController {
 
-	@Autowired
-	private ScheduleRepository scheduleRepository;
-	
-	@Autowired
-	private EventRepository eventRepository;
-		
-	@Autowired
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
     private ScheduleService scheduleService;
-    
+
     @Autowired
     private EventService eventService;
 
@@ -100,7 +100,6 @@ public class ScheduleController {
         }
     }
 
-
     // 取得所有行程
     @GetMapping("/schedules")
     public ResponseEntity<List<ScheduleBean>> getAllSchedules() {
@@ -121,9 +120,10 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId,
+            @RequestBody Map<String, String> request) {
         Optional<ScheduleBean> scheduleOptional = scheduleRepository.findById(tripId);
-        
+
         if (scheduleOptional.isPresent()) {
             ScheduleBean schedule = scheduleOptional.get();
             LocalDate newEndDate = LocalDate.parse(request.get("endDate"));
@@ -140,7 +140,7 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
     }
-    
+
     // DELETE: 根據 tripId 刪除行程資料
     @DeleteMapping("/schedule/{tripId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long tripId) {

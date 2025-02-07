@@ -11,6 +11,7 @@ public class JackPostDTO {
     private String postLink; // 貼文_貼文超連結(文章、影片連結)
     // @JsonIgnore
     private MemberInfo member;
+    private JackScheduleDTO scheduleBean;
     // @JsonIgnore
     // private Set<CommentBean> commentBeans;
     // @JsonIgnore
@@ -74,6 +75,14 @@ public class JackPostDTO {
 
     public void setMember(MemberInfo member) {
         this.member = member;
+    }
+
+    public JackScheduleDTO getScheduleBean() {
+        return scheduleBean;
+    }
+
+    public void setScheduleBean(JackScheduleDTO scheduleBean) {
+        this.scheduleBean = scheduleBean;
     }
 
 }

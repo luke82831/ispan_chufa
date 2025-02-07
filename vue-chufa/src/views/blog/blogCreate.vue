@@ -9,25 +9,28 @@
                 <input type="text" id="title" name="title" placeholder="請輸入文章標題" v-model="title">
             </div>
 
-            <!-- <div class="upload-container">
-                <h2>上傳封面圖片 / 影片</h2>
-                <input type="file" accept="image/*,video/*" @change="handleFileChange" />
-                <br />
-                <div v-if="preview">
-                <img v-if="file.type.startsWith('image')" :src="preview" alt="預覽" width="300" />
-                <video v-else :src="preview" width="300" controls />
-                </div>
-                <br />
-                <button @click="handleUpload">上傳</button>
-            </div> -->
 
-            <div>
-                行程
-            </div>
             <!-- Quill 編輯器 -->
             <div ref="editorContainer" style="height: 200px;">
-            
+                        
             </div>
+
+
+            <div>
+                <button v-if="schedule==null" @click="Schedule">加入行程</button>
+                <button v-else @click="Schedule">更改行程</button>
+                <div v-if="schedule!=null">
+                    <p>行程名稱:{{ schedule.tripName }}</p>
+                    <p>行程ID:{{ schedule.tripId }}</p>
+                    <p>行程開始時間:{{ schedule.startDate }}</p>
+                    <p>行程結束時間:{{ schedule.endDate }}</p>
+                    <img :src="getImageSource(schedule.coverPhoto)" alt="行程封面" class="itinerary-image"/> 
+                </div>
+                <div v-if="buttonSchedule">
+                    <inputSchedule></inputSchedule>
+                </div>
+            </div>
+
             <!-- 提交按鈕 -->
             <div>
                 <button @click="submitArticle">提交文章</button>
@@ -43,44 +46,26 @@ import "quill/dist/quill.snow.css";
 import axiosapi from '@/plugins/axios.js';
 import { useRouter } from "vue-router";
 import { useUserStore } from '@/stores/user'
+import inputSchedule from "@/components/Post/inputSchedule.vue";
+import eventBus from "@/eventBus";
+const buttonSchedule = ref(false)
+const Schedule = () => {
+    if(buttonSchedule.value!=true){
+        buttonSchedule.value=true
+    }else{
+        buttonSchedule.value=false
+    }
+}
+
+const getImageSource = (coverPhoto) =>
+coverPhoto
+? coverPhoto.startsWith("data:image")
+? coverPhoto
+: `data:image/jpeg;base64,${coverPhoto}`
+: "";
 
 const title = ref()
 const router = useRouter();
-
-
-// const file = ref(null);
-// const preview = ref(null);
-// // 當選擇檔案後，預覽圖片
-// const handleFileChange = (event) => {
-//     const selectedFile = event.target.files[0];
-//     if (selectedFile) {
-//         file.value = selectedFile;
-//         preview.value = URL.createObjectURL(selectedFile); // 預覽圖片或影片
-//     }
-//     console.log(preview.value)
-// };
-// 上傳檔案
-// const handleUpload = async () => {
-//     if (!file.value) {
-//         alert("請選擇檔案！");
-//         return;
-//     }
-//     console.log(preview.value)
-
-//     const formData = new FormData();
-//     formData.append("file", file.value);
-    // try {
-    //     const response = await fetch("http://localhost:5000/upload", {
-    //     method: "POST",
-    //     body: formData,
-    //     });
-
-    //     const result = await response.json();
-    //     alert(result.message);
-    // } catch (error) {
-    //     console.error("上傳失敗:", error);
-    // }
-// };
 
 const user = useUserStore()
 const { member, isLoggedIn } = user
@@ -100,14 +85,24 @@ onMounted(() => {
         ],
         },
     });
+
+    eventBus.on("inputSchedule", (scheduleData) => {
+        schedule.value = scheduleData
+        console.log(schedule.value)
+        buttonSchedule.value = false
+    });
 });
+const schedule = ref(null)
 
 const submitArticle= async () => {
-    
+    if(schedule==null){
+        schedule.value=""
+    }
     const body = {
         "postTitle":title.value,
         "postContent":quill.root.innerHTML,
         "userid":member.userid,
+        "tripId":`${schedule.value.tripId}`,
     }
     const response = await axiosapi.post('/post/create',body);
     alert(response.data.message);

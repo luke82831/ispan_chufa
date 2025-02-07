@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,6 +45,7 @@ public class ScheduleBean {
     private List<EventBean> events;
 
     @ManyToOne
+    @JsonIgnoreProperties("places")
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 

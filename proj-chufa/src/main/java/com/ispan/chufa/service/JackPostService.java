@@ -1,18 +1,13 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.ispan.chufa.domain.CommentBean;
 import com.ispan.chufa.domain.PostBean;
-import com.ispan.chufa.dto.CommentDTO;
 import com.ispan.chufa.repository.PostRepository;
 
 @Service

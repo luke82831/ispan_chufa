@@ -9,7 +9,7 @@ Go
 
 -- members
 INSERT INTO members (role, username, password, phone_number, email, name, gender, nickname, bio, birth) VALUES
-('USER', 'user1', 0x616263, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
+('USER', 'user1', 0x616263646566, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
 ('USER', 'user2', 0x626364, '0923456789', 'user2@example.com', 'User Two', 'Female', 'U2', 'Hello, I am User Two.', '1992-02-02'),
 ('USER', 'user3', 0x636465, '0934567890', 'user3@example.com', 'User Three', NULL, 'U3', NULL, '1994-03-03'),
 ('USER', 'user4', 0x646566, '0945678901', 'user4@example.com', 'User Four', 'Male', 'U4', 'I love traveling.', '1996-04-04'),

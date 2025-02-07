@@ -2,6 +2,7 @@ package com.ispan.chufa.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +36,8 @@ public class ScheduleController {
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
-
     // POST: 創建行程資料
+
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
             @RequestParam("tripName") String tripName,
@@ -81,17 +82,12 @@ public class ScheduleController {
         }
     }
 
-    // -------PostMan測試程式
-
-    // // POST: 創建行程資料
-    // @PostMapping("/schedule")
-    // public ResponseEntity<ScheduleBean> createSchedule(@RequestBody ScheduleBean
-    // schedule) {
-    // System.out.println("Received schedule with end date: " +
-    // schedule.getEndDate());
-    // ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
-    // return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
-    // }
+    // 取得所有行程
+    @GetMapping("/schedules")
+    public ResponseEntity<List<ScheduleBean>> getAllSchedules() {
+        List<ScheduleBean> schedules = scheduleService.findAllSchedules();
+        return new ResponseEntity<>(schedules, HttpStatus.OK);
+    }
 
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")

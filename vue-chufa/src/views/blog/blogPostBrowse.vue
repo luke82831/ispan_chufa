@@ -9,21 +9,26 @@
         <p><strong>連結：</strong><a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
         <p><strong>發布時間：</strong>{{ postData.postTime }}</p>
     </div>
+    
+    <div>
+      <button @click="outputImg">提取圖片</button>
+      <div v-html="imgText"></div><!-- 內容 -->
+    </div>
     =============
     <div>
         <InputComment></InputComment>
         <Comment></Comment>
     </div>
 </template>
-    
-<script setup>
-    import EditPost from "@/components/planning/Post/EditPost.vue";
-    import InputComment from "@/components/planning/Comment/InputComment.vue";
-    import Comment from "@/components/planning/Comment/Comment.vue";
 
-    import axiosapi from '@/plugins/axios.js';
-    import { ref, onMounted } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
+<script setup>
+    import EditPost from "@/components/Post/EditPost.vue";
+    import InputComment from "@/components/Comment/InputComment.vue";
+    import Comment from "@/components/Comment/Comment.vue";
+
+    import axiosapi from "@/plugins/axios.js";
+    import { ref, onMounted } from "vue";
+    import { useRoute, useRouter } from "vue-router";
     import Swal from "sweetalert2";
 
     import { useUserStore } from '@/stores/user'
@@ -40,19 +45,19 @@
     const postData = ref('')
     const htmlContent = ref('')
 
-    const Check = async () => {
-        Swal.fire({
-            title: '錯誤',
-            text: '搜尋不到這篇文章',
-            icon: 'error', // success, error, warning, info, question
-            confirmButtonText: '是的',
-            confirmButtonColor: 'blue',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                router.push("/");
-            }
-        })
+const Check = async () => {
+  Swal.fire({
+    title: "錯誤",
+    text: "搜尋不到這篇文章",
+    icon: "error", // success, error, warning, info, question
+    confirmButtonText: "是的",
+    confirmButtonColor: "blue",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.push("/");
     }
+  });
+};
 
     const findPost=async ()=>{
         await console.log("搜尋Post文章")
@@ -69,8 +74,26 @@
     onMounted(()=>{
         findPost()
     })
-</script>
-    
-<style>
 
-</style>
+  // 宣告HTML字串
+  const imgText = ref('')
+  // 從html標籤提取<img>標籤
+  const outputImg = () => {
+    console.log("提取圖片")
+    // 用DOMParser將 內容 從text解析為html文件
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(/*放入內容*/postData.value.postContent, "text/html");
+
+    // 提取 html文件 中的 <img> 標籤
+    const imgHtml = doc.querySelector("img")
+    // 確認 imgHtml 是否存在
+    if(imgHtml!=null){
+      // 將 HTML文檔 轉字串
+      imgText.value = imgHtml.outerHTML
+      console.log(imgText)
+    }
+
+  }
+</script>
+
+<style></style>

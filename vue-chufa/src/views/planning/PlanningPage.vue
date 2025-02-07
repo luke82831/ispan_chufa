@@ -26,9 +26,9 @@
 
 <script setup>
 import { computed } from "vue";
-import Swal from "sweetalert2";
 import { usePlaceStore } from "@/stores/PlaceStore";
 import { useItineraryStore } from "@/stores/ItineraryStore";
+import Swal from "sweetalert2";
 
 import MapDisplay from "@/components/planning/GoogleMap/MapDisplay.vue";
 import PlaceDetail from "@/components/planning/GoogleMap/PlaceDetail.vue";
@@ -66,14 +66,11 @@ const addToItinerary = () => {
     return;
   }
 
-  const itineraryForSelectedDay =
-    itineraryStore.getItineraryForDay(selectedDate);
+  const itineraryForSelectedDay = itineraryStore.getItineraryForDay(selectedDate);
   const newIndex = itineraryForSelectedDay.length;
 
   itineraryStore.addPlaceToDay(selectedDate, placeDetails.value);
-  console.log(
-    `📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`
-  );
+  console.log(`📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`);
 
   if (newIndex > 0) {
     const previousPlace = itineraryForSelectedDay[newIndex - 1].location;

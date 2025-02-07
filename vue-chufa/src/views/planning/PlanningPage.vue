@@ -27,7 +27,7 @@
 <script setup>
 import { computed } from "vue";
 import { usePlaceStore } from "@/stores/PlaceStore";
-import { useItineraryStore } from "@/stores/ItineraryStore";
+import { useScheduleStore } from "@/stores/ScheduleStore";
 import Swal from "sweetalert2";
 
 import MapDisplay from "@/components/planning/GoogleMap/MapDisplay.vue";
@@ -35,7 +35,7 @@ import PlaceDetail from "@/components/planning/GoogleMap/PlaceDetail.vue";
 import ItineraryTabs from "@/components/planning/Planning/ItineraryTabs.vue";
 
 const placeStore = usePlaceStore();
-const itineraryStore = useItineraryStore();
+const scheduleStore = useScheduleStore();
 const placeDetails = computed(() => placeStore.placeDetails);
 
 // 儲存地點
@@ -54,38 +54,26 @@ const savePlace = () => {
 };
 
 // 加入行程
-const addToItinerary = () => {
+const addToItinerary = async () => {
   if (!placeDetails.value) {
     Swal.fire("地點資料未正確加載");
     return;
   }
 
-  const selectedDate = itineraryStore.selectedDate;
+  const selectedDate = scheduleStore.selectedDate;
   if (!selectedDate) {
     Swal.fire("請先選擇行程日期");
     return;
   }
 
-  const itineraryForSelectedDay = itineraryStore.getItineraryForDay(selectedDate);
-  const newIndex = itineraryForSelectedDay.length;
+  await scheduleStore.addPlaceToSchedule(selectedDate, placeDetails.value);
 
-  itineraryStore.addPlaceToDay(selectedDate, placeDetails.value);
-  console.log(`📌 新增行程地點: ${placeDetails.value.displayName} (索引: ${newIndex})`);
-
-  if (newIndex > 0) {
-    const previousPlace = itineraryForSelectedDay[newIndex - 1].location;
-    const newPlaceLocation = placeDetails.value.location;
-
-    placeStore.updateRoutePair(
-      selectedDate,
-      newIndex - 1,
-      previousPlace,
-      newPlaceLocation
-    );
-    console.log(
-      `🚗 設定路徑: ${previousPlace.lat}, ${previousPlace.lng} ➡ ${newPlaceLocation.lat}, ${newPlaceLocation.lng}`
-    );
-  }
+  Swal.fire({
+    title: "已加入行程",
+    icon: "success",
+    timer: 1500,
+    showConfirmButton: false,
+  });
 };
 </script>
 

@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div v-if="scheduleStore.currentSchedule">
     <div class="header">
       <button class="back-button" @click="goBack">⬅ 返回</button>
-      <h2 v-if="!isEditing">{{ itineraryStore.itineraryTitle }}</h2>
+      <h2 v-if="!isEditing">{{ scheduleStore.currentSchedule.tripName }}</h2>
       <input
         v-if="isEditing"
         v-model="newTitle"
@@ -14,11 +14,22 @@
       <button v-if="isEditing" class="button" @click="saveTitle">儲存</button>
     </div>
 
+    <!-- 行程封面 -->
     <div v-if="coverPhotoUrl" class="cover-photo-container">
-      <img :src="coverPhotoUrl" alt="Cover Photo" class="cover-photo" />
+      <img
+        :src="`data:image/jpeg;base64,${scheduleStore.currentSchedule.coverPhoto}`"
+        alt="封面照片"
+        class="cover-photo"
+      />
     </div>
-    <p>{{ itineraryStore.startDate }} - {{ itineraryStore.endDate }}</p>
 
+    <!-- 行程日期範圍 -->
+    <p>
+      {{ scheduleStore.currentSchedule.startDate }} -
+      {{ scheduleStore.currentSchedule.endDate }}
+    </p>
+
+    <!-- 日期分頁 -->
     <div class="date-tabs">
       <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
         &lt;
@@ -40,56 +51,80 @@
       </button>
     </div>
 
-    <!-- 傳遞 selectedDate 到 PlanningDay 組件 -->
+    <!-- 傳遞選擇的日期到 PlanningDay 組件 -->
     <PlanningDay :selectedDate="selectedDate" />
   </div>
+
+  <!-- 如果 `currentSchedule` 還沒載入，顯示 Loading -->
+  <div v-else class="loading">載入中...</div>
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useRouter } from "vue-router";
-import { useItineraryStore } from "@/stores/ItineraryStore";
+import { computed, ref, watch, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useScheduleStore } from "@/stores/ScheduleStore";
+import { useEventStore } from "@/stores/EventStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();
+const route = useRoute();
+const scheduleStore = useScheduleStore();
+const eventStore = useEventStore();
 
-const goBack = () => {
-  router.push("/myitineraries");
-};
-
-// 在此初始化 itineraryStore
-const itineraryStore = useItineraryStore();
+// 從 URL 取得行程 ID
+const tripId = route.params.tripId;
+const selectedDate = ref(""); // 當前選擇的日期
 const isEditing = ref(false);
-const newTitle = ref(itineraryStore.itineraryTitle);
+const newTitle = ref("");
 
-// 進入編輯模式
+// **初始化行程數據**
+onMounted(async () => {
+  if (tripId) {
+    await scheduleStore.fetchScheduleById(tripId);
+  }
+});
+
+// **監聽行程名稱變更，確保標題更新**
+watch(
+  () => scheduleStore.currentSchedule?.tripName,
+  (newName) => {
+    newTitle.value = newName || "";
+  },
+  { immediate: true }
+);
+
+// **編輯標題**
 const editTitle = () => {
   isEditing.value = true;
 };
 
-// 儲存新的標題
+// **儲存標題**
 const saveTitle = () => {
-  itineraryStore.itineraryTitle = newTitle.value;
+  if (scheduleStore.currentSchedule) {
+    scheduleStore.currentSchedule.tripName = newTitle.value;
+  }
   isEditing.value = false;
 };
 
+// **封面圖片**
 const coverPhotoUrl = computed(() => {
-  const coverPhoto = itineraryStore.coverPhoto;
-  if (coverPhoto && coverPhoto instanceof File) {
-    return URL.createObjectURL(coverPhoto);
-  }
-  return null;
+  const coverPhoto = scheduleStore.currentSchedule?.coverPhoto;
+  return coverPhoto ? coverPhoto : null;
 });
 
-const selectedDate = ref(""); // 當前選擇的日期
-
+// **開始與結束日期**
 const startDate = computed(() =>
-  itineraryStore.startDate ? new Date(itineraryStore.startDate) : null
+  scheduleStore.currentSchedule?.startDate
+    ? new Date(scheduleStore.currentSchedule.startDate)
+    : null
 );
 const endDate = computed(() =>
-  itineraryStore.endDate ? new Date(itineraryStore.endDate) : null
+  scheduleStore.currentSchedule?.endDate
+    ? new Date(scheduleStore.currentSchedule.endDate)
+    : null
 );
 
+// **日期範圍**
 const dateRange = computed(() => {
   if (!startDate.value || !endDate.value) return [];
   const dates = [];
@@ -101,16 +136,18 @@ const dateRange = computed(() => {
   return dates;
 });
 
+// **格式化日期**
 const formatDate = (date) => {
   if (!(date instanceof Date) || isNaN(date)) return "";
   return date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" });
 };
 
+// **更新選擇的日期**
 const updateSelectedDate = (date) => {
   selectedDate.value = formatDate(date);
-  itineraryStore.setSelectedDate(selectedDate.value);
 };
 
+// **切換日期**
 const changeDate = (direction) => {
   const currentIndex = dateRange.value.findIndex(
     (date) => formatDate(date) === selectedDate.value
@@ -122,21 +159,7 @@ const changeDate = (direction) => {
   }
 };
 
-const addOneMoreDay = () => {
-  if (!endDate.value) return;
-
-  const newDate = new Date(endDate.value);
-  newDate.setDate(newDate.getDate() + 1);
-  itineraryStore.endDate = newDate.toISOString().split("T")[0];
-
-  updateSelectedDate(newDate);
-};
-
-const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
-const isLastDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
-);
-
+// **頁面載入時設定初始選擇日期**
 watch(
   dateRange,
   (newDates) => {
@@ -146,6 +169,43 @@ watch(
   },
   { immediate: true }
 );
+
+// **新增一天**
+const addOneMoreDay = async () => {
+  if (!endDate.value) return;
+
+  const newDate = new Date(endDate.value);
+  newDate.setDate(newDate.getDate() + 1);
+  const formattedDate = newDate.toISOString().split("T")[0];
+
+  console.log("🗓️ 新增一天:", formattedDate);
+
+  // 更新行程結束日期
+  scheduleStore.currentSchedule.endDate = formattedDate;
+
+  try {
+    console.log("🔄 更新 `endDate`:", formattedDate);
+    await scheduleStore.updateScheduleEndDate(tripId, formattedDate);
+    console.log("✅ `endDate` 更新成功");
+
+    // ✅ 不需要手動更新 eventStore，因為切換日期時會自動查詢
+  } catch (error) {
+    console.error("❌ 更新行程結束日期失敗:", error);
+  }
+
+  updateSelectedDate(newDate); // 切換到新日期，自動觸發事件查詢
+};
+
+// **是否為第一天 / 最後一天**
+const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
+const isLastDay = computed(
+  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
+);
+
+// **返回行程列表**
+const goBack = () => {
+  router.push("/myitineraries");
+};
 </script>
 
 <style scoped>

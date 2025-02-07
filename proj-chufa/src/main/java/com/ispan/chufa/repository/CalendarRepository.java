@@ -2,6 +2,7 @@ package com.ispan.chufa.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +13,6 @@ public interface CalendarRepository extends JpaRepository<CalendarBean, LocalDat
 
 	List<CalendarBean> findByIsHoliday(boolean b);
 
+	Optional<CalendarBean> findByDate(LocalDate date);
 	
 }

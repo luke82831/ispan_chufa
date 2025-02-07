@@ -27,11 +27,11 @@ Go
 
 -- event
 INSERT INTO event (start_time, end_time, notes, FK_schedule, FK_calendar) VALUES
-('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 1, '2025-01-20'),
-('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 1, '2025-01-23'),
-('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 1, '2025-01-26'),
-('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 2, '2025-02-01'),
-('22:00:00', '23:00:00', 'Family vacation in Bali.', 3, '2025-03-10');
+('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 8, '2025-01-20'),
+('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 8, '2025-01-23'),
+('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 8, '2025-01-26'),
+('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 8, '2025-02-01'),
+('22:00:00', '23:00:00', 'Family vacation in Bali.', 8, '2025-03-10');
 Go
 
 -- followlist

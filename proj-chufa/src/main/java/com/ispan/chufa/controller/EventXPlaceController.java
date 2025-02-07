@@ -52,7 +52,7 @@ public class EventXPlaceController {
 
             // 更新欄位 (不更新 FK 欄位)
             existingEventXPlace.setPlaceOrder(updatedEventXPlace.getPlaceOrder());
-            existingEventXPlace.setArrivalTime(updatedEventXPlace.getArrivalTime());
+            existingEventXPlace.setTravelTime(updatedEventXPlace.getTravelTime());
             existingEventXPlace.setStayDuration(updatedEventXPlace.getStayDuration());
             existingEventXPlace.setNotes(updatedEventXPlace.getNotes());
 

@@ -1,5 +1,6 @@
 <template>
   <div class="main-container">
+
     <!-- 標籤切換 -->
     <div class="tabs-container">
       <button class="tab" :class="{ active: selectedPlace === null }" @click="switchPlace(null)">
@@ -17,6 +18,13 @@
       >
         {{ place.name }}
       </button>
+
+      <div class="sort-select-container">
+      <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
+        <option value="likes">熱度排序</option>
+        <option value="time">時間排序</option>
+      </select>
+    </div>
     </div>
 
     <!-- 貼文網格布局 -->
@@ -141,7 +149,7 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import axios from "@/plugins/axios.js";
@@ -157,7 +165,7 @@ export default {
     const userId = ref(null);
     const currentPage = ref(1); // 當前頁數
     const noPosts = ref(false);
-
+    const sortBy = ref("likes"); // 排序狀態
     //place
     const selectedPlace = ref(null);
     const places = ref([
@@ -165,6 +173,11 @@ export default {
       { id: 2, name: "New York" },
       { id: 3, name: "Chicago" },
     ]);
+
+
+    watch(sortBy, () => {
+      fetchPosts();  // 每次排序方式改變時重新抓取資料
+    });
 
     const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -220,11 +233,13 @@ export default {
     const fetchPosts = async () => {
       try {
         const requestData = {
-          sortByLikes: true,
           page: currentPage.value,
           size: 100,
           checklike:member.value.userid,
         };
+
+      // 動態設定排序條件
+      requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
 
       if (selectedPlace.value === 'follow') {
         requestData.repost=true;
@@ -234,7 +249,7 @@ export default {
         requestData.place = selectedPlace.value;
       }
 
-        const response = await axios.post(
+      const response = await axios.post(
           "/api/posts/post",requestData,
           {
             headers: {
@@ -250,7 +265,7 @@ export default {
           ).sort((a, b) => b.likes - a.likes);
           noPosts.value = false; 
         } else {
-          posts.value = [];
+          //posts.value = [];
           currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
           Swal.fire("已經到底啦!", "no post。", "info"); 
         }
@@ -359,6 +374,16 @@ export default {
       }
     };
     
+    const setSort = (type) => {
+      if (sortBy.value !== type) {
+        sortBy.value = type;
+        fetchPosts();
+      }
+    };
+    
+
+    //watch
+    // 監聽 sortBy 的變化，當選擇變更時請求 fetchPost
 
     onMounted(async () => {
       selectedPlace.value = null;
@@ -387,6 +412,8 @@ export default {
       //getContentWithoutImages,
       getTextPreview,
       userStore,
+      setSort,
+      sortBy,
     };
   },
 };
@@ -692,5 +719,18 @@ export default {
 #blogbutton:hover {
   transform: scale(1.1);
   background-color: #5a6c57;
+}
+
+.sort-select-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+select {
+  padding: 8px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 4px;
 }
 </style>

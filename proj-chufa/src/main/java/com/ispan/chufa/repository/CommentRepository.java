@@ -11,5 +11,7 @@ import com.ispan.chufa.domain.CommentBean;
 public interface CommentRepository extends JpaRepository<CommentBean, Long> {
     List<CommentBean> findByParentId(Long parentId);
 
+    List<CommentBean> findByPostBeanPostid(Long postid);
+
     List<CommentBean> findByMemberBeanUserid(Long userId);
 }

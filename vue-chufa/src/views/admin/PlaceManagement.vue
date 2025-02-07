@@ -45,8 +45,11 @@
             <td>{{ place.priceLevel }}</td>
             <td>{{ place.isClosed ? '休息中' : '營業中' }}</td>
             <td>
+              <div class="action-buttons">
+
               <button class="edit-btn" @click="openEditModal(place)">更新</button>
               <button class="delete-btn" @click="confirmDelete(place.placeId)">刪除</button>
+            </div>
             </td>
           </tr>
         </tbody>
@@ -144,15 +147,7 @@ const editedPlace = ref({});
 const currentPage = ref(0); // 當前頁碼
 const totalPages = ref(0); // 總頁數
 
-const businessHours = ref(
-  ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"].map(day => ({
-    day,
-    openHour: 9,
-    openMinute: 0,
-    closeHour: 18,
-    closeMinute: 0,
-  }))
-);
+
 
 // 取得地點資料（支援分頁）
 const fetchPlaces = async (page = 0) => {
@@ -238,20 +233,23 @@ onMounted(fetchPlaces);
   padding: 20px;
   overflow-x: hidden;
   padding-top: 20px; /* 增加上方間距，給標題留空間 */
+  width: 100%;
+  padding: 20px;
+
 }
 
 
 .place-management {
   width: 100%;
   max-width: 2000px;
-  margin: -10px auto;
   padding: 30px;
   background: white;
-  border-radius: 20px;
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.2), /* 主要陰影 */
-    0 5px 15px rgba(0, 0, 0, 0.15); /* 次要陰影，增加層次感 */
-    font-family: "Microsoft JhengHei", sans-serif;
+  border-radius: 15px;            /* 使用文章管理的圓角 */
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    0 5px 15px rgba(0, 0, 0, 0.15);
+  font-family: "Microsoft JhengHei", sans-serif;
+
 }
 
 .table-wrapper {
@@ -271,6 +269,8 @@ onMounted(fetchPlaces);
   table-layout: fixed; /* 讓內容自然分配寬度 */
 }
 
+
+/*框線*/
 .place-table th,
 .place-table td {
   border: 1px solid #ddd;
@@ -372,17 +372,12 @@ onMounted(fetchPlaces);
 
 
 .page-title {
-  text-align: left;
-  font-size: 24px;
-  font-weight: bold;
-  display: inline-block;
   text-align: center;
   font-size: 28px;
   color: #343a40;
   border-bottom: 2px solid #ccc;
-  /* 底部加一道線 */
-  margin: 0 auto ;
-  /* 上面 0, 下面 30px 間距, 同時置中 */
+  margin-bottom: 0px;
+
 }
 
 
@@ -400,6 +395,32 @@ onMounted(fetchPlaces);
   overflow-y: auto; /* 讓內容可滾動，但頁面不滾動 */
   padding: 20px;
 }
+
+
+/* 確保 更新 和 刪除 按鈕是並排對齊 */
+.action-buttons {
+  display: inline-flex;  /* 讓按鈕維持 inline 並排 */
+  justify-content: center; /* 置中對齊 */
+  align-items: center; /* 垂直對齊 */
+  gap: 8px; /* 調整按鈕間距 */
+  white-space: nowrap; /* 防止換行 */
+  min-width: 150px; /* 確保欄位不會過窄 */
+}
+
+/* 讓按鈕大小一致 */
+.action-buttons button {
+  min-width: 70px; /* 避免按鈕大小變化 */
+  height: 36px !important; /* 統一按鈕高度 */
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 14px; /* 統一字體大小 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+
 
 
 /*------------------------編輯頁面----------------*/
@@ -632,6 +653,7 @@ onMounted(fetchPlaces);
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: -10px;
 }
 
 .delete-btn:hover {

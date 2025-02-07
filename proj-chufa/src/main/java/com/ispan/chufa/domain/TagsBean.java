@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +32,7 @@ public class TagsBean {
     private LocalDateTime tagUpdatedAt;
 
     @ManyToMany(mappedBy = "tagsBeans") // mappedBy 指向 PostBean 中的屬性名稱
+    @JsonBackReference
     private Set<PostBean> postBeans = new HashSet<>();
     
     @ManyToMany // 多對多 標籤對成員

@@ -36,7 +36,6 @@ const member = computed(() => userStore.member);
 .admin-layout {
   display: flex;
   height: calc(100vh - 80px);
-  overflow: hidden; /* 防止溢出 */
   background: #e0ecff; /* 淡藍背景，讓視覺更柔和 */
 }
 
@@ -87,6 +86,25 @@ const member = computed(() => userStore.member);
 .navbar span {
   font-weight: bold;
 }
+
+/* === 管理者資訊區塊 === */
+.user-info {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  width: auto;
+  max-width: 120px;
+  text-align: center;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+}
+
+
+
 
 /* === 主要內容區域 === */
 .main-content {

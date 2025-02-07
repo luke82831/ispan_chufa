@@ -3,6 +3,18 @@
     <!-- Logo -->
     <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
 
+    <div class="search-bar">
+      <input
+        v-model="searchTitle"
+        type="text"
+        placeholder="搜尋文章..."
+        class="p-2 border rounded w-full"
+      />
+      <button @click="navigateToSearch" class="p-2 bg-blue-500 text-white rounded">
+        搜索
+      </button>
+    </div>
+
     <div class="nav-links">
       <!-- 只有管理員才顯示後臺管理按鈕 -->
       <!-- <RouterLink
@@ -18,9 +30,7 @@
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
           <img
-            :src="
-              userStore.member.profile_picture || '/path/to/default-avatar.png'
-            "
+            :src="userStore.member.profile_picture || '/path/to/default-avatar.png'"
             alt="會員大頭貼"
             class="avatar"
             @error="onAvatarError"
@@ -36,16 +46,13 @@
             <RouterLink to="/secure/Profile" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 會員資料
             </RouterLink>
-            <RouterLink to="" class="dropdown-item">
+            <RouterLink to="/myitineraries" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的行程
             </RouterLink>
-            <RouterLink to="" class="dropdown-item">
+            <RouterLink to="/blog/bloghome" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的文章
             </RouterLink>
-            <RouterLink to="" class="dropdown-item">
-              <i class="fas fa-user-circle"></i> 我的優惠券
-            </RouterLink>
-            <!-- 修改：下拉選單中登出按鈕 -->
+            <!-- 下拉選單中的登出按鈕 -->
             <button @click="logout" class="dropdown-item logout-item">
               <i class="fas fa-sign-out-alt"></i> 登出
             </button>
@@ -60,16 +67,17 @@
     </div>
   </div>
 
-    <!-- 發文按鈕 (僅在首頁顯示) -->
-    <div v-if="showButtons">
-    <RouterLink to="/blog/create" id="blogbutton">發文</RouterLink>
-  </div>
-
-  <!-- 開始規劃按鈕 (僅在首頁顯示) -->
+  <!-- 僅在首頁顯示的按鈕區塊 -->
   <div v-if="showButtons">
-    <RouterLink to="/createPlanning" id="planningbutton">開始規劃</RouterLink>
+    <RouterLink to="/blog/create" id="blogbutton" @click="hidePlanningButton">發文</RouterLink>
+    <!-- 若未開始規劃才顯示「開始規劃」 -->
+    <RouterLink
+      v-if="!isPlanningStarted"
+      to="/myitineraries"
+      id="planningbutton"
+      @click="hidePlanningButton"
+    >開始規劃</RouterLink>
   </div>
-
 
   <RouterView></RouterView>
 </template>
@@ -79,23 +87,35 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 
-const userStore = useUserStore(); // 使用 Pinia 的狀態
+const userStore = useUserStore(); // 使用 Pinia 狀態管理
 const router = useRouter();
 const route = useRoute();
 
+// 僅在首頁 ("/") 顯示按鈕
+const showButtons = ref(route.path === "/");
+
 const isDropdownVisible = ref(false);
-const isPlanningStarted = ref(false);
-const showButtons = ref(true); // ✅ 控制按鈕顯示
+const searchTitle = ref("");
+const isPlanningStarted = ref(false); // 若有此狀態可供判斷是否已開始規劃
 
 const toggleDropdown = () => {
   isDropdownVisible.value = !isDropdownVisible.value;
 };
 
 const hidePlanningButton = () => {
-  isPlanningStarted.value = true;
+  showButtons.value = false;
 };
 
-// 監聽路由變化，動態顯示規劃按鈕
+const navigateToSearch = () => {
+  if (searchTitle.value.trim()) {
+    router.push({
+      path: "/search-results",
+      query: { title: searchTitle.value },
+    });
+  }
+};
+
+// 監聽路由變化，更新按鈕顯示狀態 (僅首頁顯示)
 watch(
   () => route.path,
   (newPath) => {
@@ -106,12 +126,12 @@ watch(
 // 登出行為
 const logout = () => {
   localStorage.removeItem("token");
-  userStore.logout(); // 清空 Pinia 狀態
+  userStore.logout(); // 清除 Pinia 狀態
   isDropdownVisible.value = false; // 關閉下拉選單
   router.push("/secure/Login");
 };
 
-// 處理頭像加載錯誤
+// 處理頭像載入錯誤
 const onAvatarError = () => {
   userStore.member.profile_picture = "/path/to/default-avatar.png";
 };
@@ -252,10 +272,10 @@ onMounted(() => {
 
 /* 登出按鈕美化 */
 .dropdown-menu .logout-item {
-  text-align: right; /* 文字靠右 */
-  padding-right: 20px; /* 右邊內邊距 */
+  text-align: right;
+  padding-right: 20px;
   font-weight: bold;
-  color: #dc3545; /* 紅色文字 */
+  color: #dc3545;
   background-color: transparent;
   border: none;
   width: 100%;
@@ -264,7 +284,7 @@ onMounted(() => {
 }
 
 .dropdown-menu .logout-item:hover {
-  background-color: #f8d7da; /* 淡紅背景 */
+  background-color: #f8d7da;
   color: #c82333;
 }
 
@@ -282,7 +302,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #e74c3c; /* 紅色 */
+  background-color: #e74c3c;
   color: white;
   padding: 8px 16px;
   border-radius: 8px;
@@ -301,6 +321,7 @@ onMounted(() => {
   background-color: #c0392b;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
+
 /* 發文/規劃按鈕 */
 #planningbutton {
   position: fixed;
@@ -359,4 +380,45 @@ onMounted(() => {
   transform: scale(1.1);
   background-color: #5a6c57;
 }
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #f8f8f8;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 300px;
+  width: 100%;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  border-radius: 6px;
+  margin-right: 8px;
+}
+
+.search-bar button {
+  background-color: #5a95d5;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, box-shadow 0.2s;
+}
+
+.search-bar button:hover {
+  background-color: #477ab2;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 </style>
+
+
+

@@ -3,6 +3,7 @@ package com.ispan.chufa.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -25,41 +26,43 @@ public class CouponBean {
 
     @Column(name = "coupon_code", unique = true, nullable = false)
     private String couponCode; // 優惠券代碼，要求唯一且不能為空
-    @Column(name="remaining")
+    @Column(name = "remaining")
     private Integer remaining;
-    @Column(name="Title")
+    @Column(name = "Title")
     private String title;
-    @Column(name="Subtitle")
+    @Column(name = "Subtitle")
     private String subtitle;
-    @Column(name="Content")
+    @Column(name = "Content")
     private String content;
-    @Column(name="State")
+    @Column(name = "State")
     private Boolean state;
-    @Column(name="Web")
+    @Column(name = "Web")
     private String web;
-    @Column(name="Picture")
+    @Column(name = "Picture")
     private byte[] picture;
-    @Column(name="StartTime")
+    @Column(name = "StartTime")
     private LocalDateTime startTime;
-    @Column(name="EndTime")
+    @Column(name = "EndTime")
     private LocalDateTime endTime;
-    
+
     @ManyToMany(mappedBy = "couponBean")
-    private List<MyCouponBean> myCoupons; 
-    
+    @JsonIgnore
+    private List<MyCouponBean> myCoupons;
+
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "placeId")
+    @JsonBackReference
     private PlaceBean place;
 
     // Getters and Setters
 
     public Long getCouponId() {
-    	return couponId;
+        return couponId;
     }
-    
+
     public void setCouponId(Long couponId) {
-    	this.couponId = couponId;
+        this.couponId = couponId;
     }
 
     public Integer getRemaining() {
@@ -161,5 +164,5 @@ public class CouponBean {
     public Boolean getState() {
         return state;
     }
-    
+
 }

@@ -1,5 +1,6 @@
 package com.ispan.chufa.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +22,15 @@ public class ScheduleService {
         }
         return scheduleRepository.save(schedule);
     }
+ // 取得所有行程
+    public List<ScheduleBean> findAllSchedules() {
+        return scheduleRepository.findAll();
+    }
     
     // 查詢行程資料
     public Optional<ScheduleBean> findScheduleById(Long tripId) {
         return scheduleRepository.findById(tripId);
-    }
-    
-    
+    }       
     
  // 更新行程資料
     public ScheduleBean updateSchedule(Long tripId, ScheduleBean updatedSchedule) {

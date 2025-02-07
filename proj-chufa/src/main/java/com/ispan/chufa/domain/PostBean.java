@@ -56,11 +56,25 @@ public class PostBean {
 			joinColumns = @JoinColumn(name = "postid"), // 關聯到 PostBean 的主鍵
 			inverseJoinColumns = @JoinColumn(name = "tagId") // 關聯到 TagsBean 的主鍵
 	)
+	@JsonIgnore
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
 	@JsonIgnore
 	private Set<PlaceBean> place = new HashSet<>();
+	// private Set<TagsBean> tag;
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "forwarded_from_id")
+	private PostBean forwardedFrom;
+
+	public PostBean getForwardedFrom() {
+		return forwardedFrom;
+	}
+
+	public void setForwardedFrom(PostBean forwardedFrom) {
+		this.forwardedFrom = forwardedFrom;
+	}
 
 	public Long getPostid() {
 		return postid;

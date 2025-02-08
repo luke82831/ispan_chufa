@@ -11,9 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.ispan.chufa.AccessToken;
-import com.ispan.chufa.LineUserInfo;
-import com.ispan.chufa.Verify;
+import com.ispan.chufa.util.AccessToken;
+import com.ispan.chufa.util.LineUserInfo;
+import com.ispan.chufa.util.Verify;
 
 @Service
 public class LineAPIService {

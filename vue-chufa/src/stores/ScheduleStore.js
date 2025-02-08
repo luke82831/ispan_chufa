@@ -22,7 +22,23 @@ export const useScheduleStore = defineStore("scheduleStore", {
     async fetchSchedules() {
       try {
         console.log("開始請求 API...", API_BASE_URL);
-        const response = await axios.get(`${API_BASE_URL}/api/schedules`);
+
+        // 從 localStorage 取得 JWT Token
+        const token = localStorage.getItem("token");
+
+        // 確保 token 存在
+        if (!token) {
+          console.error("沒有 JWT Token，請先登入");
+          return;
+        }
+
+        // 透過 axios 傳送請求，帶上 Authorization 標頭
+        const response = await axios.get(`${API_BASE_URL}/api/schedules`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
         console.log("API 回傳資料:", response.data);
         this.schedules = response.data;
       } catch (error) {

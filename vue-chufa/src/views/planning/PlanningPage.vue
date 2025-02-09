@@ -6,13 +6,15 @@
     </div>
 
     <!-- placedetails (only show if a place is selected) -->
-    <div v-if="placeDetails" class="place-container">
-      <PlaceDetail :place="placeDetails" />
+    <!-- `@place-selected="handlePlaceChanged"` 監聽事件 -->
+    <div v-if="selectedPlaceDetail" class="place-container">
+      <PlaceDetail :place="selectedPlaceDetail" />
+
       <!-- 按鈕區域 -->
       <div class="button-container">
         <div class="action-buttons">
           <button @click="savePlace">儲存地點</button>
-          <button @click="addToItinerary">加入行程</button>
+          <button @click="addPlaceToEvent">加入行程</button>
         </div>
       </div>
     </div>
@@ -25,18 +27,44 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { watch, computed } from "vue";
 import { usePlaceStore } from "@/stores/PlaceStore";
+import { useEventStore } from "@/stores/EventStore";
 import { useScheduleStore } from "@/stores/ScheduleStore";
+import { useEventPlaceStore } from "@/stores/EventPlaceStore"; // 新增
 import Swal from "sweetalert2";
 
 import MapDisplay from "@/components/planning/GoogleMap/MapDisplay.vue";
 import PlaceDetail from "@/components/planning/GoogleMap/PlaceDetail.vue";
 import ItineraryTabs from "@/components/planning/Planning/ItineraryTabs.vue";
 
-const placeStore = usePlaceStore();
 const scheduleStore = useScheduleStore();
-const placeDetails = computed(() => placeStore.placeDetails);
+const eventStore = useEventStore();
+const placeStore = usePlaceStore();
+const eventPlaceStore = useEventPlaceStore();
+
+// ✅ `selectedPlaceDetail` 來自 `Pinia Store`
+const selectedPlaceDetail = computed(() => placeStore.selectedPlaceDetail);
+
+// ✅ `handlePlaceChanged()` 更新 `selectedPlaceId`
+const handlePlaceChanged = (place) => {
+  if (!place || !place.googlemapPlaceId) {
+    console.warn("⚠️ 無效的地點資料", place);
+    return;
+  }
+
+  console.log("📍 地點變更:", place);
+  placeStore.selectedPlaceId = place.googlemapPlaceId; // 設定為選取的地點
+  placeStore.savePlaceToMap(place); // 存入快取
+};
+
+// ✅ 監聽 `selectedPlaceDetail`，當地點變更時自動觸發 `handlePlaceChanged()`
+watch(selectedPlaceDetail, (newPlace) => {
+  if (newPlace && newPlace.googlemapPlaceId !== placeStore.selectedPlaceId) {
+    console.log("🔄 監聽到地點變更，觸發 handlePlaceChanged:", newPlace);
+    handlePlaceChanged(newPlace);
+  }
+});
 
 // 儲存地點
 const savePlace = () => {
@@ -53,27 +81,36 @@ const savePlace = () => {
   });
 };
 
-// 加入行程
-const addToItinerary = async () => {
-  if (!placeDetails.value) {
-    Swal.fire("地點資料未正確加載");
-    return;
-  }
-
-  const selectedDate = scheduleStore.selectedDate;
-  if (!selectedDate) {
+// 3) 加入行程（多對多）
+const addPlaceToEvent = async () => {
+  if (!selectedDate.value) {
     Swal.fire("請先選擇行程日期");
     return;
   }
+  if (!selectedPlaceId.value) {
+    Swal.fire("請先選擇地點");
+    return;
+  }
 
-  await scheduleStore.addPlaceToSchedule(selectedDate, placeDetails.value);
+  // 透過 EventStore 的 getter 拿到這一天的 eventId
+  const eventId = eventStore.getEventIdByDate(selectedDate.value);
+  if (!eventId) {
+    Swal.fire("該日期尚未建立行程 (Event)");
+    return;
+  }
 
-  Swal.fire({
-    title: "已加入行程",
-    icon: "success",
-    timer: 1500,
-    showConfirmButton: false,
-  });
+  // 最後呼叫多對多的 action
+  try {
+    await eventPlaceStore.addPlaceToEvent(eventId, selectedPlaceId.value);
+    Swal.fire({
+      title: "已加入行程 (多對多)",
+      icon: "success",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    Swal.fire("加入行程失敗，請稍後再試");
+  }
 };
 </script>
 

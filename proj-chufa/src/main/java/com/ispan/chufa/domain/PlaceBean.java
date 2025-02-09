@@ -49,7 +49,7 @@ public class PlaceBean {
 	private Double rating;
 	private String website;
 	private String bookingUrl;
-	private Integer priceLevel; 
+	private String priceLevel; 
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 	private boolean isClosed;
@@ -214,11 +214,11 @@ public class PlaceBean {
 		this.bookingUrl = bookingUrl;
 	}
 
-	public Integer getPriceLevel() {
+	public String getPriceLevel() {
 		return priceLevel;
 	}
 
-	public void setPriceLevel(Integer priceLevel) {
+	public void setPriceLevel(String priceLevel) {
 		this.priceLevel = priceLevel;
 	}
 

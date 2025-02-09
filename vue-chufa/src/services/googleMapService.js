@@ -29,20 +29,33 @@ export async function initAutocomplete(
 
         autocomplete.addListener("place_changed", async () => {
             const place = autocomplete.getPlace();
-            if (place && place.place_id) {
-                if (place.place_id === previousPlaceId) {
-                    console.log("選擇的是相同地點，跳過更新標記");
-                    return;
-                }
-                previousPlaceId = place.place_id;
 
-                const placeExists = await checkPlaceInBackend(place.place_id);
-                if (placeExists) {
-                    placeStore.setPlaceDetails(placeExists);
-                    emit("place-selected", placeExists);
-                } else {
-                    fetchPlaceDetailsFromGoogle(place, placeStore, emit, checkPlaceInBackend);
-                }
+            if (!place || !place.place_id) {
+                console.error("❌ 無效的地點或缺少 `place_id`:", place);
+                return;
+            }
+
+            if (place.place_id === previousPlaceId) {
+                console.log("✅ 選擇的是相同地點，跳過更新標記");
+                return;
+            }
+            previousPlaceId = place.place_id;
+
+            console.log("🔍 嘗試在後端檢查是否已有此地點:", place.place_id);
+
+            // ✅ 檢查後端是否已有該地點
+            let placeExists = await checkPlaceInBackend(place.place_id);
+
+            if (placeExists) {
+                console.log("✅ 後端已有該地點，使用後端資料:", placeExists);
+
+                placeStore.savePlaceToMap(placeExists);
+                placeStore.selectedPlaceId = placeExists.googlemapPlaceId;
+                emit("place-selected", placeExists);
+
+            } else {
+                console.log("🔍 後端無此地點，從 Google 抓取完整資訊...");
+                fetchPlaceDetailsFromGoogle(place, placeStore, emit, checkPlaceInBackend);
             }
         });
     } catch (error) {
@@ -53,19 +66,16 @@ export async function initAutocomplete(
 // 從後端查詢地點資料
 export async function checkPlaceInBackend(placeId) {
     try {
-        const response = await axiosapi.post(`/api/checkPlace`, {
-            placeId,
-        });
+        const response = await axiosapi.post(`/api/checkPlace`, { placeId });
 
-        // 與 fetch 不同的地方在於，你可以直接取 response.data
         const result = response.data;
         if (result.message === "地點已存在資料庫") {
-            console.log("後端地點資料:", result.placeInfo);
-            return result.placeInfo;
+            console.log("✅ 後端地點資料:", result.placeInfo);
+            return result.placeInfo;  // ✅ 只返回 `placeInfo`，不 `emit`
         }
         return null;
     } catch (error) {
-        console.error("查詢後端地點資料時出錯:", error);
+        console.error("❌ 查詢後端地點資料時出錯:", error);
         return null;
     }
 }
@@ -96,7 +106,6 @@ export async function fetchPlaceDetailsFromGoogle(place, placeStore, emit, check
 
     service.getDetails(request, (details, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && details) {
-            // 正確呼叫 - 只宣告一次
             submitToBackend(details, placeStore, emit, checkPlaceInBackend);
         } else {
             console.error("取得地點詳細資訊失敗:", status);
@@ -104,7 +113,6 @@ export async function fetchPlaceDetailsFromGoogle(place, placeStore, emit, check
     });
 }
 
-// 這裡只宣告一次
 async function submitToBackend(details, placeStore, emit, checkPlaceInBackend) {
     if (!details) {
         console.error("無效的地點資料");
@@ -272,6 +280,36 @@ async function submitToBackend(details, placeStore, emit, checkPlaceInBackend) {
         return categories.length > 0 ? categories.join(", ") : "未知類型";
     };
 
+    // 格式化地點資料
+    const convertPriceLevel = (priceLevel) => {
+        switch (priceLevel) {
+            case 0:
+                return "便宜";
+            case 1:
+                return "平價";
+            case 2:
+                return "中等";
+            case 3:
+                return "高級";
+            case 4:
+                return "奢華";
+            default:
+                return null;
+        }
+    };
+
+    // 格式化營業時間資料
+    // const businessHours = (openingHours) => {
+    //     if (!openingHours) return null;
+    //     return openingHours.split("\n").reduce((acc, line) => {
+    //         const [day, hours] = line.split(": ");
+    //         if (day && hours) {
+    //             acc[day.trim()] = hours.trim();
+    //         }
+    //         return acc;
+    //     }, {});
+    // };
+
     // 提取並格式化資料
     const formattedPlaceDetails = {
         googlemapPlaceId: details.place_id || null,
@@ -287,13 +325,16 @@ async function submitToBackend(details, placeStore, emit, checkPlaceInBackend) {
         placeInfo: details.user_ratings_total || null,
         website: details.website || null,
         bookingUrl: details.url || null,
-        priceLevel: details.price_level || null,
+        priceLevel: details.price_level !== undefined
+            ? convertPriceLevel(details.price_level)
+            : null,
         city: city || "未知城市",
         region: region || "未知地區",
         accommodationType: null, // 根據需求手動設定
         reservation: details.reservable || null,
         isClosed: details.is_permanently_closed || null,
     };
+
 
     try {
         const response = await axiosapi.post(`/api/savePlace`, formattedPlaceDetails);
@@ -304,7 +345,9 @@ async function submitToBackend(details, placeStore, emit, checkPlaceInBackend) {
 
             const placeFromBackend = await checkPlaceInBackend(details.place_id);
             if (placeFromBackend) {
-                placeStore.setPlaceDetails(placeFromBackend);
+                console.log("✅ 後端已有該地點，使用後端資料:", placeFromBackend);
+                placeStore.savePlaceToMap(placeFromBackend);
+                placeStore.selectedPlaceId = placeFromBackend.googlemapPlaceId;
                 emit("place-selected", placeFromBackend);
             } else {
                 console.error("未找到後端資料");

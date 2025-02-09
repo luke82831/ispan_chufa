@@ -1,42 +1,88 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
-import { useItineraryStore } from "./ItineraryStore"; // 引入 ItineraryStore
+import axiosapi from "@/plugins/axios"; // 全域匯入 axiosapi
 
-export const usePlaceStore = defineStore("place", () => {
-  const placeDetails = ref(null);
-  const itineraries = ref([]); // 儲存行程列表
-  const routePairs = ref({}); // 存放起點與終點的配對，格式 { date: { index: { origin, destination } } }
+export const usePlaceStore = defineStore("placeStore", {
+  state: () => ({
+    /**
+     * 快取 placeId -> placeDetail
+     * 例如：
+     * {
+     *   "AAA": { placeId: "AAA", name: "地點A", ... },
+     *   "BBB": { placeId: "BBB", name: "地點B", ... }
+     * }
+     */
+    placeDetailsMap: {},
+    selectedPlaceId: null,
+  }),
 
-  const itineraryStore = useItineraryStore(); // 使用 ItineraryStore
+  getters: {
+    /**
+     * 🔹 若只想透過 placeId 拿到地點資料，可以做個 getter。
+     *    用法：placeStore.getPlaceDetailById("AAA")
+     */
+    getPlaceDetailById: (state) => (placeId) => {
+      return state.placeDetailsMap[placeId] || null;
+    },
 
-  const setPlaceDetails = (details) => {
-    placeDetails.value = details;
-  };
+    /**
+     * 🔹 也可以加一個「取得當前選擇地點的資料」的 getter
+     */
+    selectedPlaceDetail(state) {
+      if (!state.selectedPlaceId) return null;
+      return state.placeDetailsMap[state.selectedPlaceId] || null;
+    },
+  },
 
-  const updateRoutePair = (date, index, origin, destination) => {
-    if (!routePairs.value[date]) {
-      routePairs.value[date] = {};
-    }
-    routePairs.value[date][index] = { origin, destination };
+  actions: {
+    async fetchPlaceDetail(placeId) {
+      // 如果快取有資料，就直接回傳
+      if (this.placeDetailsMap[placeId]) {
+        return this.placeDetailsMap[placeId];
+      }
 
-    // console.log(`📌 updateRoutePair 更新: ${date} - ${index}`);
-    // console.log(
-    //   "🔍 當前 routePairs:",
-    //   JSON.stringify(routePairs.value, null, 2)
-    // );
-  };
+      // 若無資料，呼叫 API
+      try {
+        console.log("🔍 [fetchPlaceDetail] GET /api/place/", placeId);
+        const response = await axiosapi.get(`/api/place/${placeId}`);
+        const detail = response.data;
+        console.log("📥 [fetchPlaceDetail] 伺服器回應:", detail);
 
-  const addToItinerary = async (place) => {
-    itineraryStore.addPlaceToDay(itineraryStore.selectedDate, place);
-    console.log("地點已加入行程:", place);
-  };
+        // 放進快取
+        this.placeDetailsMap[placeId] = detail;
+        return detail;
+      } catch (error) {
+        console.error("❌ [fetchPlaceDetail] 無法取得地點詳細資訊:", error);
+        return null;
+      }
+    },
 
-  return {
-    placeDetails,
-    itineraries,
-    routePairs,
-    setPlaceDetails,
-    updateRoutePair,
-    addToItinerary,
-  };
+    /**
+     * 🔹 如果有需要一次性抓多個 placeId，你可以做一個批次取得函式
+     */
+    async fetchMultiplePlaces(placeIds = []) {
+      // 過濾已在快取的 placeIds
+      const missingIds = placeIds.filter((id) => !this.placeDetailsMap[id]);
+      if (missingIds.length === 0) {
+        // 全部都已快取
+        return placeIds.map((id) => this.placeDetailsMap[id]);
+      }
+
+      try {
+        console.log("📡 [fetchMultiplePlaces] POST /api/places/batch", missingIds);
+        const response = await axiosapi.post(`/api/places/batch`, { placeIds: missingIds });
+        const places = response.data; // 期望後端回傳陣列，每個元素是一個 placeDetail
+
+        // 放入快取
+        places.forEach((pl) => {
+          this.placeDetailsMap[pl.placeId] = pl;
+        });
+
+        // 最後回傳所有 placeIds 的完整資料
+        return placeIds.map((id) => this.placeDetailsMap[id]);
+      } catch (error) {
+        console.error("❌ [fetchMultiplePlaces] 無法批次取得地點:", error);
+        return [];
+      }
+    },
+  },
 });

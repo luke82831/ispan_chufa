@@ -15,6 +15,6 @@ public interface PlaceRepository extends JpaRepository<PlaceBean, Long> {
 
 	PlaceBean findPlaceByGooglemapPlaceId(String googlemapPlaceId);
 
-	 Page<PlaceBean> findAll(Pageable pageable);
+	Page<PlaceBean> findAll(Pageable pageable);
 	
 }

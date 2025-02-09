@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useEventPlaceStore } from "@/stores/EventPlaceStore";
 import axiosapi from "@/plugins/axios"; // 全域匯入 axiosapi
 
 export const useEventStore = defineStore("eventStore", {
@@ -136,26 +137,52 @@ export const useEventStore = defineStore("eventStore", {
     },
 
     /**
-     * 🔹 在某一天的 event 裡，新增一個地點 (placeId)
-     */
-    addPlaceToEvent(date, placeId) {
-      if (!this.eventsByDate[date]) {
-        console.warn(`⚠️ 尚未在 store 建立 ${date} 的 event。請先呼叫 fetchEventByDate 或 addEvent`);
-        return;
-      }
-      if (!this.eventsByDate[date].placeIds.includes(placeId)) {
-        this.eventsByDate[date].placeIds.push(placeId);
+      * 🔹 讓 event 內部新增地點，但真正的後端請求交給 EventPlaceStore
+      */
+    async addPlaceToEvent(eventId, placeId) {
+      const eventPlaceStore = useEventPlaceStore(); // 使用 EventPlaceStore
+      try {
+        // 先讓 EventPlaceStore 發送 API 請求
+        await eventPlaceStore.addPlaceToEvent(eventId, placeId);
+
+        // 本地 UI 更新：把 `placeId` 加入 `eventsByDate`
+        const event = Object.values(this.eventsByDate).find(e => e.eventId === eventId);
+        if (event && !event.placeIds.includes(placeId)) {
+          event.placeIds.push(placeId);
+        }
+
+        console.log(`✅ [EventStore] 地點 ${placeId} 已成功加入 Event ${eventId}`);
+      } catch (error) {
+        console.error("❌ [EventStore] 無法加入地點:", error);
       }
     },
 
     /**
-     * 🔹 從某一天的 event 中移除一個地點 (placeId)
+     * 🔹 從後端獲取某天的 Event，確保 `placeIds` 更新
      */
-    removePlaceFromEvent(date, placeId) {
-      if (!this.eventsByDate[date]) return;
-      this.eventsByDate[date].placeIds = this.eventsByDate[date].placeIds.filter(
-        (id) => id !== placeId
-      );
+    async fetchEventByDate(tripId, date) {
+      try {
+        console.log(`🔍 [fetchEventByDate] GET /api/event/${tripId}/date/${date}`);
+        const response = await axiosapi.get(`/api/event/${tripId}/date/${date}`);
+
+        if (!response.data || response.data.length === 0) {
+          console.warn(`⚠️ [fetchEventByDate] 沒有找到 ${date} 的行程`);
+          return;
+        }
+
+        const event = response.data[0];
+        this.eventsByDate[date] = {
+          eventId: event.eventId,
+          date: event.date,
+          placeIds: (event.places || []).map((p) => p.placeId), // 取出 placeIds
+          startTime: event.startTime || "08:00",
+          notes: event.notes || "",
+        };
+
+        console.log("✅ [fetchEventByDate] 行程已更新:", this.eventsByDate[date]);
+      } catch (error) {
+        console.error("❌ [fetchEventByDate] 無法取得行程:", error);
+      }
     },
   },
 });

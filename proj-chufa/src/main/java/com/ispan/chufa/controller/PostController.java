@@ -55,6 +55,11 @@ public class PostController {
 
         return responseBean;
     }
+    
+    @PostMapping("/searchByName")
+    public List<MemberDTO> getMemberByName(@RequestBody String json) {
+        return postService.getMemberByName(json);
+    }
 
     @PostMapping("/listall")
     public String postMethodName(@RequestBody String entity) {

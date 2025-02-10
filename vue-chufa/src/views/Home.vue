@@ -1,9 +1,22 @@
 <template>
   <div class="main-container">
-
     <!-- 標籤切換 -->
-    <div class="tabs-container">
-      <button class="tab" :class="{ active: selectedPlace === null }" @click="switchPlace(null)">
+<div v-if="searchStore.isSearch">
+  <div class="sort-select-container">
+    <p>搜尋結果</p>
+      <div class="tabs-container">
+        <button class="tab" :class="{ active: selectedTab === 'posts' }" @click="switchTab('posts')">文章</button>
+        <button class="tab" :class="{ active: selectedTab === 'users' }" @click="switchTab('users')">使用者</button>
+      </div>
+      <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
+        <option value="likes">熱度排序</option>
+        <option value="time">時間排序</option>
+      </select>
+    </div>
+</div>
+<div v-else>
+    <div class="tabs-container" >
+        <button class="tab" :class="{ active: selectedPlace ==='null' }" @click="switchPlace(null)">
         首頁
       </button>
       <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')">
@@ -18,6 +31,7 @@
       >
         {{ place.name }}
       </button>
+    
 
       <div class="sort-select-container">
       <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
@@ -25,10 +39,27 @@
         <option value="time">時間排序</option>
       </select>
     </div>
+  </div>
+</div>
+<div v-if="selectedTab === 'users'" class="users-grid">
+  <div v-for="user in users" :key="user.userid" class="user-card">
+    <h3>{{ user.username }}</h3>
+    <p>{{ user.email }}</p>
+    <p>{{ user.nickname }}</p>
+    <div class="profile-picture-container">
+    <img
+        v-if="user.profilePicture"
+        :src="'data:image/jpeg;base64,' + user.profilePicture"
+        alt="Author's Profile Picture"
+        class="profile-picture"
+        />
+      <div v-else class="default-profile"></div>
     </div>
+  </div>
+</div>
 
     <!-- 貼文網格布局 -->
-    <div class="posts-grid">
+    <div v-else class="posts-grid">
       <div
         v-for="post in posts"
         :key="post.postid"
@@ -149,11 +180,13 @@
   </div>
 </template>
 <script>
-import { ref, onMounted,watch } from "vue";
+import { ref, onMounted,watch,inject,computed} from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
+import { useRoute } from 'vue-router';
+import { useSearchStore } from '@/stores/search.js';
 
 export default {
   setup() {
@@ -161,18 +194,43 @@ export default {
     const profileLoaded = ref(false);
     const member = ref({});
     const posts = ref([]);
+    const users = ref([]);
     const isAdmin = ref(false);
     const userId = ref(null);
     const currentPage = ref(1); // 當前頁數
     const noPosts = ref(false);
     const sortBy = ref("likes"); // 排序狀態
+    const searchQuery = ref('');
+    const isSearch = ref(false);
+    const searchStore = useSearchStore();
+    const selectedTab = ref("posts"); // 當前選擇的 Tab
+    
+    //const selectedPlace = computed(() => searchStore.selectedTab); 
+    const selectedPlace = ref(null); 
+    
     //place
-    const selectedPlace = ref(null);
+    //const selectedPlace = ref(null);
     const places = ref([
       { id: 1, name: "Los Angeles" },
       { id: 2, name: "New York" },
       { id: 3, name: "Chicago" },
     ]);
+
+    console.log("11"+searchStore.selectedPlace);
+
+
+    // 搜尋用戶
+    const fetchUsers = async (query = "") => {
+      try {
+        const response = await axios.post("/api/posts/searchByName", {
+          username: query, 
+        });
+        users.value = response.data; // 將結果儲存到 store
+        console.log(users.userid);
+      } catch (error) {
+        console.error("搜尋失敗:", error);
+      }
+    };
 
 
     watch(sortBy, () => {
@@ -230,7 +288,7 @@ export default {
       }
     };
 
-    const fetchPosts = async () => {
+    const fetchPosts = async (query = "") => {
       try {
         const requestData = {
           page: currentPage.value,
@@ -241,13 +299,18 @@ export default {
       // 動態設定排序條件
       requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
 
+      if (query) {
+        requestData.postTitle = query; // 加入搜尋條件
+        isSearch.value=true;
+      } 
       if (selectedPlace.value === 'follow') {
         requestData.repost=true;
         requestData.followerId = member.value.userid;  
-      } else if (selectedPlace.value !== null) {
+      } else if (selectedPlace.value !== null||selectedPlace!=='users') {
         // 只有選擇地點時才加入 place
         requestData.place = selectedPlace.value;
       }
+    
 
       const response = await axios.post(
           "/api/posts/post",requestData,
@@ -262,7 +325,7 @@ export default {
         if (response.data.postdto && response.data.postdto.length > 0) {
           posts.value = response.data.postdto.filter(
             (post) => !post.repost && post.repostDTO === null      
-          ).sort((a, b) => b.likes - a.likes);
+          );
           noPosts.value = false; 
         } else {
           //posts.value = [];
@@ -277,14 +340,31 @@ export default {
 
     //tab
     const switchPlace = (placeName) => {
+      //searchStore.setselectedPlace(placeName);
       if (placeName === 'follow') {
       selectedPlace.value = 'follow';
     } else{
       selectedPlace.value = placeName; 
     }
     currentPage.value = 1;
+    // const url = new URL(window.location.href);
+    // url.search = ''; // 清空查詢參數
+    // window.history.replaceState(null, '', url);
+
+    searchStore.resetSearch(); // 清空搜索
     fetchPosts();
   };
+
+  const switchTab = (tabName) => {
+    selectedTab.value = tabName; // 更新 selectedTab 為傳入的 tabName
+    //searchStore.setselectedPlace(null);
+  if (tabName === 'users') {
+    fetchUsers(searchStore.searchTitle); // 搜索用戶
+  } else if (tabName === 'posts') {
+    fetchPosts(searchStore.searchTitle); // 搜索貼文
+  }
+};
+
 
     //分頁
     const nextPage = () => {
@@ -380,7 +460,23 @@ export default {
         fetchPosts();
       }
     };
-    
+    const route = useRoute();
+    const resetSearch = () => {
+  searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
+};
+
+    watch(
+      () => route.query.title,
+      (newQuery) => {
+        if (newQuery) {
+          fetchPosts(newQuery); // 如果有搜尋條件就請求搜尋
+        } else {
+          fetchPosts(); // 沒有搜尋條件則請求普通的 fetchPosts
+        }
+      },
+      { immediate: true }
+      
+    );
 
     //watch
     // 監聽 sortBy 的變化，當選擇變更時請求 fetchPost
@@ -390,6 +486,8 @@ export default {
       //selectedPlace.value = places.value[0].id;
       await fetchPosts();
       await fetchProfile();
+      const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
+      fetchPosts(query); // 根據查詢條件抓取貼文
     });
 
     return {
@@ -414,6 +512,12 @@ export default {
       userStore,
       setSort,
       sortBy,
+      searchQuery,
+      isSearch,
+      switchTab,
+      searchStore,
+      selectedTab,
+      users,
     };
   },
 };

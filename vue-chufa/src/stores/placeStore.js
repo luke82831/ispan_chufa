@@ -63,25 +63,31 @@ export const usePlaceStore = defineStore("placeStore", {
      * 🔹 將已知的地點資料手動存進快取
      */
     savePlaceToMap(place) {
-      if (!place || !place.googlemapPlaceId) {
-        console.warn("⚠️ `place` 物件無效或缺少 `googlemapPlaceId`，無法儲存", place);
+      if (!place || !place.placeId) {
+        console.warn(
+          "⚠️ `place` 物件無效或缺少 `googlemapPlaceId`，無法儲存",
+          place
+        );
         return;
       }
 
       // ✅ 避免重複存入相同地點
-      if (this.placeDetailsMap[place.googlemapPlaceId]) {
-        console.log("⚠️ 該地點已存在 PlaceStore，跳過儲存:", place.googlemapPlaceId);
+      if (this.placeDetailsMap[place.placeId]) {
+        console.log("⚠️ 該地點已存在 PlaceStore，跳過儲存:", place.placeId);
         return;
       }
 
-      this.placeDetailsMap[place.googlemapPlaceId] = {
+      this.placeDetailsMap[place.placeId] = {
         ...place,
         latitude: place.latitude || null,
         longitude: place.longitude || null,
       };
 
-      this.selectedPlaceId = place.googlemapPlaceId;
-      console.log("✅ 地點已存入 PlaceStore:", this.placeDetailsMap[place.googlemapPlaceId]);
+      this.selectedPlaceId = place.placeId;
+      console.log(
+        "✅ 地點已存入 PlaceStore:",
+        this.placeDetailsMap[place.placeId]
+      );
     },
 
     /**
@@ -96,8 +102,13 @@ export const usePlaceStore = defineStore("placeStore", {
       }
 
       try {
-        console.log("📡 [fetchMultiplePlaces] POST /api/places/batch", missingIds);
-        const response = await axiosapi.post(`/api/places/batch`, { placeIds: missingIds });
+        console.log(
+          "📡 [fetchMultiplePlaces] POST /api/places/batch",
+          missingIds
+        );
+        const response = await axiosapi.post(`/api/places/batch`, {
+          placeIds: missingIds,
+        });
         const places = response.data; // 後端回傳的陣列，每個元素是一個 placeDetail
 
         // 放入快取

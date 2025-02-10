@@ -48,40 +48,31 @@ const selectedPlaceDetail = computed(() => placeStore.selectedPlaceDetail);
 
 // ✅ `handlePlaceChanged()` 更新 `selectedPlaceId`
 const handlePlaceChanged = (place) => {
-  if (!place || !place.googlemapPlaceId) {
+  if (!place || !place.placeId) {
     console.warn("⚠️ 無效的地點資料", place);
     return;
   }
 
   console.log("📍 地點變更:", place);
-  placeStore.selectedPlaceId = place.googlemapPlaceId; // 設定為選取的地點
+  placeStore.selectedPlaceId = place.placeId; // 設定為選取的地點
   placeStore.savePlaceToMap(place); // 存入快取
 };
 
 // ✅ 監聽 `selectedPlaceDetail`，當地點變更時自動觸發 `handlePlaceChanged()`
 watch(selectedPlaceDetail, (newPlace) => {
-  if (newPlace && newPlace.googlemapPlaceId !== placeStore.selectedPlaceId) {
+  if (newPlace && newPlace.placeId !== placeStore.placeId) {
     console.log("🔄 監聽到地點變更，觸發 handlePlaceChanged:", newPlace);
     handlePlaceChanged(newPlace);
   }
 });
 
-// 儲存地點
-const savePlace = () => {
-  if (!placeDetails.value) {
-    Swal.fire("地點資料未正確加載");
-    return;
-  }
-  console.log("儲存地點:", placeDetails.value);
-  Swal.fire({
-    title: "已儲存景點",
-    icon: "success",
-    timer: 1500,
-    showConfirmButton: false,
-  });
-};
+// ✅ `selectedDate` 來自 `scheduleStore`
+const selectedDate = computed(() => scheduleStore.selectedDate);
 
-// 3) 加入行程（多對多）
+// ✅ `selectedPlaceId` 來自 `placeStore`
+const selectedPlaceId = computed(() => placeStore.selectedPlaceId);
+
+// 加入行程（多對多）
 const addPlaceToEvent = async () => {
   if (!selectedDate.value) {
     Swal.fire("請先選擇行程日期");
@@ -99,18 +90,60 @@ const addPlaceToEvent = async () => {
     return;
   }
 
-  // 最後呼叫多對多的 action
   try {
-    await eventPlaceStore.addPlaceToEvent(eventId, selectedPlaceId.value);
+    console.log(
+      `📡 [加入行程] eventId: ${eventId}, placeId: ${selectedPlaceId.value}`
+    );
+
+    // 🔹 確保 API 請求成功
+    const response = await eventPlaceStore.addPlaceToEvent(
+      eventId,
+      selectedPlaceId.value
+    );
+
+    // 🔹 確保回應資料有效
+    if (!response || !response.eventmappingId) {
+      console.log("response: " + response);
+      console.log("response.eventmappingId: " + response.eventmappingId);
+      throw new Error("API 回應錯誤，未返回有效數據");
+    }
+
+    // ✅ 重新拉取 `eventPlaceList`，確保狀態同步
+    await eventPlaceStore.fetchPlacesByEvent(eventId);
+
+    // ✅ 顯示成功訊息
     Swal.fire({
-      title: "已加入行程 (多對多)",
+      title: "已加入行程",
+      text: `成功將地點 ${selectedPlaceId.value} 加入 ${selectedDate.value} 的行程！`,
       icon: "success",
       timer: 1500,
       showConfirmButton: false,
     });
   } catch (error) {
-    Swal.fire("加入行程失敗，請稍後再試");
+    console.error("❌ [加入行程失敗]:", error);
+
+    // ❌ 顯示 API 錯誤訊息（如果有）
+    Swal.fire({
+      title: "加入行程失敗",
+      text: error.response?.data?.message || "伺服器錯誤，請稍後再試。",
+      icon: "error",
+    });
   }
+};
+
+// 儲存地點
+const savePlace = () => {
+  if (!placeDetails.value) {
+    Swal.fire("地點資料未正確加載");
+    return;
+  }
+  console.log("儲存地點:", placeDetails.value);
+  Swal.fire({
+    title: "已儲存景點",
+    icon: "success",
+    timer: 1500,
+    showConfirmButton: false,
+  });
 };
 </script>
 

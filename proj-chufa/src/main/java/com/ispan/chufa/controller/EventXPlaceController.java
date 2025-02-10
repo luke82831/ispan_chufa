@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,9 +28,14 @@ public class EventXPlaceController {
 	@PostMapping("/eventXPlace")
 	public ResponseEntity<EventXPlaceBean> addPlaceToEvent(
             @RequestParam Long eventId,
-            @RequestParam String placeId) {
+            @RequestParam Long placeId) {
 
-        EventXPlaceBean savedRelation = eventXPlaceService.addPlaceToEvent(eventId, placeId);
+	    EventXPlaceBean savedRelation = eventXPlaceService.addPlaceToEvent(eventId, placeId);
+
+	    if (savedRelation == null || savedRelation.getEventmappingId() == null) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(null); 
+	    }
         return ResponseEntity.ok(savedRelation);
     }
     
@@ -45,7 +48,7 @@ public class EventXPlaceController {
 
     //移除 eventId 內的某個 placeId
     @DeleteMapping("/eventXPlace/{eventId}/{placeId}")
-    public ResponseEntity<String> removePlaceFromEvent(@PathVariable Long eventId, @PathVariable String placeId) {
+    public ResponseEntity<String> removePlaceFromEvent(@PathVariable Long eventId, @PathVariable Long placeId) {
         eventXPlaceService.removePlaceFromEvent(eventId, placeId);
         return ResponseEntity.ok("地點 " + placeId + " 已從行程 " + eventId + " 移除");
     }

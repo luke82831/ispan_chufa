@@ -1,7 +1,6 @@
 package com.ispan.chufa.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,7 @@ import com.ispan.chufa.repository.PlaceRepository;
 @Service
 public class EventXPlaceService {
 
-    @Autowired
+	@Autowired
     private EventXPlaceRepository eventXPlaceRepository;
 
     @Autowired
@@ -42,16 +41,11 @@ public class EventXPlaceService {
 
     //取得某個 eventId 的所有 placeId
     public List<String> getPlacesByEvent(Long eventId) {
-        List<EventXPlaceBean> public List<String> getPlacesByEvent(Long eventId) {
-            return eventXPlaceRepository.findByEvent_EventId(eventId)
-                    .stream()
-                    .map(EventXPlaceBean::getPlace)  // 取得 PlaceBean
-                    .map(PlaceBean::getPlaceId)      // 取得 PlaceId
-                    .collect(Collectors.toList());   // 收集結果
-        }
+        return eventXPlaceRepository.findPlaceIdsByEventId(eventId);
+    }
 
     //從行程中移除地點
-    public void removePlaceFromEvent(Long eventId, String placeId) {
+    public void removePlaceFromEvent(Long eventId, Long placeId) {
         EventXPlaceBean relation = eventXPlaceRepository.findByEvent_EventIdAndPlace_PlaceId(eventId, placeId)
                 .orElseThrow(() -> new RuntimeException("找不到對應的 eventXPlace"));
 

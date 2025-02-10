@@ -64,12 +64,12 @@ public class EventXPlaceBean {
 		this.notes = notes;
 	}
 
-	public Long getMappingId() {
+	public Long getEventmappingId() {
 		return eventmappingId;
 	}
 
-	public void setMappingId(Long mappingId) {
-		this.eventmappingId = mappingId;
+	public void setEventmappingId(Long eventmappingId) {
+		this.eventmappingId = eventmappingId;
 	}
 
 	public EventBean getEvent() {

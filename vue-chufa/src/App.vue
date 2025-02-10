@@ -96,9 +96,6 @@ const resetSearch = () => {
   searchTitle.value = '';
   searchStore.isSearch= false;
   searchStore.searchResults.value = [];
-  searchStore.selectedPlace='null';
-  searchStore.setselectedTab='null';
-  console.log(searchStore.selectedPlace);
   // 使用 Vue Router 跳转到首页，并清空查询参数
   router.push({ path: '/', query: {} }); // 清空查询参数
   //window.location.reload();
@@ -110,7 +107,7 @@ const onSearch = () => {
   if (searchTitle.value.trim()) {
     searchStore.setSearchTitle(searchTitle.value);
     searchStore.isSearch = true; // 設定搜尋狀態
-    router.push({ path: '/', query: { title: searchTitle.value } });
+    router.push({ path: '/search-results', query: { title: searchTitle.value } });
   }
 };
 

@@ -1,4 +1,5 @@
     <template>
+    
         <div class="profile-page">
         <div v-if="member" class="profile-container">
             <h2 class="section-title">會員資料</h2>
@@ -14,6 +15,12 @@
             <p><strong>關注人數:</strong> {{ followersCount }}</p>    
             <p><strong>粉絲:</strong> {{ followingCount }}</p>
             </router-link>
+            <button
+            :class="['follow-button', { active: member.isFollowing }]"
+            @click.stop="toggleFollow(member)"
+            >
+            {{ member.isFollowing ? '已關注' : '未關注' }}
+            </button>
             </div>
             </div>
 
@@ -41,10 +48,12 @@
     </template>
 
     <script>
-    import { ref, onMounted } from 'vue';
+    import { ref, onMounted,computed } from 'vue';
     import axios from '@/plugins/axios.js';
     import Swal from 'sweetalert2';
     import { useRouter } from 'vue-router';
+    import { useUserStore } from "@/stores/user.js";
+    
 
     export default {
     props: ['bloghomeid'],
@@ -55,9 +64,13 @@
             const isAdmin = ref(false);
             const profileLoaded = ref(false);
             const bloghomeid = props.bloghomeid;
+            //const isFollowing=ref(false);
 
             const followersCount = ref(0); // 使用 ref 來定義自適應資料
             const followingCount = ref(0);
+            const userStore = useUserStore();
+            const userId = computed(() => userStore.member.userid);
+            console.log("hohi"+userStore.member.userid);
 
         // 用來從後端取得關注者和被關注者的人數
         const fetchCount = async (type) => {
@@ -74,6 +87,75 @@
             return 0;
         }
         };
+
+        const fetchProfiles = async () => {
+            try {
+                const response = await axios.get(`/api/posts/members/${bloghomeid}`);
+
+                if (response.data) {
+                    member.value = response.data; // 存储用户资料
+                     // 获取关注状态
+                    const memberData = response.data;
+                    member.value = memberData;
+                    await checkFollowingStatus(memberData);
+                    console.log('Member data:', member.value);
+                    } else {
+                    Swal.fire('沒有用戶資料', '無法獲取該用戶的資料', 'info');
+                    }
+                } catch (error) {
+                    console.error('Fetch user profile failed:', error);
+                    Swal.fire('錯誤', '無法獲取用戶資料', 'error');
+                }
+            
+        };
+    
+
+// 检查当前用户是否已关注该用户
+const checkFollowingStatus = async (member) => {
+    if (!member || !member.userid) {
+        console.error('Member object or userid is missing:', member);
+        return;
+    }
+
+    try {
+        // 获取该用户是否被当前用户关注的状态
+        const response = await axios.post('/follow/isFollowing', {
+            followedid: userStore.member.userid,
+            followerid: member.userid, // 使用传递过来的普通对象
+        });
+        // 更新用户的关注状态
+        member.isFollowing = response.data;
+        console.log(bloghomeid + " " + member.isFollowing);
+    } catch (error) {
+        console.error('Error checking following status:', error);
+    }
+};
+ 
+ 
+
+// 切换关注状态
+const toggleFollow = async (member) => {
+    try {
+        const action = member.isFollowing ? 'unfollow' : 'follow';
+        const response = await axios.post('/follow/verb', {
+            followerid: userStore.member.userid,
+            followedid: member.userid,
+            action,
+        });
+
+        if (response.data.success) {
+            // 切换关注状态
+            member.isFollowing = !member.isFollowing;
+            console.log(`User ${member.userid} is now ${member.isFollowing ? 'following' : 'not following'}`);
+        } else {
+            console.error('Failed to toggle follow status:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Failed to toggle follow status:', error);
+        Swal.fire('錯誤', '無法更新關注狀態', 'error');
+    }
+};
+    
         
 
         // 載入關注人數和被關注人數
@@ -92,21 +174,6 @@
             return new Date(date).toLocaleDateString('zh-TW', options);
             };
     
-        const fetchProfile = async () => {
-            try {
-                const response = await axios.get(`/api/posts/members/${bloghomeid}`);
-
-                if (response.data) {
-                    member.value = response.data; // 存储用户资料
-                    } else {
-                    Swal.fire('沒有用戶資料', '無法獲取該用戶的資料', 'info');
-                    }
-                } catch (error) {
-                    console.error('Fetch user profile failed:', error);
-                    Swal.fire('錯誤', '無法獲取用戶資料', 'error');
-                }
-            
-        };
     
         const fetchPosts = async () => {
             try {
@@ -126,11 +193,12 @@
         };
     
         onMounted(async () => {
-            await fetchProfile();
+            await fetchProfiles();
             if (bloghomeid) {
             await fetchPosts();
             }
             await loadCounts();
+            
         });
 
         
@@ -144,6 +212,7 @@
             bloghomeid,
             followersCount,
             followingCount,
+            toggleFollow,
             };
         },
     };

@@ -1,22 +1,9 @@
 <template>
   <div class="main-container">
     <!-- 標籤切換 -->
-<div v-if="searchStore.isSearch">
-  <div class="sort-select-container">
-    <p>搜尋結果</p>
-      <div class="tabs-container">
-        <button class="tab" :class="{ active: selectedTab === 'posts' }" @click="switchTab('posts')">文章</button>
-        <button class="tab" :class="{ active: selectedTab === 'users' }" @click="switchTab('users')">使用者</button>
-      </div>
-      <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
-        <option value="likes">熱度排序</option>
-        <option value="time">時間排序</option>
-      </select>
-    </div>
-</div>
-<div v-else>
+<div>
     <div class="tabs-container" >
-        <button class="tab" :class="{ active: selectedPlace ==='null' }" @click="switchPlace(null)">
+        <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
         首頁
       </button>
       <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')">
@@ -31,7 +18,6 @@
       >
         {{ place.name }}
       </button>
-    
 
       <div class="sort-select-container">
       <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
@@ -41,25 +27,8 @@
     </div>
   </div>
 </div>
-<div v-if="selectedTab === 'users'" class="users-grid">
-  <div v-for="user in users" :key="user.userid" class="user-card">
-    <h3>{{ user.username }}</h3>
-    <p>{{ user.email }}</p>
-    <p>{{ user.nickname }}</p>
-    <div class="profile-picture-container">
-    <img
-        v-if="user.profilePicture"
-        :src="'data:image/jpeg;base64,' + user.profilePicture"
-        alt="Author's Profile Picture"
-        class="profile-picture"
-        />
-      <div v-else class="default-profile"></div>
-    </div>
-  </div>
-</div>
-
     <!-- 貼文網格布局 -->
-    <div v-else class="posts-grid">
+    <div class="posts-grid">
       <div
         v-for="post in posts"
         :key="post.postid"
@@ -203,9 +172,6 @@ export default {
     const searchQuery = ref('');
     const isSearch = ref(false);
     const searchStore = useSearchStore();
-    const selectedTab = ref("posts"); // 當前選擇的 Tab
-    
-    //const selectedPlace = computed(() => searchStore.selectedTab); 
     const selectedPlace = ref(null); 
     
     //place
@@ -215,23 +181,6 @@ export default {
       { id: 2, name: "New York" },
       { id: 3, name: "Chicago" },
     ]);
-
-    console.log("11"+searchStore.selectedPlace);
-
-
-    // 搜尋用戶
-    const fetchUsers = async (query = "") => {
-      try {
-        const response = await axios.post("/api/posts/searchByName", {
-          username: query, 
-        });
-        users.value = response.data; // 將結果儲存到 store
-        console.log(users.userid);
-      } catch (error) {
-        console.error("搜尋失敗:", error);
-      }
-    };
-
 
     watch(sortBy, () => {
       fetchPosts();  // 每次排序方式改變時重新抓取資料
@@ -340,7 +289,6 @@ export default {
 
     //tab
     const switchPlace = (placeName) => {
-      //searchStore.setselectedPlace(placeName);
       if (placeName === 'follow') {
       selectedPlace.value = 'follow';
     } else{
@@ -354,16 +302,6 @@ export default {
     searchStore.resetSearch(); // 清空搜索
     fetchPosts();
   };
-
-  const switchTab = (tabName) => {
-    selectedTab.value = tabName; // 更新 selectedTab 為傳入的 tabName
-    //searchStore.setselectedPlace(null);
-  if (tabName === 'users') {
-    fetchUsers(searchStore.searchTitle); // 搜索用戶
-  } else if (tabName === 'posts') {
-    fetchPosts(searchStore.searchTitle); // 搜索貼文
-  }
-};
 
 
     //分頁
@@ -514,9 +452,7 @@ export default {
       sortBy,
       searchQuery,
       isSearch,
-      switchTab,
       searchStore,
-      selectedTab,
       users,
     };
   },

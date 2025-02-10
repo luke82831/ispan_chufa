@@ -1,37 +1,50 @@
     <template>
         <div class="main-container">
-    
         <!-- 標籤切換 -->
-        <div>
-            <div class="tabs-container">
-        <button
-            class="tab"
-            :class="{ active: selectedTab === '文章' }"
-            @click="switchTab('文章')"
-        >
-            文章
-        </button>
-        <button
-            class="tab"
-            :class="{ active: selectedTab === '用戶' }"
-            @click="switchTab('用戶')"
-        >
-            用戶
-        </button>
-        </div>
+    <div v-if="searchStore.isSearch">
+        
         <div class="sort-select-container">
-        <p>搜尋結果</p>
-            <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
+            <div class="tabs-container">
+            <button class="tab" :class="{ active: selectedTab === 'posts' }" @click="switchTab('posts')">文章</button>
+            <button class="tab" :class="{ active: selectedTab === 'users' }" @click="switchTab('users')">使用者</button>
+            </div>
+            <select  v-if="selectedTab === 'posts'" id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">\
+            
             <option value="likes">熱度排序</option>
             <option value="time">時間排序</option>
+           
             </select>
-            </div>
         </div>
-        
+    </div>
+
+    <div v-if="selectedTab === 'users'" class="users-grid">
+  <div v-for="user in users" :key="user.userid" class="user-card" @click="navigateToMember(user.userid, $event)">
+    <div class="user-info">
+      <h3 class="username">{{ user.username }}</h3>
+      <p class="nickname">{{ user.nickname }}</p>
+    </div>
+    <div class="profile-picture-container">
+      <img
+        v-if="user.profilePicture"
+        :src="'data:image/jpeg;base64,' + user.profilePicture"
+        alt="Author's Profile Picture"
+        class="profile-picture"
+      />
+      <div v-else class="default-profile"></div>
+    </div>
+    <button
+      :class="['follow-button', { active: user.isFollowing }]"
+      @click.stop="toggleFollow(user)"
+    >
+      {{ user.isFollowing ? '已關注' : '未關注' }}
+    </button>
+
+  </div>
+</div>
+
     
         <!-- 貼文網格布局 -->
-
-        <div v-if="selectedTab === '文章'" class="posts-grid">
+        <div v-else class="posts-grid">
             <div
             v-for="post in posts"
             :key="post.postid"
@@ -152,7 +165,7 @@
         </div>
     </template>
     <script>
-    import { ref, onMounted,watch,inject } from "vue";
+    import { ref, onMounted,watch,inject,computed} from "vue";
     import { useRouter } from "vue-router";
     import { useUserStore } from "@/stores/user.js";
     import axios from "@/plugins/axios.js";
@@ -166,6 +179,7 @@
         const profileLoaded = ref(false);
         const member = ref({});
         const posts = ref([]);
+        const users = ref([]);
         const isAdmin = ref(false);
         const userId = ref(null);
         const currentPage = ref(1); // 當前頁數
@@ -174,28 +188,63 @@
         const searchQuery = ref('');
         const isSearch = ref(false);
         const searchStore = useSearchStore();
-        const selectedTab = ref('文章');
+        const selectedTab = ref("posts"); // 當前選擇的 Tab
+        const listData = ref([]);
         
-
-            // 切換 Tab
-        const switchTab = (tab) => {
-        selectedTab.value = tab; // 更新 selectedTab
-        if (tab === '用戶') {
-            searchUsers(); // 切換到用戶時搜索用戶
-        } else {
-            fetchPosts(); // 切換回文章時搜索文章
-        }
+        const selectedPlace = ref(null); 
+        
+        // 搜尋用戶
+        const fetchUsers = async (query = "") => {
+            try {
+            const response = await axios.post("/api/posts/searchByName", {
+                username: query, 
+            });
+            users.value = response.data; // 將結果儲存到 store
+            await Promise.all(users.value.map(user => checkFollowingStatus(user)));
+            console.log(users.userid);
+            } catch (error) {
+            console.error("搜尋失敗:", error);
+            }
         };
-        
-        //place
-        const selectedPlace = ref(null);
-        const places = ref([
-            { id: 1, name: "Los Angeles" },
-            { id: 2, name: "New York" },
-            { id: 3, name: "Chicago" },
-        ]);
     
-    
+    const checkFollowingStatus = async (user) => {
+        try {
+            // 获取该用户是否被当前用户关注的状态
+            const response = await axios.post('/follow/isFollowing', {
+                followedid: user.userid,
+                followerid: member.value.userid,
+            });
+            // 更新用户的关注状态
+            user.isFollowing = response.data; 
+            console.log(user.userid + " " + user.isFollowing);
+        } catch (error) {
+            console.error('Error checking following status:', error);
+        }
+    };
+ 
+
+// 切换关注状态
+const toggleFollow = async (user) => {
+    try {
+        const action = user.isFollowing ? 'unfollow' : 'follow';
+        const response = await axios.post('/follow/verb', {
+            followerid: member.value.userid,
+            followedid: user.userid,
+            action,
+        });
+
+        if (response.data.success) {
+            // 切换关注状态
+            user.isFollowing = !user.isFollowing;
+            console.log(`User ${user.userid} is now ${user.isFollowing ? 'following' : 'not following'}`);
+        } else {
+            console.error('Failed to toggle follow status:', response.data.message);
+        }
+    } catch (error) {
+        console.error('Failed to toggle follow status:', error);
+        Swal.fire('錯誤', '無法更新關注狀態', 'error');
+    }
+};
     
         watch(sortBy, () => {
             fetchPosts();  // 每次排序方式改變時重新抓取資料
@@ -226,6 +275,16 @@
             }
             router.push(`/blog/find/${postid}`);
         };
+        const navigateToMember = (userid, event) => {
+            const excludedElements = ['.follow-button', 'button'];  // 排除的元素，如关注按钮
+            for (let selector of excludedElements) {
+                if (event.target.closest(selector)) {
+                return;  // 如果点击的是排除的元素，跳过跳转
+                }
+            }
+            // 跳转到用户个人页面
+            router.push(`/blog/blogprofile/${userid}`);
+            };
     
         const formatDate = (date) => {
             if (!date) return "";
@@ -270,7 +329,7 @@
             if (selectedPlace.value === 'follow') {
             requestData.repost=true;
             requestData.followerId = member.value.userid;  
-            } else if (selectedPlace.value !== null) {
+            } else if (selectedPlace.value !== null||selectedPlace!=='users') {
             // 只有選擇地點時才加入 place
             requestData.place = selectedPlace.value;
             }
@@ -289,12 +348,11 @@
             if (response.data.postdto && response.data.postdto.length > 0) {
                 posts.value = response.data.postdto.filter(
                 (post) => !post.repost && post.repostDTO === null      
-                ).sort((a, b) => b.likes - a.likes);
+                );
                 noPosts.value = false; 
             } else {
                 //posts.value = [];
-                currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
-                Swal.fire("已經到底啦!", "no post。", "info"); 
+                Swal.fire("sorry", "沒有貼文", );     
             }
             } catch (error) {
             console.error("Fetch posts failed:", error);
@@ -304,6 +362,7 @@
     
         //tab
         const switchPlace = (placeName) => {
+            //searchStore.setselectedPlace(placeName);
             if (placeName === 'follow') {
             selectedPlace.value = 'follow';
         } else{
@@ -317,6 +376,18 @@
         searchStore.resetSearch(); // 清空搜索
         fetchPosts();
         };
+    
+        const switchTab = (tabName) => {
+        selectedTab.value = tabName; // 更新 selectedTab 為傳入的 tabName
+        //searchStore.setselectedPlace(null);
+        if (tabName === 'users') {
+        fetchUsers(searchStore.searchTitle); // 搜索用戶
+         //fetchDataWithStatus();
+        } else if (tabName === 'posts') {
+        fetchPosts(searchStore.searchTitle); // 搜索貼文
+        }
+    };
+    
     
         //分頁
         const nextPage = () => {
@@ -413,6 +484,10 @@
             }
         };
         const route = useRoute();
+        const resetSearch = () => {
+        searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
+    };
+    
         watch(
             () => route.query.title,
             (newQuery) => {
@@ -423,6 +498,7 @@
             }
             },
             { immediate: true }
+            
         );
     
         //watch
@@ -430,10 +506,10 @@
     
         onMounted(async () => {
             selectedPlace.value = null;
-            selectedTab.value='文章';
             //selectedPlace.value = places.value[0].id;
             await fetchPosts();
             await fetchProfile();
+            //await fetchDataWithStatus();
             const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
             fetchPosts(query); // 根據查詢條件抓取貼文
         });
@@ -448,10 +524,10 @@
             repostPost,
             posts,
             navigateToDetail,
+            navigateToMember,
             currentPage,
             nextPage,
             prevPage,
-            places,
             switchPlace,
             selectedPlace,
             getFirstImage,
@@ -464,329 +540,394 @@
             isSearch,
             switchTab,
             searchStore,
+            selectedTab,
+            users,
+            toggleFollow,
         };
         },
     };
     </script>
     <style scoped>
+   .main-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
 
-    .active {
-    font-weight: bold;
-    border-bottom: 2px solid #007bff;
-    }
-    .main-container {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    
-    .tabs-container {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-        overflow-x: auto;
-        padding-bottom: 10px;
-    }
-    
-    .tab {
-        padding: 10px 20px;
-        border: none;
-        background-color: #f0f0f0;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 14px;
-        color: #333;
-        transition: background-color 0.3s, color 0.3s;
-        white-space: nowrap;
-    }
-    
-    .tab:hover {
-        background-color: #e0e0e0;
-    }
-    
-    .tab.active {
-        background-color: #005AB5;
-        color: white;
-    }
-    
+.tabs-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  justify-content: flex-start; /* 将内容靠左 */
+  width: 100%;
+}
+
+.tab {
+  padding: 10px 20px;
+  border: none;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background-color: #e0e0e0;
+}
+
+.tab.active {
+  background-color: #005AB5;
+  color: white;
+}
+
     .posts-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
     }
-    
+
     .post-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        overflow: hidden;
-        background-color: white;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: white;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .post-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
     }
-    
+
     .post-image-container {
-        width: 100%;
-        height: 200px;
-        overflow: hidden;
-        position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
     }
-    
+
     .post-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
     }
-    
+
     .post-image-container:hover .post-image {
-        transform: scale(1.05);
+    transform: scale(1.05);
     }
-    
+
     .post-content-preview{
-        padding: 16px;
-        font-size: 14px;
-        color: #555;
-        line-height: 1.5;
+    padding: 16px;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
     }
-    
+
     .post-content h3 {
-        margin: 0 0 10px;
-        font-size: 18px;
-        color: #333;
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: #333;
     }
-    
+
     .read-more {
-        display: inline-block;
-        margin: 10px 0;
-        color: #ff4757;
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.3s;
+    display: inline-block;
+    margin: 10px 0;
+    color: #ff4757;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
     }
-    
+
     .read-more:hover {
-        color: #ff6b81;
+    color: #ff6b81;
     }
-    
+
     .post-meta,
     .post-stats {
-        padding: 0 16px 10px;
-        font-size: 12px;
-        color: #888;
+    padding: 0 16px 10px;
+    font-size: 12px;
+    color: #888;
     }
-    
+
     .post-meta p,
     .post-stats p {
-        margin: 5px 0;
+    margin: 5px 0;
     }
-    
+
     .post-actions {
-        display: flex;
-        justify-content: space-around;
-        padding: 10px;
-        border-top: 1px solid #e0e0e0;
-        background-color: #f9f9f9;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f9f9f9;
     }
-    
+
     .action-btn {
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-size: 14px;
-        color: #666;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: color 0.3s;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: color 0.3s;
     }
-    
+
     .action-btn:hover {
-        color: #ff4757;
+    color: #ff4757;
     }
-    
+
     .action-btn.active {
-        color: #ff4757;
+    color: #ff4757;
     }
-    
+
     .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 30px;
-        gap: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 10px;
     }
-    
+
     .pagination button {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 20px;
-        background-color: #f0f0f0;
-        cursor: pointer;
-        font-size: 14px;
-        color: #333;
-        transition: background-color 0.3s, color 0.3s;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
     }
-    
+
     .pagination button:hover {
-        background-color: #ff4757;
-        color: white;
+    background-color: #ff4757;
+    color: white;
     }
-    
+
     .pagination button:disabled {
-        background-color: #ccc;
-        color: #666;
-        cursor: not-allowed;
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
     }
-    
+
     .pagination span {
-        font-size: 14px;
-        color: #333;
+    font-size: 14px;
+    color: #333;
     }
-    
+
     /* 作者信息樣式 */
     .author-info {
-        padding: 16px;
+    padding: 16px;
     }
-    
+
     .author-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     }
-    
+
     .profile-picture-container {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        overflow: hidden;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
     }
-    
+
     .profile-picture {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     }
-    
+
     .default-profile {
-        width: 100%;
-        height: 100%;
-        background-color: #ccc;
-        border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    background-color: #ccc;
+    border-radius: 50%;
     }
-    
+
     .author-name {
-        font-size: 14px;
-        color: #333;
+    font-size: 14px;
+    color: #333;
     }
-    
+
     /* REPOST 樣式 */
     .repost-header {
-        padding: 10px 16px;
-        background-color: #f9f9f9;
-        border-bottom: 1px solid #e0e0e0;
+    padding: 10px 16px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
     }
-    
+
     .interaction-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     }
-    
+
     .repost-profile-container {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        overflow: hidden;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
     }
-    
+
     .small-profile {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     }
-    
+
     .interaction-name {
-        font-size: 12px;
-        color: #666;
-        margin: 0;
+    font-size: 12px;
+    color: #666;
+    margin: 0;
     }
-    
+
     /* 發文/規劃按鈕 */
     #planningbutton {
-        position: fixed;
-        bottom: 50px;
-        right: 50px;
-        width: 100px;
-        height: 100px;
-        background-color: #84baf5;
-        color: #fff;
-        border-radius: 50%;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        font-size: 35px;
-        font-weight: bold;
-        text-decoration: none;
-        z-index: 1000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        white-space: normal;
-        overflow-wrap: break-word;
-        padding: 10px;
-        transition: transform 0.2s, background-color 0.2s;
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    width: 100px;
+    height: 100px;
+    background-color: #84baf5;
+    color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 35px;
+    font-weight: bold;
+    text-decoration: none;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    padding: 10px;
+    transition: transform 0.2s, background-color 0.2s;
     }
-    
+
     #planningbutton:hover {
-        transform: scale(1.1);
-        background-color: #5a95d5;
+    transform: scale(1.1);
+    background-color: #5a95d5;
     }
-    
+
     #blogbutton {
-        position: fixed;
-        bottom: 200px;
-        right: 50px;
-        width: 100px;
-        height: 100px;
-        background-color: #85a98f;
-        color: #fff;
-        border-radius: 50%;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        font-size: 35px;
-        font-weight: bold;
-        text-decoration: none;
-        z-index: 1000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        white-space: normal;
-        overflow-wrap: break-word;
-        padding: 10px;
-        transition: transform 0.2s, background-color 0.2s;
+    position: fixed;
+    bottom: 200px;
+    right: 50px;
+    width: 100px;
+    height: 100px;
+    background-color: #85a98f;
+    color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 35px;
+    font-weight: bold;
+    text-decoration: none;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: normal;
+    overflow-wrap: break-word;
+    padding: 10px;
+    transition: transform 0.2s, background-color 0.2s;
     }
-    
+
     #blogbutton:hover {
-        transform: scale(1.1);
-        background-color: #5a6c57;
+    transform: scale(1.1);
+    background-color: #5a6c57;
     }
-    
+
     .sort-select-container {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-grow: 1;
     }
     select {
-        padding: 8px;
-        margin: 5px;
-        cursor: pointer;
-        border-radius: 4px;
+    padding: 8px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 4px;
     }
+
+    .users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.user-info {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.username {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+.nickname {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 0;
+}
+
+
+.follow-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.follow-button.active {
+  background-color: #6c757d;
+}
+
+.follow-button:hover {
+  background-color: #0056b3;
+}
+
+.follow-button.active:hover {
+  background-color: #5a6268;
+}
     </style>
-    

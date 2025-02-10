@@ -108,13 +108,9 @@ export const useEventStore = defineStore("eventStore", {
      */
     async updateEvent(eventId, updateData) {
       try {
-        console.log(
-          "📡 [updateEvent] PUT /api/event/update/",
-          eventId,
-          updateData
-        );
+        console.log("📡 [updateEvent] PUT /api/event/", eventId, updateData);
         const response = await axiosapi.put(
-          `/api/event/update/${eventId}`,
+          `/api/event/${eventId}`,
           updateData
         );
         const updatedEvent = response.data;

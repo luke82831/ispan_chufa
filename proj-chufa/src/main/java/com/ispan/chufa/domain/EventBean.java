@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -49,7 +50,7 @@ public class EventBean {
 	@JsonIgnore
 	private CalendarBean calendar; // 多對一關聯 (行程內容 -> 行事曆)
 	
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event",cascade = CascadeType.ALL)
     @JsonIgnoreProperties({"eventXPlaceBeans","place","event"})
     private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 

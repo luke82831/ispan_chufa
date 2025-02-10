@@ -90,7 +90,7 @@ public class EventController {
             EventBean newEvent = new EventBean();
             newEvent.setCalendar(calendar); // ✅ 設定 CalendarBean
             newEvent.setSchedule(schedule); // ✅ 設定 ScheduleBean
-            newEvent.setStartTime(LocalTime.of(9, 0)); // 預設開始時間
+            newEvent.setStartTime(LocalTime.of(8, 0)); // 預設開始時間
             newEvent.setEndTime(null); // 預設結束時間
             newEvent = eventService.saveEvent(newEvent); // 儲存事件
 

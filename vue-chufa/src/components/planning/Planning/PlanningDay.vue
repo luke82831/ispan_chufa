@@ -108,6 +108,14 @@ const props = defineProps({
   selectedDate: String,
 });
 
+watch(
+  () => props.selectedDate,
+  (newDate) => {
+    console.log("📅 `PlanningDay.vue` 收到的 `selectedDate`: ", newDate);
+  },
+  { immediate: true }
+);
+
 const itineraryStore = useItineraryStore();
 const scheduleStore = useScheduleStore();
 const eventStore = useEventStore();

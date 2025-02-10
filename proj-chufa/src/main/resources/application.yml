@@ -9,6 +9,21 @@ spring:
     converters:
       preferred-json-mapper: jackson
     static-path-pattern: /static/**
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "fafarere1104@gmail.com"  # 替換成你的 Gmail 帳號
+    password: "azmm feqw xhtj ffef"  # 使用 Google 應用程式密碼
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
   #Hibernate/JPA的相關設定
   jpa:
@@ -19,7 +34,6 @@ spring:
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-
 #thymeleaf
   thymeleaf:
     enabled: true
@@ -44,3 +58,4 @@ line:
     channel-id: "2006733552"
     channel-secret: "2e094b815ed92a5e16cb5938e9576102"
     callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"
+

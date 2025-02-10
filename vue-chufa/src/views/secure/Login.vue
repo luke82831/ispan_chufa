@@ -32,6 +32,10 @@
           {{ serverError }}
         </div>
       </form>
+      <div class="forgot-password">
+        <router-link to="/secure/ForgotPassword">忘記密碼？</router-link>
+      </div>
+
       <div class="social-login">
         <button class="line-login-button" @click="redirectToLineLogin">
           使用 LINE 帳號登入
@@ -194,10 +198,12 @@ function redirectToLineLogin() {
 .login-card {
   width: 360px;
   padding: 30px;
+  padding-bottom: 100px; /* 增加下側內距，讓下面的連結不會重疊 */
   border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
+  position: relative; /* 讓內部的絕對定位以此為參照 */
 }
 
 /* 標題樣式 */
@@ -228,6 +234,8 @@ function redirectToLineLogin() {
   border: 1px solid #cccccc;
   border-radius: 5px;
   font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .form-group .form-control:focus {
@@ -247,7 +255,7 @@ function redirectToLineLogin() {
 /* 登入按鈕 */
 .btn-primary {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   font-weight: bold;
   color: #ffffff;
@@ -256,6 +264,8 @@ function redirectToLineLogin() {
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.3s;
+  margin-top: 10px;
+  box-sizing: border-box;
 }
 
 .btn-primary:hover {
@@ -269,26 +279,29 @@ function redirectToLineLogin() {
   color: #ff4d4d;
 }
 
-/* 底部註冊連結 */
+/* 註冊連結樣式 */
 .login-footer {
-  margin-top: 20px;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 15px;
 }
 
 .register-link {
-  font-size: 14px;
-  color: #4a89c4;
+  color: #8a8a8a;
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.3s ease;
 }
 
 .register-link:hover {
-  color: #3a6ea1;
+  color: #555555;
+  text-decoration: underline;
 }
 
 /* LINE 登入按鈕樣式 */
 .line-login-button {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   font-weight: bold;
   color: white;
@@ -297,10 +310,27 @@ function redirectToLineLogin() {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-top: 20px;
 }
 
 .line-login-button:hover {
   background-color: #00a300;
+}
+
+.forgot-password {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 15px;
+}
+
+.forgot-password a {
+  color: #8a8a8a;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password a:hover {
+  color: #555555; /* hover 時換成稍微深一點的灰 */
+  text-decoration: underline;
 }
 </style>

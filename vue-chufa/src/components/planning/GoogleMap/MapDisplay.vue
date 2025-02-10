@@ -153,9 +153,7 @@ const placeDetails = placeStore.placeDetails;
   height: 100%; /* 確保容器滿高 */
   width: 100%;
   flex-grow: 1;
-  position: relative; /* 確保內部元素的絕對定位相對於 .container */
   position: relative; /* 為地圖設定定位基準 */
-  height: 100%; /* 確保容器滿高 */
 }
 
 #map {

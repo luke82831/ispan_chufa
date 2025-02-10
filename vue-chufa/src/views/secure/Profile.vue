@@ -1,6 +1,6 @@
 <template>
   <div class="profile-container" v-if="profileLoaded">
-    <!-- Header: Profile Picture and User Info -->
+    <!-- Header: 大頭貼、會員名稱、暱稱等資訊始終顯示 -->
     <div class="profile-header">
       <img
         :src="member.profile_picture"
@@ -9,14 +9,16 @@
         @error="onImageError"
       />
       <div class="user-info">
-        <!-- 左側文字區（會員名稱與歡迎文字）與右側操作按鈕區 -->
         <div class="info-row">
           <div class="text-info">
             <h1>{{ member.name || "會員名稱" }}</h1>
             <p class="welcome-text">歡迎回來，{{ member.nickname || "暱稱" }}！</p>
           </div>
           <div class="header-actions">
-            <button class="btn btn-edit" @click="editProfile">編輯資料</button>
+            <!-- 編輯資料按鈕僅在非編輯模式下顯示 -->
+            <button class="btn btn-edit" v-if="!isEditing" @click="editProfile">
+              編輯資料
+            </button>
             <button class="btn btn-admin" v-if="isAdmin" @click="navigateToAdmin">
               管理會員資料
             </button>
@@ -25,7 +27,7 @@
       </div>
     </div>
 
-    <!-- Profile Details -->
+    <!-- 內容區：根據編輯狀態切換顯示個人資料或編輯表單 -->
     <div v-if="!isEditing" id="profile-info" class="profile-details-container">
       <dl class="profile-details">
         <div class="detail-item">
@@ -81,7 +83,7 @@
       </div>
     </div>
 
-    <!-- Edit Form -->
+    <!-- 編輯表單：僅在編輯模式下顯示 -->
     <div v-else id="edit-form" class="edit-form-container">
       <h4>編輯個人資料</h4>
       <form @submit.prevent="saveProfile">
@@ -180,7 +182,7 @@ const profileLoaded = ref(false);
 
 // 從 Pinia store 取得會員資料
 const member = computed(() => userStore.member);
-// 初始化編輯資料時，確保 socialLinks 不為 undefined
+// 初始化編輯資料，確保 socialLinks 不為 undefined
 const editMember = ref({
   ...userStore.member,
   socialLinks: { ...(userStore.member.socialLinks || {}) },
@@ -533,13 +535,37 @@ const onImageError = (event) => {
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 其他按鈕樣式保持不變 */
+.btn-save {
+  background: linear-gradient(45deg, #5fa65e, #559d55); /* 較柔和的綠色 */
+  color: #fff;
+  border: none;
+  border-radius: 12px; /* 增加圓角 */
+  padding: 12px 30px;
+  margin: 20px 10px 0 auto; /* 上方與左右都有間距，自動向右推 */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  display: inline-block;
+}
 
-.actions-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 20px;
-  margin-top: 30px;
+.btn-save:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(85, 157, 85, 0.5);
+  background: linear-gradient(45deg, #559d55, #4e8c4e);
+}
+
+.btn-secondary {
+  background: linear-gradient(45deg, #a8a8a8, #969696); /* 較柔和的灰色 */
+  color: #fff;
+  border: none;
+  border-radius: 12px; /* 增加圓角 */
+  padding: 12px 30px;
+  margin: 20px 10px 0 0; /* 上方與左右都有間距 */
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(150, 150, 150, 0.5);
+  background: linear-gradient(45deg, #969696, #888888);
 }
 
 /* 社群連結區塊 */

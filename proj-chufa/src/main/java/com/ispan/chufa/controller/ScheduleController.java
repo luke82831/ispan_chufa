@@ -1,12 +1,9 @@
 package com.ispan.chufa.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,8 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
 import com.ispan.chufa.service.MemberService;
@@ -41,9 +36,8 @@ public class ScheduleController {
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
-
-    
     // POST: 創建行程資料
+
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
             @RequestParam("tripName") String tripName,
@@ -66,10 +60,9 @@ public class ScheduleController {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-         // 將 MultipartFile 轉換為 byte[]
+            // 將 MultipartFile 轉換為 byte[]
             byte[] coverPhotoBytes = coverPhoto.getBytes();
-            
-            
+
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
@@ -77,7 +70,7 @@ public class ScheduleController {
             schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
-         // 儲存行程資料
+            // 儲存行程資料
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
@@ -89,15 +82,12 @@ public class ScheduleController {
         }
     }
 
-    // -------PostMan測試程式
-
-//    // POST: 創建行程資料
-//    @PostMapping("/schedule")
-//    public ResponseEntity<ScheduleBean> createSchedule(@RequestBody ScheduleBean schedule) {
-//        System.out.println("Received schedule with end date: " + schedule.getEndDate());
-//        ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
-//        return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
-//    }
+    // 取得所有行程
+    @GetMapping("/schedules")
+    public ResponseEntity<List<ScheduleBean>> getAllSchedules() {
+        List<ScheduleBean> schedules = scheduleService.findAllSchedules();
+        return new ResponseEntity<>(schedules, HttpStatus.OK);
+    }
 
     // GET: 前端輸入tripId查詢資料
     @GetMapping("/schedule/{tripId}")

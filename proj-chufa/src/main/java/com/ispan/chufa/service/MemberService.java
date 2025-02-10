@@ -29,6 +29,23 @@ public class MemberService {
 	@Autowired
 	private PlaceRepository placeRepository;
 
+	public boolean isEmailRegistered(String email) {
+		System.out.println("檢查 Email 是否註冊: " + email);
+		System.out.println("結果：" + memberRepository.existsByEmail(email));
+		return memberRepository.existsByEmail(email.trim());
+	}
+
+	public boolean updatePassword(String email, String newPassword) {
+		Optional<MemberBean> optionalMember = memberRepository.findByEmail(email);
+		if (optionalMember.isPresent()) {
+			MemberBean member = optionalMember.get();
+			member.setPassword(newPassword.getBytes()); // ⚠️ 這裡應該加密密碼，未來可以改進
+			memberRepository.save(member);
+			return true;
+		}
+		return false;
+	}
+
 	public void addPlaceToMember(Long userid, Long placeId) {
 		// 查找 Member
 		MemberBean member = memberRepository.findById(userid)
@@ -80,7 +97,7 @@ public class MemberService {
 	public MemberBean findById(Long userid) {
 		return memberRepository.findById(userid).orElse(null);
 	}
-	
+
 	public MemberBean getUserById(Long userId) {
 		return memberRepository.findById(userId).orElse(null);
 	}
@@ -200,6 +217,7 @@ public class MemberService {
 			return false;
 		}
 	}
+
 	public MemberBean getMemberById(Long userId) {
 		return memberRepository.findById(userId).orElse(null);
 	}
@@ -209,4 +227,32 @@ public class MemberService {
 		Pageable pageable = PageRequest.of(page, size);
 		return memberRepository.findAll(pageable);
 	}
+
+	public boolean updateMemberEmail(Long memberId, String newEmail) {
+		// 依據 memberId 找到會員
+		MemberBean member = memberRepository.findById(memberId)
+				.orElseThrow(() -> new EntityNotFoundException("會員不存在"));
+
+		// 檢查新的 email 是否為空
+		if (newEmail == null || newEmail.trim().isEmpty()) {
+			throw new IllegalArgumentException("新電子郵件不可為空");
+		}
+
+		// 檢查電子郵件格式（可依需求調整正規表達式）
+		if (!newEmail.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+			throw new IllegalArgumentException("電子郵件格式錯誤");
+		}
+
+		// 檢查該電子郵件是否已被其他會員使用
+		MemberBean existingMember = memberRepository.findByEmail(newEmail).orElse(null);
+		if (existingMember != null && !existingMember.getUserid().equals(memberId)) {
+			throw new IllegalArgumentException("該電子郵件已被其他會員使用");
+		}
+
+		// 更新會員電子郵件
+		member.setEmail(newEmail);
+		memberRepository.save(member);
+		return true;
+	}
+
 }

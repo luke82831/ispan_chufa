@@ -1,42 +1,21 @@
 <template>
   <div class="space-y-6">
-    <!-- 使用 formattedSelectedDate (在 template 中可直接寫 {{ formattedSelectedDate }} ) -->
     <h3 class="text-2xl font-semibold text-gray-900">
       {{ formattedSelectedDate }} 的行程
     </h3>
-    <p class="text-sm text-red-500">
-      Debug: placeIds = {{ eventData?.placeIds }}
-    </p>
 
-    <!-- 設定出發時間：使用雙向綁定 departureTime -->
     <div class="departure-time">
       <label>出發時間：</label>
       <input type="time" v-model="departureTime" />
-      <!-- 
-        說明： 
-        - 如果你還想在失焦（blur）時手動呼叫 updateStartTime，可再加上 @blur="updateStartTime"
-        - 但因為我們在 Script 裡的 departureTime set() 已呼叫 updateStartTime，所以這裡可省略
-      -->
-    </div>
-
-    <!-- 顯示該 event 內的所有地點 -->
-    <div v-if="placesForEvent.length">
-      <h3>當天的所有地點：</h3>
-      <ul>
-        <li v-for="place in placesForEvent" :key="place.placeId">
-          {{ place.placeName }} - {{ place.placeAddress }} -
-          {{ place.placeOrder }}
-        </li>
-      </ul>
     </div>
 
     <!-- 顯示當天的行程 -->
-    <div v-if="placesForEvent.length" class="itinerary-list">
+    <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
       <draggable
-        v-model="placesForEvent"
+        v-model="itineraryForSelectedDay"
         :group="{ name: 'places', pull: 'clone', put: true }"
         :animation="250"
-        item-key="place.placeOrder"
+        item-key="placeOrder"
         @end="handleDragEnd"
       >
         <template #item="{ element, index }">
@@ -47,22 +26,17 @@
               </button>
 
               <div class="itinerary-details">
-                <div class="stay-time-header">
-                  <!-- 
-                    傳入 formattedSelectedDate 取代原本 selectedDate
-                    同時也傳入正確的 stayDurations key 
-                  -->
+                <!-- <div class="stay-time-header">
                   <StayTime
                     :date="formattedSelectedDate"
                     :departureTime="departureTime"
-                    :itinerary="placesForEvent"
+                    :itinerary="itineraryForSelectedDay"
                     :stayDurations="
                       itineraryStore.stayDurations[formattedSelectedDate] || {}
                     "
                     :index="index"
                   />
 
-                  <!-- 顯示/編輯停留時間 -->
                   <a
                     v-if="!element.isEditingStay"
                     href="#"
@@ -85,7 +59,7 @@
                     @blur="saveStayTime(element)"
                     @keyup.enter="saveStayTime(element)"
                   />
-                </div>
+                </div> -->
 
                 <div class="itinerary-info">
                   <img
@@ -96,35 +70,32 @@
                   />
                   <div>
                     <h4 class="location-title">{{ element.placeName }}</h4>
-                    <p class="location-address">
-                      {{ element.placeAddress }}
-                    </p>
+                    <p class="location-address">{{ element.placeAddress }}</p>
                   </div>
                 </div>
               </div>
             </li>
 
-            <!-- 顯示路徑時間：把 date 換成 formattedSelectedDate -->
-            <div
+            <!-- <div
               v-if="index < itineraryForSelectedDay.length - 1"
               class="route-time"
             >
               <RouteTime :date="formattedSelectedDate" :index="index" />
-            </div>
+            </div> -->
           </ul>
         </template>
       </draggable>
     </div>
 
     <div v-else>
-      <!-- 若沒有行程 -->
       <p>今天還沒有新增行程！</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
+import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import { useEventStore } from "@/stores/EventStore";
@@ -133,7 +104,6 @@ import RouteTime from "./RouteTime.vue";
 import draggable from "vuedraggable";
 import StayTime from "./StayTime.vue";
 
-// 取得傳入的日期參數
 const props = defineProps({
   selectedDate: String,
 });
@@ -143,263 +113,214 @@ const scheduleStore = useScheduleStore();
 const eventStore = useEventStore();
 const placeStore = usePlaceStore();
 
-//本地只留一個 eventData，用來顯示/控制當天的 event 狀態
-//後端/Store 回傳後，存 { eventId, date, placeIds, startTime, ... }
-const eventData = ref({});
-watch(
-  () => eventData.value,
-  (newEventData) => {
-    console.log("🔍 eventData:", newEventData);
-    console.log("📍 placeIds = ", newEventData?.placeIds || "沒有 placeIds");
+const hasUnsavedChanges = ref(false); // 追蹤是否有變更
+const eventData = ref({}); // 儲存從後端載入的行程數據
+
+const departureTime = computed({
+  get: () => itineraryStore.getStartTime(formattedSelectedDate.value),
+  set: (newTime) => {
+    itineraryStore.setStartTime(formattedSelectedDate.value, newTime);
+    hasUnsavedChanges.value = true; // 標記有變更
   },
-  { immediate: true }
-);
-
-//取得當天的 placeIds
-const placeIdsForEvent = computed(() => {
-  return eventData.value?.placeIds || [];
-});
-watch(
-  placeIdsForEvent,
-  async (newPlaceIds) => {
-    console.log("🔍 監聽到 placeIdsForEvent 變更:", newPlaceIds);
-    if (newPlaceIds.length === 0) {
-      console.warn("⚠️ 沒有 placeIds，無法取得地點資料！");
-      return;
-    }
-
-    console.log("📡 嘗試從 API 取得地點資料:", newPlaceIds);
-    await placeStore.fetchMultiplePlaces(newPlaceIds);
-    console.log("✅ 已載入的地點:", placeStore.placeDetailsMap);
-  },
-  { immediate: true }
-);
-
-//獲取 places 資料
-const placesForEvent = computed(() => {
-  if (!eventData.value || !eventData.value.eventXPlaceBeans) return [];
-
-  return eventData.value.eventXPlaceBeans
-    .map((eventXPlace) => ({
-      placeId: eventXPlace.placeId,
-      placeOrder: eventXPlace.placeOrder, // 確保有 placeOrder
-      ...placeStore.getPlaceDetailById(eventXPlace.placeId),
-    }))
-    .filter((place) => place.placeId) // 過濾掉無效地點
-    .sort((a, b) => a.placeOrder - b.placeOrder); // ✅ 根據 placeOrder 排序
 });
 
-//確保 selectedDate 轉成 "YYYY-MM-DD" 格式
+// 確保 selectedDate 轉成 "YYYY-MM-DD" 格式
 const formattedSelectedDate = computed(() => {
   if (!props.selectedDate) return "";
-
-  // 移除非數字與斜線
   const cleanedDate = props.selectedDate.replace(/[^0-9\/]/g, "");
-
-  // 已經是 YYYY-MM-DD 就直接回傳
   if (cleanedDate.includes("-")) return cleanedDate;
 
-  // 若是 M/D 格式，轉成 YYYY-MM-DD
   const baseYear =
     scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
     new Date().getFullYear();
   const [month, day] = cleanedDate
     .split("/")
     .map((num) => num.padStart(2, "0"));
-
-  const formattedDate = `${baseYear}-${month}-${day}`;
-  console.log(`📅 formattedSelectedDate 計算結果: ${formattedDate}`);
-  return formattedDate;
+  return `${baseYear}-${month}-${day}`;
 });
 
-/**
- * 監聽修正後的 selectedDate，去 EventStore 取（或抓）當天的 event
- */
+// **讀取後端資料，並存入 Pinia**
 watch(
   () => formattedSelectedDate.value,
   async (newDate) => {
     if (!newDate) return;
 
-    console.log(`📅 修正後的 selectedDate: ${newDate}`);
+    console.log(`📅 選擇的日期: ${newDate}`);
 
-    const event = await eventStore.fetchEventByDate(
-      scheduleStore.currentSchedule.tripId,
-      newDate
+    // 🚀 **從後端獲取行程資料**
+    const event =
+      (await eventStore.fetchEventByDate(
+        scheduleStore.currentSchedule.tripId,
+        newDate
+      )) || {};
+
+    console.log("🔍 從後端獲取的 `event`: ", event);
+
+    eventData.value = { eventId: event.eventId ?? null };
+
+    let placesWithDetails = [];
+    if (event.eventXPlaceBeans) {
+      console.log(
+        "📍 從後端獲取的 `eventXPlaceBeans`:",
+        event.eventXPlaceBeans
+      );
+
+      const placeIds = event.eventXPlaceBeans.map((e) => e.placeId);
+      console.log("📍 需要加載的地點 ID:", placeIds);
+
+      await placeStore.fetchMultiplePlaces(placeIds);
+      console.log(
+        "✅ `placeStore.placeDetailsMap`:",
+        placeStore.placeDetailsMap
+      );
+
+      // ✅ 確保 `placeDetailsMap` 內有完整資料
+      placesWithDetails = event.eventXPlaceBeans.map((eventPlace) => {
+        const placeDetails = placeStore.getPlaceDetailById(eventPlace.placeId);
+
+        return {
+          ...eventPlace,
+          placeName: placeDetails?.placeName ?? "未知地點",
+          placeAddress: placeDetails?.placeAddress ?? "未知地址",
+          photos: placeDetails?.photos ?? [], // ✅ 存入照片
+          latitude: placeDetails?.latitude ?? null, // ✅ 存入緯度
+          longitude: placeDetails?.longitude ?? null, // ✅ 存入經度
+        };
+      });
+    }
+
+    console.log("✅ 處理後的 `placesWithDetails`:", placesWithDetails);
+
+    // ✅ 存入 Pinia
+    itineraryStore.setItinerary(newDate, placesWithDetails);
+    itineraryStore.setStartTime(newDate, event.startTime ?? "08:00");
+
+    console.log(
+      "✅ 已存入 Pinia：",
+      itineraryStore.getItineraryForDay(newDate)
     );
-
-    if (event) {
-      eventData.value = { ...event };
-      console.log(`🚀 從後端載入 startTime: ${eventData.value.startTime}`);
-    } else {
-      console.warn(`⚠️ ${newDate} 沒有行程內容`);
-      eventData.value = {};
-    }
   },
   { immediate: true }
 );
 
-/**
- * 確保選中的日期同步到 scheduleStore (全域)
- */
-watch(
-  () => formattedSelectedDate.value,
-  (newDate) => {
-    if (newDate) {
-      console.log(`📅 選擇的日期更新: ${newDate}`);
-      scheduleStore.setSelectedDate(newDate);
-    }
-  },
-  { immediate: true }
-);
-
-/**
- * 更新 startTime 到後端
- */
-const updateStartTime = async (newTime) => {
-  if (!eventData.value || !eventData.value.eventId) return;
-
-  console.log(`🔄 更新後端 startTime 為: ${newTime}`);
-  await eventStore.updateEvent(eventData.value.eventId, {
-    startTime: newTime,
-  });
-  console.log(`✅ 更新完成`);
-};
-
-/**
- * 計存「每個日期的預設出發時間」，若和後端無法即時同步，可作本地暫存
- */
-const departureTimes = ref({});
-
-/**
- * 雙向綁定 startTime (computed)
- * get -> 取 eventData.value.startTime
- * set -> 呼叫 updateStartTime
- */
-const departureTime = computed({
-  get: () => {
-    return eventData.value?.startTime || "08:00";
-  },
-  set: async (newTime) => {
-    if (!eventData.value || !eventData.value.eventId) return;
-    eventData.value.startTime = newTime;
-    await updateStartTime(newTime);
-  },
-});
-
-/**
- * 取得/設定「當天的行程陣列」，來自 itineraryStore
- * 假設 itineraryStore 使用 Option API => 可直接存取 .itineraryDates[date]
- */
+// **從 Pinia 獲取當天的行程**
 const itineraryForSelectedDay = computed({
   get: () => {
-    return itineraryStore.getItineraryForDay(formattedSelectedDate.value);
+    const date = formattedSelectedDate.value;
+    if (!date) return [];
+
+    const itinerary = itineraryStore.getItineraryForDay(date);
+    console.log(`📌 itineraryForSelectedDay (${date}):`, itinerary);
+
+    return itinerary ?? [];
   },
   set: (newItinerary) => {
-    // 如果 itineraryDates 是 Option API state，可直接：
-    itineraryStore.itineraryDates[formattedSelectedDate.value] = newItinerary;
+    const date = formattedSelectedDate.value;
+    if (!date) return;
+    console.log(`✏️ 更新行程 (${date}):`, newItinerary);
 
-    // 若 itineraryDates 是 ref({})，則需要：
-    // itineraryStore.itineraryDates.value[formattedSelectedDate.value] = newItinerary;
+    itineraryStore.setItinerary(date, newItinerary);
   },
 });
 
-/**
- * 刪除地點並更新 routePairs
- */
-const deletePlace = (index) => {
-  console.log(`🗑 刪除行程: ${index}`);
-  // 注意：formattedSelectedDate 是 computed -> 取值要加 .value
-  itineraryStore.removePlaceFromItinerary(formattedSelectedDate.value, index);
-  updateRoutePairs();
-};
-
-/**
- * 拖曳地點後，更新 routePairs 和停留時間
- */
+// **拖曳結束時更新 Pinia**
 const handleDragEnd = () => {
-  updateRoutePairs();
+  const date = formattedSelectedDate.value;
+  if (!date) return;
+
+  console.log("🔄 拖曳結束，重新排序 placeOrder");
+
+  // ✅ 確保新的順序與 placeOrder 一致
+  itineraryForSelectedDay.value.forEach((place, index) => {
+    place.placeOrder = index + 1; // **讓 placeOrder 根據新順序重新編號**
+  });
+
+  console.log("📝 新的行程順序：", itineraryForSelectedDay.value);
+
+  // ✅ 存回 Pinia
+  itineraryStore.setItinerary(date, [...itineraryForSelectedDay.value]);
+  hasUnsavedChanges.value = true; // **標記數據變更**
 };
 
-/**
- * 更新 placeStore.routePairs
- * 假設 placeStore.routePairs 是 Option API (state = { routePairs: {} })
- */
-const updateRoutePairs = () => {
-  const date = formattedSelectedDate.value;
-  // 清除舊資料
-  placeStore.routePairs[date] = {};
+// **前端新增景點**
+const addPlace = (place) => {
+  itineraryStore.addPlace(formattedSelectedDate.value, place);
+  hasUnsavedChanges.value = true;
+};
 
-  // itineraryForSelectedDay 本身是 computed，需要 .value 取得陣列
-  for (let i = 0; i < itineraryForSelectedDay.value.length - 1; i++) {
-    const origin = itineraryForSelectedDay.value[i].location;
-    const destination = itineraryForSelectedDay.value[i + 1].location;
+// **前端刪除景點**
+const deletePlace = (index) => {
+  itineraryStore.removePlace(formattedSelectedDate.value, index);
+  hasUnsavedChanges.value = true;
+};
 
-    // 呼叫 store 裡的 action
-    placeStore.updateRoutePair(date, i, origin, destination);
+// **監聽行程變更，標記未儲存**
+watch(
+  itineraryForSelectedDay,
+  () => {
+    hasUnsavedChanges.value = true;
+  },
+  { deep: true }
+);
+
+const getPhotoUrl = (photo) => {
+  if (!photo) return ""; // 確保 photo 不為 null 或 undefined
+  if (typeof photo === "object" && photo.hasOwnProperty("url")) {
+    return photo.url; // 如果 photo 是一個物件，取 `url`
+  }
+  return photo; // 如果 photo 已經是 URL 字串，直接回傳
+};
+
+// **離開畫面時，將變更儲存至後端**
+onBeforeRouteLeave(async (to, from, next) => {
+  if (!hasUnsavedChanges.value) {
+    next();
+    return;
+  }
+
+  if (!eventData.value?.eventId) {
+    console.warn("⚠️ 沒有 eventId，不需要同步");
+    next();
+    return;
+  }
+
+  try {
+    console.log("🚀 儲存行程變更到後端...");
+    await eventStore.updateEvent(eventData.value.eventId, {
+      places: itineraryForSelectedDay.value.map(({ placeId, placeOrder }) => ({
+        placeId,
+        placeOrder,
+      })),
+      startTime: itineraryStore.getStartTime(formattedSelectedDate.value), // 存入 Pinia 內的 startTime
+    });
+    console.log("✅ 儲存完成");
+    hasUnsavedChanges.value = false;
+    next();
+  } catch (error) {
+    console.error("❌ 儲存失敗", error);
+    if (confirm("變更未儲存，是否仍要離開？")) {
+      next();
+    } else {
+      next(false);
+    }
+  }
+});
+
+// **瀏覽器關閉時提醒**
+const warnUnsavedChanges = (event) => {
+  if (hasUnsavedChanges.value) {
+    event.preventDefault();
+    event.returnValue = "你有未儲存的變更，確定要離開嗎？";
   }
 };
 
-/**
- * 編輯停留時間
- */
-const editStayTime = (place) => {
-  place.isEditingStay = true;
-  place.tempStayDuration = itineraryStore.getStayDuration(
-    formattedSelectedDate.value,
-    place.id
-  );
-};
+onMounted(() => {
+  window.addEventListener("beforeunload", warnUnsavedChanges);
+});
 
-/**
- * 儲存新的停留時間
- */
-const saveStayTime = (place) => {
-  const newDuration = Number(place.tempStayDuration);
-  itineraryStore.setStayDuration(
-    formattedSelectedDate.value,
-    place.id,
-    newDuration
-  );
-  place.isEditingStay = false;
-};
-
-/**
- * 獲取照片 URL
- */
-const getPhotoUrl = (photo) => {
-  return photo;
-};
-
-/**
- * 監聽 placeStore.routePairs[某日]，做相應處理
- * 如果 placeStore 是 Option API => placeStore.routePairs[date]
- * 若是 ref => placeStore.routePairs.value[date]
- */
-//暫時註解
-// watch(
-//   () => placeStore.routePairs[formattedSelectedDate.value],
-//   (newVal) => {
-//     if (newVal) {
-//       console.log("✅ 觸發計算，開始更新路徑時間:", newVal);
-//       // 這裡可以呼叫計算邏輯或後端 API
-//     }
-//   },
-//   { immediate: true, deep: true }
-// );
-
-/**
- * 確保初始出發時間
- */
-watch(
-  () => formattedSelectedDate.value,
-  (newDate) => {
-    if (!newDate) return;
-    if (!(newDate in departureTimes.value)) {
-      departureTimes.value[newDate] = "08:00";
-    }
-  },
-  { immediate: true }
-);
+onUnmounted(() => {
+  window.removeEventListener("beforeunload", warnUnsavedChanges);
+});
 </script>
 
 <style scoped>

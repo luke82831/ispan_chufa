@@ -1,6 +1,7 @@
 package com.ispan.chufa.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,5 +129,16 @@ public class PlaceController {
         response.put("message", "Place saved successfully");
 
         return ResponseEntity.ok(response); // 回傳 JSON 格式
+    }
+    
+    @PostMapping("/place/batch")
+    public List<PlaceBean> getMultiplePlaces(@RequestBody Map<String, List<Long>> request) {
+        List<Long> placeIds = request.get("placeIds");
+
+        if (placeIds == null || placeIds.isEmpty()) {
+            throw new IllegalArgumentException("placeIds 不能為空");
+        }
+
+        return placeService.getPlacesByIds(placeIds);
     }
 }

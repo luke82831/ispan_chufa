@@ -47,8 +47,12 @@ public class PlaceService {
         return placeRepository.findById(id).orElse(null);
     }
     
-    
- // 更新指定 ID 的 Place
+    //根據 placeIds 取得對應的地點資料
+    public List<PlaceBean> getPlacesByIds(List<Long> placeIds) {
+        return placeRepository.findAllById(placeIds);
+    }
+        
+    // 更新指定 ID 的 Place
     public PlaceBean updatePlace(Long id, PlaceBean placeBean) {
         return placeRepository.findById(id).map(place -> {
             place.setGooglemapPlaceId(placeBean.getGooglemapPlaceId());

@@ -3,6 +3,7 @@ package com.ispan.chufa.domain;
 import java.time.LocalTime;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -39,13 +40,10 @@ public class EventXPlaceBean {
 	private char[] notes;
 
 	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
 	@JoinColumn(name = "fk_event_id", referencedColumnName = "event_id", nullable = false)
 	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 
 	@ManyToOne
-	// @JsonIgnoreProperties("eventXPlaceBeans")
-	@JsonIgnore
 	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
 	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
 
@@ -119,11 +117,9 @@ public class EventXPlaceBean {
 	public void setNotes(char[] notes) {
 		this.notes = notes;
 	}
+	
+	public Long getPlaceId() {
+        return (place != null) ? place.getPlaceId() : null;
+    }
 
-	@Override
-	public String toString() {
-		return "EventXPlaceBean [eventmappingId=" + eventmappingId + ", event=" + event + ", place=" + place
-				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + travelTime + ", stayDuration=" + stayDuration
-				+ ", notes=" + Arrays.toString(notes) + "]";
-	}
 }

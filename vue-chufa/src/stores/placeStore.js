@@ -34,34 +34,33 @@ export const usePlaceStore = defineStore("placeStore", {
   },
 
   actions: {
-    /**
-     * 🔹 從後端取單筆地點資料並快取
-     */
-    async fetchPlaceDetail(placeId) {
-      // 如果快取有資料，就直接回傳
+    //根據 placeId 獲取完整地點資訊
+    async fetchPlaceDetails(placeId) {
+      if (!placeId) return null;
+
+      // 🔹 先檢查快取，避免多次請求
       if (this.placeDetailsMap[placeId]) {
         return this.placeDetailsMap[placeId];
       }
 
-      // 若無資料，呼叫 API
       try {
-        console.log("🔍 [fetchPlaceDetail] GET /api/place/", placeId);
+        console.log(`📡 [PlaceStore] GET /api/place/${placeId}`);
         const response = await axiosapi.get(`/api/place/${placeId}`);
-        const detail = response.data;
-        console.log("📥 [fetchPlaceDetail] 伺服器回應:", detail);
 
-        // 放進快取
-        this.placeDetailsMap[placeId] = detail;
-        return detail;
+        if (response.data) {
+          this.placeDetailsMap[placeId] = response.data; // ✅ 存入快取
+          return response.data;
+        } else {
+          console.warn(`⚠️ 找不到 placeId ${placeId} 的詳細資訊`);
+          return null;
+        }
       } catch (error) {
-        console.error("❌ [fetchPlaceDetail] 無法取得地點詳細資訊:", error);
+        console.error(`❌ 無法取得 placeId ${placeId} 的詳細資訊:`, error);
         return null;
       }
     },
 
-    /**
-     * 🔹 將已知的地點資料手動存進快取
-     */
+    //將已知的地點資料手動存進快取
     savePlaceToMap(place) {
       if (!place || !place.placeId) {
         console.warn(
@@ -90,9 +89,7 @@ export const usePlaceStore = defineStore("placeStore", {
       );
     },
 
-    /**
-     * 🔹 批次抓多個 placeId 的資訊
-     */
+    //批次抓多個 placeId 的資訊
     async fetchMultiplePlaces(placeIds = []) {
       // 過濾已在快取的 placeIds
       const missingIds = placeIds.filter((id) => !this.placeDetailsMap[id]);
@@ -103,10 +100,10 @@ export const usePlaceStore = defineStore("placeStore", {
 
       try {
         console.log(
-          "📡 [fetchMultiplePlaces] POST /api/places/batch",
+          "📡 [fetchMultiplePlaces] POST /api/place/batch",
           missingIds
         );
-        const response = await axiosapi.post(`/api/places/batch`, {
+        const response = await axiosapi.post(`/api/place/batch`, {
           placeIds: missingIds,
         });
         const places = response.data; // 後端回傳的陣列，每個元素是一個 placeDetail

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.EventBean;
@@ -60,15 +58,16 @@ public class EventController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) { // ✅ 確保是 `YYYY-MM-DD`
 
         System.out.println("🛠 後端收到的 date：" + date);
-
         ScheduleBean schedule = scheduleRepository.findById(tripId)
                 .orElseThrow(() -> new RuntimeException("找不到行程 (Trip ID: " + tripId + ")"));
 
         List<EventBean> events = eventService.findEventsByTripAndDate(schedule, date);
 
         if (!events.isEmpty()) {
+            System.out.println("📡 回傳 JSON: " + events);
+
             return new ResponseEntity<>(events, HttpStatus.OK);
-        } else {
+        }else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }

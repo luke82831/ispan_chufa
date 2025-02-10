@@ -4,6 +4,9 @@
     <h3 class="text-2xl font-semibold text-gray-900">
       {{ formattedSelectedDate }} 的行程
     </h3>
+    <p class="text-sm text-red-500">
+      Debug: placeIds = {{ eventData?.placeIds }}
+    </p>
 
     <!-- 設定出發時間：使用雙向綁定 departureTime -->
     <div class="departure-time">
@@ -14,6 +17,16 @@
         - 如果你還想在失焦（blur）時手動呼叫 updateStartTime，可再加上 @blur="updateStartTime"
         - 但因為我們在 Script 裡的 departureTime set() 已呼叫 updateStartTime，所以這裡可省略
       -->
+    </div>
+
+    <!-- 顯示該 event 內的所有地點 -->
+    <div v-if="placesForEvent.length">
+      <h3>當天的所有地點：</h3>
+      <ul>
+        <li v-for="place in placesForEvent" :key="place.placeId">
+          {{ place.displayName }} - {{ place.formattedAddress }}
+        </li>
+      </ul>
     </div>
 
     <!-- 顯示當天的行程 -->
@@ -28,7 +41,9 @@
         <template #item="{ element, index }">
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
-              <button @click="deletePlace(index)" class="delete-button">✖</button>
+              <button @click="deletePlace(index)" class="delete-button">
+                ✖
+              </button>
 
               <div class="itinerary-details">
                 <div class="stay-time-header">
@@ -54,7 +69,10 @@
                     class="stay-duration-link"
                   >
                     {{
-                      itineraryStore.getStayDuration(formattedSelectedDate, element.id)
+                      itineraryStore.getStayDuration(
+                        formattedSelectedDate,
+                        element.id
+                      )
                     }}
                     分鐘
                   </a>
@@ -77,14 +95,19 @@
                   />
                   <div>
                     <h4 class="location-title">{{ element.displayName }}</h4>
-                    <p class="location-address">{{ element.formattedAddress }}</p>
+                    <p class="location-address">
+                      {{ element.formattedAddress }}
+                    </p>
                   </div>
                 </div>
               </div>
             </li>
 
             <!-- 顯示路徑時間：把 date 換成 formattedSelectedDate -->
-            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
+            <div
+              v-if="index < itineraryForSelectedDay.length - 1"
+              class="route-time"
+            >
               <RouteTime :date="formattedSelectedDate" :index="index" />
             </div>
           </ul>
@@ -119,15 +142,46 @@ const scheduleStore = useScheduleStore();
 const eventStore = useEventStore();
 const placeStore = usePlaceStore();
 
-/**
- * 本地只留一個 eventData，用來顯示/控制當天的 event 狀態
- * 後端/Store 回傳後，存 { eventId, date, placeIds, startTime, ... }
- */
+//本地只留一個 eventData，用來顯示/控制當天的 event 狀態
+//後端/Store 回傳後，存 { eventId, date, placeIds, startTime, ... }
 const eventData = ref({});
+watch(
+  () => eventData.value,
+  (newEventData) => {
+    console.log("🔍 eventData:", newEventData);
+    console.log("📍 placeIds = ", newEventData?.placeIds || "沒有 placeIds");
+  },
+  { immediate: true }
+);
 
-/**
- * 確保 selectedDate 轉成 "YYYY-MM-DD" 格式
- */
+//取得當天的 placeIds
+const placeIdsForEvent = computed(() => {
+  return eventData.value?.placeIds || [];
+});
+watch(
+  placeIdsForEvent,
+  async (newPlaceIds) => {
+    console.log("🔍 監聽到 placeIdsForEvent 變更:", newPlaceIds);
+    if (newPlaceIds.length === 0) {
+      console.warn("⚠️ 沒有 placeIds，無法取得地點資料！");
+      return;
+    }
+
+    console.log("📡 嘗試從 API 取得地點資料:", newPlaceIds);
+    await placeStore.fetchMultiplePlaces(newPlaceIds);
+    console.log("✅ 已載入的地點:", placeStore.placeDetailsMap);
+  },
+  { immediate: true }
+);
+
+//獲取 places 資料
+const placesForEvent = computed(() => {
+  return placeIdsForEvent.value
+    .map((id) => placeStore.getPlaceDetailById(id)) // ✅ 從 store 取得詳細資訊
+    .filter((place) => place); // 過濾掉 undefined
+});
+
+//確保 selectedDate 轉成 "YYYY-MM-DD" 格式
 const formattedSelectedDate = computed(() => {
   if (!props.selectedDate) return "";
 
@@ -139,9 +193,15 @@ const formattedSelectedDate = computed(() => {
 
   // 若是 M/D 格式，轉成 YYYY-MM-DD
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
-  return `${baseYear}-${month}-${day}`;
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
+
+  const formattedDate = `${baseYear}-${month}-${day}`;
+  console.log(`📅 formattedSelectedDate 計算結果: ${formattedDate}`);
+  return formattedDate;
 });
 
 /**
@@ -154,7 +214,6 @@ watch(
 
     console.log(`📅 修正後的 selectedDate: ${newDate}`);
 
-    // 從後端或快取抓 event 資料 (只含 { eventId, date, placeIds, startTime, ... })
     const event = await eventStore.fetchEventByDate(
       scheduleStore.currentSchedule.tripId,
       newDate
@@ -288,7 +347,11 @@ const editStayTime = (place) => {
  */
 const saveStayTime = (place) => {
   const newDuration = Number(place.tempStayDuration);
-  itineraryStore.setStayDuration(formattedSelectedDate.value, place.id, newDuration);
+  itineraryStore.setStayDuration(
+    formattedSelectedDate.value,
+    place.id,
+    newDuration
+  );
   place.isEditingStay = false;
 };
 

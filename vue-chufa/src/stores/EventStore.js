@@ -4,26 +4,10 @@ import axiosapi from "@/plugins/axios"; // 全域匯入 axiosapi
 
 export const useEventStore = defineStore("eventStore", {
   state: () => ({
-    /**
-     * 以日期做 key，存放當日的 event 與其 placeIds:
-     * {
-     *   "YYYY-MM-DD": {
-     *     eventId: 101,
-     *     date: "YYYY-MM-DD",
-     *     placeIds: ["AAA", "BBB", ...],
-     *     startTime: "08:00",
-     *     endTime: null,
-     *     notes: "...",
-     *     ...
-     *   },
-     *   ...
-     * }
-     */
-    eventsByDate: {},
+    eventsByDate: {}, // 以日期為 key，存放當日的 event
     selectedEventId: null,
   }),
 
-  // ✅ 新增 Getter
   getters: {
     /**
      * 由日期取得對應的 eventId；若沒找到則回傳 null
@@ -36,26 +20,33 @@ export const useEventStore = defineStore("eventStore", {
 
   actions: {
     /**
-     * 🔹 取得某天的 Event，並只存到 store 中必要資訊 (eventId, date, placeIds...)
+     * 🔹 從 eventXPlaceBeans 提取 placeIds
+     */
+    extractPlaceIds(event) {
+      return (event.eventXPlaceBeans || []).map((p) => p.placeId);
+    },
+
+    /**
+     * 🔹 取得某天的 Event，並存到 store
      */
     async fetchEventByDate(tripId, date) {
       try {
-        console.log(`🔍 [fetchEventByDate] GET /api/event/${tripId}/date/${date}`);
-        const response = await axiosapi.get(`/api/event/${tripId}/date/${date}`);
-        console.log("[fetchEventByDate] 伺服器回應:", response.data);
+        console.log(`📡 查詢 event: tripId=${tripId}, date=${date}`);
 
+        const response = await axiosapi.get(
+          `/api/event/${tripId}/date/${date}`
+        );
         if (!response.data || response.data.length === 0) {
           console.warn(`⚠️ 沒有找到 ${date} 的行程 (event)`);
           return null;
         }
 
-        // 假設一天只有一個 event，若回傳多筆，你可以自行決定怎處理
         const event = response.data[0];
+        const placeIds = this.extractPlaceIds(event);
+        console.log("✅ 取得的 eventData:", event);
+        console.log("📍 解析出的 placeIds:", placeIds);
 
-        // 從後端回傳的 places 提取出 placeIds
-        const placeIds = (event.places || []).map((p) => p.placeId);
-
-        // 在前端 store 只記錄必要欄位
+        // 存入 store
         this.eventsByDate[date] = {
           eventId: event.eventId,
           date: event.date,
@@ -73,7 +64,7 @@ export const useEventStore = defineStore("eventStore", {
     },
 
     /**
-     * 🔹 新增某天的 Event，成功後把 eventId 與日期等資訊存到 store
+     * 🔹 新增某天的 Event，成功後存到 store
      */
     async addEvent(tripId, date) {
       try {
@@ -93,7 +84,6 @@ export const useEventStore = defineStore("eventStore", {
         const newEvent = response.data;
         console.log("✅ [addEvent] 新增回應:", newEvent);
 
-        // 在 store 中記錄此日の event
         this.eventsByDate[date] = {
           eventId: newEvent.eventId,
           date: newEvent.calendar.date,
@@ -110,16 +100,22 @@ export const useEventStore = defineStore("eventStore", {
     },
 
     /**
-     * 🔹 更新某個 eventId (例如 startTime, endTime, notes...)，再同步到 store
+     * 🔹 更新某個 eventId (startTime, endTime, notes...)
      */
     async updateEvent(eventId, updateData) {
       try {
-        console.log("📡 [updateEvent] PUT /api/event/update/", eventId, updateData);
-        const response = await axiosapi.put(`/api/event/update/${eventId}`, updateData);
+        console.log(
+          "📡 [updateEvent] PUT /api/event/update/",
+          eventId,
+          updateData
+        );
+        const response = await axiosapi.put(
+          `/api/event/update/${eventId}`,
+          updateData
+        );
         const updatedEvent = response.data;
         console.log("✅ [updateEvent] 更新成功:", updatedEvent);
 
-        // 從回傳資料中的日期找出 store 內的紀錄並更新
         const date = updatedEvent.calendar?.date;
         if (date && this.eventsByDate[date]) {
           this.eventsByDate[date] = {
@@ -137,51 +133,25 @@ export const useEventStore = defineStore("eventStore", {
     },
 
     /**
-      * 🔹 讓 event 內部新增地點，但真正的後端請求交給 EventPlaceStore
-      */
+     * 🔹 讓 event 內部新增地點，但真正的後端請求交給 EventPlaceStore
+     */
     async addPlaceToEvent(eventId, placeId) {
-      const eventPlaceStore = useEventPlaceStore(); // 使用 EventPlaceStore
+      const eventPlaceStore = useEventPlaceStore();
       try {
-        // 先讓 EventPlaceStore 發送 API 請求
         await eventPlaceStore.addPlaceToEvent(eventId, placeId);
 
-        // 本地 UI 更新：把 `placeId` 加入 `eventsByDate`
-        const event = Object.values(this.eventsByDate).find(e => e.eventId === eventId);
+        const event = Object.values(this.eventsByDate).find(
+          (e) => e.eventId === eventId
+        );
         if (event && !event.placeIds.includes(placeId)) {
           event.placeIds.push(placeId);
         }
 
-        console.log(`✅ [EventStore] 地點 ${placeId} 已成功加入 Event ${eventId}`);
+        console.log(
+          `✅ [EventStore] 地點 ${placeId} 已成功加入 Event ${eventId}`
+        );
       } catch (error) {
         console.error("❌ [EventStore] 無法加入地點:", error);
-      }
-    },
-
-    /**
-     * 🔹 從後端獲取某天的 Event，確保 `placeIds` 更新
-     */
-    async fetchEventByDate(tripId, date) {
-      try {
-        console.log(`🔍 [fetchEventByDate] GET /api/event/${tripId}/date/${date}`);
-        const response = await axiosapi.get(`/api/event/${tripId}/date/${date}`);
-
-        if (!response.data || response.data.length === 0) {
-          console.warn(`⚠️ [fetchEventByDate] 沒有找到 ${date} 的行程`);
-          return;
-        }
-
-        const event = response.data[0];
-        this.eventsByDate[date] = {
-          eventId: event.eventId,
-          date: event.date,
-          placeIds: (event.places || []).map((p) => p.placeId), // 取出 placeIds
-          startTime: event.startTime || "08:00",
-          notes: event.notes || "",
-        };
-
-        console.log("✅ [fetchEventByDate] 行程已更新:", this.eventsByDate[date]);
-      } catch (error) {
-        console.error("❌ [fetchEventByDate] 無法取得行程:", error);
       }
     },
   },

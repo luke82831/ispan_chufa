@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -61,8 +62,7 @@ public class PlaceBean {
 	private List<CouponBean> coupons;
 
     @OneToMany(mappedBy = "place")
-//    @JsonIgnoreProperties("place")
-    @JsonIgnore
+    @JsonIgnoreProperties({"eventXPlaceBeans","place","event"})
     private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 	
 	@ManyToMany(mappedBy = "place") // 多對多，對應 MemberBean 的 places

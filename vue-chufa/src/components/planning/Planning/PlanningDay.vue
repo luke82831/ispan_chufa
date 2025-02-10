@@ -24,18 +24,19 @@
       <h3>當天的所有地點：</h3>
       <ul>
         <li v-for="place in placesForEvent" :key="place.placeId">
-          {{ place.displayName }} - {{ place.formattedAddress }}
+          {{ place.placeName }} - {{ place.placeAddress }} -
+          {{ place.placeOrder }}
         </li>
       </ul>
     </div>
 
     <!-- 顯示當天的行程 -->
-    <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
+    <div v-if="placesForEvent.length" class="itinerary-list">
       <draggable
-        v-model="itineraryForSelectedDay"
+        v-model="placesForEvent"
         :group="{ name: 'places', pull: 'clone', put: true }"
         :animation="250"
-        item-key="id"
+        item-key="place.placeOrder"
         @end="handleDragEnd"
       >
         <template #item="{ element, index }">
@@ -54,7 +55,7 @@
                   <StayTime
                     :date="formattedSelectedDate"
                     :departureTime="departureTime"
-                    :itinerary="itineraryForSelectedDay"
+                    :itinerary="placesForEvent"
                     :stayDurations="
                       itineraryStore.stayDurations[formattedSelectedDate] || {}
                     "
@@ -94,9 +95,9 @@
                     class="location-image"
                   />
                   <div>
-                    <h4 class="location-title">{{ element.displayName }}</h4>
+                    <h4 class="location-title">{{ element.placeName }}</h4>
                     <p class="location-address">
-                      {{ element.formattedAddress }}
+                      {{ element.placeAddress }}
                     </p>
                   </div>
                 </div>
@@ -176,9 +177,16 @@ watch(
 
 //獲取 places 資料
 const placesForEvent = computed(() => {
-  return placeIdsForEvent.value
-    .map((id) => placeStore.getPlaceDetailById(id)) // ✅ 從 store 取得詳細資訊
-    .filter((place) => place); // 過濾掉 undefined
+  if (!eventData.value || !eventData.value.eventXPlaceBeans) return [];
+
+  return eventData.value.eventXPlaceBeans
+    .map((eventXPlace) => ({
+      placeId: eventXPlace.placeId,
+      placeOrder: eventXPlace.placeOrder, // 確保有 placeOrder
+      ...placeStore.getPlaceDetailById(eventXPlace.placeId),
+    }))
+    .filter((place) => place.placeId) // 過濾掉無效地點
+    .sort((a, b) => a.placeOrder - b.placeOrder); // ✅ 根據 placeOrder 排序
 });
 
 //確保 selectedDate 轉成 "YYYY-MM-DD" 格式

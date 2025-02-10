@@ -46,10 +46,13 @@ export const useEventStore = defineStore("eventStore", {
         console.log("✅ 取得的 eventData:", event);
         console.log("📍 解析出的 placeIds:", placeIds);
 
+        const eventXPlaceBeans = event.eventXPlaceBeans || [];
+
         // 存入 store
         this.eventsByDate[date] = {
           eventId: event.eventId,
           date: event.date,
+          eventXPlaceBeans,
           placeIds,
           startTime: event.startTime || "08:00",
           endTime: event.endTime || null,
@@ -87,6 +90,7 @@ export const useEventStore = defineStore("eventStore", {
         this.eventsByDate[date] = {
           eventId: newEvent.eventId,
           date: newEvent.calendar.date,
+          eventXPlaceBeans: [],
           placeIds: [], // 初始無地點
           startTime: newEvent.startTime || "08:00",
           endTime: newEvent.endTime || null,

@@ -20,6 +20,16 @@ const routes = [
     name: "css",
     component: () => import("@/views/css.vue"),
   },
+  {
+    path: "/cssA",
+    name: "cssA",
+    component: () => import("@/views/cssPseudoClass.vue"),
+  },
+  {
+    path: "/cssB",
+    name: "cssB",
+    component: () => import("@/views/cssAnimations.vue"),
+  },
   //主頁
   { path: "/", component: Home },
   //會員系統

@@ -168,7 +168,7 @@ const toggleFollow = async (member) => {
         console.log(followersCount.value);
         console.log(followingCount.value);
     
-            const formatDate = (date) => {
+        const formatDate = (date) => {
             if (!date) return '';
             const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
             return new Date(date).toLocaleDateString('zh-TW', options);

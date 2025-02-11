@@ -172,6 +172,7 @@
     import Swal from "sweetalert2";
     import { useRoute } from 'vue-router';
     import { useSearchStore } from '@/stores/search.js';
+    import axiosapi from "@/plugins/axios.js";
     
     export default {
         setup() {
@@ -196,7 +197,7 @@
         // 搜尋用戶
         const fetchUsers = async (query = "") => {
             try {
-            const response = await axios.post("/api/posts/searchByName", {
+            const response = await axiosapi.post("/api/posts/searchByName", {
                 username: query, 
             });
             users.value = response.data; // 將結果儲存到 store
@@ -210,7 +211,7 @@
     const checkFollowingStatus = async (user) => {
         try {
             // 获取该用户是否被当前用户关注的状态
-            const response = await axios.post('/follow/isFollowing', {
+            const response = await axiosapi.post('/follow/isFollowing', {
                 followedid: user.userid,
                 followerid: member.value.userid,
             });
@@ -227,7 +228,7 @@
 const toggleFollow = async (user) => {
     try {
         const action = user.isFollowing ? 'unfollow' : 'follow';
-        const response = await axios.post('/follow/verb', {
+        const response = await axiosapi.post('/follow/verb', {
             followerid: member.value.userid,
             followedid: user.userid,
             action,
@@ -294,7 +295,7 @@ const toggleFollow = async (user) => {
     
         const fetchProfile = async () => {
             try {
-            const response = await axios.get("/ajax/secure/profile", {
+            const response = await axiosapi.get("/ajax/secure/profile", {
                 headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             if (response.data.success) {
@@ -335,7 +336,7 @@ const toggleFollow = async (user) => {
             }
         
     
-            const response = await axios.post(
+            const response = await axiosapi.post(
                 "/api/posts/post",requestData,
                 {
                 headers: {
@@ -409,7 +410,7 @@ const toggleFollow = async (user) => {
                 userid: member.value.userid,
             };
     
-            const response = await axios.post("/api/posts/repost/forward", data, {
+            const response = await axiosapi.post("/api/posts/repost/forward", data, {
                 headers: {
                 "Content-Type": "application/json",
                 },
@@ -435,7 +436,7 @@ const toggleFollow = async (user) => {
                 interactionType: "LIKE",
             };
     
-            const response = await axios.post("/api/posts/insertinteraction", data, {
+            const response = await axiosapi.post("/api/posts/insertinteraction", data, {
                 headers: {
                 "Content-Type": "application/json",
                 },
@@ -460,7 +461,7 @@ const toggleFollow = async (user) => {
                 interactionType: "COLLECT",
             };
     
-            const response = await axios.post("/api/posts/insertinteraction", data, {
+            const response = await axiosapi.post("/api/posts/insertinteraction", data, {
                 headers: {
                 "Content-Type": "application/json",
                 },

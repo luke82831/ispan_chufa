@@ -29,7 +29,7 @@ import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/ajax/secure")
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http://192.168.23.77:5173", allowedHeaders = "*", allowCredentials = "true")
 public class LoginAjaxController {
 
     @Autowired

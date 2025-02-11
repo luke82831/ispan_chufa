@@ -29,6 +29,7 @@ public class PostDTO {
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 	// private List<CommentDTO>CommentDTO ;
 	private boolean likedByCurrentUser;
+	private boolean collectByCurrentUser;
 	private boolean isRepost;
 	private MemberInfo repostMember; // 如果是轉發貼文，則會包含原貼文數據
 
@@ -50,6 +51,14 @@ public class PostDTO {
 
 	public boolean isRepost() {
 		return isRepost;
+	}
+
+	public boolean isCollectByCurrentUser() {
+		return collectByCurrentUser;
+	}
+
+	public void setCollectByCurrentUser(boolean collectByCurrentUser) {
+		this.collectByCurrentUser = collectByCurrentUser;
 	}
 
 	public boolean isLikedByCurrentUser() {

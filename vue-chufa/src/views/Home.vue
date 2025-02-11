@@ -117,13 +117,16 @@
             class="action-btn like-btn"
             :class="{ active: post.likedByCurrentUser }"
           >
-            👍 {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
+          <span class="heart-icon"></span> 
+            {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
           </button>
           <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
             🔁 轉發
           </button>
-          <button @click.stop="collectPost(post.postid)" class="action-btn collect-btn">
-            ❤️ 收藏
+          <button @click.stop="collectPost(post.postid)" 
+          class="action-btn collect-btn"
+          :class="{ active: post.collectByCurrentUser }">
+            {{ post.collectByCurrentUser ? '已收藏' : '收藏' }}
           </button>
         </div>
       </div>
@@ -156,6 +159,7 @@ import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRoute } from 'vue-router';
 import { useSearchStore } from '@/stores/search.js';
+import axiosapi from "@/plugins/axios.js";
 
 export default {
   setup() {
@@ -220,7 +224,7 @@ export default {
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("/ajax/secure/profile", {
+        const response = await axiosapi.get("/ajax/secure/profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.data.success) {
@@ -261,7 +265,7 @@ export default {
       }
     
 
-      const response = await axios.post(
+      const response = await axiosapi.post(
           "/api/posts/post",requestData,
           {
             headers: {
@@ -324,7 +328,7 @@ export default {
           userid: member.value.userid,
         };
 
-        const response = await axios.post("/api/posts/repost/forward", data, {
+        const response = await axiosapi.post("/api/posts/repost/forward", data, {
           headers: {
             "Content-Type": "application/json",
           },
@@ -342,29 +346,47 @@ export default {
       }
     };
 
+
+    // 判断当前用户是否已经点赞
     const likePost = async (postid) => {
-      try {
-        const data = {
-          postid: postid,
-          userid: member.value.userid,
-          interactionType: "LIKE",
-        };
+      try {   
+        // 查找当前操作的帖子
+       const postToUpdate = posts.value.find(post => post.postid === postid);
+      const data = {
+        postid: postid,
+        userid: member.value.userid,
+        interactionType: "LIKE",  // 如果点赞则是 LIKE，取消点赞则是 DISLIKE
+      };
 
-        const response = await axios.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      const response = await axiosapi.post("/api/posts/insertinteraction", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (response.data.success) {
-          await fetchPosts();
-        } else {
-          Swal.fire("錯誤", "點讚失敗！", "error");
-        }
-      } catch (error) {
-        console.error("點讚請求失敗:", error);
-        Swal.fire("錯誤", "無法執行點讚操作", "error");
-      }
+      if (response.data.success) {
+        // 更新本地状态：更新点赞状态和点赞数量
+        // 更新本地状态：根据操作更新点赞状态和点赞数量
+        const updatedPosts = posts.value.map(post => {
+              if (post.postid === postid) {
+                return { 
+                  ...post, 
+                  likedByCurrentUser: !post.likedByCurrentUser,  // 反转点赞状态
+                  likeCount: post.likedByCurrentUser ? post.likeCount - 1 : post.likeCount + 1  // 根据点赞状态增加或减少点赞数
+                };
+              }
+              return post;
+            });
+
+            // 更新本地 posts 状态
+            posts.value = updatedPosts;
+} else {
+  Swal.fire("錯誤", "點讚操作失敗！", "error");
+}
+} catch (error) {
+console.error("點讚請求失敗:", error);
+Swal.fire("錯誤", "無法執行點讚操作", "error");
+}
     };
 
     const collectPost = async (postid) => {
@@ -375,14 +397,25 @@ export default {
           interactionType: "COLLECT",
         };
 
-        const response = await axios.post("/api/posts/insertinteraction", data, {
+        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
           headers: {
             "Content-Type": "application/json",
           },
         });
 
         if (response.data.success) {
-          await fetchPosts();
+          const updatedPosts = posts.value.map(post => {
+              if (post.postid === postid) {
+                return { 
+                  ...post, 
+                  collectByCurrentUser: !post.collectByCurrentUser,  // 反转点赞状态
+                    };
+              }
+              return post;
+            });
+
+            // 更新本地 posts 状态
+            posts.value = updatedPosts;
         } else {
           Swal.fire("錯誤", "點讚失敗！", "error");
         }
@@ -772,5 +805,73 @@ select {
   margin: 5px;
   cursor: pointer;
   border-radius: 4px;
+}
+
+/* 基本的愛心按鈕樣式 */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.like-btn.active {
+  color: red; /* 爱心变为红色 */
+}
+
+.like-btn.active::before {
+  content: '❤️'; /* 实心爱心 */
+}
+
+.like-btn:not(.active)::before {
+  content: '🖤'; /* 空心爱心 */
+}
+
+/* 点击时的动画效果 */
+.like-btn:active {
+  transform: scale(1.2);
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.collect-btn.active {
+  color: #ffcc00; /* 书签变为黄色 */
+}
+
+.collect-btn.active::before {
+  content: '⭐'; /* 实心书签 */
+}
+
+.collect-btn:not(.active)::before {
+  content: '⭐'; /* 空心书签 */
+}
+
+/* 点击时的动画效果 */
+.collect-btn:active {
+  transform: scale(1.2);
+}
+
+@keyframes fillBookmark {
+  0% {
+    background: linear-gradient(90deg, #62605a 0%, #bab7a9 0%);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+  100% {
+    background: linear-gradient(90deg, #ffcc00 100%, #ffcc00 100%);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+.collect-btn.active {
+  animation: fillBookmark 0.5s ease-out forwards;
 }
 </style>

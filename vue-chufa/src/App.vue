@@ -3,11 +3,11 @@
     <!-- Logo -->
     <RouterLink to="/" class="nav-link logo" @click="resetSearch">Chufa首頁</RouterLink>
 
-    <div class="search-bar">
+    <div class="search-bar"  v-if="showSearchBar" >
       <input
         v-model="searchTitle"
         type="text"
-        placeholder="搜尋文章..."
+        placeholder="搜尋文章或用戶..."
         class="p-2 border rounded w-full"
       />
       <button @click="onSearch" class="p-2 bg-blue-500 text-white rounded">
@@ -74,7 +74,7 @@
 
 <script setup>
 import { ref, onMounted, watch,inject } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter,useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import { useSearchStore } from "./stores/search";
 
@@ -82,6 +82,15 @@ const userStore = useUserStore(); // 使用 Pinia 的狀態
 const router = useRouter();
 const searchStore = useSearchStore(); // 使用 Pinia 搜尋狀態
 const isDropdownVisible = ref(false);
+
+
+// 使用 vue-router 的 useRoute 監聽路由變化
+const route = useRoute();
+const showSearchBar = ref(false);
+// 監聽路由名稱，根據路由名稱判斷是否顯示 SearchBar
+watch(() => route.name, (newRoute) => {
+  showSearchBar.value = newRoute === 'Home' || newRoute === 'SearchResults';
+}, { immediate: true });
  // 定義 isSearch
     
 const toggleDropdown = () => {

@@ -205,6 +205,14 @@ public class PostDaoImpl implements PostDao {
 		        );
 		    }
 		    postDTO.setLikedByCurrentUser(likedByCurrentUser);
+		    
+		    boolean collectByCurrentUser = false;
+		    if (currentUserId != null) {
+		    	collectByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
+		            postlist.getPostid(), currentUserId, "COLLECT"
+		        );
+		    }
+		    postDTO.setCollectByCurrentUser(collectByCurrentUser);
 
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);

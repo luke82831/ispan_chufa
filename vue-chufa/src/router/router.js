@@ -17,7 +17,9 @@ import { ref } from "vue";
 
 const routes = [
   //主頁
-  { path: "/", component: Home },
+  { path: "/", 
+    name:"Home",
+    component: Home },
   //會員系統
   {
     path: "/secure/Login",

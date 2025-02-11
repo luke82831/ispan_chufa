@@ -26,22 +26,34 @@
       <h3 class="section-title">貼文內容</h3>
       <div class="tab-content">
         <ul v-if="posts.length > 0" class="post-list">
-          <li v-for="post in posts" :key="post.postid" class="post-item">
-            <div class="post-author">
-              <img 
-                v-if="post.member?.profilePicture" 
-                :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
-                alt="Author's Profile Picture" 
-                class="profile-picture" 
-                @error="event.target.src = '/default-profile.png'"
-              /> 
-              <div v-else class="default-profile"></div>
-              <div class="post-author-name">{{ post.member.name }}</div>
-            </div>
-            <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-              <h4>{{ post.postTitle || '無標題' }}</h4>
-            </router-link>
-            <p class="post-content">{{ post.postContent }}</p>
+          <li v-for="post in posts" :key="post.postid" 
+    class="post-item" 
+    :class="{ 'hidden-post': postStore.getHiddenReason(post.postid) }">
+  
+  <!-- 隱藏的文章顯示提示 -->
+  <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
+    <p>您的文章已被隱藏</p>
+    <p>原因：文章內有「{{ postStore.getHiddenReason(post.postid) }}」</p>
+  </div>
+
+  <!-- 正常顯示的文章 -->
+  <div v-else>
+    <div class="post-author">
+      <img 
+        v-if="post.member?.profilePicture" 
+        :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
+        alt="Author's Profile Picture" 
+        class="profile-picture"
+      />
+      <div v-else class="default-profile"></div>
+      <div class="post-author-name">{{ post.member.name }}</div>
+    </div>
+    <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
+      <h4>{{ post.postTitle || '無標題' }}</h4>
+    </router-link>
+    <p class="post-content">{{ post.postContent }}</p>
+  </div>
+
 
             <!-- 如果是轉發貼文，顯示被轉發的原始貼文 -->
             <div v-if="post.repost && post.repostDTO" class="repost-container">
@@ -75,6 +87,7 @@ import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
+import { usePostStore } from '@/stores/usePostStore';
 
 export default {
   setup() {
@@ -82,6 +95,7 @@ export default {
     const member = ref({});
     const posts = ref([]);
     const activeTab = ref('myPosts');
+    const postStore = usePostStore();
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -152,6 +166,7 @@ export default {
       formatDate,
       setActiveTab,
       activeTab,
+      postStore, // 傳遞 Pinia
     };
   },
 };
@@ -348,4 +363,23 @@ export default {
   line-height: 1.4;
   margin: 0;
 }
+
+/*=========================已隱藏CSS================*/
+.hidden-post {
+  background: #f5f5f5;
+  color: #888;
+  border: 1px solid #ddd;
+  opacity: 0.7;
+  pointer-events: none; /* 防止點擊 */
+}
+
+.hidden-message {
+  font-size: 14px;
+  font-weight: bold;
+  color: red;
+  text-align: center;
+  padding: 10px;
+}
+
+
 </style>

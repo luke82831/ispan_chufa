@@ -74,6 +74,29 @@ public class PostService {
 	public PostBean getPostById(Long id) {
 		return postRepository.findById(id).orElse(null);
 	}
+	
+	public List<PostBean> getAllPosts() {
+        return postRepository.findAll();
+    }
+	
+	
+	public boolean deletePostById(Long postid) {
+	    Optional<PostBean> optionalPost = postRepository.findById(postid);
+	    if (optionalPost.isPresent()) {
+	        PostBean postToDelete = optionalPost.get();
+
+	        // 先刪除所有轉發這篇文章的貼文，避免外鍵約束衝突
+	        postRepository.deleteAllByForwardedFrom(postToDelete);
+
+	        // 再刪除這篇文章本身
+	        postRepository.delete(postToDelete);
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
+
+	
 
 //	public Optional<PostBean> getPostdetailById(Long id) {
 //	        return postRepository.findById(id);

@@ -3,6 +3,7 @@ package com.ispan.chufa.service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,10 @@ import com.ispan.chufa.repository.PostRepository;
 public class JackPostService {
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private CommentService commentService;
+    // 將Bean映射到DTO用的
+    private final ModelMapper modelMapper = new ModelMapper();
 
     // 創建貼文
     public PostBean createPost(PostBean bean) {

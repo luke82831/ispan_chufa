@@ -1,13 +1,11 @@
 <template>
   <div class="space-y-6">
-    <h3 class="text-2xl font-semibold text-gray-900">
-      {{ selectedDate }} 的行程
-    </h3>
+    <h3 class="text-2xl font-semibold text-gray-900">{{ selectedDate }} 的行程</h3>
 
     <!-- 設定出發時間 -->
     <div class="departure-time">
       <label>出發時間：</label>
-      <input type="time" v-model="departureTime" />
+      <input type="time" v-model="eventData.startTime" @blur="updateStartTime" />
     </div>
 
     <!-- 顯示當天的行程 -->
@@ -22,18 +20,14 @@
         <template #item="{ element, index }">
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
-              <button @click="deletePlace(index)" class="delete-button">
-                ✖
-              </button>
+              <button @click="deletePlace(index)" class="delete-button">✖</button>
               <div class="itinerary-details">
                 <div class="stay-time-header">
                   <StayTime
                     :date="selectedDate"
                     :departureTime="departureTime"
                     :itinerary="itineraryForSelectedDay"
-                    :stayDurations="
-                      itineraryStore.stayDurations[selectedDate] || {}
-                    "
+                    :stayDurations="itineraryStore.stayDurations[selectedDate] || {}"
                     :index="index"
                   />
                   <!-- 顯示超連結模式 -->
@@ -43,9 +37,7 @@
                     @click.prevent="editStayTime(element)"
                     class="stay-duration-link"
                   >
-                    {{
-                      itineraryStore.getStayDuration(selectedDate, element.id)
-                    }}
+                    {{ itineraryStore.getStayDuration(selectedDate, element.id) }}
                     分鐘
                   </a>
                   <!-- 編輯模式 -->
@@ -76,10 +68,7 @@
             </li>
 
             <!-- 顯示路徑時間 -->
-            <div
-              v-if="index < itineraryForSelectedDay.length - 1"
-              class="route-time"
-            >
+            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
               <route-time :date="selectedDate" :index="index" />
             </div>
           </ul>
@@ -87,7 +76,7 @@
       </draggable>
     </div>
 
-    <div v-else class="no-itinerary">
+    <div v-if="!eventData">
       <p>今天還沒有新增行程！</p>
     </div>
   </div>
@@ -96,6 +85,8 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
+import { useScheduleStore } from "@/stores/ScheduleStore";
+import { useEventStore } from "@/stores/EventStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
 import RouteTime from "./RouteTime.vue";
 import draggable from "vuedraggable";
@@ -107,28 +98,103 @@ const props = defineProps({
 });
 
 const itineraryStore = useItineraryStore();
+const scheduleStore = useScheduleStore();
+const eventStore = useEventStore();
 const placeStore = usePlaceStore();
+const eventData = ref({});
+
+// 取得修正後的 selectedDate
+const formattedSelectedDate = computed(() => {
+  if (!props.selectedDate) return "";
+
+  // **確保 selectedDate 只有數字與 `/`，避免意外字串**
+  const cleanedDate = props.selectedDate.replace(/[^0-9\/]/g, "");
+
+  // **如果已經是 `YYYY-MM-DD`，直接回傳**
+  if (cleanedDate.includes("-")) return cleanedDate;
+
+  // **從 schedule.startDate 取得年份**
+  const baseYear =
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
+
+  // **確保 `M/D` 變成 `MM-DD`（補 0）**
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+
+  // **回傳 `YYYY-MM-DD` 格式**
+  return `${baseYear}-${month}-${day}`;
+});
+
+// **監聽 selectedDate，確保載入當天的 event**
+watch(
+  () => formattedSelectedDate.value,
+  async (newDate) => {
+    if (!newDate) return;
+
+    console.log(`📅 修正後的 selectedDate: ${newDate}`);
+    let event = await eventStore.fetchEventByDate(
+      scheduleStore.currentSchedule.tripId,
+      newDate
+    );
+
+    if (event) {
+      eventData.value = { ...event }; // ✅ 確保 eventData.value 存入 API 回傳的值
+      console.log(`🚀 從後端載入 startTime: ${eventData.value.startTime}`);
+    } else {
+      console.warn(`⚠️ ${newDate} 沒有行程內容`);
+      eventData.value = {};
+    }
+  },
+  { immediate: true }
+);
+
+// **確保選中的日期同步到 scheduleStore**
+watch(
+  () => formattedSelectedDate.value,
+  (newDate) => {
+    if (newDate) {
+      console.log(`📅 選擇的日期更新: ${newDate}`);
+      scheduleStore.setSelectedDate(newDate);
+    }
+  },
+  { immediate: true }
+);
+
+// **更新 Start Time**
+const updateStartTime = async (newTime) => {
+  if (!eventData.value) return;
+
+  console.log(`🔄 更新後端 startTime 為: ${newTime}`);
+  await eventStore.updateEvent(eventData.value.event_id, {
+    startTime: newTime,
+  });
+
+  console.log(`✅ 更新完成`);
+};
 
 // 存儲每個日期的出發時間
 const departureTimes = ref({});
 const departureTime = computed({
-  get: () => departureTimes.value[props.selectedDate] || "08:00",
-  set: (newTime) => {
-    departureTimes.value[props.selectedDate] = newTime;
+  get: () => {
+    return eventData.value?.startTime || "08:00"; // ✅ 預設值 08:00
+  },
+  set: async (newTime) => {
+    if (!eventData.value) return;
+    eventData.value.startTime = newTime; // 更新本地資料
+    await updateStartTime(newTime); // ✅ 更新後端
   },
 });
 
 const itineraryForSelectedDay = computed({
-  get: () => itineraryStore.getItineraryForDay(props.selectedDate),
+  get: () => itineraryStore.getItineraryForDay(formattedSelectedDate.value),
   set: (newItinerary) => {
-    itineraryStore.itineraryDates[props.selectedDate] = newItinerary;
+    itineraryStore.itineraryDates[formattedSelectedDate.value] = newItinerary;
   },
 });
 
 // **刪除地點並更新 routePairs**
 const deletePlace = (index) => {
   console.log(`🗑 刪除行程: ${index}`);
-  itineraryStore.removePlaceFromItinerary(props.selectedDate, index);
+  itineraryStore.removePlaceFromItinerary(formattedSelectedDate.value, index);
   updateRoutePairs();
 };
 
@@ -139,13 +205,13 @@ const handleDragEnd = () => {
 
 // **更新 placeStore.routePairs**
 const updateRoutePairs = () => {
-  placeStore.routePairs[props.selectedDate] = {}; // 清除舊資料
+  placeStore.routePairs[formattedSelectedDate.value] = {}; // 清除舊資料
 
   for (let i = 0; i < itineraryForSelectedDay.value.length - 1; i++) {
     const origin = itineraryForSelectedDay.value[i].location;
     const destination = itineraryForSelectedDay.value[i + 1].location;
 
-    placeStore.updateRoutePair(props.selectedDate, i, origin, destination);
+    placeStore.updateRoutePair(formattedSelectedDate.value, i, origin, destination);
   }
 };
 
@@ -153,7 +219,7 @@ const updateRoutePairs = () => {
 const editStayTime = (place) => {
   place.isEditingStay = true;
   place.tempStayDuration = itineraryStore.getStayDuration(
-    props.selectedDate,
+    formattedSelectedDate.value,
     place.id
   );
 };
@@ -161,7 +227,7 @@ const editStayTime = (place) => {
 // **儲存新的停留時間**
 const saveStayTime = (place) => {
   const newDuration = Number(place.tempStayDuration);
-  itineraryStore.setStayDuration(props.selectedDate, place.id, newDuration);
+  itineraryStore.setStayDuration(formattedSelectedDate.value, place.id, newDuration);
   place.isEditingStay = false;
 };
 
@@ -170,9 +236,9 @@ const getPhotoUrl = (photo) => {
   return photo; // 假設你有其他方法處理 URL
 };
 
-// **監聽 routePairs 的變化，確保時間重新計算**
+// **監聽 routePairs，確保時間重新計算**
 watch(
-  () => placeStore.routePairs[props.selectedDate],
+  () => placeStore.routePairs[formattedSelectedDate.value],
   (newVal) => {
     if (newVal) {
       console.log("✅ 觸發計算，開始更新路徑時間");
@@ -180,10 +246,11 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+// **確保初始出發時間**
 watch(
-  () => props.selectedDate,
+  () => formattedSelectedDate.value,
   (newDate) => {
-    // 如果這個日期還沒有設定出發時間，就初始化為 08:00
     if (!(newDate in departureTimes.value)) {
       departureTimes.value[newDate] = "08:00";
     }

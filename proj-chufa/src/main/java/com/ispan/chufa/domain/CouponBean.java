@@ -39,7 +39,7 @@ public class CouponBean {
     @Column(name = "Web")
     private String web;
     @Column(name = "Picture")
-    private String picture;
+    private byte[] picture;
     @Column(name = "StartTime")
     private LocalDateTime startTime;
     @Column(name = "EndTime")
@@ -50,6 +50,7 @@ public class CouponBean {
     private List<MyCouponBean> myCoupons;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "placeId")
     @JsonBackReference
     private PlaceBean place;
@@ -112,11 +113,11 @@ public class CouponBean {
         this.web = web;
     }
 
-    public String getPicture() {
+    public byte[] getPicture() {
         return picture;
     }
 
-    public void setPicture(String picture) {
+    public void setPicture(byte[] picture) {
         this.picture = picture;
     }
 

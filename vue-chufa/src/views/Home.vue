@@ -1,7 +1,8 @@
 <template>
   <div class="main-container">
+    <!-- 只顯示未被隱藏的貼文 -->
     <div
-      v-for="post in posts"
+      v-for="post in visiblePosts"
       :key="post.postid"
       class="post-item"
       @click="navigateToDetail(post.postid, $event)"
@@ -49,9 +50,9 @@
       </div>
 
       <p class="post-content">{{ post.postContent }}</p>
-      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more"
-        >閱讀更多</a
-      >
+      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more">
+        閱讀更多
+      </a>
       <div class="post-meta">
         <p>
           發佈時間:
@@ -100,11 +101,12 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user.js";
+import { ref, onMounted, computed } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
+import { usePostStore } from "@/stores/usePostStore";
+import { useUserStore } from "@/stores/user";
 
 export default {
   setup() {
@@ -115,6 +117,12 @@ export default {
     const isAdmin = ref(false);
     const userId = ref(null);
     const currentPage = ref(1); // 當前頁數
+    const postStore = usePostStore();
+
+    // computed 屬性：只回傳未被隱藏的貼文
+    const visiblePosts = computed(() => {
+      return posts.value.filter((post) => !postStore.getHiddenReason(post.postid));
+    });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
     const navigateToDetail = (postid, event) => {
@@ -142,8 +150,6 @@ export default {
           member.value = response.data.user || {};
           isAdmin.value = response.data.user.role === "ADMIN";
           userId.value = member.value.userid;
-        } else {
-          // Swal.fire("味登入", "登入體驗更好");
         }
         profileLoaded.value = true;
       } catch (error) {
@@ -159,21 +165,19 @@ export default {
           {
             sortByLikes: true,
             repost: true,
-            page: currentPage.value, // 添加分頁參數
+            page: currentPage.value, // 加入分頁參數
           },
           {
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           }
         );
-
         if (response.data.postdto && response.data.postdto.length > 0) {
+          // 只取出原創貼文（排除 repost）
           posts.value = response.data.postdto.filter(
             (post) => !post.repost && post.repostDTO === null
           );
         } else {
-          currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
+          currentPage.value = Math.max(1, currentPage.value - 1);
           Swal.fire("已經到底啦!", "no post。", "info");
         }
       } catch (error) {
@@ -182,7 +186,7 @@ export default {
       }
     };
 
-    //分頁
+    // 分頁控制
     const nextPage = () => {
       currentPage.value++;
       fetchPosts();
@@ -197,17 +201,10 @@ export default {
 
     const repostPost = async (postid) => {
       try {
-        const data = {
-          postid: postid,
-          userid: member.value.userid,
-        };
-
+        const data = { postid, userid: member.value.userid };
         const response = await axios.post("/api/posts/repost/forward", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
-
         if (response.data.repost) {
           Swal.fire("成功", "轉發成功！", "success");
           await fetchPosts();
@@ -223,17 +220,13 @@ export default {
     const likePost = async (postid) => {
       try {
         const data = {
-          postid: postid,
+          postid,
           userid: member.value.userid,
           interactionType: "LIKE",
         };
-
         const response = await axios.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
-
         if (response.data.success) {
           await fetchPosts();
         } else {
@@ -248,17 +241,13 @@ export default {
     const collectPost = async (postid) => {
       try {
         const data = {
-          postid: postid,
+          postid,
           userid: member.value.userid,
           interactionType: "COLLECT",
         };
-
         const response = await axios.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         });
-
         if (response.data.success) {
           await fetchPosts();
         } else {
@@ -284,6 +273,7 @@ export default {
       collectPost,
       repostPost,
       posts,
+      visiblePosts, // 將 visiblePosts 回傳給模板
       navigateToDetail,
       currentPage,
       nextPage,

@@ -3,6 +3,7 @@ package com.ispan.chufa.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
+import com.ispan.chufa.repository.EventRepository;
+import com.ispan.chufa.repository.ScheduleRepository;
+import com.ispan.chufa.service.EventService;
 import com.ispan.chufa.service.MemberService;
 import com.ispan.chufa.service.ScheduleService;
 
@@ -32,7 +37,16 @@ import com.ispan.chufa.service.ScheduleService;
 public class ScheduleController {
 
     @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
     private ScheduleService scheduleService;
+
+    @Autowired
+    private EventService eventService;
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
@@ -43,7 +57,7 @@ public class ScheduleController {
             @RequestParam("tripName") String tripName,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam("coverPhoto") MultipartFile coverPhoto, // 接收檔案
+            @RequestParam("coverPhoto") MultipartFile coverPhoto,
             @RequestParam("userId") Long userId) {
 
         System.out.println("Received tripName: " + tripName);
@@ -54,15 +68,15 @@ public class ScheduleController {
 
         try {
             MemberBean user = memberService.getUserById(userId);
-
             if (user == null) {
                 System.err.println("User with ID " + userId + " not found.");
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            // 將 MultipartFile 轉換為 byte[]
+            // 轉換 MultipartFile 為 byte[]
             byte[] coverPhotoBytes = coverPhoto.getBytes();
 
+            // **建立行程 (Schedule)**
             ScheduleBean schedule = new ScheduleBean();
             schedule.setTripName(tripName);
             schedule.setStartDate(startDate);
@@ -70,8 +84,12 @@ public class ScheduleController {
             schedule.setCoverPhoto(coverPhotoBytes);
             schedule.setUser(user);
 
-            // 儲存行程資料
+            // **儲存行程**
             ScheduleBean savedSchedule = scheduleService.saveSchedule(schedule);
+
+            // **自動建立 event**
+            eventService.createEventFromSchedule(savedSchedule);
+
             return new ResponseEntity<>(savedSchedule, HttpStatus.CREATED);
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
@@ -102,13 +120,24 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateSchedule(@PathVariable("tripId") Long tripId,
-            @RequestBody ScheduleBean updatedSchedule) {
-        try {
-            ScheduleBean updated = scheduleService.updateSchedule(tripId, updatedSchedule);
-            return new ResponseEntity<>(updated, HttpStatus.OK); // 更新成功，返回 200 和更新後的資料
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 資料不存在，返回 404 和錯誤訊息
+    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId,
+            @RequestBody Map<String, String> request) {
+        Optional<ScheduleBean> scheduleOptional = scheduleRepository.findById(tripId);
+
+        if (scheduleOptional.isPresent()) {
+            ScheduleBean schedule = scheduleOptional.get();
+            LocalDate newEndDate = LocalDate.parse(request.get("endDate"));
+
+            // 更新行程結束日期
+            schedule.setEndDate(newEndDate);
+            scheduleRepository.save(schedule);
+
+            // ✅ 自動新增對應的 Event
+            eventService.createEventFromSchedule(schedule);
+
+            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增對應的事件");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
     }
 

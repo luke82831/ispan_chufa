@@ -4,17 +4,15 @@ import java.util.Date;
 
 public class MemberDTO {
 	private Long userid;
-    private String username;
-    private String phoneNumber;
-    private String email;
-    private String name;
-    private String gender;
-    private String nickname;
-    private byte[] profilePicture;
-    private String bio;
-    private java.util.Date birth;
-
-  
+	private String username;
+	private String phoneNumber;
+	private String email;
+	private String name;
+	private String gender;
+	private String nickname;
+	private byte[] profilePicture;
+	private String bio;
+	private java.util.Date birth;
 
 	public MemberDTO(Long userid, String username, String phoneNumber, String email, String name, String gender,
 			String nickname, byte[] profilePicture, String bio, Date birth) {
@@ -30,17 +28,14 @@ public class MemberDTO {
 		this.bio = bio;
 		this.birth = birth;
 	}
-	
-	
 
 	public byte[] getProfilePicture() {
 		return profilePicture;
 	}
+
 	public void setProfilePicture(byte[] profilePicture) {
 		this.profilePicture = profilePicture;
 	}
-
-
 
 	public Long getUserid() {
 		return userid;
@@ -113,7 +108,5 @@ public class MemberDTO {
 	public void setBirth(java.util.Date birth) {
 		this.birth = birth;
 	}
-    
-    
 
 }

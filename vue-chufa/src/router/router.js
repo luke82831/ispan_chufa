@@ -15,6 +15,11 @@ import { useUserStore } from "@/stores/user";
 import Swal from "sweetalert2";
 
 const routes = [
+  {
+    path: "/css",
+    name: "css",
+    component: () => import("@/views/css.vue"),
+  },
   //主頁
   { path: "/", component: Home },
   //會員系統

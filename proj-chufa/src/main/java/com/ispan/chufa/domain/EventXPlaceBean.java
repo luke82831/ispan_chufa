@@ -3,6 +3,7 @@ package com.ispan.chufa.domain;
 import java.time.LocalTime;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -27,8 +28,8 @@ public class EventXPlaceBean {
 	@Column(name = "place_order")
 	private Integer placeOrder;
 
-	@Column(name = "arrival_time")
-	private LocalTime arrivalTime;
+	@Column(name = "travel_time")
+	private LocalTime travelTime;
 
 	@Column(name = "stay_duration")
 	private LocalTime stayDuration;
@@ -43,7 +44,8 @@ public class EventXPlaceBean {
 	private EventBean event; // FK_Event_行程內容id，多對多(行程內容VS地點)
 
 	@ManyToOne
-	@JsonIgnoreProperties("eventXPlaceBeans")
+	// @JsonIgnoreProperties("eventXPlaceBeans")
+	@JsonIgnore
 	@JoinColumn(name = "fk_place_id", referencedColumnName = "placeId", nullable = false)
 	private PlaceBean place; // FK_地點_地點id，多對多(行程內容VS地點)
 
@@ -52,12 +54,12 @@ public class EventXPlaceBean {
 	public EventXPlaceBean() {
 	}
 
-	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime arrivalTime,
+	public EventXPlaceBean(EventBean event, PlaceBean place, Integer placeOrder, LocalTime travelTime,
 			LocalTime stayDuration, char[] notes) {
 		this.event = event;
 		this.place = place;
 		this.placeOrder = placeOrder;
-		this.arrivalTime = arrivalTime;
+		this.travelTime = travelTime;
 		this.stayDuration = stayDuration;
 		this.notes = notes;
 	}
@@ -94,12 +96,12 @@ public class EventXPlaceBean {
 		this.placeOrder = placeOrder;
 	}
 
-	public LocalTime getArrivalTime() {
-		return arrivalTime;
+	public LocalTime getTravelTime() {
+		return travelTime;
 	}
 
-	public void setArrivalTime(LocalTime arrivalTime) {
-		this.arrivalTime = arrivalTime;
+	public void setTravelTime(LocalTime travelTime) {
+		this.travelTime = travelTime;
 	}
 
 	public LocalTime getStayDuration() {
@@ -121,7 +123,7 @@ public class EventXPlaceBean {
 	@Override
 	public String toString() {
 		return "EventXPlaceBean [eventmappingId=" + eventmappingId + ", event=" + event + ", place=" + place
-				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + arrivalTime + ", stayDuration=" + stayDuration
+				+ ", placeOrder=" + placeOrder + ", arrivalTime=" + travelTime + ", stayDuration=" + stayDuration
 				+ ", notes=" + Arrays.toString(notes) + "]";
 	}
 }

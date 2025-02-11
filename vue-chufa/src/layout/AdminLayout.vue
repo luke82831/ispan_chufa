@@ -81,11 +81,31 @@ const member = computed(() => userStore.member);
   font-size: 16px;
 }
 
+/* === 管理者資訊區塊 === */
+.user-info {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 8px;
+  width: auto;
+  max-width: 120px;
+  text-align: center;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+}
+
+
+
+
 /* === 主要內容區域 === */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* 確保內容不會額外滾動 */
 }
 
 /* 內容區（路由內容） */

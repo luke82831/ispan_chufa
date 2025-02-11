@@ -2,7 +2,11 @@ package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,8 +40,12 @@ public class ScheduleBean {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
+    
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EventBean> events;
 
     @ManyToOne
+    @JsonIgnoreProperties("places")
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 
@@ -70,7 +79,10 @@ public class ScheduleBean {
     }
     
     public String getCoverPhotoBase64() {
-        return Base64.getEncoder().encodeToString(this.coverPhoto); // 將 byte[] 轉換成 Base64 字串
+        if (this.coverPhoto != null) {
+            return Base64.getEncoder().encodeToString(this.coverPhoto);
+        }
+        return ""; // 或者返回 null，根據需求而定
     }
 
     public void setCoverPhotoBase64(String base64String) {

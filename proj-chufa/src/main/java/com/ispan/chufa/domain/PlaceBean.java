@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,13 +56,18 @@ public class PlaceBean {
 
 	//  一對多
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties({"myCoupons", "place"})
+//	@JsonIgnoreProperties({"myCoupons", "place"})
+	@JsonIgnore
 	private List<CouponBean> coupons;
 
     @OneToMany(mappedBy = "place")
+//    @JsonIgnoreProperties("place")
+    @JsonIgnore
     private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 	
 	@ManyToMany(mappedBy = "place") // 多對多，對應 MemberBean 的 places
+//	@JsonIgnoreProperties("places")
+	@JsonIgnore
 	private List<MemberBean> members;
 	
 	@ManyToMany
@@ -69,7 +75,8 @@ public class PlaceBean {
 			joinColumns = @JoinColumn(name = "fk_Place_Id", foreignKey = @ForeignKey(name = "placeId")), // PlaceBean關聯的外鍵
 			inverseJoinColumns = @JoinColumn(name = "fk_Post_Id", foreignKey = @ForeignKey(name = "postid")) // PostBean關聯的外鍵
 	)
-	@JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
+//	@JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
+	@JsonIgnore
 	private Set<PostBean> posts = new HashSet<>();
 	
 

@@ -43,8 +43,8 @@ export const useEventStore = defineStore("eventStore", {
 
         const event = response.data[0];
         const placeIds = this.extractPlaceIds(event);
-        console.log("✅ 取得的 eventData:", event);
-        console.log("📍 解析出的 placeIds:", placeIds);
+        // console.log("✅ 取得的 eventData:", event);
+        // console.log("📍 解析出的 placeIds:", placeIds);
 
         const eventXPlaceBeans = event.eventXPlaceBeans || [];
 

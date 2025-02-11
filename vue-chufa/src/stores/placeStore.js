@@ -3,30 +3,16 @@ import axiosapi from "@/plugins/axios"; // 假設你有這個全域 axios
 
 export const usePlaceStore = defineStore("placeStore", {
   state: () => ({
-    /**
-     * 快取 placeId -> placeDetail
-     * 例如：
-     * {
-     *   "AAA": { placeId: "AAA", name: "地點A", ... },
-     *   "BBB": { placeId: "BBB", name: "地點B", ... }
-     * }
-     */
     placeDetailsMap: {},
     selectedPlaceId: null,
   }),
 
   getters: {
-    /**
-     * 🔹 若只想透過 placeId 拿到地點資料，可以做個 getter。
-     *    用法：placeStore.getPlaceDetailById("AAA")
-     */
     getPlaceDetailById: (state) => (placeId) => {
       return state.placeDetailsMap[placeId] || null;
     },
 
-    /**
-     * 🔹 取得當前選擇地點的資料
-     */
+    //取得當前選擇地點的資料
     selectedPlaceDetail(state) {
       if (!state.selectedPlaceId) return null;
       return state.placeDetailsMap[state.selectedPlaceId] || null;

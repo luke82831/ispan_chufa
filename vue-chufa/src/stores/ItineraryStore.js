@@ -3,9 +3,11 @@ import { defineStore } from "pinia";
 export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
     itineraryDates: {},
-    startTimes: {}, // 存放每一天的出發時間
-    routeTimes: {}, // 存放每個行程的行車時間 (以 index 為 key)
-    stayDurations: {}, // 存放停留時間 (以 index 為 key)
+    startTimes: {},   // 存放每一天的出發時間
+    routeTimes: {},   // 存放每個行程的行車時間 (以 index 為 key)
+    stayDurations: {},// 存放停留時間 (以 index 為 key)
+    isEditingStays: {},
+    tempStayDurations: {},
   }),
 
   getters: {
@@ -16,7 +18,17 @@ export const useItineraryStore = defineStore("itinerary", {
       return state.startTimes[date] ?? "08:00"; // 確保有預設出發時間
     },
     getStayDuration: (state) => (date, index) => {
-      return state.stayDurations[date]?.[index] ?? 0; // ✅ 改用 index 作為 key
+      return state.stayDurations[date]?.[index] ?? 0;
+    },
+
+    // 🔥 Getter：讀取「是否正在編輯」
+    getIsEditingStay: (state) => (date, index) => {
+      return state.isEditingStays[date]?.[index] ?? false;
+    },
+
+    // 🔥 Getter：讀取「暫存停留時間」
+    getTempStayDuration: (state) => (date, index) => {
+      return state.tempStayDurations[date]?.[index] ?? 0;
     },
 
     getRoutePairs: (state) => (date) => {
@@ -45,7 +57,7 @@ export const useItineraryStore = defineStore("itinerary", {
 
       // ✅ 改用 index，統一管理順序
       const normalizedItinerary = itinerary
-        .filter((place) => place !== null && place !== undefined) // 過濾掉 undefined
+        .filter((place) => place !== null && place !== undefined)
         .map((place, index) => ({
           placeId: place.placeId ?? null,
           placeName: place.placeName ?? "",
@@ -72,18 +84,29 @@ export const useItineraryStore = defineStore("itinerary", {
         this.routeTimes[date] = {};
       }
       this.routeTimes[date][index] = time;
-
-      // console.log(
-      //   `🚗 存入 Pinia routeTimes: `,
-      //   JSON.stringify(this.routeTimes, null, 2)
-      // );
     },
 
     setStayDuration(date, index, duration) {
       if (!this.stayDurations[date]) {
         this.stayDurations[date] = {};
       }
-      this.stayDurations[date][index] = duration; // ✅ 改用 index
+      this.stayDurations[date][index] = duration;
+    },
+
+    // 🔥 Action：設定「是否正在編輯」
+    setIsEditingStay(date, index, isEditing) {
+      if (!this.isEditingStays[date]) {
+        this.isEditingStays[date] = {};
+      }
+      this.isEditingStays[date][index] = isEditing;
+    },
+
+    // 🔥 Action：設定「暫存停留時間」
+    setTempStayDuration(date, index, tempDuration) {
+      if (!this.tempStayDurations[date]) {
+        this.tempStayDurations[date] = {};
+      }
+      this.tempStayDurations[date][index] = tempDuration;
     },
 
     // **前端刪除景點**
@@ -126,6 +149,29 @@ export const useItineraryStore = defineStore("itinerary", {
           });
           this.stayDurations[date] = updatedStayDurations;
         }
+
+        // 🔥 同步更新 isEditingStays & tempStayDurations
+        if (this.isEditingStays[date]) {
+          const updatedEditing = {};
+          Object.keys(this.isEditingStays[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedEditing[newKey] = this.isEditingStays[date][key];
+          });
+          this.isEditingStays[date] = updatedEditing;
+        }
+
+        if (this.tempStayDurations[date]) {
+          const updatedTemps = {};
+          Object.keys(this.tempStayDurations[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedTemps[newKey] = this.tempStayDurations[date][key];
+          });
+          this.tempStayDurations[date] = updatedTemps;
+        }
       } else {
         console.warn(`removePlace: 無效的索引 ${index}`);
       }
@@ -139,7 +185,7 @@ export const useItineraryStore = defineStore("itinerary", {
         index: index, // 重新計算 index
       }));
 
-      // ✅ 同步調整 `routeTimes` & `stayDurations` 的索引
+      // ✅ 同步調整 `routeTimes` & `stayDurations`
       const updatedRouteTimes = {};
       Object.keys(this.routeTimes[date] || {}).forEach((oldIndex) => {
         const newIndex = newOrder.findIndex(
@@ -159,6 +205,27 @@ export const useItineraryStore = defineStore("itinerary", {
           updatedStayDurations[newIndex] = this.stayDurations[date][oldIndex];
       });
       this.stayDurations[date] = updatedStayDurations;
+
+      // 🔥 同步調整 isEditingStays & tempStayDurations
+      const updatedEditing = {};
+      Object.keys(this.isEditingStays[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedEditing[newIndex] = this.isEditingStays[date][oldIndex];
+      });
+      this.isEditingStays[date] = updatedEditing;
+
+      const updatedTemps = {};
+      Object.keys(this.tempStayDurations[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedTemps[newIndex] = this.tempStayDurations[date][oldIndex];
+      });
+      this.tempStayDurations[date] = updatedTemps;
     },
   },
 });

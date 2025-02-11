@@ -37,18 +37,13 @@ const calculateRouteTime = () => {
   const directionsService = new google.maps.DirectionsService();
   const request = {
     origin: new google.maps.LatLng(pair.origin.lat, pair.origin.lng),
-    destination: new google.maps.LatLng(
-      pair.destination.lat,
-      pair.destination.lng
-    ),
+    destination: new google.maps.LatLng(pair.destination.lat, pair.destination.lng),
     travelMode: google.maps.TravelMode.DRIVING,
   };
 
   directionsService.route(request, (result, status) => {
     if (status === "OK") {
-      const travelMinutes = Math.round(
-        result.routes[0].legs[0].duration.value / 60
-      );
+      const travelMinutes = Math.round(result.routes[0].legs[0].duration.value / 60);
       routeTime.value = travelMinutes;
       console.log(`✅ 計算成功：${travelMinutes} 分鐘，正在存入 Pinia`);
       itineraryStore.setRouteTime(props.date, props.index, travelMinutes); // ✅ 存入 Pinia
@@ -64,7 +59,7 @@ watch(
   routePair,
   (newVal) => {
     if (newVal?.origin && newVal?.destination) {
-      console.log("✅ 觸發計算，開始 calculateRouteTime()");
+      // console.log("✅ 觸發計算，開始 calculateRouteTime()");
       calculateRouteTime();
     } else {
       console.warn("⚠️ routePair 資料不完整，無法計算");

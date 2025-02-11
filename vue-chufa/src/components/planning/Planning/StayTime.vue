@@ -6,7 +6,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const props = defineProps({
@@ -21,9 +21,6 @@ const itineraryStore = useItineraryStore();
 // **取得當天出發時間**
 const departureTime = computed(() => itineraryStore.getStartTime(props.date));
 
-// **確保 `stayDurations` 直接使用 props**
-const stayDurationsReactive = props.stayDurations;
-
 // **計算每個地點的到達與離開時間**
 const computedItinerary = computed(() => {
   if (!departureTime.value || !props.itinerary.length) return [];
@@ -33,15 +30,19 @@ const computedItinerary = computed(() => {
   let baseTime = new Date(year, month - 1, day, hours, minutes);
   let currentTime = new Date(baseTime);
 
-  console.log("🕒 原始 baseTime:", baseTime.toLocaleString());
+  // console.log("🕒 原始 baseTime:", baseTime.toLocaleString());
 
-  let itineraryWithTimes = [];
+  // 讀取 store 中的行車時間與停留時間
   const routeTimes = itineraryStore.routeTimes[props.date] || {};
   const stayTimes = itineraryStore.stayDurations[props.date] || {};
 
+  let itineraryWithTimes = [];
+
   props.itinerary.forEach((place, index) => {
-    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0; // 取得行車時間
-    let stayTime = props.stayDurations?.[place.id] ?? 0; // 停留時間
+    // 行車時間：若 index 為 0 則沒有行車時間，否則使用前一個地點後的行車時間
+    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0;
+    // 停留時間：直接從 store 取對應 index 的停留時間 (預設為 0)
+    let stayTime = stayTimes[index] ?? 0;
 
     let startTime;
     if (index === 0) {
@@ -62,9 +63,9 @@ const computedItinerary = computed(() => {
       endTime,
     });
 
-    console.log(
-      `📌 地點 ${index}: ${startTime.toLocaleString()} - ${endTime.toLocaleString()}`
-    );
+    // console.log(
+    //   `📌 地點 ${index}: ${startTime.toLocaleString()} - ${endTime.toLocaleString()}`
+    // );
   });
 
   return itineraryWithTimes;
@@ -72,37 +73,6 @@ const computedItinerary = computed(() => {
 
 // **取得對應 `index` 的地點時間**
 const currentPlaceTime = computed(() => computedItinerary.value[props.index] || null);
-
-watch(
-  () => computedItinerary.value,
-  (newVal) => {
-    console.log("📌 computedItinerary 變更:", newVal);
-  },
-  { deep: true }
-);
-
-watch(
-  () => itineraryStore.routeTimes[props.date],
-  (newVal) => {
-    console.log("🚗 行車時間變更:", newVal);
-  },
-  { deep: true }
-);
-
-watch(
-  () => stayDurationsReactive,
-  (newVal) => {
-    console.log("⏳ 停留時間變更:", newVal);
-  },
-  { deep: true }
-);
-
-watch(
-  () => currentPlaceTime.value,
-  (newVal) => {
-    console.log("⏰ currentPlaceTime 更新:", JSON.stringify(newVal, null, 2));
-  }
-);
 
 // **格式化時間 (HH:MM)**
 const formatTime = (date) => {

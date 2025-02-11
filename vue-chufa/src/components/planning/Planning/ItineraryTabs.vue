@@ -73,13 +73,11 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useScheduleStore } from "@/stores/ScheduleStore";
-import { useEventStore } from "@/stores/EventStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();
 const route = useRoute();
 const scheduleStore = useScheduleStore();
-const eventStore = useEventStore();
 
 // 從 URL 取得行程 ID
 const tripId = route.params.tripId;

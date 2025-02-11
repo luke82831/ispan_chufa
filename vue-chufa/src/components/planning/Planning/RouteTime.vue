@@ -10,31 +10,36 @@ import { ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const props = defineProps({
-  date: String,
-  index: Number,
+  date: String, // ✅ 確保接收日期
+  index: Number, // ✅ 統一使用 index，而不是 placeOrder
 });
 
 const itineraryStore = useItineraryStore();
 const routeTime = ref(null);
 
-// **取得當天的路徑配對資訊**
+// ✅ 取得當日的 `routePairs`（按 index 存取）
 const routePairs = computed(() => itineraryStore.getRoutePairs(props.date));
+
+// ✅ 直接使用 `index` 來取得對應的 `routePair`
+const routePair = computed(() => {
+  if (!routePairs.value) return null;
+  return routePairs.value[props.index] || null;
+});
 
 // **計算路徑時間**
 const calculateRouteTime = () => {
-  const routePair = routePairs.value[props.index];
-
-  if (!routePair || !routePair.origin || !routePair.destination) {
+  const pair = routePair.value;
+  if (!pair || !pair.origin || !pair.destination) {
     console.warn("🚨 起點或終點資訊缺失，無法計算路徑時間");
     return;
   }
 
   const directionsService = new google.maps.DirectionsService();
   const request = {
-    origin: new google.maps.LatLng(routePair.origin.lat, routePair.origin.lng),
+    origin: new google.maps.LatLng(pair.origin.lat, pair.origin.lng),
     destination: new google.maps.LatLng(
-      routePair.destination.lat,
-      routePair.destination.lng
+      pair.destination.lat,
+      pair.destination.lng
     ),
     travelMode: google.maps.TravelMode.DRIVING,
   };
@@ -53,13 +58,15 @@ const calculateRouteTime = () => {
   });
 };
 
-// **監聽 `itineraryStore` 內的路線變更**
+// **監聽 `routePair` 變更，自動重新計算**
 watch(
-  () => routePairs.value[props.index], // ✅ 改為監聽 itineraryStore
+  routePair,
   (newVal) => {
-    if (newVal && newVal.origin && newVal.destination) {
+    if (newVal?.origin && newVal?.destination) {
       console.log("✅ 觸發計算，開始 calculateRouteTime()");
       calculateRouteTime();
+    } else {
+      console.warn("⚠️ routePair 資料不完整，無法計算");
     }
   },
   { immediate: true, deep: true }

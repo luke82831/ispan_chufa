@@ -21,10 +21,11 @@ export const useItineraryStore = defineStore("itinerary", {
 
     getRoutePairs: (state) => (date) => {
       const places = state.itineraryDates[date] ?? [];
-      let routePairs = {};
 
+      let routePairs = {};
       for (let i = 0; i < places.length - 1; i++) {
         routePairs[i] = {
+          // ✅ 直接用 index 作為 key
           origin: { lat: places[i].latitude, lng: places[i].longitude },
           destination: {
             lat: places[i + 1].latitude,
@@ -43,7 +44,25 @@ export const useItineraryStore = defineStore("itinerary", {
         console.warn(`setItinerary: 預期收到陣列，但收到 ${typeof itinerary}`);
         itinerary = [];
       }
-      this.itineraryDates[date] = itinerary;
+
+      // 🔥 只使用 index，完全不考慮 placeOrder
+      const normalizedItinerary = itinerary
+        .filter((place) => place !== null && place !== undefined) // 過濾掉 undefined
+        .map((place, index) => ({
+          placeId: place.placeId ?? null,
+          placeName: place.placeName ?? "",
+          placeAddress: place.placeAddress ?? "",
+          latitude: place.latitude ?? null,
+          longitude: place.longitude ?? null,
+          index: index, // ✅ 改成 index
+          travelTime: place.travelTime ?? null,
+          stayDuration: place.stayDuration ?? null,
+          notes: place.notes ?? null,
+          photos: Array.isArray(place.photos) ? place.photos : [],
+        }));
+
+      console.log("🚀 更新行程資料 (使用 index):", normalizedItinerary);
+      this.itineraryDates[date] = normalizedItinerary;
     },
 
     setStartTime(date, startTime) {

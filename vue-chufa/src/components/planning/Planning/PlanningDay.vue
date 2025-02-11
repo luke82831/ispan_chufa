@@ -13,13 +13,12 @@
       />
     </div>
 
-    <!-- 顯示當天的行程 -->
     <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
       <draggable
         v-model="itineraryForSelectedDay"
         :group="{ name: 'places', pull: 'clone', put: true }"
         :animation="250"
-        item-key="placeOrder"
+        item-key="index"
         @end="handleDragEnd"
       >
         <template #item="{ element, index }">
@@ -43,26 +42,27 @@
                   />
 
                   <a
-                    v-if="!element.isEditingStay"
+                    v-if="!itineraryForSelectedDay[index].isEditingStay"
                     href="#"
-                    @click.prevent="editStayTime(element)"
+                    @click.prevent="editStayTime(index)"
                     class="stay-duration-link"
                   >
                     {{
                       itineraryStore.getStayDuration(
                         formattedSelectedDate,
-                        element.id
+                        index
                       )
                     }}
                     分鐘
                   </a>
+
                   <input
                     v-else
                     type="number"
-                    v-model="editingStayTimes[element.id]"
+                    v-model="itineraryForSelectedDay[index].tempStayDuration"
                     class="stay-duration-input"
-                    @blur="saveStayTime(element)"
-                    @keyup.enter="saveStayTime(element)"
+                    @blur="saveStayTime(index)"
+                    @keyup.enter="saveStayTime(index)"
                   />
                 </div>
 
@@ -128,7 +128,6 @@ const placeStore = usePlaceStore();
 
 const hasUnsavedChanges = ref(false); // 追蹤是否有變更
 const eventData = ref({}); // 儲存從後端載入的行程數據
-const editingStayTimes = ref({}); // 存放每個地點的暫存停留時間
 
 const updateDepartureTime = (event) => {
   const newTime = event.target.value;
@@ -248,18 +247,11 @@ const handleDragEnd = () => {
   const date = formattedSelectedDate.value;
   if (!date) return;
 
-  console.log("🔄 拖曳結束，重新排序 placeOrder");
+  console.log("🔄 拖曳結束，更新行程順序");
 
-  // ✅ 確保新的順序與 placeOrder 一致
-  itineraryForSelectedDay.value.forEach((place, index) => {
-    place.placeOrder = index + 1; // **讓 placeOrder 根據新順序重新編號**
-  });
-
-  console.log("📝 新的行程順序：", itineraryForSelectedDay.value);
-
-  // ✅ 存回 Pinia
+  // ✅ 只存回 Pinia，不要手動更新 index（Vue 會自動處理）
   itineraryStore.setItinerary(date, [...itineraryForSelectedDay.value]);
-  hasUnsavedChanges.value = true; // **標記數據變更**
+  hasUnsavedChanges.value = true;
 };
 
 // **前端刪除景點**
@@ -269,34 +261,30 @@ const deletePlace = (index) => {
 };
 
 // **編輯停留時間**
-const editStayTime = (place) => {
-  place.isEditingStay = true;
-
-  // 確保編輯時，每個地點的 `stayDuration` 是獨立的
-  editingStayTimes.value = { ...editingStayTimes.value };
-  editingStayTimes.value[place.id] = itineraryStore.getStayDuration(
-    formattedSelectedDate.value,
-    place.id
-  );
+const editStayTime = (index) => {
+  // ✅ 改用 index
+  itineraryForSelectedDay[index].isEditingStay = true;
+  itineraryForSelectedDay[index].tempStayDuration =
+    itineraryStore.getStayDuration(
+      formattedSelectedDate.value,
+      index // ✅ 改用 index
+    );
 };
 
 // **儲存新的停留時間**
-const saveStayTime = (place) => {
-  if (editingStayTimes.value[place.id] !== undefined) {
-    const newDuration = Number(editingStayTimes.value[place.id]);
+const saveStayTime = (index) => {
+  const newDuration = Number(itineraryForSelectedDay[index].tempStayDuration);
+  itineraryStore.setStayDuration(
+    formattedSelectedDate.value,
+    index,
+    newDuration
+  );
 
-    itineraryStore.setStayDuration(
-      formattedSelectedDate.value,
-      place.id,
-      newDuration
-    );
-  }
+  console.log(
+    `⏳ 存入停留時間：${formattedSelectedDate.value} | Index: ${index} | Duration: ${newDuration}`
+  );
 
-  place.isEditingStay = false;
-
-  // 清除該地點的暫存值
-  editingStayTimes.value = { ...editingStayTimes.value };
-  delete editingStayTimes.value[place.id];
+  itineraryForSelectedDay[index].isEditingStay = false;
 };
 
 const getPhotoUrl = (photo) => {
@@ -314,6 +302,13 @@ watch(
     hasUnsavedChanges.value = true;
   },
   { deep: true }
+);
+
+watch(
+  () => departureTime.value,
+  (newTime, oldTime) => {
+    console.log("🚀 出發時間變更:", oldTime, "➡️", newTime);
+  }
 );
 
 // **離開畫面時，將變更儲存至後端**

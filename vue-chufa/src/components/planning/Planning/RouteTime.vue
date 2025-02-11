@@ -50,7 +50,8 @@ const calculateRouteTime = () => {
         result.routes[0].legs[0].duration.value / 60
       );
       routeTime.value = travelMinutes;
-      console.log(`✅ 計算成功：${travelMinutes} 分鐘`);
+      console.log(`✅ 計算成功：${travelMinutes} 分鐘，正在存入 Pinia`);
+      itineraryStore.setRouteTime(props.date, props.index, travelMinutes); // ✅ 存入 Pinia
     } else {
       console.error("❌ 無法計算路徑時間:", status);
       routeTime.value = null;

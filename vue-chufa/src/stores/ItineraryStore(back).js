@@ -76,15 +76,22 @@ export const useItineraryStore = defineStore("itinerary", {
       if (!this.routeTimes[date]) {
         this.routeTimes[date] = {};
       }
+      console.log(
+        `⏳ 接收到路程時間：${date} | Index: ${index} | Duration: ${time}`
+      );
       this.routeTimes[date][index] = time;
     },
 
     // 新增 StayDuration 方法，用來儲存停留時間
-    setStayDuration(date, placeId, duration) {
+    setStayDuration(date, index, duration) {
       if (!this.stayDurations[date]) {
-        this.stayDurations[date] = {}; // 初始化該日期的停留時間物件
+        this.stayDurations[date] = {};
       }
-      this.stayDurations[date][placeId] = duration;
+      this.stayDurations[date][index] = duration;
+
+      console.log(
+        `⏳ 設定停留時間：${date} | Index: ${index} | Duration: ${duration}`
+      );
     },
 
     getStayDuration(date, placeId) {

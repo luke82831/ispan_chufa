@@ -37,7 +37,7 @@
                 @error="event.target.src = '/default-profile.png'"
               /> 
               <div v-else class="default-profile"></div>
-              <div class="post-author-name">{{ post.member.name }}</div>
+              <div class="post-author-name">{{ post.member.name }}repost</div>
             </div>
             <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
               <h4>{{ post.postTitle || '無標題' }}</h4>
@@ -55,7 +55,7 @@
                   @error="event.target.src = '/default-profile.png'"
                 />
                 <div v-else class="default-profile"></div>
-                <div class="repost-author-name">{{ post.repostDTO.member.name }}</div>
+                <div class="repost-author-name">{{ post.repostDTO.member.name }}the author-header</div>
               </div>
               <p class="repost-content">{{ post.repostDTO.postContent }}</p>
             </div>

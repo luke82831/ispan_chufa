@@ -58,8 +58,8 @@
             <div class="profile-picture-container">
               <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
                 <img
-                  v-if="post.member.profilePicture"
-                  :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+                  v-if="post.repostDTO ? post.repostDTO.member?.profilePicture : post.member?.profilePicture"
+                  :src="'data:image/jpeg;base64,' + (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)"
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
@@ -79,14 +79,14 @@
         </div>
 
         <!-- 顯示第一張圖片 -->
-        <div v-if="getFirstImage(post.postContent)" class="post-image-container" >
-          <img :src="getFirstImage(post.postContent)" class="post-image" />
+        <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
+          <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
         </div>
 <!-- 
         移除圖片後的內容
         <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
         <p class="post-content-preview">
-        {{ getTextPreview(post.postContent, 30) }}
+        {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
         </p>
 
         <!-- 閱讀更多連結
@@ -247,6 +247,7 @@ export default {
           page: currentPage.value,
           size: 100,
           checklike:member.value.userid,
+          repost:true,
         };
 
       // 動態設定排序條件
@@ -257,7 +258,7 @@ export default {
         isSearch.value=true;
       } 
       if (selectedPlace.value === 'follow') {
-        requestData.repost=true;
+        //requestData.repost=true;
         requestData.followerId = member.value.userid;  
       } else if (selectedPlace.value !== null||selectedPlace!=='users') {
         // 只有選擇地點時才加入 place
@@ -276,9 +277,10 @@ export default {
         );
 
         if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto.filter(
-            (post) => !post.repost && post.repostDTO === null      
-          );
+          posts.value = response.data.postdto
+          // .filter(
+          //   (post) => !post.repost && post.repostDTO === null      
+          // );
           noPosts.value = false; 
         } else {
           //posts.value = [];

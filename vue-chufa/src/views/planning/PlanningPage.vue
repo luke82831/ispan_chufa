@@ -66,11 +66,8 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate; // 如果已經是 YYYY-MM-DD 格式則直接回傳
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
-    new Date().getFullYear();
-  const [month, day] = cleanedDate
-    .split("/")
-    .map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
 
   return `${baseYear}-${month}-${day}`; // 轉換為 YYYY-MM-DD
 });

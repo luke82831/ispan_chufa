@@ -6,11 +6,7 @@
 
     <div class="departure-time">
       <label>出發時間：</label>
-      <input
-        type="time"
-        v-model="departureTime"
-        @change="updateDepartureTime"
-      />
+      <input type="time" v-model="departureTime" @change="updateDepartureTime" />
     </div>
 
     <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
@@ -24,9 +20,7 @@
         <template #item="{ element, index }">
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
-              <button @click="deletePlace(index)" class="delete-button">
-                ✖
-              </button>
+              <button @click="deletePlace(index)" class="delete-button">✖</button>
 
               <div class="itinerary-details">
                 <div class="stay-time-header">
@@ -35,8 +29,7 @@
                     :departureTime="departureTime"
                     :itinerary="itineraryForSelectedDay"
                     :stayDurations="
-                      itineraryStore.stayDurations?.[formattedSelectedDate] ??
-                      {}
+                      itineraryStore.stayDurations?.[formattedSelectedDate] ?? {}
                     "
                     :index="index"
                   />
@@ -47,12 +40,7 @@
                     @click.prevent="editStayTime(index)"
                     class="stay-duration-link"
                   >
-                    {{
-                      itineraryStore.getStayDuration(
-                        formattedSelectedDate,
-                        index
-                      )
-                    }}
+                    {{ itineraryStore.getStayDuration(formattedSelectedDate, index) }}
                     分鐘
                   </a>
 
@@ -81,10 +69,7 @@
               </div>
             </li>
 
-            <div
-              v-if="index < itineraryForSelectedDay.length - 1"
-              class="route-time"
-            >
+            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
               <RouteTime :date="formattedSelectedDate" :index="index" />
             </div>
           </ul>
@@ -150,11 +135,8 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate;
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
-    new Date().getFullYear();
-  const [month, day] = cleanedDate
-    .split("/")
-    .map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
   return `${baseYear}-${month}-${day}`;
 });
 
@@ -179,19 +161,13 @@ watch(
 
     let placesWithDetails = [];
     if (event.eventXPlaceBeans) {
-      console.log(
-        "📍 從後端獲取的 `eventXPlaceBeans`:",
-        event.eventXPlaceBeans
-      );
+      console.log("📍 從後端獲取的 `eventXPlaceBeans`:", event.eventXPlaceBeans);
 
       const placeIds = event.eventXPlaceBeans.map((e) => e.placeId);
       console.log("📍 需要加載的地點 ID:", placeIds);
 
       await placeStore.fetchMultiplePlaces(placeIds);
-      console.log(
-        "✅ `placeStore.placeDetailsMap`:",
-        placeStore.placeDetailsMap
-      );
+      console.log("✅ `placeStore.placeDetailsMap`:", placeStore.placeDetailsMap);
 
       // ✅ 確保 `placeDetailsMap` 內有完整資料
       placesWithDetails = event.eventXPlaceBeans.map((eventPlace) => {
@@ -214,10 +190,7 @@ watch(
     itineraryStore.setItinerary(newDate, placesWithDetails);
     itineraryStore.setStartTime(newDate, event.startTime ?? "08:00");
 
-    console.log(
-      "✅ 已存入 Pinia：",
-      itineraryStore.getItineraryForDay(newDate)
-    );
+    console.log("✅ 已存入 Pinia：", itineraryStore.getItineraryForDay(newDate));
   },
   { immediate: true }
 );
@@ -264,21 +237,16 @@ const deletePlace = (index) => {
 const editStayTime = (index) => {
   // ✅ 改用 index
   itineraryForSelectedDay[index].isEditingStay = true;
-  itineraryForSelectedDay[index].tempStayDuration =
-    itineraryStore.getStayDuration(
-      formattedSelectedDate.value,
-      index // ✅ 改用 index
-    );
+  itineraryForSelectedDay[index].tempStayDuration = itineraryStore.getStayDuration(
+    formattedSelectedDate.value,
+    index // ✅ 改用 index
+  );
 };
 
 // **儲存新的停留時間**
 const saveStayTime = (index) => {
   const newDuration = Number(itineraryForSelectedDay[index].tempStayDuration);
-  itineraryStore.setStayDuration(
-    formattedSelectedDate.value,
-    index,
-    newDuration
-  );
+  itineraryStore.setStayDuration(formattedSelectedDate.value, index, newDuration);
 
   console.log(
     `⏳ 存入停留時間：${formattedSelectedDate.value} | Index: ${index} | Duration: ${newDuration}`

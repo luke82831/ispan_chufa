@@ -39,44 +39,39 @@ const computedItinerary = computed(() => {
   const routeTimes = itineraryStore.routeTimes[props.date] || {};
   const stayTimes = itineraryStore.stayDurations[props.date] || {};
 
-  props.itinerary.forEach((_, index) => {
-    let travelTime = Number(routeTimes[index]) || 0;
-    let stayTime = Number(stayTimes[index]) || 0;
+  props.itinerary.forEach((place, index) => {
+    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0; // 取得行車時間
+    let stayTime = props.stayDurations?.[place.id] ?? 0; // 停留時間
 
-    console.log(
-      `🛣 地點 ${index} 行車時間: ${travelTime} 分鐘, 停留時間: ${stayTime} 分鐘`
-    );
-
-    // ✅ **index 0 的 `startTime` 來自出發時間**
     let startTime;
     if (index === 0) {
-      startTime = new Date(currentTime.getTime()); // ✅ 初始出發時間
+      // ✅ 第 1 個地點，直接使用出發時間
+      startTime = new Date(currentTime.getTime());
     } else {
-      // ✅ **後續地點的 `startTime` 應該來自上一個 `endTime`**
+      // ✅ 其他地點：上一個地點的 `endTime` + 行車時間
       startTime = new Date(itineraryWithTimes[index - 1].endTime);
+      startTime.setMinutes(startTime.getMinutes() + travelTime);
     }
 
-    // ✅ **確保 `endTime = startTime + 行車時間 + 停留時間`**
     let endTime = new Date(startTime.getTime());
-    endTime.setMinutes(endTime.getMinutes() + travelTime + stayTime);
+    endTime.setMinutes(endTime.getMinutes() + stayTime);
+
+    itineraryWithTimes.push({
+      ...place,
+      startTime,
+      endTime,
+    });
 
     console.log(
       `📌 地點 ${index}: ${startTime.toLocaleString()} - ${endTime.toLocaleString()}`
     );
-
-    itineraryWithTimes.push({
-      startTime: startTime, // ✅ 確保 Vue 讀取的是 `Date` 物件
-      endTime: endTime,
-    });
   });
 
   return itineraryWithTimes;
 });
 
 // **取得對應 `index` 的地點時間**
-const currentPlaceTime = computed(
-  () => computedItinerary.value[props.index] || null
-);
+const currentPlaceTime = computed(() => computedItinerary.value[props.index] || null);
 
 watch(
   () => computedItinerary.value,

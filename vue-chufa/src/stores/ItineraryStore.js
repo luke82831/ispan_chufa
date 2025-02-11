@@ -4,6 +4,7 @@ export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
     itineraryDates: {},
     startTimes: {}, // 存放每一天的出發時間
+    routeTimes: {}, // 存放每個行程的行車時間
   }),
 
   getters: {
@@ -16,34 +17,46 @@ export const useItineraryStore = defineStore("itinerary", {
   },
 
   actions: {
-    // 初始化行程（從後端載入時使用）
+    // 從後端載入行程
     setItinerary(date, itinerary) {
-      this.itineraryDates[date] = Array.isArray(itinerary) ? itinerary : []; // 確保存入的是陣列
+      if (!Array.isArray(itinerary)) {
+        console.warn(`setItinerary: 預期收到陣列，但收到 ${typeof itinerary}`);
+        itinerary = [];
+      }
+      this.itineraryDates[date] = itinerary;
     },
 
     setStartTime(date, startTime) {
-      if (!this.startTimes) this.startTimes = {};
       this.startTimes[date] = startTime;
     },
 
-    // **前端新增景點**
-    addPlace(date, place) {
-      if (!this.itineraryDates[date]) {
-        this.itineraryDates[date] = [];
+    setRouteTime(date, index, time) {
+      if (!this.routeTimes[date]) {
+        this.routeTimes[date] = {};
       }
-      this.itineraryDates[date].push(place);
+      this.routeTimes[date][index] = time;
     },
 
     // **前端刪除景點**
     removePlace(date, index) {
-      if (this.itineraryDates[date]) {
+      if (
+        this.itineraryDates[date] &&
+        index >= 0 &&
+        index < this.itineraryDates[date].length
+      ) {
         this.itineraryDates[date].splice(index, 1);
+      } else {
+        console.warn(
+          `removePlace: 無效的索引 ${index}，當前陣列長度: ${
+            this.itineraryDates[date]?.length ?? 0
+          }`
+        );
       }
     },
 
     // **前端拖曳排序**
     updateOrder(date, newOrder) {
-      this.itineraryDates[date] = newOrder;
+      this.itineraryDates[date] = [...newOrder];
     },
   },
 });

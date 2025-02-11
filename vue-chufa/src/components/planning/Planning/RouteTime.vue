@@ -6,8 +6,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { usePlaceStore } from "@/stores/PlaceStore";
+import { ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const props = defineProps({
@@ -15,26 +14,64 @@ const props = defineProps({
   index: Number,
 });
 
-const placeStore = usePlaceStore();
 const itineraryStore = useItineraryStore();
 const routeTime = ref(null);
 
-// 計算路徑時間
-const calculateRouteTime = () => {
-  const routePair = placeStore.routePairs[props.date]?.[props.index];
+// **透過 itineraryStore 取得當天的行程順序**
+const itineraryForDay = computed(() =>
+  itineraryStore.getItineraryForDay(props.date)
+);
 
-  if (!routePair || !routePair.origin || !routePair.destination) {
+// **根據 index 取得當前地點的起點與終點**
+const routePair = computed(() => {
+  const places = itineraryForDay.value;
+  if (!places || places.length < 2 || props.index >= places.length - 1)
+    return null;
+
+  return {
+    origin: places[props.index],
+    destination: places[props.index + 1],
+  };
+});
+
+// **計算路徑時間**
+const calculateRouteTime = () => {
+  if (
+    !routePair.value ||
+    !routePair.value.origin ||
+    !routePair.value.destination
+  ) {
     console.warn("🚨 起點或終點資訊缺失，無法計算路徑時間");
+    return;
+  }
+
+  const { origin, destination } = routePair.value;
+
+  // ✅ 修正：確保 Google Maps API 能讀取正確的經緯度格式
+  const originLatLng = new google.maps.LatLng(
+    origin.latitude,
+    origin.longitude
+  );
+  const destinationLatLng = new google.maps.LatLng(
+    destination.latitude,
+    destination.longitude
+  );
+
+  // 確保數據有效
+  if (
+    typeof origin.latitude !== "number" ||
+    typeof origin.longitude !== "number" ||
+    typeof destination.latitude !== "number" ||
+    typeof destination.longitude !== "number"
+  ) {
+    console.error("❌ 無效的經緯度數據:", { origin, destination });
     return;
   }
 
   const directionsService = new google.maps.DirectionsService();
   const request = {
-    origin: new google.maps.LatLng(routePair.origin.lat, routePair.origin.lng),
-    destination: new google.maps.LatLng(
-      routePair.destination.lat,
-      routePair.destination.lng
-    ),
+    origin: originLatLng,
+    destination: destinationLatLng,
     travelMode: google.maps.TravelMode.DRIVING,
   };
 
@@ -43,7 +80,7 @@ const calculateRouteTime = () => {
       routeTime.value = Math.round(
         result.routes[0].legs[0].duration.value / 60
       );
-      itineraryStore.setRouteTime(props.date, props.index, routeTime.value); // 存入 ItineraryStore
+      itineraryStore.setRouteTime(props.date, props.index, routeTime.value);
       console.log(`✅ 計算成功：${routeTime.value} 分鐘`);
     } else {
       console.error("❌ 無法計算路徑時間:", status);
@@ -52,15 +89,15 @@ const calculateRouteTime = () => {
   });
 };
 
-// 監聽 routePairs 變更，重新計算時間
+// **監聽行程順序變化，重新計算時間**
 watch(
-  () => placeStore.routePairs[props.date]?.[props.index],
+  () => itineraryForDay.value,
   (newVal) => {
-    if (newVal && newVal.origin && newVal.destination) {
+    if (newVal && newVal.length > 1) {
       console.log("✅ 觸發計算，開始 calculateRouteTime()");
       calculateRouteTime();
     } else {
-      console.warn("⚠️ newVal 為空，未能觸發 calculateRouteTime");
+      console.warn("⚠️ 無法計算路徑，行程資料不足");
     }
   },
   { immediate: true, deep: true }

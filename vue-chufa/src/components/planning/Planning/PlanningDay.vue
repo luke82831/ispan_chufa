@@ -76,12 +76,12 @@
               </div>
             </li>
 
-            <!-- <div
+            <div
               v-if="index < itineraryForSelectedDay.length - 1"
               class="route-time"
             >
               <RouteTime :date="formattedSelectedDate" :index="index" />
-            </div> -->
+            </div>
           </ul>
         </template>
       </draggable>
@@ -248,12 +248,6 @@ const handleDragEnd = () => {
   // ✅ 存回 Pinia
   itineraryStore.setItinerary(date, [...itineraryForSelectedDay.value]);
   hasUnsavedChanges.value = true; // **標記數據變更**
-};
-
-// **前端新增景點**
-const addPlace = (place) => {
-  itineraryStore.addPlace(formattedSelectedDate.value, place);
-  hasUnsavedChanges.value = true;
 };
 
 // **前端刪除景點**

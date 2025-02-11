@@ -50,12 +50,7 @@
       </div>
 
       <p class="post-content">{{ post.postContent }}</p>
-      <a
-        v-if="post.postLink"
-        :href="post.postLink"
-        target="_blank"
-        class="read-more"
-      >
+      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more">
         閱讀更多
       </a>
       <div class="post-meta">
@@ -111,7 +106,7 @@ import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { usePostStore } from "@/stores/usePostStore";
-import {useUserStore } from "@/stores/user"
+import { useUserStore } from "@/stores/user";
 
 export default {
   setup() {
@@ -288,7 +283,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .main-container {

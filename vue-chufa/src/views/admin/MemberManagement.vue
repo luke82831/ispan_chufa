@@ -1,7 +1,7 @@
 <template>
   <div id="member-management-page">
     <div class="member-management">
-      <h1>會員管理</h1>
+      <h1 class="page-title">會員管理</h1>
       <div v-if="loading" class="loader">載入中...</div>
       <div v-else class="table-container">
         <table class="user-table">
@@ -19,13 +19,19 @@
             <tr v-for="user in users" :key="user.userid">
               <td class="name-cell">{{ user.name }}</td>
               <td>{{ user.role }}</td>
-              <td>{{ user.email }}</td>
-              <!-- 新增手機號碼欄位 -->
+              <!-- 電子郵件欄位：限制顯示長度，並附上「編輯」按鈕 -->
+              <td class="email-cell">
+                <span class="email-text">{{ user.email }}</span>
+                <button
+                  @click="updateEmail(user.userid, user.email)"
+                  class="btn edit-email-btn"
+                >
+                  編輯
+                </button>
+              </td>
               <td>{{ user.phone_number }}</td>
-              <!-- 新增性別欄位 -->
               <td>{{ user.gender }}</td>
               <td class="action-cell">
-                <!-- 設為管理員按鈕 -->
                 <button
                   v-if="user.role !== 'ADMIN'"
                   @click="updateRole(user.userid, 'ADMIN')"
@@ -33,7 +39,6 @@
                 >
                   設為管理員
                 </button>
-                <!-- 設為會員按鈕 -->
                 <button
                   v-if="user.role !== 'USER'"
                   @click="updateRole(user.userid, 'USER')"
@@ -41,7 +46,6 @@
                 >
                   設為會員
                 </button>
-                <!-- 刪除會員按鈕 -->
                 <button @click="deleteMember(user.userid)" class="btn delete-btn">
                   刪除會員
                 </button>
@@ -146,174 +150,242 @@ const deleteMember = async (userId) => {
   }
 };
 
+// 更新電子郵件的方法
+const updateEmail = async (userId, currentEmail) => {
+  const { value: newEmail } = await Swal.fire({
+    title: "修改電子郵件",
+    input: "email",
+    inputLabel: "請輸入新的電子郵件",
+    inputValue: currentEmail,
+    showCancelButton: true,
+    confirmButtonText: "更新",
+    cancelButtonText: "取消",
+    inputValidator: (value) => {
+      if (!value) {
+        return "請輸入電子郵件";
+      }
+    },
+  });
+
+  if (newEmail) {
+    try {
+      const response = await axios.put(
+        `/ajax/secure/members/${userId}/email`,
+        { email: newEmail },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+      if (response.data.success) {
+        Swal.fire("成功", "電子郵件更新成功", "success");
+        fetchUsers(currentPage.value);
+      } else {
+        Swal.fire("錯誤", response.data.message, "error");
+      }
+    } catch (error) {
+      Swal.fire("錯誤", "電子郵件更新失敗", "error");
+      console.error("Update Email Error:", error);
+    }
+  }
+};
+
 fetchUsers();
 </script>
 
 <style scoped>
-/* 整個頁面背景 */
+/* ------------------------ 外層與主要容器 ------------------------ */
 #member-management-page {
   background: #f0f2f5;
   min-height: 100vh;
   padding: 20px;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
 }
 
-/* 卡片容器 */
-#member-management-page .member-management {
-  max-width: 1400px;
-  margin: 40px auto;
-  padding: 30px;
+.member-management {
+  width: 100%;
+  height: 100vh;
+  max-width: 1200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 0 auto;
   font-family: "Microsoft JhengHei", sans-serif;
-  background: linear-gradient(145deg, #ffffff, #f3f3f3);
-  border-radius: 20px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
 }
 
-/* 頁面標題 */
-#member-management-page .member-management h1 {
+.member-management h1 {
   text-align: center;
-  font-size: 32px;
-  color: #343a40;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 10px;
-  margin-bottom: 30px;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-/* 載入中 */
-#member-management-page .loader {
+.loader {
   text-align: center;
   font-size: 1.2rem;
   color: #777;
 }
 
-/* 表格外層容器：加上水平捲軸 */
-#member-management-page .table-container {
-  background: linear-gradient(145deg, #ffffff, #f7f7f7);
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  border: 1px solid #e0e0e0;
-  margin-top: 30px;
-  overflow-x: auto;
-}
-
-/* 表格樣式 */
-#member-management-page .user-table {
-  width: 100%;
-  border-collapse: collapse;
+/* ------------------------ 表格樣式 ------------------------ */
+.table-container {
+  width: 90%;
+  max-width: 1000px;
+  margin: 20px auto;
   background: #fff;
+  padding: 15px;
   border-radius: 10px;
-  overflow: hidden;
-  /* 依照欄位數量調整最小寬度 */
-  min-width: 1200px;
-}
-
-#member-management-page .user-table thead {
-  background: linear-gradient(135deg, #f0f0f0, #e4e4e4);
-}
-
-#member-management-page .user-table th {
-  padding: 14px 12px;
-  font-weight: bold;
-  font-size: 14px;
-  color: #495057;
-  border-bottom: 1px solid #ccc;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-}
-
-#member-management-page .user-table td {
-  padding: 14px 12px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-  color: #555;
-  font-size: 14px;
-}
-
-/* 會員名稱欄設定單行顯示 */
-#member-management-page .user-table td.name-cell {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#member-management-page .user-table tr:nth-child(even) {
-  background-color: #fcfcfc;
-}
-
-#member-management-page .user-table tbody tr:hover {
-  background-color: #f1f7e9;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 保留操作欄寬度限制（根據需求調整） */
-#member-management-page .user-table th:last-child,
-#member-management-page .user-table td:last-child {
-  min-width: 350px;
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-/* 操作按鈕區塊 */
-#member-management-page .action-cell {
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
+.user-table th,
+.user-table td {
+  padding: 10px 15px;
+  text-align: center;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
 }
 
-/* 統一按鈕樣式，固定寬度與重置預設 */
-/* 加入 display:flex 與對齊設定，確保垂直與水平置中 */
-#member-management-page .btn {
-  border: none;
-  padding: 8px 12px; /* ✅ 縮小內邊距 */
-  margin: 2px; /* ✅ 讓按鈕靠近 */
-  cursor: pointer;
-  font-size: 14px; /* ✅ 統一字體 */
-  border-radius: 6px; /* ✅ 調整圓角 */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.user-table th {
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+}
+
+.hover-effect:hover {
+  background-color: #f0f8e6;
+}
+.member-management h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.loader {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #777;
+}
+
+/* 列 hover 效果 */
+.user-table tbody tr:hover {
+  background-color: #f1f7e9;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 28px;
+  color: #343a40;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 0px;
+}
+
+.edit-email-btn {
+  background: #40bed1;
   color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  width: 110px; /* ✅ 統一按鈕寬度 */
-  height: 38px; /* ✅ 統一按鈕高度 */
-  display: flex;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-email-btn:hover {
+  background: #138496;
+  transform: scale(1.05);
+}
+
+.email-cell {
+  display: grid;
+  grid-template-columns: 200px auto;
   align-items: center;
-  justify-content: center;
-
+  gap: 10px;
 }
 
-/* 管理員按鈕：藍色 */
-#member-management-page .admin-btn {
+.email-text {
+  width: 200px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 操作按鈕容器 */
+.action-cell {
+  display: flex; /* 讓按鈕水平排列 */
+  justify-content: center; /* 水平居中對齊 */
+  align-items: center; /* 垂直居中對齊 */
+  flex-wrap: wrap; /* 如果按鈕過多，自動換行 */
+  gap: 10px; /* 按鈕之間的間距 */
+}
+
+/* 通用按鈕樣式 */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+  width: 110px; /* 確保按鈕寬度一致 */
+  height: 40px; /* 確保按鈕高度一致 */
+}
+
+/* 設為管理員按鈕 */
+.admin-btn {
   background-color: #007bff;
+  color: white;
 }
-#member-management-page .admin-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+.admin-btn:hover {
+  background-color: #0056b3;
+  box-shadow: 0 4px 10px rgba(0, 91, 187, 0.4);
+  transform: scale(1.05);
 }
 
-/* 會員按鈕：綠色 */
-#member-management-page .user-btn {
+/* 設為會員按鈕 */
+.user-btn {
   background-color: #28a745;
+  color: white;
 }
-#member-management-page .user-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+.user-btn:hover {
+  background-color: #218838;
+  box-shadow: 0 4px 10px rgba(33, 136, 56, 0.4);
+  transform: scale(1.05);
 }
 
-/* 刪除按鈕：紅色 */
-#member-management-page .delete-btn {
+/* 刪除會員按鈕 */
+.delete-btn {
   background-color: #dc3545;
-  margin-top: 5px;
+  color: white;
+  position: static; /* 確保按鈕不脫離表格布局 */
 }
-#member-management-page .delete-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+.delete-btn:hover {
+  background-color: #c82333;
+  box-shadow: 0 4px 10px rgba(200, 35, 51, 0.4);
+  transform: scale(1.05);
 }
 
-/* 分頁控制 */
-#member-management-page .pagination {
+/* ----------------------- 分頁控制 ----------------------- */
+.pagination {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -322,7 +394,7 @@ fetchUsers();
   font-family: "Microsoft JhengHei", sans-serif;
 }
 
-#member-management-page .pagination button {
+.pagination button {
   padding: 8px 16px;
   border: 2px solid #ccc;
   border-radius: 50px;
@@ -334,13 +406,13 @@ fetchUsers();
   transition: all 0.3s ease;
 }
 
-#member-management-page .pagination button:hover {
+.pagination button:hover {
   border-color: #007bff;
   color: #007bff;
   transform: scale(1.1);
 }
 
-#member-management-page .pagination button:disabled {
+.pagination button:disabled {
   background: #f0f0f0;
   color: #999;
   border: 2px solid #e0e0e0;
@@ -348,7 +420,7 @@ fetchUsers();
   transform: none;
 }
 
-#member-management-page .pagination span {
+.pagination span {
   font-size: 14px;
   color: #555;
   font-weight: bold;

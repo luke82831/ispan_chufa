@@ -11,7 +11,7 @@
 
     <!-- 主要內容區域 -->
     <div class="main-content">
-      <!-- 頂部導航 (未來擴展 Navbar.vue) -->
+      <!-- 頂部使用者資訊 (未來擴展 Navbar.vue) -->
       <div class="user-info">
         <span>管理者：{{ member?.username || "訪客" }}</span>
       </div>
@@ -33,10 +33,11 @@ const member = computed(() => userStore.member);
 </script>
 
 <style scoped>
+/* 整個版面容器，使用 flex 並以 min-height 保證至少滿版 */
 .admin-layout {
   display: flex;
-  height: calc(100vh - 80px);
-  background: #e0ecff; /* 淡藍背景，讓視覺更柔和 */
+  min-height: 100vh; /* 確保容器至少和瀏覽器視窗一樣高 */
+  background: #e0ecff; /* 淡藍背景 */
 }
 
 /* === 側邊選單樣式 === */
@@ -45,6 +46,7 @@ const member = computed(() => userStore.member);
   background: #5a95d5; /* 主要藍色 */
   color: white;
   padding: 20px;
+  min-height: 100vh; /* 利用作法1：側邊選單至少延展至 100vh */
 }
 
 .sidebar h2 {
@@ -71,20 +73,12 @@ const member = computed(() => userStore.member);
   transform: translateX(4px); /* 滑鼠懸停時輕微位移 */
 }
 
-/* === 頂部導航欄樣式 === */
-.navbar {
-  background: #3b82f6; /* 與側邊欄相同 */
-  color: white;
-  padding: 15px 20px;
-  text-align: right;
+/* === 頂部使用者資訊樣式 === */
+.user-info {
+  background: #f8f8f8;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
   font-size: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.navbar span {
-  font-weight: bold;
 }
 
 /* === 管理者資訊區塊 === */
@@ -114,11 +108,13 @@ const member = computed(() => userStore.member);
   overflow: hidden; /* 確保內容不會額外滾動 */
 }
 
+/* 內容區（路由內容） */
 .content {
   flex: 1;
   padding: 20px;
   background: white; /* 主要內容區域保持白色 */
   border-radius: 8px;
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  margin: 20px;
 }
 </style>

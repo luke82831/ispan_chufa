@@ -202,7 +202,7 @@ public class JackPostController {
                 response.setMessage("已刪除這筆貼文");
             } else {
                 response.setSuccesss(false);
-                response.setMessage("查不到這筆貼文");
+                response.setMessage("刪除失敗");
             }
         }
 

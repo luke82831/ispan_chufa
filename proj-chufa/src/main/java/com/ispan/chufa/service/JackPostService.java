@@ -32,11 +32,17 @@ public class JackPostService {
     public Boolean deletePost(Long id) {
         if (id != null) {
             if (postRepository.existsById(id)) {
-                postRepository.deleteById(id);
+                try {
+                    postRepository.deleteById(id);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                    return false;
+                }
                 return true;
             }
         }
-        return null;
+        return false;
     }
 
     // 用ID查詢貼文

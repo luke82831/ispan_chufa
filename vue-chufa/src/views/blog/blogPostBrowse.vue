@@ -1,23 +1,38 @@
 <template>
 
-    <div class="post">
-        <h1 class="title">標題:{{ postData.postTitle }}</h1><!-- 標題 -->
-        <EditPost v-show="member.userid == memberId" :postData="postData"></EditPost>
-        <p>作者:{{ memberName }}</p><!-- Post作者 -->
-        <p><strong>文章狀態：</strong>{{ postData.postStatus }}</p>
-        <div v-if="schedule!=null" class="schedule">
-            <h2>行程</h2>
-            <p>行程名稱:{{ schedule.tripName }}</p>
-            <p>行程ID:{{ schedule.tripId }}</p>
-            <p>行程開始時間:{{ schedule.startDate }}</p>
-            <p>行程結束時間:{{ schedule.endDate }}</p>
-            <div class="itinerary-image-container">
-                <img :src="img" alt="Base64 圖片">
+    <div class="postBox">
+        <div class="postBody">
+            <div class="title-editPost">
+                <h1 class="title">{{ postData.postTitle }}</h1><!-- 標題 -->
+                <EditPost v-show="member.userid == memberId" :postData="postData"></EditPost>
             </div>
+            <div class="memberPost">
+                <img v-if="memberPicture!=null" :src="'data:image/jpeg;base64,' + memberPicture" class="memberPicture">
+                <img v-else src="@/assets/empty.png" class="memberPicture"/>
+                <p class="memberName">{{ memberName }}</p><!-- Post作者 -->
+                <p class="postTime"><strong>發布時間:</strong>{{ postData.postTime }}</p>
+                <p class="postStatus">文章狀態：{{ postData.postStatus }}</p>
+            </div>
+
+            <div v-if="schedule!=null" class="openSchedule">
+                <button v-if="!openSchedule" class="openScheduleButton" @click="openSchedule = !openSchedule">打開行程</button>
+                <button v-else class="closeScheduleButton" @click="openSchedule = !openSchedule">關閉行程</button>
+                行程名稱:{{ schedule.tripName }}
+            </div>
+            <div v-if="schedule!=null && openSchedule" class="schedule">
+                <div class="scheduleDataText">
+                    <h2>行程資料</h2>
+                    <p>行程名稱:{{ schedule.tripName }}</p>
+                    <p>行程ID:{{ schedule.tripId }}</p>
+                    <p>行程開始時間:{{ schedule.startDate }}</p>
+                    <p>行程結束時間:{{ schedule.endDate }}</p>
+                </div>
+                <img class="scheduleDataImg" :src="img" alt="Base64 圖片">
+            </div>
+
+            <div v-html="htmlContent"></div>
+            <p v-if="postData.postLink!=null">連結：<a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
         </div>
-        <div v-html="htmlContent"></div><!-- 內容 -->
-        <p><strong>連結：</strong><a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
-        <p><strong>發布時間：</strong>{{ postData.postTime }}</p>
     </div>
     
     <!-- <div>
@@ -25,9 +40,11 @@
         <div v-html="imgText"></div>
     </div> -->
     
-    <div class="Comment">
-        <InputComment></InputComment>
-        <Comment></Comment>
+    <div class="commentBox">
+        <div class="commentBody">
+            <InputComment></InputComment>
+            <Comment></Comment>
+        </div>
     </div>
 </template>
 
@@ -48,6 +65,7 @@
     import { useScheduleStore } from "@/stores/ScheduleStore";
     const scheduleStore = useScheduleStore();
 
+    const openSchedule = ref(false)
 
     const getImageSource = (coverPhoto) =>
     coverPhoto
@@ -63,6 +81,7 @@
     const postid = ref(route.params.postid); // 取得動態路由參數
 
     const memberName=ref('')
+    const memberPicture=ref(null)
     const memberId=ref('')
     const postData = ref('')
     const htmlContent = ref('')
@@ -89,6 +108,9 @@
         if (response.data.successs) {
             postData.value = response.data.list[0]
             memberName.value = postData.value.member.name
+            if(postData.value.member.profilePicture!=null){
+                memberPicture.value = postData.value.member.profilePicture
+            }
             memberId.value = postData.value.member.userid
             htmlContent.value = response.data.list[0].postContent
             if(response.data.list[0].scheduleBean!=null){
@@ -122,15 +144,119 @@
 //     }
 </script>
 
-<style>
+<style scoped>
+    .commentBox{
+        display: flex; /* 啟用Flexbox佈局 */
+        justify-content: center; /* 主軸對齊 */
+    }
+    .commentBody{
+        width: 1000px;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .postBox{
+        display: flex; /* 啟用Flexbox佈局 */
+        justify-content: center; /* 主軸對齊 */
+    }
+    .postBody{
+        width: 1000px;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .title-editPost{
+        display: flex; /* 啟用Flexbox佈局 */
+        justify-content: center;
+        align-items: center;
+    }
+    .title{
+        margin: 10px;
+        font-size: 50px;
+    }
+    .memberPost{
+        display: flex; /* 啟用Flexbox佈局 */
+        align-items: center;
+        flex-grow: 1;
+    }
+    .memberPicture{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        margin: 5px;
+    }
+    .memberName{
+        margin: 5px;
+        font-size: 20px;
+    }
+    .postTime{
+        margin: 5px;
+        font-size: 14px;
+        color: rgb(160, 160, 160);
+    }
+    .postStatus{
+        margin: 5px;
+        font-size: 14px;
+        color: rgb(160, 160, 160);
+    }
+
+    .openScheduleButton{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #17a2b8;
+        color: white;
+        margin-bottom: 10px; 
+        margin-top: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .openScheduleButton:hover {
+        transform: scale(1.05);
+    }
+    .closeScheduleButton{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: rgb(226, 66, 66);
+        color: white;
+        margin-bottom: 10px; 
+        margin-top: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .closeScheduleButton:hover {
+        transform: scale(1.05);
+    }
     .schedule{
-        border: 5px solid black;
+        display: flex; /* 啟用Flexbox佈局 */
+        flex-direction: row-reverse;
+        justify-content: space-around;
+        padding: 25px;
         margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
-    .post{
-        border: 5px solid black;
-        margin: 20px;
+    .scheduleDataText{
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
     }
+    .scheduleDataImg{
+        width: 100px;
+        height: 100%;
+        object-fit: cover;
+        flex-basis: 300px;
+    }
+
     .Comment{
         border: 5px solid black;
         margin: 20px;

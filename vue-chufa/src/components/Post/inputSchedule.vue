@@ -1,25 +1,25 @@
 <template>
 <div class="itineraries-container">
-<h1 class="itineraries-title">我的行程</h1>
+    <h1 class="itineraries-title">我的行程</h1>
 
-<!-- 行程列表 -->
-<div v-if="loading" class="loading-text">載入中...</div>
-<div v-else-if="schedules.length === 0" class="no-schedules">
-目前沒有行程
-</div>
-<div v-else class="itineraries-grid">
-<div
-v-for="schedule in paginatedSchedules"
-:key="schedule.tripId"
-class="itinerary-card"
-@click="goToPlanningPage(schedule)"
->
-<div class="itinerary-image-container">
-<img
-:src="getImageSource(schedule.coverPhoto)"
-alt="行程封面"
-class="itinerary-image"
-/>
+    <!-- 行程列表 -->
+    <div v-if="loading" class="loading-text">載入中...</div>
+        <div v-else-if="schedules.length === 0" class="no-schedules">
+        目前沒有行程
+        </div>
+    <div v-else class="itineraries-grid">
+        <div
+        v-for="schedule in paginatedSchedules"
+        :key="schedule.tripId"
+        class="itinerary-card"
+        @click="goToPlanningPage(schedule)"
+        >
+    <div class="itinerary-image-container">
+    <img
+    :src="getImageSource(schedule.coverPhoto)"
+    alt="行程封面"
+    class="itinerary-image"
+    />
 </div>
 
 <!-- 文字內容 -->
@@ -62,7 +62,7 @@ loading.value = false;
 
 // 分頁設定
 const currentPage = ref(1); // 當前頁數
-const itemsPerPage = 6; // 每頁顯示 6 個行程
+const itemsPerPage = 2; // 每頁顯示 2 個行程
 
 // 計算總頁數
 const totalPages = computed(() =>
@@ -100,3 +100,8 @@ const goToPlanningPage = (schedule) => {
 onMounted(fetchSchedules);
 </script>
 
+<style scoped>
+    .itineraries-title{
+        margin: 0;
+    }
+</style>

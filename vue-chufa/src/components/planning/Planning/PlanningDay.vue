@@ -6,7 +6,11 @@
 
     <div class="departure-time">
       <label>出發時間：</label>
-      <input type="time" v-model="departureTime" />
+      <input
+        type="time"
+        v-model="departureTime"
+        @change="updateDepartureTime"
+      />
     </div>
 
     <!-- 顯示當天的行程 -->
@@ -26,13 +30,14 @@
               </button>
 
               <div class="itinerary-details">
-                <!-- <div class="stay-time-header">
+                <div class="stay-time-header">
                   <StayTime
                     :date="formattedSelectedDate"
                     :departureTime="departureTime"
                     :itinerary="itineraryForSelectedDay"
                     :stayDurations="
-                      itineraryStore.stayDurations[formattedSelectedDate] || {}
+                      itineraryStore.stayDurations?.[formattedSelectedDate] ??
+                      {}
                     "
                     :index="index"
                   />
@@ -54,12 +59,12 @@
                   <input
                     v-else
                     type="number"
-                    v-model="element.tempStayDuration"
+                    v-model="editingStayTimes[element.id]"
                     class="stay-duration-input"
                     @blur="saveStayTime(element)"
                     @keyup.enter="saveStayTime(element)"
                   />
-                </div> -->
+                </div>
 
                 <div class="itinerary-info">
                   <img
@@ -123,6 +128,13 @@ const placeStore = usePlaceStore();
 
 const hasUnsavedChanges = ref(false); // 追蹤是否有變更
 const eventData = ref({}); // 儲存從後端載入的行程數據
+const editingStayTimes = ref({}); // 存放每個地點的暫存停留時間
+
+const updateDepartureTime = (event) => {
+  const newTime = event.target.value;
+  itineraryStore.setStartTime(formattedSelectedDate.value, newTime);
+  hasUnsavedChanges.value = true; // 標記變更
+};
 
 const departureTime = computed({
   get: () => itineraryStore.getStartTime(formattedSelectedDate.value),
@@ -256,14 +268,36 @@ const deletePlace = (index) => {
   hasUnsavedChanges.value = true;
 };
 
-// **監聽行程變更，標記未儲存**
-watch(
-  itineraryForSelectedDay,
-  () => {
-    hasUnsavedChanges.value = true;
-  },
-  { deep: true }
-);
+// **編輯停留時間**
+const editStayTime = (place) => {
+  place.isEditingStay = true;
+
+  // 確保編輯時，每個地點的 `stayDuration` 是獨立的
+  editingStayTimes.value = { ...editingStayTimes.value };
+  editingStayTimes.value[place.id] = itineraryStore.getStayDuration(
+    formattedSelectedDate.value,
+    place.id
+  );
+};
+
+// **儲存新的停留時間**
+const saveStayTime = (place) => {
+  if (editingStayTimes.value[place.id] !== undefined) {
+    const newDuration = Number(editingStayTimes.value[place.id]);
+
+    itineraryStore.setStayDuration(
+      formattedSelectedDate.value,
+      place.id,
+      newDuration
+    );
+  }
+
+  place.isEditingStay = false;
+
+  // 清除該地點的暫存值
+  editingStayTimes.value = { ...editingStayTimes.value };
+  delete editingStayTimes.value[place.id];
+};
 
 const getPhotoUrl = (photo) => {
   if (!photo) return ""; // 確保 photo 不為 null 或 undefined
@@ -272,6 +306,15 @@ const getPhotoUrl = (photo) => {
   }
   return photo; // 如果 photo 已經是 URL 字串，直接回傳
 };
+
+// **監聽行程變更，標記未儲存**
+watch(
+  itineraryForSelectedDay,
+  () => {
+    hasUnsavedChanges.value = true;
+  },
+  { deep: true }
+);
 
 // **離開畫面時，將變更儲存至後端**
 onBeforeRouteLeave(async (to, from, next) => {

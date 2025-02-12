@@ -6,7 +6,11 @@
 
     <div class="departure-time">
       <label>出發時間：</label>
-      <input type="time" v-model="departureTime" @change="updateDepartureTime" />
+      <input
+        type="time"
+        v-model="departureTime"
+        @change="updateDepartureTime"
+      />
     </div>
 
     <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
@@ -21,7 +25,9 @@
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
               <!-- 刪除按鈕 -->
-              <button @click="deletePlace(index)" class="delete-button">✖</button>
+              <button @click="deletePlace(index)" class="delete-button">
+                ✖
+              </button>
 
               <div class="itinerary-details">
                 <div class="stay-time-header">
@@ -40,7 +46,12 @@
                     @click.prevent="editStayTime(index)"
                     class="stay-duration-link"
                   >
-                    {{ itineraryStore.getStayDuration(formattedSelectedDate, index) }}
+                    {{
+                      itineraryStore.getStayDuration(
+                        formattedSelectedDate,
+                        index
+                      )
+                    }}
                     分鐘
                   </a>
 
@@ -71,7 +82,10 @@
             </li>
 
             <!-- 在行程之間插入 RouteTime -->
-            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
+            <div
+              v-if="index < itineraryForSelectedDay.length - 1"
+              class="route-time"
+            >
               <RouteTime :date="formattedSelectedDate" :index="index" />
             </div>
           </ul>
@@ -92,11 +106,12 @@ import { useItineraryStore } from "@/stores/ItineraryStore";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import { useEventStore } from "@/stores/EventStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
+import { useEventPlaceStore } from "@/stores/EventPlaceStore";
+
 import RouteTime from "./RouteTime.vue";
 import draggable from "vuedraggable";
 import StayTime from "./StayTime.vue";
 
-const router = useRouter();
 const props = defineProps({
   selectedDate: String,
 });
@@ -106,6 +121,7 @@ const itineraryStore = useItineraryStore();
 const scheduleStore = useScheduleStore();
 const eventStore = useEventStore();
 const placeStore = usePlaceStore();
+const eventPlaceStore = useEventPlaceStore();
 
 // ------------- UI 狀態 -------------
 const hasUnsavedChanges = ref(false);
@@ -118,8 +134,11 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate;
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
   return `${baseYear}-${month}-${day}`;
 });
 
@@ -165,13 +184,19 @@ watch(
 
     let placesWithDetails = [];
     if (event.eventXPlaceBeans) {
-      console.log("📍 從後端獲取的 `eventXPlaceBeans`:", event.eventXPlaceBeans);
+      console.log(
+        "📍 從後端獲取的 `eventXPlaceBeans`:",
+        event.eventXPlaceBeans
+      );
 
       const placeIds = event.eventXPlaceBeans.map((e) => e.placeId);
       // console.log("📍 需要加載的地點 ID:", placeIds);
 
       await placeStore.fetchMultiplePlaces(placeIds);
-      console.log("✅ `placeStore.placeDetailsMap`:", placeStore.placeDetailsMap);
+      console.log(
+        "✅ `placeStore.placeDetailsMap`:",
+        placeStore.placeDetailsMap
+      );
 
       // 將地點詳細資訊合併
       placesWithDetails = event.eventXPlaceBeans.map((eventPlace) => {
@@ -192,7 +217,10 @@ watch(
     // 存入 Pinia
     itineraryStore.setItinerary(newDate, placesWithDetails);
     itineraryStore.setStartTime(newDate, event.startTime ?? "08:00");
-    console.log("✅ 已存入 Pinia：", itineraryStore.getItineraryForDay(newDate));
+    console.log(
+      "✅ 已存入 Pinia：",
+      itineraryStore.getItineraryForDay(newDate)
+    );
   },
   { immediate: true }
 );
@@ -256,7 +284,8 @@ const saveStayTime = (index, duration) => {
   if (!date) return;
 
   // 轉成數字
-  const validDuration = isNaN(duration) || duration === "" ? 0 : Number(duration);
+  const validDuration =
+    isNaN(duration) || duration === "" ? 0 : Number(duration);
 
   // 1. 寫回「正式」的停留時間
   itineraryStore.setStayDuration(date, index, validDuration);
@@ -304,34 +333,20 @@ onBeforeRouteLeave(async (to, from, next) => {
   }
   try {
     console.log("🚀 儲存行程變更到後端...");
-    await eventStore.updateEvent(eventData.value.eventId, {
-      places: itineraryForSelectedDay.value.map(({ placeId, placeOrder }) => ({
-        placeId,
-        placeOrder,
-      })),
-      startTime: itineraryStore.getStartTime(formattedSelectedDate.value),
-    });
+    await eventPlaceStore.saveItineraryToBackend(
+      eventData.value.eventId,
+      formattedSelectedDate.value
+    );
     console.log("✅ 儲存完成");
-    itineraryStore.itineraryDates[date] = {};
-    itineraryStore.startTimes[date] = {};
-    itineraryStore.routeTimes[date] = {};
-    itineraryStore.stayDurations[date] = {};
-    itineraryStore.isEditingStays[date] = {};
-    itineraryStore.tempStayDurations[date] = {};
-    console.log(`🗑️ 離開頁面，清除 ${date} 的資料`);
     hasUnsavedChanges.value = false;
+    itineraryStore.clearDayData(date);
     next();
   } catch (error) {
-    console.error("❌ 儲存失敗", error);
+    console.error("❌ 儲存失敗", error.message || error);
     if (confirm("變更未儲存，是否仍要離開？")) {
-      itineraryStore.itineraryDates[date] = {};
-      itineraryStore.startTimes[date] = {};
-      itineraryStore.routeTimes[date] = {};
-      itineraryStore.stayDurations[date] = {};
-      itineraryStore.isEditingStays[date] = {};
-      itineraryStore.tempStayDurations[date] = {};
+      itineraryStore.clearDayData(date);
       console.log(`🗑️ 離開頁面，清除 ${date} 的資料`);
-      router.push("/myitineraries"); // 🚀 修改為你的行程頁面路由
+      next("/myitineraries"); // 🚀 正確導航方式
     } else {
       next(false);
     }

@@ -3,9 +3,10 @@ import { defineStore } from "pinia";
 export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
     itineraryDates: {},
-    startTimes: {},   // 存放每一天的出發時間
-    routeTimes: {},   // 存放每個行程的行車時間 (以 index 為 key)
-    stayDurations: {},// 存放停留時間 (以 index 為 key)
+    startTimes: {}, // 存放每一天的出發時間
+    endTimes: {}, // 存放每一天的結束時間
+    routeTimes: {}, // 存放每個行程的行車時間 (以 index 為 key)
+    stayDurations: {}, // 存放停留時間 (以 index 為 key)
     isEditingStays: {},
     tempStayDurations: {},
   }),
@@ -17,6 +18,15 @@ export const useItineraryStore = defineStore("itinerary", {
     getStartTime: (state) => (date) => {
       return state.startTimes[date] ?? "08:00"; // 確保有預設出發時間
     },
+
+    getEndTime: (state) => (date) => {
+      return state.endTimes[date] ?? "23:59"; // 確保有預設結束時間
+    },
+
+    getRouteTime: (state) => (date, index) => {
+      return state.routeTimes[date]?.[index] ?? "00:30:00"; // 預設 30 分鐘
+    },
+
     getStayDuration: (state) => (date, index) => {
       return state.stayDurations[date]?.[index] ?? 0;
     },
@@ -77,6 +87,10 @@ export const useItineraryStore = defineStore("itinerary", {
 
     setStartTime(date, startTime) {
       this.startTimes[date] = startTime;
+    },
+
+    setEndTime(date, endTime) {
+      this.endTimes[date] = endTime;
     },
 
     setRouteTime(date, index, time) {
@@ -226,6 +240,18 @@ export const useItineraryStore = defineStore("itinerary", {
           updatedTemps[newIndex] = this.tempStayDurations[date][oldIndex];
       });
       this.tempStayDurations[date] = updatedTemps;
+    },
+
+    clearDayData(date) {
+      if (!date) return;
+      if (this.itineraryDates[date]) delete this.itineraryDates[date];
+      if (this.startTimes[date]) delete this.startTimes[date];
+      if (this.routeTimes[date]) delete this.routeTimes[date];
+      if (this.stayDurations[date]) delete this.stayDurations[date];
+      if (this.isEditingStays[date]) delete this.isEditingStays[date];
+      if (this.tempStayDurations[date]) delete this.tempStayDurations[date];
+
+      console.log(`🗑️ 已清除 ${date} 的行程暫存資料`);
     },
   },
 });

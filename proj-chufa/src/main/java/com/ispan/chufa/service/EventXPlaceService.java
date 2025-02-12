@@ -1,5 +1,6 @@
 package com.ispan.chufa.service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,15 +9,16 @@ import org.springframework.stereotype.Service;
 import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.EventXPlaceBean;
 import com.ispan.chufa.domain.PlaceBean;
+import com.ispan.chufa.dto.EventXPlaceRequest;
+import com.ispan.chufa.dto.ItineraryRequest;
 import com.ispan.chufa.repository.EventRepository;
 import com.ispan.chufa.repository.EventXPlaceRepository;
 import com.ispan.chufa.repository.PlaceRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EventXPlaceService {
-
-	@Autowired
-    private EventXPlaceRepository eventXPlaceRepository;
 
     @Autowired
     private EventRepository eventRepository;
@@ -24,20 +26,8 @@ public class EventXPlaceService {
     @Autowired
     private PlaceRepository placeRepository;
 
-    //新增地點到行程
-    public EventXPlaceBean addPlaceToEvent(Long eventId, Long placeId) {
-        EventBean event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("找不到行程: " + eventId));
-        PlaceBean place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new RuntimeException("找不到地點: " + placeId));
-
-        EventXPlaceBean newRelation = new EventXPlaceBean();
-        newRelation.setEvent(event);
-        newRelation.setPlace(place);
-        newRelation.setPlaceOrder(eventXPlaceRepository.countByEvent(event) + 1); // 設定順序
-
-        return eventXPlaceRepository.save(newRelation);
-    }
+    @Autowired
+    private EventXPlaceRepository eventXPlaceRepository;
 
     //取得某個 eventId 的所有 placeId
     public List<String> getPlacesByEvent(Long eventId) {
@@ -51,8 +41,61 @@ public class EventXPlaceService {
 
         eventXPlaceRepository.delete(relation);
     }
+    
+    @Transactional
+    public void updateEventXPlaces(Long eventId, ItineraryRequest request) {
+        // 1️⃣ 取得 `EventBean`
+        EventBean event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("行程不存在: " + eventId));
+
+        // 2️⃣ 更新 `EventBean` 的基本資訊
+        event.setStartTime(LocalTime.parse(request.getStartTime()));
+        event.setEndTime(LocalTime.parse(request.getEndTime()));
+        event.setNotes(request.getNotes());
+        eventRepository.save(event);
+
+        // 3️⃣ 刪除舊的 `EventXPlaceBean`
+        eventXPlaceRepository.deleteByEventId(eventId);
+
+        // 4️⃣ 插入新的 `EventXPlaceBean`
+        for (EventXPlaceRequest placeRequest : request.getPlaces()) {
+            EventXPlaceBean eventXPlace = new EventXPlaceBean();
+            eventXPlace.setEvent(event);
+            
+            PlaceBean place = placeRepository.findById(placeRequest.getPlaceId())
+                    .orElseThrow(() -> new RuntimeException("找不到地點: " + placeRequest.getPlaceId()));
+            eventXPlace.setPlace(place);
+
+            eventXPlace.setPlaceOrder(placeRequest.getPlaceOrder());
+            eventXPlace.setTravelTime(LocalTime.parse(placeRequest.getTravelTime()));
+            eventXPlace.setStayDuration(LocalTime.parse(placeRequest.getStayDuration()));
+
+            if (placeRequest.getNotes() != null) {
+                eventXPlace.setNotes(placeRequest.getNotes().toCharArray());
+            } else {
+                eventXPlace.setNotes(null);
+            }
+
+            eventXPlaceRepository.save(eventXPlace);
+        }
+    }
 }
 
+
+//新增地點到行程
+//public EventXPlaceBean addPlaceToEvent(Long eventId, Long placeId) {
+//  EventBean event = eventRepository.findById(eventId)
+//          .orElseThrow(() -> new RuntimeException("找不到行程: " + eventId));
+//  PlaceBean place = placeRepository.findById(placeId)
+//          .orElseThrow(() -> new RuntimeException("找不到地點: " + placeId));
+//
+//  EventXPlaceBean newRelation = new EventXPlaceBean();
+//  newRelation.setEvent(event);
+//  newRelation.setPlace(place);
+//  newRelation.setPlaceOrder(eventXPlaceRepository.countByEvent(event) + 1); // 設定順序
+//
+//  return eventXPlaceRepository.save(newRelation);
+//}
 
 //	// 儲存 EventXPlace 資料
 //	public EventXPlaceBean saveEventXPlace(EventXPlaceBean eventXPlaceBean) {

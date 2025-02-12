@@ -34,6 +34,7 @@
   <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
     <p>您的文章已被隱藏</p>
     <p>原因：文章內有「{{ postStore.getHiddenReason(post.postid) }}」</p>
+    <p>請聯絡客服協助處裡，Email: Chufa.service@gmail.com</p>
   </div>
 
   <!-- 正常顯示的文章 -->

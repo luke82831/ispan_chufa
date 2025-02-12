@@ -158,12 +158,12 @@ const hidePost = async (postId) => {
       "隱私問題": "隱私問題",
       "垃圾內容": "垃圾內容",
       /*========測試========*/
-      "骯髒邪惡又噁心的內容": "骯髒邪惡又噁心的內容",
-      "救命呀~~~救命呀~~~": "救命呀~~~救命呀~~~",
-      "管理員有點鬱悶": "管理員有點鬱悶",
-      "管理員想封鎖你hahaha笑你": "管理員想封鎖你hahaha笑你",
-      "你又騙我": "你又騙我",
-      "我不想看你的程式碼": "我不想看你的程式碼",
+      // "骯髒邪惡又噁心的內容": "骯髒邪惡又噁心的內容",
+      // "救命呀~~~救命呀~~~": "救命呀~~~救命呀~~~",
+      // "管理員有點鬱悶": "管理員有點鬱悶",
+      // "管理員想封鎖你hahaha笑你": "管理員想封鎖你hahaha笑你",
+      // "你又騙我": "你又騙我",
+      // "我不想看你的程式碼": "我不想看你的程式碼",
 /*========測試========*/
     },
     inputPlaceholder: "請選擇隱藏原因",
@@ -239,34 +239,54 @@ onMounted(fetchPosts);
 
 <style scoped>
 /* 與 PlaceManagement 類似的版面設定 */
+/* 外層容器 */
 .post-management {
   width: 100%;
   max-width: 2000px;
-  margin: 20px auto;
   padding: 30px;
   background: white;
-  border-radius: 20px;
+  border-radius: 15px;
   box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.2),
     0 5px 15px rgba(0, 0, 0, 0.15);
   font-family: "Microsoft JhengHei", sans-serif;
-  border-radius: 15px;
 }
 
+.page-title {
+  text-align: center;
+  font-size: 28px;
+  color: #343a40;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 0px;
+}
+
+/* 主要容器 */
 .container {
-  width: 100%;
+  max-width: 100%;
+  height: 100vh; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 讓內容靠右 */
   padding: 20px;
+  overflow-x: hidden;
+  padding-top: 20px;
+  width: 100%;
 }
 
+/* 表格外的滾動容器 */
 .table-wrapper {
   width: 100%;
+  max-width: 100vw;
   overflow-x: auto;
+  display: block;
   margin-bottom: 20px;
   border-radius: 15px;
 }
 
+/* 表格本身 */
 .post-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -284,6 +304,14 @@ onMounted(fetchPosts);
 .post-table th {
   background-color: #f4f4f4;
 }
+
+/* 無資料、載入中文字體 */
+.loading-text,
+.no-data {
+  text-align: center;
+  font-size: 18px;
+}
+
 
 /* 各欄位寬度調整 */
 .preview-col {
@@ -392,24 +420,18 @@ onMounted(fetchPosts);
 }
 
 
-/* 分頁樣式 */
+/* 分頁控制 */
 .pagination {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  margin-top: 20px;
   gap: 10px;
-  background: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: auto;
-
+  font-family: "Microsoft JhengHei", sans-serif;
+  text-align: center;
 }
+
 .pagination button {
   padding: 8px 16px;
   border: 2px solid #ccc;
@@ -431,6 +453,7 @@ onMounted(fetchPosts);
   color: #999;
   border: 2px solid #e0e0e0;
   cursor: not-allowed;
+  transform: none;
 }
 .pagination span {
   font-size: 14px;
@@ -438,13 +461,8 @@ onMounted(fetchPosts);
   font-weight: bold;
 }
 
-.page-title {
-  text-align: center;
-  font-size: 28px;
-  color: #343a40;
-  border-bottom: 2px solid #ccc;
-  margin-bottom: 20px;
-}
+
+
 
 /* 貼文預覽區塊 */
 .post-item-preview {
@@ -487,5 +505,3 @@ onMounted(fetchPosts);
   margin-top: 5px;
 }
 </style>
-
-

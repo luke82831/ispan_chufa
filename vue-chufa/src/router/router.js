@@ -7,6 +7,7 @@ import AdminLayout from "@/layout/AdminLayout.vue";
 import MemberManagement from "@/views/admin/MemberManagement.vue";
 import PlaceManagement from "@/views/admin/PlaceManagement.vue";
 import PostManagement from "@/views/admin/PostManagement.vue";
+import CalendarManagement from "@/views/admin/CalendarManagement.vue";
 import PostDetail from "@/views/blog/PostDetail.vue";
 import blogprofile from "@/views/blog/blogprofile.vue";
 import followlist from "@/views/blog/followlist.vue";
@@ -175,6 +176,7 @@ const routes = [
       { path: "members", component: MemberManagement },
       { path: "places", component: PlaceManagement },
       { path: "post", component: PostManagement },
+      { path: "calendar", component: CalendarManagement },
       { path: "", redirect: "/admin/members" }, // 預設顯示會員管理
     ],
     meta: { requiresAuth: true }, //需要登入才可使用

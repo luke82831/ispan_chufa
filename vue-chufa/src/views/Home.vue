@@ -111,7 +111,7 @@ import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { usePostStore } from "@/stores/usePostStore";
-import {useUserStore } from "@/stores/user"
+import { useUserStore } from "@/stores/user"
 
 export default {
   setup() {

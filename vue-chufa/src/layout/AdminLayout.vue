@@ -6,6 +6,7 @@
         <router-link to="/admin/members">會員管理</router-link>
         <router-link to="/admin/places">地點管理</router-link>
         <router-link to="/admin/post">文章管理</router-link>
+        <router-link to="/admin/calendar">日期管理</router-link>
       </nav>
     </aside>
 
@@ -13,8 +14,10 @@
     <div class="main-content">
       <!-- 頂部導航 (未來擴展 Navbar.vue) -->
       <div class="user-info">
-        <span>管理者：{{ member?.username || "訪客" }}</span>
-      </div>
+  <span>管理者：</span>
+  <span class="text">{{ member?.username || "訪客" }}</span>
+</div>
+
 
       <!-- 路由對應的內容 -->
       <div class="content">
@@ -30,6 +33,7 @@ import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
 const member = computed(() => userStore.member);
+
 </script>
 
 <style scoped>
@@ -89,19 +93,28 @@ const member = computed(() => userStore.member);
 
 /* === 管理者資訊區塊 === */
 .user-info {
-  background: linear-gradient(90deg, #3b82f6, #2563eb);
-  color: #fff;
+  background: linear-gradient(90deg, #ffffff, #ddecf1);
+  color: #160f0f;
   padding: 5px 10px;
   font-size: 16px;
   font-weight: bold;
   border-radius: 8px;
-  width: auto;
-  max-width: 120px;
+  display: flex;  /* 讓內容能夠自然排列 */
+  align-items: center;
+  max-width: 200px;  /* 限制整個區塊的寬度 */
   text-align: center;
   margin-bottom: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
 }
+
+.user-info .text {
+  display: inline-block;  /* 確保能夠受 max-width 限制 */
+  max-width: 120px;  /* 限制文字部分的最大寬度 */
+  white-space: nowrap;  /* 不允許換行 */
+  overflow: hidden;  /* 隱藏超出部分 */
+  text-overflow: ellipsis;  /* 省略號顯示超出部分 */
+}
+
 
 
 

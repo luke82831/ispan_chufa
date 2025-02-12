@@ -157,7 +157,7 @@ const fetchPlaces = async (page = 0) => {
 
   loading.value = true;
   try {
-    const response = await axios.get(`/api/places/paged?page=${page}&size=5`);
+    const response = await axios.get(`/api/places/paged?page=${page}&size=4`);
     places.value = response.data.content; // 地點列表
     currentPage.value = response.data.number; // 當前頁碼
     totalPages.value = response.data.totalPages; // 總頁數
@@ -548,21 +548,14 @@ onMounted(fetchPlaces);
 
 
 .pagination {
-  position: fixed; /* ✅ 固定於視窗底部 */
-  bottom: 0px; /* ✅ 與底部保持間距 */
-  left: 50%; /* ✅ 水平置中 */
-  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  margin-top: 20px;
   gap: 10px;
-  background: white; /* ✅ 防止背景透明 */
-  padding: 10px 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* ✅ 增加陰影效果 */
-  z-index: 1000; /* ✅ 確保不被其他元素遮擋 */
-  width: auto; /* ✅ 避免佔滿整個寬度 */
-
+  font-family: "Microsoft JhengHei", sans-serif;
+  text-align: center;
 }
 
 .pagination button {
@@ -575,6 +568,7 @@ onMounted(fetchPlaces);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+
 
 }
 
@@ -590,6 +584,7 @@ onMounted(fetchPlaces);
   color: #999;
   border: 2px solid #e0e0e0;
   cursor: not-allowed;
+  transform: none;
 }
 
 .pagination span {
@@ -659,10 +654,6 @@ onMounted(fetchPlaces);
 .delete-btn:hover {
   background-color: #c82333;
 }
-
-
-
-
 
 
 </style>

@@ -2,7 +2,6 @@
   <p>{{ member.name }}</p>
   <div class="followlist-page">
     <h1 class="page-title">用戶 ID: {{ followid }}</h1>
-
     <!-- 分頁按鈕 -->
   
     <div class="tabs">
@@ -19,19 +18,16 @@
         粉絲列表
       </button>
     </div>
-
     <!-- 加載中提示 -->
     <div v-if="isLoading" class="loading">
       <div class="spinner"></div>
       <p>加載中，請稍候...</p>
     </div>
-
     <!-- 錯誤提示 -->
     <div v-if="isError" class="error">
       <p>資料加載失敗，請稍後重試。</p>
       <button @click="fetchData" class="retry-button">重試</button>
     </div>
-
     <!-- 關注者/粉絲列表 -->
     <div v-if="!isLoading && !isError" class="followers-section">
       <div v-if="listData.length === 0" class="empty-state">
@@ -48,7 +44,7 @@
             />
           </div>
           <div class="follower-info">
-            <h3 class="follower-nickname">{{ item.nickname }}</h3>
+            <p class="follower-nickname">{{ item.nickname }}</p>
             <p class="follower-id">ID: {{ item.userid }}</p>
             <p class="follower-name">Name: {{ item.name }}</p>
           </div><p>{{ item.isFollowing }}</p>
@@ -69,8 +65,6 @@ import { ref, onMounted, watch } from 'vue';
 import axiosapi from '@/plugins/axios';
 import defaultProfilePic from '@/assets/empty.png';
 import Swal from 'sweetalert2';
-
-
 export default {
   props: {
     followid: {
@@ -87,9 +81,6 @@ export default {
     const userId = ref(null);
     const member = ref({});
     const profileLoaded = ref(false);
-
-
-
     const fetchProfile = async () => {
       try {
         const response = await axiosapi.get('/ajax/secure/profile', {
@@ -98,27 +89,23 @@ export default {
         if (response.data.success) {
           member.value = response.data.user || {};
         } else {
-          //Swal.fire('錯誤', response.data.message, 'error');
+          Swal.fire('錯誤', response.data.message, 'error');
         }
       } catch (error) {
         console.error('Fetch profile failed:', error);
-        //Swal.fire('錯誤', '無法獲取會員資料', 'error');
+        Swal.fire('錯誤', '無法獲取會員資料', 'error');
       }
     };
-
     // 根據當前選中的分頁獲取數據
     const fetchData = async () => {
       try {
         isLoading.value = true;
         isError.value = false;
-
         const endpoint =
           activeTab.value === 'followed'
             ? `/follow/followedList/${props.followid}`
             : `/follow/followerList/${props.followid}`;
-
         const response = await axiosapi.get(endpoint);
-
         if (response.data && Array.isArray(response.data)) {
           listData.value = response.data;
         } else {
@@ -131,7 +118,6 @@ export default {
         isLoading.value = false;
       }
     };
-
   
     // 切換分頁
     const switchTab =  async(tab) => {
@@ -139,9 +125,7 @@ export default {
       await fetchData();
       await fetchDataWithStatus();
     };
-
-
-    // 查詢是否關注
+        // 查詢是否關注
     const checkFollowingStatus = async (item) => {
       try {
         const response = await axiosapi.post('/follow/isFollowing', {
@@ -154,9 +138,8 @@ export default {
         console.error('Error checking following status:', error);
       }
     };
-
     // 切換關注狀態
-    const toggleFollow = async (item) => {
+      const toggleFollow = async (item) => {
     try {
       const action = item.isFollowing ? 'unfollow' : 'follow';
       const response = await axiosapi.post('/follow/verb', {
@@ -164,14 +147,10 @@ export default {
         followedid: item.userid,
         action,
       });
-
       if (response.data.success) {
         // 切換狀態
         item.isFollowing = !item.isFollowing;
         console.log(`User ${item.userid} is now ${item.isFollowing ? 'following' : 'not following'}`);
-        await checkFollowingStatus(item);
-        await fetchData(); // 重新加載列表 
-        
       } else {
         console.error('Failed to toggle follow status:', response.data.message);
       }
@@ -180,17 +159,13 @@ export default {
       Swal.fire('錯誤', '無法更新關注狀態', 'error');
     }
   };
-
     // 初始化檢查列表中的每個用戶是否關注
     const fetchDataWithStatus = async () => {
     await fetchData(); // 先抓取列表資料
-    await checkFollowingStatus();
     const checkPromises = listData.value.map(item => checkFollowingStatus(item)); // 并行检查每个用户的关注状态
     await Promise.all(checkPromises); // 等待所有的检查完成
     };
-
     
-
     // 組件加載時自動執行
     onMounted(async () => {
       await fetchProfile(); // 等待會員資料加載完成
@@ -204,7 +179,6 @@ export default {
         fetchData();
       }
     );
-
     return {
       listData,
       isLoading,
@@ -221,135 +195,79 @@ export default {
 };
 </script>
 <style scoped>
-/* 頁面基本設置 */
 .followlist-page {
-    font-family: 'Arial', sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
-
-/* 標題樣式 */
 .page-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
 }
-
-/* 分頁按鈕 */
-.tabs {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.tab-button {
-    font-size: 16px;
-    padding: 12px 20px;
-    background-color: transparent;
-    border: none;
-    color: #333;
-    cursor: pointer;
-    transition: color 0.3s ease, border-bottom 0.3s ease;
-}
-
-.tab-button:hover {
-    color: #007bff;
-}
-
-.tab-button.active {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
-}
-
-/* 加載中提示 */
+/* 加載中樣式 */
 .loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 50px;
+  text-align: center;
+  margin-top: 50px;
 }
-
 .spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #007bff;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 2s linear infinite;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 10px;
 }
-
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-
-.loading p {
-    margin-top: 10px;
-    font-size: 16px;
-    color: #555;
-}
-
-/* 錯誤提示 */
+/* 錯誤提示樣式 */
 .error {
-    text-align: center;
-    margin-top: 50px;
-    font-size: 16px;
-    color: #e74c3c;
+  text-align: center;
+  color: #e74c3c;
+  margin-top: 50px;
 }
-
 .retry-button {
-    padding: 10px 20px;
-    background-color: #e74c3c;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
 }
-
 .retry-button:hover {
-    background-color: #c0392b;
+  background-color: #2980b9;
 }
-
-/* 關注者列表 */
-.followers-section {
-    margin-top: 30px;
-}
-
-/* 空狀態提示 */
-.empty-state {
-    text-align: center;
-    font-size: 16px;
-    color: #777;
-}
-
 /* 關注者列表樣式 */
+.followers-section {
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 .followers-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 15px;
 }
-
 .follower-item {
-    display: flex;
-    align-items: center;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    margin-bottom: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .follower-item:hover {
-    transform: scale(1.02);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
 /* 會員頭像 */
 .profile-picture {
     width: 50px;
@@ -364,48 +282,46 @@ export default {
     height: 100%;
     object-fit: cover;
 }
-
-/* 關注者信息 */
 .follower-info {
-    flex-grow: 1;
+  flex: 1;
 }
-
 .follower-nickname {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #333;
+  margin: 0;
+  color: #333;
+  font-size: 1.2em;
 }
-
-.follower-id, .follower-name {
-    font-size: 14px;
-    color: #555;
+.follower-id,
+.follower-name {
+  margin: 5px 0;
+  color: #777;
 }
-
-/* 關注按鈕 */
-.follow-button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s ease;
+/* 空狀態樣式 */
+.empty-state {
+  text-align: center;
+  color: #777;
+  margin-top: 20px;
 }
-
-.follow-button:hover {
-    background-color: #0056b3;
+/* 分頁按鈕樣式 */
+.tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
 }
-
-.follow-button.active {
-    background-color: #28a745;
+.tab-button {
+  background-color: #f1f1f1;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
-
-.follow-button.active:hover {
-    background-color: #218838;
+.tab-button.active {
+  background-color: #3498db;
+  color: white;
 }
-
-
+.tab-button:hover {
+  background-color: #ddd;
+}
 /* 其他樣式保持不變 */
 </style>

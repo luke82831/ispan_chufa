@@ -51,6 +51,7 @@ import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from 'vue-router';
 
+
 export default {
   components: {
     PostCard // 註冊 PostCard 元件
@@ -61,6 +62,7 @@ export default {
     const member = ref({});
     const posts = ref([]);
     const activeTab = ref('myPosts');
+    //const postStore = usePostStore();
 
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);

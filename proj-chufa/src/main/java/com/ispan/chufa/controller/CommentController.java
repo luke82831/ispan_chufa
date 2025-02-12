@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -167,7 +166,7 @@ public class CommentController {
     // 刪除留言
     // 測試 http://localhost:8080/comment/delete
     // 測試 RequestBody => {"commentId":"1"}
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public Response delete(@RequestBody String json) {
         JSONObject requestJson = new JSONObject(json);
         Response response = new Response();
@@ -198,6 +197,54 @@ public class CommentController {
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆留言");
+            }
+        }
+
+        return response;
+    }
+
+    // 用postId刪除留言
+    // 測試 http://localhost:8080/comment/deleteByPostId
+    // 測試 RequestBody => {"postId":"1"}
+    @PostMapping("/deleteByPostId")
+    public Response deleteByPostId(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        Response response = new Response();
+
+        Long postid;
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postid")) {
+                try {
+                    postid = requestJson.getLong("postid");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("postid請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("request請輸入postid");
+                return response;
+            }
+        }
+
+        // 用postId查留言
+        {
+            List<CommentBean> beans = commentService.findByPostId(postid);
+            if (beans.size() != 0) {
+                for (int i = 0; i < beans.size(); i++) {
+                    Long commentId = beans.get(i).getCommentId();
+                    // 刪除資料
+                    if (commentService.deleteComment(commentId)) {
+                        System.out.println("刪除" + i + "筆資料");
+                    }
+                }
+                response.setSuccesss(true);
+                response.setMessage("刪除文章留言");
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查不到文章留言");
             }
         }
 
@@ -342,7 +389,7 @@ public class CommentController {
             }
         }
 
-        // 用commentId查詢留言
+        // 用postId查詢留言
         {
             List<CommentBean> beans = commentService.findByPostId(longPostid);
             for (int i = 0; i < beans.size(); i++) {

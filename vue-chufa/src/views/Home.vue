@@ -150,11 +150,12 @@
 import { ref, onMounted,watch,inject,computed} from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
-import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRoute } from 'vue-router';
 import { useSearchStore } from '@/stores/search.js';
 import axiosapi from "@/plugins/axios.js";
+import { usePostStore } from "@/stores/usePostStore";
+
 
 export default {
   setup() {
@@ -195,6 +196,12 @@ export default {
       const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
       return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
     };
+    const postStore = usePostStore();
+
+    // computed 屬性：只回傳未被隱藏的貼文
+    const visiblePosts = computed(() => {
+      return posts.value.filter((post) => !postStore.getHiddenReason(post.postid));
+    });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
     const navigateToDetail = (postid, event) => {
@@ -222,8 +229,6 @@ export default {
           member.value = response.data.user || {};
           isAdmin.value = response.data.user.role === "ADMIN";
           userId.value = member.value.userid;
-        } else {
-          // Swal.fire("味登入", "登入體驗更好");
         }
         profileLoaded.value = true;
       } catch (error) {
@@ -266,7 +271,6 @@ export default {
             },
           }
         );
-
         if (response.data.postdto && response.data.postdto.length > 0) {
           posts.value = response.data.postdto
           // .filter(
@@ -326,7 +330,6 @@ export default {
             "Content-Type": "application/json",
           },
         });
-
         if (response.data.repost) {
           Swal.fire("成功", "轉發成功！", "success");
           await fetchPosts();
@@ -385,7 +388,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
     const collectPost = async (postid) => {
       try {
         const data = {
-          postid: postid,
+          postid,
           userid: member.value.userid,
           interactionType: "COLLECT",
         };
@@ -395,7 +398,6 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
             "Content-Type": "application/json",
           },
         });
-
         if (response.data.success) {
           const updatedPosts = posts.value.map(post => {
               if (post.postid === postid) {
@@ -463,6 +465,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
       collectPost,
       repostPost,
       posts,
+      visiblePosts, // 將 visiblePosts 回傳給模板
       navigateToDetail,
       currentPage,
       nextPage,

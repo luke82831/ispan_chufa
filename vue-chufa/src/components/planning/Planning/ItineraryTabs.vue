@@ -31,7 +31,11 @@
 
     <!-- 日期分頁 -->
     <div class="date-tabs">
-      <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
+      <button
+        class="arrow-button"
+        @click="changeDate('prev')"
+        :disabled="isFirstDay"
+      >
         &lt;
       </button>
 
@@ -44,9 +48,15 @@
         {{ formatDate(date) }}
       </button>
 
-      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
+      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
+        ＋
+      </button>
 
-      <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
+      <button
+        class="arrow-button"
+        @click="changeDate('next')"
+        :disabled="isLastDay"
+      >
         &gt;
       </button>
     </div>
@@ -63,13 +73,11 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useScheduleStore } from "@/stores/ScheduleStore";
-import { useEventStore } from "@/stores/EventStore";
 import PlanningDay from "./PlanningDay.vue";
 
 const router = useRouter();
 const route = useRoute();
 const scheduleStore = useScheduleStore();
-const eventStore = useEventStore();
 
 // 從 URL 取得行程 ID
 const tripId = route.params.tripId;
@@ -144,7 +152,10 @@ const formatDate = (date) => {
 
 // **更新選擇的日期**
 const updateSelectedDate = (date) => {
-  selectedDate.value = formatDate(date);
+  const formatted = formatDate(date);
+  console.log("📅 選擇的行程日期:", formatted);
+  selectedDate.value = formatted;
+  scheduleStore.setSelectedDate(formatted);
 };
 
 // **切換日期**
@@ -154,7 +165,10 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
+  } else if (
+    direction === "next" &&
+    currentIndex < dateRange.value.length - 1
+  ) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -197,9 +211,13 @@ const addOneMoreDay = async () => {
 };
 
 // **是否為第一天 / 最後一天**
-const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
+const isFirstDay = computed(
+  () => selectedDate.value === formatDate(dateRange.value[0])
+);
 const isLastDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
+  () =>
+    selectedDate.value ===
+    formatDate(dateRange.value[dateRange.value.length - 1])
 );
 
 // **返回行程列表**

@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -38,8 +39,10 @@ public class CouponBean {
     private Boolean state;
     @Column(name = "Web")
     private String web;
+
+    @Lob
     @Column(name = "Picture")
-    private String picture;
+    private byte[] picture;
     @Column(name = "StartTime")
     private LocalDateTime startTime;
     @Column(name = "EndTime")
@@ -50,6 +53,7 @@ public class CouponBean {
     private List<MyCouponBean> myCoupons;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "placeId")
     @JsonBackReference
     private PlaceBean place;
@@ -112,11 +116,11 @@ public class CouponBean {
         this.web = web;
     }
 
-    public String getPicture() {
+    public byte[] getPicture() {
         return picture;
     }
 
-    public void setPicture(String picture) {
+    public void setPicture(byte[] picture) {
         this.picture = picture;
     }
 

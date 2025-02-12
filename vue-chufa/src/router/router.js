@@ -16,6 +16,11 @@ import Swal from "sweetalert2";
 import { ref } from "vue";
 
 const routes = [
+  {
+    path: "/css",
+    name: "css",
+    component: () => import("@/views/css.vue"),
+  },
   //主頁
   { path: "/", 
     name:"Home",
@@ -35,6 +40,21 @@ const routes = [
     path: "/secure/Register",
     name: "Register",
     component: () => import("@/views/secure/Register.vue"),
+  },
+  {
+    path: "/secure/ForgotPassword",
+    name: "ForgotPassword",
+    component: () => import("@/views/secure/ForgotPassword.vue"),
+  },
+  {
+    path: "/secure/VerifyOtp",
+    name: "VerifyOtp",
+    component: () => import("@/views/secure/VerifyOtp.vue"),
+  },
+  {
+    path: "/secure/ResetPassword",
+    name: "ResetPassword",
+    component: () => import("@/views/secure/ResetPassword.vue"),
   },
   //行程規劃
   {

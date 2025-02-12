@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -20,7 +21,9 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "post")
@@ -38,12 +41,11 @@ public class PostBean {
 
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
-	// @JsonManagedReference
-	@JsonIgnoreProperties("place")
-	MemberBean member;
+	@JsonBackReference
+	private MemberBean member;
 
 	@OneToMany(mappedBy = "postBean")
-	// @JsonIgnore
+	@JsonManagedReference
 	private Set<CommentBean> commentBeans;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -60,9 +62,13 @@ public class PostBean {
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
+	@JsonIgnore
 	private Set<PlaceBean> place = new HashSet<>();
 	// private Set<TagsBean> tag;
-    //轉發的貼文的id
+
+	@ManyToOne(cascade = CascadeType.ALL)
+	private ScheduleBean scheduleBean;
+
 	@ManyToOne
 	@JoinColumn(name = "forwarded_from_id")
 	private PostBean forwardedFrom;
@@ -177,6 +183,14 @@ public class PostBean {
 				+ postTime + ", postContent=" + postContent + ", postLink=" + postLink + ", member=" + member
 				+ ", commentBeans=" + commentBeans + ", interactions=" + interactions + ", tagsBeans=" + tagsBeans
 				+ ", place=" + place + "]";
+	}
+
+	public ScheduleBean getScheduleBean() {
+		return scheduleBean;
+	}
+
+	public void setScheduleBean(ScheduleBean scheduleBean) {
+		this.scheduleBean = scheduleBean;
 	}
 
 }

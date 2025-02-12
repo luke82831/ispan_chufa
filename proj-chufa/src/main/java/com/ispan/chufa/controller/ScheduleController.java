@@ -17,15 +17,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.domain.ScheduleBean;
-import com.ispan.chufa.repository.EventRepository;
+import com.ispan.chufa.jwt.JsonWebTokenUtility;
+import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
 import com.ispan.chufa.service.MemberService;
@@ -36,22 +37,25 @@ import com.ispan.chufa.service.ScheduleService;
 @RequestMapping("/api")
 public class ScheduleController {
 
-	@Autowired
-	private ScheduleRepository scheduleRepository;
-	
-	@Autowired
-	private EventRepository eventRepository;
-		
-	@Autowired
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private MemberRepository memberRepository;
+
+    @Autowired
     private ScheduleService scheduleService;
-    
+
     @Autowired
     private EventService eventService;
 
     @Autowired
     private MemberService memberService; // 注入 MemberService
+    
+    @Autowired
+    private JsonWebTokenUtility jsonWebTokenUtility;
+   
     // POST: 創建行程資料
-
     @PostMapping("/schedule")
     public ResponseEntity<ScheduleBean> createSchedule(
             @RequestParam("tripName") String tripName,
@@ -100,11 +104,29 @@ public class ScheduleController {
         }
     }
 
-
     // 取得所有行程
     @GetMapping("/schedules")
-    public ResponseEntity<List<ScheduleBean>> getAllSchedules() {
-        List<ScheduleBean> schedules = scheduleService.findAllSchedules();
+    public ResponseEntity<List<ScheduleBean>> getUserSchedules(@RequestHeader("Authorization") String token) {
+        // 去除 "Bearer " 前綴
+        String jwt = token.replace("Bearer ", "");
+        String email = jsonWebTokenUtility.validateToken(jwt); // 這裡取得的是 email
+
+        if (email == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        // 根據 email 查詢 userId（使用 Optional）
+        Optional<MemberBean> optionalUser = memberRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        MemberBean user = optionalUser.get(); // 取得 user
+        Long userId = user.getUserid(); // 取得 userId
+
+        // 查詢該 userId 的行程
+        List<ScheduleBean> schedules = scheduleService.findSchedulesByUserId(userId);
+
         return new ResponseEntity<>(schedules, HttpStatus.OK);
     }
 
@@ -121,9 +143,10 @@ public class ScheduleController {
 
     // PUT: 更新行程資料
     @PutMapping("/schedule/{tripId}")
-    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateScheduleEndDate(@PathVariable Long tripId,
+            @RequestBody Map<String, String> request) {
         Optional<ScheduleBean> scheduleOptional = scheduleRepository.findById(tripId);
-        
+
         if (scheduleOptional.isPresent()) {
             ScheduleBean schedule = scheduleOptional.get();
             LocalDate newEndDate = LocalDate.parse(request.get("endDate"));
@@ -140,7 +163,7 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
     }
-    
+
     // DELETE: 根據 tripId 刪除行程資料
     @DeleteMapping("/schedule/{tripId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long tripId) {

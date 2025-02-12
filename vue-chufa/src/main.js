@@ -15,5 +15,5 @@ app.use(router);
 
 const userStore = useUserStore();
 userStore.fetchProfile().finally(() => {
-  app.mount("#app"); // 等待初始化後再掛載應用
+  app.mount("#app");
 });

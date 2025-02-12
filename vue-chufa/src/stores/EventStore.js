@@ -27,25 +27,25 @@ export const useEventStore = defineStore("eventStore", {
     //取得某天的 Event，並存到 store
     async fetchEventByDate(tripId, date) {
       try {
-        console.log(`📡 查詢 event: tripId=${tripId}, date=${date}`);
+        // 確保 date 是 string，並轉換為 YYYY-MM-DD 格式
+        const formattedDate = new Date(date).toISOString().split("T")[0];
+
+        console.log(`📡 查詢 event: tripId=${tripId}, date=${formattedDate}`);
 
         const response = await axiosapi.get(
-          `/api/event/${tripId}/date/${date}`
+          `/api/event/${tripId}/date/${formattedDate}`
         );
+
         if (!response.data || response.data.length === 0) {
-          console.warn(`⚠️ 沒有找到 ${date} 的行程 (event)`);
+          console.warn(`⚠️ 沒有找到 ${formattedDate} 的行程 (event)`);
           return null;
         }
 
         const event = response.data[0];
         const placeIds = this.extractPlaceIds(event);
-        // console.log("✅ 取得的 eventData:", event);
-        // console.log("📍 解析出的 placeIds:", placeIds);
-
         const eventXPlaceBeans = event.eventXPlaceBeans || [];
 
-        // 存入 store
-        this.eventsByDate[date] = {
+        this.eventsByDate[formattedDate] = {
           eventId: event.eventId,
           date: event.date,
           eventXPlaceBeans,
@@ -55,7 +55,7 @@ export const useEventStore = defineStore("eventStore", {
           notes: event.notes || "",
         };
 
-        return this.eventsByDate[date];
+        return this.eventsByDate[formattedDate];
       } catch (error) {
         console.error("❌ [fetchEventByDate] 無法取得行程:", error);
         return null;

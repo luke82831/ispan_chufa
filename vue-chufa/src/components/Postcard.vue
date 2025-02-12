@@ -1,37 +1,10 @@
 <template>
-  <div class="main-container">
-    <!-- 標籤切換 -->
-<div>
-    <div class="tabs-container" >
-        <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
-        首頁
-      </button>
-      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')">
-        關注
-      </button>
-      <button
-        v-for="place in places"
-        :key="place.id"
-        class="tab"
-        :class="{ active: selectedPlace === place.name }"
-        @click="switchPlace(place.name)"
-      >
-        {{ place.name }}
-      </button>
-
-      <div class="sort-select-container">
-      <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
-        <option value="likes">熱度排序</option>
-        <option value="time">時間排序</option>
-      </select>
-    </div>
-  </div>
-</div>
-    <!-- 貼文網格布局 -->
-    <div class="posts-grid">
+<!-- 貼文網格布局 -->
+<div class="posts-grid">
       <div
-        v-for="post in posts"
-        :key="post.postid"
+       
+
+
         class="post-card"
         @click="navigateToDetail(post.postid, $event)"
       >
@@ -127,77 +100,38 @@
       </div>
     </div>
 
-    <!-- 分頁控制 -->
-    <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">上一頁</button>
-      <span>第 {{ currentPage }} 頁</span>
-      <button @click="nextPage">下一頁</button>
-    </div>
-
-    <!-- 發文按鈕 -->
-    <div v-if="userStore.isLoggedIn">
-      <RouterLink to="/blog/create" id="blogbutton">發文</RouterLink>
-    </div>
-
-    <!-- 開始規劃按鈕 -->
-    <div v-if="userStore.isLoggedIn">
-      <RouterLink to="/myitineraries" id="planningbutton">開始規劃</RouterLink>
-    </div>
-    <RouterView></RouterView>
-  </div>
 </template>
-<script>
-import { ref, onMounted,watch,inject,computed} from "vue";
-import { useRouter } from "vue-router";
-import { useUserStore } from "@/stores/user.js";
-import axios from "@/plugins/axios.js";
+
+
+<script setup>
+import { defineProps, defineEmits,ref } from "vue";
 import Swal from "sweetalert2";
-import { useRoute } from 'vue-router';
-import { useSearchStore } from '@/stores/search.js';
-import axiosapi from "@/plugins/axios.js";
+import axiosapi from "@/plugins/axios";
+import { useRouter } from "vue-router";
+const posts = ref([]);
+const router = useRouter();
+// 接收從父組件傳入的 `post` 資料和 `member`
+const props = defineProps({
+  post: Object,
+  member: Object,
+  formatDate: Function,
+});
+//props.fetchPosts();
 
-export default {
-  setup() {
-    const router = useRouter();
-    const profileLoaded = ref(false);
-    const member = ref({});
-    const posts = ref([]);
-    const users = ref([]);
-    const isAdmin = ref(false);
-    const userId = ref(null);
-    const currentPage = ref(1); // 當前頁數
-    const noPosts = ref(false);
-    const sortBy = ref("likes"); // 排序狀態
-    const searchQuery = ref('');
-    const isSearch = ref(false);
-    const searchStore = useSearchStore();
-    const selectedPlace = ref(null); 
-    
-    //place
-    //const selectedPlace = ref(null);
-    const places = ref([
-      { id: 1, name: "Los Angeles" },
-      { id: 2, name: "New York" },
-      { id: 3, name: "Chicago" },
-    ]);
-
-    watch(sortBy, () => {
-      fetchPosts();  // 每次排序方式改變時重新抓取資料
-    });
-
-    const getFirstImage = (content) => {
+const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
       return match ? match[1] : null;
     };
 
-    const getTextPreview = (content, length) => {
+const getTextPreview = (content, length) => {
       // 移除圖片和其他 HTML 標籤
       const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
       return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
     };
-    const userStore = useUserStore(); // 使用 Pinia 的狀態
+// 定義事件發射器
+const emit = defineEmits(["update-posts"]);
 
-    const navigateToDetail = (postid, event) => {
+const navigateToDetail = (postid, event) => {
       const excludedElements = [".post-actions", ".action-btn", "a", "button"];
       for (let selector of excludedElements) {
         if (event.target.closest(selector)) {
@@ -206,284 +140,96 @@ export default {
       }
       router.push(`/blog/find/${postid}`);
     };
-
-    const formatDate = (date) => {
-      if (!date) return "";
-      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-      return new Date(date).toLocaleDateString("zh-TW", options);
+// 轉發貼文
+const repostPost = async (postid) => {
+  try {
+    const data = {
+      postid: postid,
+      userid: props.member.userid,
     };
 
-    const fetchProfile = async () => {
-      try {
-        const response = await axiosapi.get("/ajax/secure/profile", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        if (response.data.success) {
-          member.value = response.data.user || {};
-          isAdmin.value = response.data.user.role === "ADMIN";
-          userId.value = member.value.userid;
-        } else {
-          // Swal.fire("味登入", "登入體驗更好");
-        }
-        profileLoaded.value = true;
-      } catch (error) {
-        console.error("Fetch profile failed:", error);
-        Swal.fire("錯誤", "無法取得會員資料", "error");
-      }
-    };
+    const response = await axiosapi.post("/api/posts/repost/forward", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    const fetchPosts = async (query = "") => {
-      try {
-        const requestData = {
-          page: currentPage.value,
-          size: 100,
-          checklike:member.value.userid,
-          repost:true,
-        };
-
-      // 動態設定排序條件
-      requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
-
-      if (query) {
-        requestData.postTitle = query; // 加入搜尋條件
-        isSearch.value=true;
-      } 
-      if (selectedPlace.value === 'follow') {
-        //requestData.repost=true;
-        requestData.followerId = member.value.userid;  
-      } else if (selectedPlace.value !== null||selectedPlace!=='users') {
-        // 只有選擇地點時才加入 place
-        requestData.place = selectedPlace.value;
-      }
-    
-
-      const response = await axiosapi.post(
-          "/api/posts/post",requestData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache",
-            },
-          }
-        );
-
-        if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto
-          // .filter(
-          //   (post) => !post.repost && post.repostDTO === null      
-          // );
-          noPosts.value = false; 
-        } else {
-          //posts.value = [];
-          currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
-          Swal.fire("已經到底啦!", "no post。", "info"); 
-        }
-      } catch (error) {
-        console.error("Fetch posts failed:", error);
-        Swal.fire("錯誤", "無法取得貼文", "error");
-      }
-    };
-
-    //tab
-    const switchPlace = (placeName) => {
-      if (placeName === 'follow') {
-      selectedPlace.value = 'follow';
-    } else{
-      selectedPlace.value = placeName; 
+    if (response.data.repost) {
+      Swal.fire("成功", "轉發成功！", "success");
+      emit("update-posts"); // 通知父組件更新貼文
+    } else {
+      Swal.fire("錯誤", "轉發失敗！", "error");
     }
-    currentPage.value = 1;
-    // const url = new URL(window.location.href);
-    // url.search = ''; // 清空查詢參數
-    // window.history.replaceState(null, '', url);
+  } catch (error) {
+    console.error("轉發請求失敗:", error);
+    Swal.fire("錯誤", "無法執行轉發操作", "error");
+  }
+};
 
-    searchStore.resetSearch(); // 清空搜索
-    fetchPosts();
-  };
-
-
-    //分頁
-    const nextPage = () => {
-      currentPage.value++;
-      fetchPosts();
+// 點讚貼文
+const likePost = async (postid) => {
+  try {
+    const data = {
+      postid: postid,
+      userid: props.member.userid,
+      interactionType: "LIKE",
     };
 
-    const prevPage = () => {
-      if (currentPage.value > 1) {
-        currentPage.value--;
-        fetchPosts();
-      }
-    };
-
-    const repostPost = async (postid) => {
-      try {
-        const data = {
-          postid: postid,
-          userid: member.value.userid,
-        };
-
-        const response = await axiosapi.post("/api/posts/repost/forward", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.data.repost) {
-          Swal.fire("成功", "轉發成功！", "success");
-          await fetchPosts();
-        } else {
-          Swal.fire("錯誤", "轉發失敗！", "error");
-        }
-      } catch (error) {
-        console.error("轉發請求失敗:", error);
-        Swal.fire("錯誤", "無法執行轉發操作", "error");
-      }
-    };
-
-
-    // 判断当前用户是否已经点赞
-    const likePost = async (postid) => {
-      try {   
-        // 查找当前操作的帖子
-       const postToUpdate = posts.value.find(post => post.postid === postid);
-      const data = {
-        postid: postid,
-        userid: member.value.userid,
-        interactionType: "LIKE",  // 如果点赞则是 LIKE，取消点赞则是 DISLIKE
-      };
-
-      const response = await axiosapi.post("/api/posts/insertinteraction", data, {
+    const response = await axiosapi.post(
+      "/api/posts/insertinteraction",
+      data,
+      {
         headers: {
           "Content-Type": "application/json",
         },
-      });
-
-      if (response.data.success) {
-        // 更新本地状态：更新点赞状态和点赞数量
-        // 更新本地状态：根据操作更新点赞状态和点赞数量
-        const updatedPosts = posts.value.map(post => {
-              if (post.postid === postid) {
-                return { 
-                  ...post, 
-                  likedByCurrentUser: !post.likedByCurrentUser,  // 反转点赞状态
-                  likeCount: post.likedByCurrentUser ? post.likeCount - 1 : post.likeCount + 1  // 根据点赞状态增加或减少点赞数
-                };
-              }
-              return post;
-            });
-
-            // 更新本地 posts 状态
-            posts.value = updatedPosts;
-} else {
-  Swal.fire("錯誤", "點讚操作失敗！", "error");
-}
-} catch (error) {
-console.error("點讚請求失敗:", error);
-Swal.fire("錯誤", "無法執行點讚操作", "error");
-}
-    };
-
-    const collectPost = async (postid) => {
-      try {
-        const data = {
-          postid: postid,
-          userid: member.value.userid,
-          interactionType: "COLLECT",
-        };
-
-        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.data.success) {
-          const updatedPosts = posts.value.map(post => {
-              if (post.postid === postid) {
-                return { 
-                  ...post, 
-                  collectByCurrentUser: !post.collectByCurrentUser,  // 反转点赞状态
-                    };
-              }
-              return post;
-            });
-
-            // 更新本地 posts 状态
-            posts.value = updatedPosts;
-        } else {
-          Swal.fire("錯誤", "點讚失敗！", "error");
-        }
-      } catch (error) {
-        console.error("點讚請求失敗:", error);
-        Swal.fire("錯誤", "無法執行點讚操作", "error");
       }
-    };
-    
-    const setSort = (type) => {
-      if (sortBy.value !== type) {
-        sortBy.value = type;
-        fetchPosts();
-      }
-    };
-    const route = useRoute();
-    const resetSearch = () => {
-  searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
-};
-
-    watch(
-      () => route.query.title,
-      (newQuery) => {
-        if (newQuery) {
-          fetchPosts(newQuery); // 如果有搜尋條件就請求搜尋
-        } else {
-          fetchPosts(); // 沒有搜尋條件則請求普通的 fetchPosts
-        }
-      },
-      { immediate: true }
-      
     );
 
-    //watch
-    // 監聽 sortBy 的變化，當選擇變更時請求 fetchPost
+    if (response.data.success) {
+      props.post.likedByCurrentUser = !props.post.likedByCurrentUser;
+      props.post.likeCount = props.post.likedByCurrentUser
+        ? props.post.likeCount + 1
+        : props.post.likeCount - 1;
+    } else {
+      Swal.fire("錯誤", "點讚操作失敗！", "error");
+    }
+  } catch (error) {
+    console.error("點讚請求失敗:", error);
+    Swal.fire("錯誤", "無法執行點讚操作", "error");
+  }
+};
 
-    onMounted(async () => {
-      selectedPlace.value = null;
-      //selectedPlace.value = places.value[0].id;
-      await fetchPosts();
-      await fetchProfile();
-      const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
-      fetchPosts(query); // 根據查詢條件抓取貼文
-    });
-
-    return {
-      profileLoaded,
-      member,
-      isAdmin,
-      formatDate,
-      likePost,
-      collectPost,
-      repostPost,
-      posts,
-      navigateToDetail,
-      currentPage,
-      nextPage,
-      prevPage,
-      places,
-      switchPlace,
-      selectedPlace,
-      getFirstImage,
-      //getContentWithoutImages,
-      getTextPreview,
-      userStore,
-      setSort,
-      sortBy,
-      searchQuery,
-      isSearch,
-      searchStore,
-      users,
+// 收藏貼文
+const collectPost = async (postid) => {
+  try {
+    const data = {
+      postid: postid,
+      userid: props.member.userid,
+      interactionType: "COLLECT",
     };
-  },
+
+    const response = await axiosapi.post(
+      "/api/posts/insertinteraction",
+      data,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.data.success) {
+      props.post.collectByCurrentUser = !props.post.collectByCurrentUser;
+    } else {
+      Swal.fire("錯誤", "收藏操作失敗！", "error");
+    }
+  } catch (error) {
+    console.error("收藏請求失敗:", error);
+    Swal.fire("錯誤", "無法執行收藏操作", "error");
+  }
 };
 </script>
+
 <style scoped>
 .main-container {
   padding: 20px;

@@ -1,20 +1,26 @@
     <template>
-    
         <div class="profile-page">
         <div v-if="member" class="profile-container">
             <h2 class="section-title">會員資料</h2>
             <div class="profile-details">
-            <img :src="'data:image/jpeg;base64,' + member.profilePicture" alt="Profile Picture" v-if="member.profilePicture" class="profile-picture" />
-            <div class="info">
+            <!-- <img :src="'data:image/jpeg;base64,' + member.profilePicture" alt="Profile Picture" v-if="member.profilePicture" class="profile-picture" />
+            -->
+            <img 
+                :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePicture"
+                alt="Profile Picture" 
+                v-if="member.profilePicture || defaultProfilePicture" 
+                class="profile-picture" />
+            <div class="info"> 
                 <p><strong>姓名:</strong> {{ member.name }}</p>
                 <p><strong>Email:</strong> {{ member.email }}</p>
                 <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
-                <p><strong>角色:</strong> {{ isAdmin ? '管理員' : '普通會員' }}</p>
-                <p><strong>ID:</strong> {{ member.userid }}</p>
-            <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ followersCount }}</p>    
-            <p><strong>粉絲:</strong> {{ followingCount }}</p>
-            </router-link>
+                <p> {{ member.bio }}</p>
+                <div class="follow-stats">
+                        <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
+                            <span><strong>關注:</strong> {{ followersCount }}</span>
+                            <span><strong>粉絲:</strong> {{ followingCount }}</span>
+                        </router-link>
+                </div>
             <button
             :class="['follow-button', { active: member.isFollowing }]"
             @click.stop="toggleFollow(member)"
@@ -24,21 +30,26 @@
             </div>
             </div>
 
-            <h3 class="section-title">博主的貼文</h3>
+        <div class="tabs-container">
+        <button :class="{ active: activeTab === 'myPosts' }" @click="setActiveTab('myPosts')">我的貼文</button>
+        <button :class="{ active: activeTab === 'likedPosts' }" @click="setActiveTab('likedPosts')">點讚貼文</button>
+        <button :class="{ active: activeTab === 'sharedPosts' }" @click="setActiveTab('sharedPosts')">轉發貼文</button>
+        <button :class="{ active: activeTab === 'savedPosts' }" @click="setActiveTab('savedPosts')">收藏貼文</button>
+        </div>
             
-            <ul class="post-list" v-if="posts.length > 0">
-                <li v-for="post in posts" :key="post.id" class="post-item">
-                <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }">
-                <h4>{{ post.postTitle }}</h4>
-                </router-link>
-                <p>{{ post.postContent }}</p>
-                <h4>{{ post.member.name }}</h4>
-                <p>{{ post.tags || '無標籤' }}</p>           
-                </li>
-            </ul>
+            <div class="posts-grid" v-if="posts.length > 0">
+                    <PostCard
+                    v-for="post in posts"
+                    :key="post.postid"
+                    :post="post"
+                    :member="member"
+                    :formatDate="formatDate"
+                    @update-posts="fetchPosts()"
+                    />
+            </div>
 
 
-            <p v-else>此會員尚無貼文。</p>
+            <p v-else>沒有貼文。</p>
             </div>
 
             <div v-else>
@@ -53,10 +64,16 @@
     import Swal from 'sweetalert2';
     import { useRouter } from 'vue-router';
     import { useUserStore } from "@/stores/user.js";
+    import PostCard from '@/components/Postcard.vue';
+    import axiosapi from '@/plugins/axios.js';
+    import defaultProfilePic from '@/assets/empty.png';
     
 
     export default {
     props: ['bloghomeid'],
+    components: {
+        PostCard // 註冊 PostCard 元件
+    },
         setup(props) {
             const router = useRouter();
             const member = ref({});
@@ -64,13 +81,14 @@
             const isAdmin = ref(false);
             const profileLoaded = ref(false);
             const bloghomeid = props.bloghomeid;
+            const defaultProfilePicture = ref(defaultProfilePic); 
             //const isFollowing=ref(false);
 
             const followersCount = ref(0); // 使用 ref 來定義自適應資料
             const followingCount = ref(0);
             const userStore = useUserStore();
             const userId = computed(() => userStore.member.userid);
-            console.log("hohi"+userStore.member.userid);
+            const activeTab = ref('myPosts');
 
         // 用來從後端取得關注者和被關注者的人數
         const fetchCount = async (type) => {
@@ -79,7 +97,7 @@
             : `/follow/followingcount/${bloghomeid}`;
 
         try {
-            const response = await axios.get(url);
+            const response = await axiosapi.get(url);
             // 假設返回的資料是一個物件，包含 `count` 資料欄
             return response.data; // 如果沒有資料則返回0
         } catch (error) {
@@ -90,7 +108,7 @@
 
         const fetchProfiles = async () => {
             try {
-                const response = await axios.get(`/api/posts/members/${bloghomeid}`);
+                const response = await axiosapi.get(`/api/posts/members/${bloghomeid}`);
 
                 if (response.data) {
                     member.value = response.data; // 存储用户资料
@@ -119,7 +137,7 @@ const checkFollowingStatus = async (member) => {
 
     try {
         // 获取该用户是否被当前用户关注的状态
-        const response = await axios.post('/follow/isFollowing', {
+        const response = await axiosapi.post('/follow/isFollowing', {
             followedid: userStore.member.userid,
             followerid: member.userid, // 使用传递过来的普通对象
         });
@@ -137,7 +155,7 @@ const checkFollowingStatus = async (member) => {
 const toggleFollow = async (member) => {
     try {
         const action = member.isFollowing ? 'unfollow' : 'follow';
-        const response = await axios.post('/follow/verb', {
+        const response = await axiosapi.post('/follow/verb', {
             followerid: userStore.member.userid,
             followedid: member.userid,
             action,
@@ -155,7 +173,9 @@ const toggleFollow = async (member) => {
         Swal.fire('錯誤', '無法更新關注狀態', 'error');
     }
 };
-    
+   
+
+
         
 
         // 載入關注人數和被關注人數
@@ -175,23 +195,41 @@ const toggleFollow = async (member) => {
             };
     
     
-        const fetchPosts = async () => {
+        const fetchPosts = async (filterType) => {
             try {
-            const response = await axios.post('/api/posts/post', {
-                userid: bloghomeid,
-            });
-    
-            if (response.data.postdto && response.data.postdto.length > 0) {
-                posts.value = response.data.postdto;
+            const payload = { };
+            if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
+            if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
+            if (filterType === 'myPosts') {
+            payload.repost = false;  // 不要 repost 的貼文\
+            payload.userid=member.value.userid;
+            } else if (filterType === 'sharedPosts') {
+            payload.repost = true;  // 只要 repost 的貼文
+            payload.userid=member.value.userid;
+            }
+            //userid: member.value.userid 
+            const response = await axiosapi.post('/api/posts/post', payload);
+            let postData = response.data.postdto || [];
+
+            // 過濾條件
+            if (filterType === 'myPosts') {
+            posts.value = postData.filter(post => !post.repost && post.repostDTO === null);
+            } else if (filterType === 'sharedPosts') {
+            posts.value = postData.filter(post => post.repost || post.repostDTO !== null);
             } else {
-                Swal.fire('沒有貼文', '此用戶暫無貼文。', 'info');
+            posts.value = postData;
             }
-            } catch (error) {
+        } catch (error) {
             console.error('Fetch posts failed:', error);
-            Swal.fire('錯誤', '無法取得貼文', 'error');
-            }
-        };
-    
+            Swal.fire('錯誤', `無法取得${filterType}的貼文`, 'error');
+        }
+            };
+
+            const setActiveTab = async (tab) => {
+            activeTab.value = tab;
+            await fetchPosts(tab);
+            };
+            
         onMounted(async () => {
             await fetchProfiles();
             if (bloghomeid) {
@@ -213,88 +251,158 @@ const toggleFollow = async (member) => {
             followersCount,
             followingCount,
             toggleFollow,
+            setActiveTab,
+            activeTab,
+            defaultProfilePicture,
             };
         },
     };
     </script>
     
     <style>
-    .profile-page {
+  /* 整體頁面樣式 */
+.profile-page {
     padding: 20px;
-    background-color: #f4f7fc;
-    min-height: 100vh;
-    }
-
-    .section-title {
-    font-size: 1.8em;
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: 'Arial', sans-serif;
     color: #333;
-    margin-bottom: 15px;
-    border-bottom: 3px solid #007bff;
-    padding-bottom: 5px;
-    }
+}
 
-    .profile-container {
-    background: #fff;
-    padding: 20px;
+/* 會員資料容器 */
+.profile-container {
+    background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-    }
+    padding: 20px;
+    margin-bottom: 20px;
+}
 
-    .profile-details {
+/* 標題樣式 */
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* 會員資料區塊 */
+.profile-details {
     display: flex;
-    align-items: center;
-    gap: 25px;
-    margin-bottom: 25px;
-    }
+    align-items: flex-start; /* 讓內容靠上對齊 */
+    gap: 20px;
+    position: relative; /* 讓關注按鈕可以定位 */
+}
 
-    .profile-picture {
+/* 大頭照樣式 */
+.profile-picture {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
+    border: 2px solid #ddd;
+}
 
-    .info p {
-    font-size: 1.1em;
+/* 會員資訊樣式 */
+.info {
+    flex: 1;
+}
+
+.info p {
+    margin: 8px 0;
+    font-size: 14px;
     color: #555;
-    margin: 5px 0;
-    }
+}
 
-    .follow-link {
-    color: #007bff;
-    text-decoration: none;
-    }
+.info strong {
+    color: #333;
+    font-weight: bold;
+}
 
-    .post-list {
-    list-style: none;
-    padding: 0;
-    }
+/* 關注和粉絲樣式 */
+.follow-stats {
+    display: flex;
+    gap: 16px; /* 關注和粉絲之間的間距 */
+    margin-top: 8px;
+}
 
-    .post-item {
-    background: #fff;
-    margin-bottom: 15px;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    }
+.follow-stats span {
+    font-size: 14px;
+    color: #333;
+}
 
-    .post-item h4 {
-    margin: 0 0 10px 0;
-    color: #007bff;
-    font-size: 1.4em;
-    }
+.follow-stats strong {
+    color: #333;
+    font-weight: bold;
+}
 
-    .post-item h5 {
-    font-size: 1.1em;
-    color: #555;
-    margin-top: 10px;
-    }
+/* 關注按鈕樣式 */
+.follow-button {
+    position: absolute; /* 絕對定位 */
+    top: 0; /* 置頂 */
+    right: 0; /* 置右 */
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: #46a1e2;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
 
-    .post-item p {
-    color: #777;
-    font-size: 1.1em;
-    }
+.follow-button.active {
+    background-color: #ccc;
+}
+
+.follow-button:hover {
+    background-color: #4a97e0;
+}
+
+/* 標籤按鈕容器 */
+.tabs-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* 標籤按鈕樣式 */
+.tabs-container button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.tabs-container button.active {
+    background-color: #4179ea;
+    color: #fff;
+}
+
+.tabs-container button:hover {
+    background-color: #ddd;
+}
+
+/* 貼文網格樣式 */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 無貼文提示樣式 */
+p {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+    margin-top: 20px;
+}
     </style>
         

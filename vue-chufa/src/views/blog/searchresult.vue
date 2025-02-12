@@ -44,105 +44,15 @@
 
     
         <!-- 貼文網格布局 -->
-        <div v-else class="posts-grid">
-            <div
-            v-for="post in posts"
-            :key="post.postid"
-            class="post-card"
-            @click="navigateToDetail(post.postid, $event)"
-            >
-            <!-- REPOST 版型處理 -->
-            <div v-if="post.repost" class="repost-header">
-                <div class="interaction-info">
-                <div class="repost-profile-container">
-                    <img
-                    v-if="post.member?.profilePicture"
-                    :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-                    alt="Interaction Profile Picture"
-                    class="profile-picture small-profile"
+        <div v-else class="posts-grid" v-if="posts.length > 0">
+            <PostCard
+                    v-for="post in posts"
+                    :key="post.postid"
+                    :post="post"
+                    :member="member"
+                    :formatDate="formatDate"
+                    @update-posts="fetchPosts()"
                     />
-                </div>
-                <p class="interaction-name">
-                    {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
-                </p>
-                </div>
-            </div>
-    
-            <!-- 作者信息 -->
-            <div class="author-info" >
-                <div class="author-header">
-                <div class="profile-picture-container">
-                    <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
-                    <img
-                        v-if="post.member.profilePicture"
-                        :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-                        alt="Author's Profile Picture"
-                        class="profile-picture"
-                    />
-                    <div v-else class="default-profile"></div>
-                    </router-link>
-                </div>
-                <div class="author-name">
-                    <strong>
-                    {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-                    ({{ post.repostDTO?.member?.name || post.member.name }})
-                    </strong>
-                </div>
-                </div>
-                <h3>
-                {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-                </h3>
-            </div>
-    
-            <!-- 顯示第一張圖片 -->
-            <div v-if="getFirstImage(post.postContent)" class="post-image-container" >
-                <img :src="getFirstImage(post.postContent)" class="post-image" />
-            </div>
-    <!-- 
-            移除圖片後的內容
-            <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
-            <p class="post-content-preview">
-            {{ getTextPreview(post.postContent, 30) }}
-            </p>
-    
-            <!-- 閱讀更多連結
-            <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more"
-                >閱讀更多</a
-            > -->
-    
-            <!-- 貼文元信息 -->
-            <div class="post-meta">
-                <p>
-                發佈時間:
-                {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
-                </p>
-                <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-                <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
-            </div>
-    
-            <!-- 貼文統計 -->
-            <div class="post-stats">
-                <p>轉發次數: {{ post.repostCount }}</p>
-                <p>點讚數: {{ post.likeCount }}</p>
-            </div>
-    
-            <!-- 互動按鈕 -->
-            <div class="post-actions" @click.stop>
-                <button
-                @click.stop="likePost(post.postid)"
-                class="action-btn like-btn"
-                :class="{ active: post.likedByCurrentUser }"
-                >
-                👍 {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
-                </button>
-                <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-                🔁 轉發
-                </button>
-                <button @click.stop="collectPost(post.postid)" class="action-btn collect-btn">
-                ❤️ 收藏
-                </button>
-            </div>
-            </div>
         </div>
     
         <!-- 分頁控制 -->
@@ -173,8 +83,12 @@
     import { useRoute } from 'vue-router';
     import { useSearchStore } from '@/stores/search.js';
     import axiosapi from "@/plugins/axios.js";
+    import PostCard from "@/components/Postcard.vue";
     
     export default {
+    components: {
+    PostCard // 註冊 PostCard 元件
+    },
         setup() {
         const router = useRouter();
         const profileLoaded = ref(false);
@@ -318,6 +232,7 @@ const toggleFollow = async (user) => {
                 page: currentPage.value,
                 size: 100,
                 checklike:member.value.userid,
+                repost:true,
             };
     
             // 動態設定排序條件

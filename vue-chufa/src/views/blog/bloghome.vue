@@ -25,45 +25,15 @@
       </div>
 
       <h3 class="section-title">貼文內容</h3>
-      <div class="tab-content">
-        <ul v-if="posts.length > 0" class="post-list">
-          <li v-for="post in posts" :key="post.postid" class="post-item">
-            <div class="post-author">
-              <img 
-                v-if="post.member?.profilePicture" 
-                :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
-                alt="Author's Profile Picture" 
-                class="profile-picture" 
-                @error="event.target.src = '/default-profile.png'"
-              /> 
-              <div v-else class="default-profile"></div>
-              <div class="post-author-name">{{ post.member.name }}repost</div>
-            </div>
-            <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-              <h4>{{ post.postTitle || '無標題' }}</h4>
-            </router-link>
-            <p class="post-content">{{ post.postContent }}</p>
-
-            <!-- 如果是轉發貼文，顯示被轉發的原始貼文 -->
-            <div v-if="post.repost && post.repostDTO" class="repost-container">
-              <div class="repost-author">
-                <img 
-                  v-if="post.repostDTO.member?.profilePicture" 
-                  :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
-                  alt="Original Author's Profile Picture" 
-                  class="profile-picture" 
-                  @error="event.target.src = '/default-profile.png'"
-                />
-                <div v-else class="default-profile"></div>
-                <div class="repost-author-name">{{ post.repostDTO.member.name }}the author-header</div>
-              </div>
-              <p class="repost-content">{{ post.repostDTO.postContent }}</p>
-            </div>
-
-            <div class="post-tags">{{ post.tags || '無標籤' }}</div>
-          </li>
-        </ul>
-        <p v-else class="no-posts">目前沒有相關的貼文。</p>
+      <div class="posts-grid">
+        <PostCard
+          v-for="post in posts"
+          :key="post.postid"
+          :post="post"
+          :member="member"
+          :formatDate="formatDate"
+          @update-posts="fetchPosts()"
+        />
       </div>
     </div>
     <div v-else class="loading">
@@ -77,8 +47,15 @@ import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
 import axiosapi from '@/plugins/axios.js';
+import PostCard from "@/components/Postcard.vue";
+import { useUserStore } from "@/stores/user.js";
+import { useRoute } from 'vue-router';
 
 export default {
+  components: {
+    PostCard // 註冊 PostCard 元件
+  },
+  
   setup() {
     const router = useRouter();
     const member = ref({});
@@ -88,6 +65,8 @@ export default {
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
 
+    
+
     // 用來從後端取得關注者和被關注者的人數
     const fetchCount = async (type) => {
       const url = type === 'followers'
@@ -96,22 +75,20 @@ export default {
 
       try {
         const response = await axiosapi.get(url);
+        console.log("jdgfbdis"+followersCount)
         // 假設返回的資料是一個物件，包含 `count` 資料欄
-        return response.data.count || 0; // 如果沒有資料則返回0
+        return response.data || 0; // 如果沒有資料則返回0
       } catch (error) {
         console.error(`Error fetching ${type}:`, error);
         return 0;
       }
-    };
+    }; 
 
     // 載入關注人數和被關注人數
     const loadCounts = async () => {
       followersCount.value = await fetchCount('followers');
       followingCount.value = await fetchCount('followed');
     };
-
-    
-
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -164,12 +141,37 @@ export default {
     Swal.fire('錯誤', `無法取得${filterType}的貼文`, 'error');
   }
     };
-    
 
     const setActiveTab = async (tab) => {
       activeTab.value = tab;
       await fetchPosts(tab);
     };
+
+    const getFirstImage = (content) => {
+      const match = content.match(/<img[^>]+src="([^">]+)"/);
+      return match ? match[1] : null;
+    };
+
+    const getTextPreview = (content, length) => {
+      // 移除圖片和其他 HTML 標籤
+      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
+      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+    };
+    const userStore = useUserStore(); // 使用 Pinia 的狀態
+
+    const navigateToDetail = (postid, event) => {
+      const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+      for (let selector of excludedElements) {
+        if (event.target.closest(selector)) {
+          return; // 如果點擊的是按鈕、連結，就不觸發跳轉
+        }
+      }
+      router.push(`/blog/find/${postid}`);
+    };
+
+
+    const route = useRoute();
+
 
     onMounted(async () => {
       await fetchProfile();
@@ -383,4 +385,12 @@ export default {
   line-height: 1.4;
   margin: 0;
 }
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+
 </style>

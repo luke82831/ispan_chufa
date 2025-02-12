@@ -26,14 +26,26 @@
 
       <h3 class="section-title">貼文內容</h3>
       <div class="posts-grid">
-        <PostCard
+        <div
           v-for="post in posts"
           :key="post.postid"
-          :post="post"
-          :member="member"
-          :formatDate="formatDate"
-          @update-posts="fetchPosts()"
-        />
+          :class="{'hidden-post': postStore.getHiddenReason(post.postid)}"
+          style="position: relative;"
+        >
+          <PostCard
+            :post="post"
+            :member="member"
+            :formatDate="formatDate"
+            @update-posts="fetchPosts()"
+          />
+          <div
+            v-if="postStore.getHiddenReason(post.postid)"
+            class="hidden-message"
+          >
+            此文章已被隱藏，原因：{{ postStore.getHiddenReason(post.postid) }}，
+            請聯繫客服信箱：Chufa@service.com
+          </div>
+        </div>
       </div>
     </div>
     <div v-else class="loading">
@@ -41,6 +53,8 @@
     </div>
   </div>
 </template>
+
+
 <script>
 import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
@@ -50,6 +64,7 @@ import axiosapi from '@/plugins/axios.js';
 import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from 'vue-router';
+import { usePostStore } from '@/stores/usePostStore';
 
 
 export default {
@@ -67,7 +82,7 @@ export default {
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
 
-    
+    const postStore = usePostStore();
 
     // 用來從後端取得關注者和被關注者的人數
     const fetchCount = async (type) => {
@@ -191,6 +206,7 @@ export default {
       activeTab,
       followersCount,
       followingCount,
+      postStore,
     };
   },
 };
@@ -394,5 +410,31 @@ export default {
   gap: 20px;
 }
 
+
+.hidden-post {
+  background-color: rgba(245, 245, 245, 0.3) !important;  /* ★★★★★ 修改：使用 RGBA 設定背景透明度 0.3 ★★★★★ */
+  color: #888 !important;
+  pointer-events: none; /* 禁止任何互動 */
+  /* 移除了 opacity 屬性 */
+  position: relative; /* 確保 .hidden-message 的絕對定位是相對於 .hidden-post */
+}
+
+/* ★★★★★【MODIFIED】：隱藏提示訊息設定，並新增 min-width 讓提示訊息更寬 ★★★★★ */
+.hidden-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(179, 164, 164, 0.9);
+  text-align: center;
+  font-size: 14px;
+  padding: 10px 20px;
+  color: #ff0000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1; /* 保持100%不透明 */
+  min-width: 300px;  /* ★★★★★ 新增：設定最小寬度 300px ★★★★★ */
+}
 
 </style>

@@ -9,7 +9,7 @@
           <thead>
             <tr>
               <th class="number-col">ID</th>
-              <th class="small-col">類型</th>
+              <th class="xsmall-col">類型</th>
               <th class="small-col">名稱</th>
               <th class="large-col">照片</th>
               <th class="scroll-col">地址</th>
@@ -17,7 +17,7 @@
               <th class="xsmall-col">地區</th>
               <th class="phone-col">電話</th>
               <th class="scroll-col">營業時間</th>
-              <th class="number-col">評分</th>
+              <th class="xsmall-col">評分</th>
               <th class="xsmall-col">網址</th>
               <th class="xsmall-col">價錢</th>
               <th class="xsmall-col">狀態</th>
@@ -362,7 +362,7 @@ onMounted(fetchPlaces);
 
 /* 滾動欄位 */
 .scroll-col {
-  width: 200px;
+  width: 150px;
   max-width: 200px;
 }
 

@@ -41,6 +41,9 @@ public class ScheduleBean {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
+
+    @OneToMany(mappedBy = "scheduleBean", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostBean> posts;
     
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -50,6 +53,7 @@ public class ScheduleBean {
     @JsonIgnoreProperties("places")
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
+      
 
     // Constructors
     public ScheduleBean() {

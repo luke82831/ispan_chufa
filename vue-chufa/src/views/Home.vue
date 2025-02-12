@@ -63,7 +63,7 @@
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <div v-else class="default-profile"></div>
+                <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
               </router-link>
             </div>
             <div class="author-name">
@@ -155,6 +155,7 @@ import { useRoute } from 'vue-router';
 import { useSearchStore } from '@/stores/search.js';
 import axiosapi from "@/plugins/axios.js";
 import { usePostStore } from "@/stores/usePostStore";
+import defaultProfilePicture from "@/assets/empty.png"
 
 
 export default {
@@ -173,6 +174,7 @@ export default {
     const isSearch = ref(false);
     const searchStore = useSearchStore();
     const selectedPlace = ref(null); 
+    const defaultProfilePic=ref(defaultProfilePicture);
     
     //place
     //const selectedPlace = ref(null);
@@ -241,7 +243,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 5,
+          size: 50,
           checklike:member.value.userid,
           repost:true,
         };
@@ -258,7 +260,7 @@ export default {
         requestData.followerId = member.value.userid;  
       } else if (selectedPlace.value !== null||selectedPlace!=='users') {
         // 只有選擇地點時才加入 place
-        requestData.place = selectedPlace.value;
+        requestData.places = selectedPlace.value;
       }
     
 
@@ -483,6 +485,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
       isSearch,
       searchStore,
       users,
+      defaultProfilePic,
     };
   },
 };

@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
+import com.ispan.chufa.domain.EventBean;
+import com.ispan.chufa.domain.EventXPlaceBean;
 import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.domain.ScheduleBean;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
 
@@ -113,6 +116,20 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(likedByMePredicate);
 		}
 		
+		
+		// 加入條件：篩選 city
+		if (!param.isNull("places")) {
+			Join<PostBean, ScheduleBean> scheduleJoin = postRoot.join("scheduleBean", JoinType.INNER);
+	        // Step 2: Join 到 EventBean
+			Join<ScheduleBean, EventBean> eventJoin = scheduleJoin.join("events", JoinType.INNER);
+			// Step 3: Join 到 EventXPlaceBean
+			Join<EventBean, EventXPlaceBean> eventXPlaceJoin = eventJoin.join("eventXPlaceBeans", JoinType.INNER);
+			// Step 4: 最終 Join 到 PlaceBean
+			Join<EventXPlaceBean, PlaceBean> placeJoin = eventXPlaceJoin.join("place", JoinType.INNER);
+		    String places = param.getString("places");
+		    Predicate placePredicate = criteriaBuilder.equal(placeJoin.get("city"), places);
+		    predicates.add(placePredicate);
+		}
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID
 		Subquery<Long> subquery = criteriaQuery.subquery(Long.class);
@@ -140,8 +157,7 @@ public class PostDaoImpl implements PostDao {
 		if (!param.isNull("sortByTime") && param.getBoolean("sortByTime")) {
 			criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
 		}
-		
-		
+	
 		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
 		    Subquery<Long> likeCountSubquery = criteriaQuery.subquery(Long.class);
 		    Root<InteractionBean> interactionRoot = likeCountSubquery.from(InteractionBean.class);

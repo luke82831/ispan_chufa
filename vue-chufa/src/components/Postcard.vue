@@ -2,9 +2,6 @@
 <!-- 貼文網格布局 -->
 <div class="posts-grid">
       <div
-       
-
-
         class="post-card"
         @click="navigateToDetail(post.postid, $event)"
       >
@@ -18,6 +15,10 @@
                 alt="Interaction Profile Picture"
                 class="profile-picture small-profile"
               />
+
+              <div v-else>
+                  <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
+                </div>
             </div>
             <p class="interaction-name">
               {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
@@ -36,7 +37,9 @@
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <div v-else class="default-profile"></div>
+                <div v-else >
+                  <img :src="defaultProfilePicture" alt="Default Profile Picture" class="profile-picture">
+                </div>
               </router-link>
             </div>
             <div class="author-name">
@@ -108,15 +111,18 @@ import { defineProps, defineEmits,ref } from "vue";
 import Swal from "sweetalert2";
 import axiosapi from "@/plugins/axios";
 import { useRouter } from "vue-router";
+import defaultProfilePicture from '@/assets/empty.png';
 const posts = ref([]);
 const router = useRouter();
+const defaultProfilePic=ref(defaultProfilePicture);
+
 // 接收從父組件傳入的 `post` 資料和 `member`
 const props = defineProps({
   post: Object,
   member: Object,
   formatDate: Function,
 });
-//props.fetchPosts();
+// props.fetchPosts();
 
 const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -228,6 +234,7 @@ const collectPost = async (postid) => {
     Swal.fire("錯誤", "無法執行收藏操作", "error");
   }
 };
+
 </script>
 
 <style scoped>

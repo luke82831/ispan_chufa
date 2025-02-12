@@ -1,4 +1,4 @@
-    <template>
+<template>
         <div class="main-container">
         <!-- 標籤切換 -->
     <div v-if="searchStore.isSearch">
@@ -17,32 +17,35 @@
         </div>
     </div>
 
-    <div v-if="selectedTab === 'users'" class="users-grid">
-  <div v-for="user in users" :key="user.userid" class="user-card" @click="navigateToMember(user.userid, $event)">
-    <div class="user-info">
-      <h3 class="username">{{ user.username }}</h3>
-      <p class="nickname">{{ user.nickname }}</p>
-    </div>
-    <div class="profile-picture-container">
-      <img
-        v-if="user.profilePicture"
-        :src="'data:image/jpeg;base64,' + user.profilePicture"
-        alt="Author's Profile Picture"
-        class="profile-picture"
-      />
-      <div v-else class="default-profile"></div>
-    </div>
-    <button
-      :class="['follow-button', { active: user.isFollowing }]"
-      @click.stop="toggleFollow(user)"
-    >
-      {{ user.isFollowing ? '已關注' : '未關注' }}
-    </button>
+    <div v-if="selectedTab === 'users'" class="users-list">
+    <div v-for="user in users" :key="user.userid" class="user-item" @click="navigateToMember(user.userid, $event)">
+        <!-- 用戶頭像 -->
+        <div class="profile-picture-container">
+            <img
+                v-if="user.profilePicture"
+                :src="'data:image/jpeg;base64,' + user.profilePicture"
+                alt="Author's Profile Picture"
+                class="profile-picture"
+            />
+            <img v-else :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture" />
+        </div>
 
-  </div>
+        <!-- 用戶信息 -->
+        <div class="user-info">
+            <h3 class="username">{{ user.name }}</h3>
+            <h3 class="nickname">{{ user.nickname }}</h3>
+        </div>
+
+        <!-- 關注按鈕 -->
+        <button
+            :class="['follower-button', { active: user.isFollowing }]"
+            @click.stop="toggleFollow(user)"
+        >
+            {{ user.isFollowing ? '已關注' : '未關注' }}
+        </button>
+    </div>
 </div>
 
-    
         <!-- 貼文網格布局 -->
         <div v-else class="posts-grid" v-if="posts.length > 0">
             <PostCard
@@ -84,7 +87,7 @@
     import { useSearchStore } from '@/stores/search.js';
     import axiosapi from "@/plugins/axios.js";
     import PostCard from "@/components/Postcard.vue";
-    
+    import  defaultProfilePicture from '@/assets/empty.png'
     export default {
     components: {
     PostCard // 註冊 PostCard 元件
@@ -105,6 +108,7 @@
         const searchStore = useSearchStore();
         const selectedTab = ref("posts"); // 當前選擇的 Tab
         const listData = ref([]);
+        const defaultProfilePic=ref(defaultProfilePicture)
         
         const selectedPlace = ref(null); 
         
@@ -459,6 +463,7 @@ const toggleFollow = async (user) => {
             selectedTab,
             users,
             toggleFollow,
+            defaultProfilePic,
         };
         },
     };
@@ -596,14 +601,6 @@ const toggleFollow = async (user) => {
     align-items: center;
     gap: 5px;
     transition: color 0.3s;
-    }
-
-    .action-btn:hover {
-    color: #ff4757;
-    }
-
-    .action-btn.active {
-    color: #ff4757;
     }
 
     .pagination {
@@ -781,37 +778,55 @@ const toggleFollow = async (user) => {
     border-radius: 4px;
     }
 
-    .users-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
-
-.user-card {
+  /* 用戶列表容器 */
+.users-list {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  flex-direction: column; /* 垂直排列 */
+  gap: 12px; /* 用戶之間的間距 */
   padding: 16px;
+}
+
+/* 每個用戶的容器 */
+.user-item {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 頭像、信息和按鈕之間分散排列 */
+  padding: 8px;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
-.user-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 用戶頭像 */
+.profile-picture-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* 圓形頭像 */
+  overflow: hidden;
+  flex-shrink: 0; /* 防止頭像被壓縮 */
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 圖片填充 */
+}
+
+/* 用戶信息 */
 .user-info {
-  text-align: center;
-  margin-bottom: 12px;
+  flex-grow: 1; /* 佔用剩餘空間 */
+  margin-left: 12px;
 }
 
 .username {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   margin: 0;
   color: #333;
@@ -819,31 +834,34 @@ const toggleFollow = async (user) => {
 
 .nickname {
   font-size: 14px;
-  color: #666;
   margin: 4px 0 0;
+  color: #666;
 }
 
-
-.follow-button {
+/* 關注按鈕 */
+.follower-button {
   padding: 8px 16px;
   border: none;
-  border-radius: 20px;
-  background-color: #007bff;
+  border-radius: 20px; /* 圓角按鈕 */
+  background-color: #ff5a5f; /* 小紅書風格紅色 */
   color: #fff;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
+  flex-shrink: 0; /* 防止按鈕被壓縮 */
 }
 
-.follow-button.active {
-  background-color: #6c757d;
+.follower-button.active {
+  background-color: #ccc; /* 已關注狀態 */
 }
 
-.follow-button:hover {
-  background-color: #0056b3;
+.follower-button:hover {
+  background-color: #e04a50; /* 懸停效果 */
 }
 
-.follow-button.active:hover {
-  background-color: #5a6268;
+/* 確保用戶卡片內部的排版不會有額外的元素 */
+.user-item > * {
+  margin-right: 12px; /* 頭像、信息和按鈕之間的間距 */
 }
+
     </style>

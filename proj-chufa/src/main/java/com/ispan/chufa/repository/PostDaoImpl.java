@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.InteractionBean;
+import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
@@ -61,11 +62,22 @@ public class PostDaoImpl implements PostDao {
 		// Join 到點贊表 (interaction 表)
 		Join<PostBean, InteractionBean> interactionJoin = postRoot.join("interactions", JoinType.LEFT);
 
+		Long currentUserId = param.isNull("checklike") ? null : param.getLong("checklike");
+		
 		if (!param.isNull("postTitle")) {
 			String titleKeyword = param.getString("postTitle");
 			Predicate titleLike = criteriaBuilder.like(postRoot.get("postTitle"), "%" + titleKeyword + "%");
 			predicates.add(titleLike);
 		}
+		
+		//根據地區查詢
+		if(!param.isNull("place")) {
+			 String place = param.getString("place");
+			 Join<PostBean, PlaceBean> placeJoin = postRoot.join("place",JoinType.INNER);
+			 Predicate placePredicate = criteriaBuilder.equal(placeJoin.get("city"), place);
+			 predicates.add(placePredicate);
+		}
+
 
 		// 根據 userId 查詢
 		if (!param.isNull("userid")) {
@@ -101,10 +113,6 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(likedByMePredicate);
 		}
 		
-
-	
-		
-
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID
 		Subquery<Long> subquery = criteriaQuery.subquery(Long.class);
@@ -131,6 +139,18 @@ public class PostDaoImpl implements PostDao {
 		// 按 postTime 排序（按降序排列最新的貼文）
 		if (!param.isNull("sortByTime") && param.getBoolean("sortByTime")) {
 			criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
+		}
+		
+		
+		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
+		    Subquery<Long> likeCountSubquery = criteriaQuery.subquery(Long.class);
+		    Root<InteractionBean> interactionRoot = likeCountSubquery.from(InteractionBean.class);
+		    likeCountSubquery.select(criteriaBuilder.count(interactionRoot))
+		                     .where(criteriaBuilder.equal(interactionRoot.get("post").get("postid"), postRoot.get("postid")));		    
+		    criteriaQuery.orderBy(
+		        criteriaBuilder.desc(likeCountSubquery), // 按点赞数排序
+		        criteriaBuilder.asc(postRoot.get("postid")) // 按 postid 排序，确保唯一性
+		    );
 		}
 
 		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
@@ -176,16 +196,33 @@ public class PostDaoImpl implements PostDao {
 			postDTO.setLikeCount(likeCount);
 			long repostCount = postRepository.countByForwardedFrom(postlist);
 			postDTO.setRepostCount(repostCount);
+			
+			  // 檢查是否已點讚
+		    boolean likedByCurrentUser = false;
+		    if (currentUserId != null) {
+		        likedByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
+		            postlist.getPostid(), currentUserId, "LIKE"
+		        );
+		    }
+		    postDTO.setLikedByCurrentUser(likedByCurrentUser);
+		    
+		    boolean collectByCurrentUser = false;
+		    if (currentUserId != null) {
+		    	collectByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
+		            postlist.getPostid(), currentUserId, "COLLECT"
+		        );
+		    }
+		    postDTO.setCollectByCurrentUser(collectByCurrentUser);
 
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);
 		}
-
-		// 根據點讚數排序
-		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
-			postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());
-			//criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("likeCount")));
-		}
+//
+//		// 根據點讚數排序
+//		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
+//			postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());
+//			//criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("likeCount")));
+//		}
 
 
 		return postDTOList;

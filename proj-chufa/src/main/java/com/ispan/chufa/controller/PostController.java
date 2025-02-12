@@ -30,7 +30,7 @@ import com.ispan.chufa.service.PostService;
 import com.ispan.chufa.service.TimelineService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http:localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api/posts")
 public class PostController {
     @Autowired
@@ -59,6 +59,11 @@ public class PostController {
         }
 
         return responseBean;
+    }
+    
+    @PostMapping("/searchByName")
+    public List<MemberDTO> getMemberByName(@RequestBody String json) {
+        return postService.getMemberByName(json);
     }
 
     @PostMapping("/listall")

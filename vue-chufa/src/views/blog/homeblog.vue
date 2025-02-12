@@ -144,7 +144,7 @@
           };
   
           // 發送 POST 請求到 API
-            const response = await axios.post('/api/posts/repost/forward', data, {
+            const response = await axiosapi.post('/api/posts/repost/forward', data, {
             headers: {
             'Content-Type': 'application/json',
             },
@@ -176,7 +176,7 @@
           };
   
           // 發送 POST 請求到 API
-            const response = await axios.post('/api/posts/insertinteraction', data, {
+            const response = await axiosapi.post('/api/posts/insertinteraction', data, {
           headers: {
             'Content-Type': 'application/json',
             },

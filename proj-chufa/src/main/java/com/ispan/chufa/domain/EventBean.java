@@ -3,6 +3,8 @@ package com.ispan.chufa.domain;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +35,7 @@ public class EventBean {
 
 	@ManyToOne
 	@JoinColumn(name = "FK_schedule", referencedColumnName = "trip_id", nullable = false)
+	@JsonIgnoreProperties("user")
 	private ScheduleBean schedule; // 多對一關聯 (行程內容 -> 行程)
 
 	@ManyToOne

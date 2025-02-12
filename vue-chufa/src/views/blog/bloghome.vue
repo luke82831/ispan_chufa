@@ -10,7 +10,8 @@
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
           <p><strong>ID:</strong> {{ member.userid }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ member.followersCount || 0 }}</p>
+            <p><strong>關注人數:</strong> {{ followersCount }}</p>    
+            <p><strong>粉絲:</strong> {{ followingCount }}</p>
           </router-link>
         </div>
       </div>
@@ -36,7 +37,7 @@
                 @error="event.target.src = '/default-profile.png'"
               /> 
               <div v-else class="default-profile"></div>
-              <div class="post-author-name">{{ post.member.name }}</div>
+              <div class="post-author-name">{{ post.member.name }}repost</div>
             </div>
             <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
               <h4>{{ post.postTitle || '無標題' }}</h4>
@@ -54,7 +55,7 @@
                   @error="event.target.src = '/default-profile.png'"
                 />
                 <div v-else class="default-profile"></div>
-                <div class="repost-author-name">{{ post.repostDTO.member.name }}</div>
+                <div class="repost-author-name">{{ post.repostDTO.member.name }}the author-header</div>
               </div>
               <p class="repost-content">{{ post.repostDTO.postContent }}</p>
             </div>
@@ -75,6 +76,7 @@ import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
+import axiosapi from '@/plugins/axios.js';
 
 export default {
   setup() {
@@ -82,6 +84,34 @@ export default {
     const member = ref({});
     const posts = ref([]);
     const activeTab = ref('myPosts');
+
+    const followersCount = ref(0); // 使用 ref 來定義自適應資料
+    const followingCount = ref(0);
+
+    // 用來從後端取得關注者和被關注者的人數
+    const fetchCount = async (type) => {
+      const url = type === 'followers'
+        ? `/follow/followercount/${member.value.userid}`
+        : `/follow/followingcount/${member.value.userid}`;
+
+      try {
+        const response = await axiosapi.get(url);
+        // 假設返回的資料是一個物件，包含 `count` 資料欄
+        return response.data.count || 0; // 如果沒有資料則返回0
+      } catch (error) {
+        console.error(`Error fetching ${type}:`, error);
+        return 0;
+      }
+    };
+
+    // 載入關注人數和被關注人數
+    const loadCounts = async () => {
+      followersCount.value = await fetchCount('followers');
+      followingCount.value = await fetchCount('followed');
+    };
+
+    
+
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -91,7 +121,7 @@ export default {
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('/ajax/secure/profile', {
+        const response = await axiosapi.get('/ajax/secure/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (response.data.success) {
@@ -107,16 +137,18 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { userid: member.value.userid };
+    const payload = { };
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
     if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
-      payload.repost = false;  // 不要 repost 的貼文
+      payload.repost = false;  // 不要 repost 的貼文\
+      payload.userid=member.value.userid;
     } else if (filterType === 'sharedPosts') {
       payload.repost = true;  // 只要 repost 的貼文
+      payload.userid=member.value.userid;
     }
-
-    const response = await axios.post('/api/posts/post', payload);
+    //userid: member.value.userid 
+    const response = await axiosapi.post('/api/posts/post', payload);
     let postData = response.data.postdto || [];
 
     // 過濾條件
@@ -141,6 +173,7 @@ export default {
 
     onMounted(async () => {
       await fetchProfile();
+      await loadCounts();
       if (member.value.userid) {
         await fetchPosts('myPosts');
       }
@@ -152,6 +185,8 @@ export default {
       formatDate,
       setActiveTab,
       activeTab,
+      followersCount,
+      followingCount,
     };
   },
 };

@@ -20,7 +20,7 @@ import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.service.FollowService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http://192.168.23.77:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/follow")
 public class FollowController {
 	@Autowired

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -22,6 +23,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "post")
@@ -30,21 +32,19 @@ public class PostBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
 	private Long postid; // 貼文_貼文id
 	private String postStatus; // 貼文_貼文狀態
-	@Column(columnDefinition = "NVARCHAR")
 	private String postTitle; // 貼文_貼文標題
 	private LocalDateTime postTime; // 貼文_貼文時間
-	@Column(columnDefinition = "NVARCHAR(MAX)")
+	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 
 	@ManyToOne(cascade = { CascadeType.MERGE })
 	@JoinColumn(name = "userid", nullable = false, foreignKey = @ForeignKey(name = "fk_posts_member"))
-	// @JsonManagedReference
-	@JsonIgnoreProperties("place")
-	MemberBean member;
+	@JsonBackReference
+	private MemberBean member;
 
 	@OneToMany(mappedBy = "postBean")
-	// @JsonIgnore
+	@JsonManagedReference
 	private Set<CommentBean> commentBeans;
 
 	@OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -61,10 +61,11 @@ public class PostBean {
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 
 	@ManyToMany(mappedBy = "posts")
+	@JsonIgnore
 	private Set<PlaceBean> place = new HashSet<>();
 	// private Set<TagsBean> tag;
-    //轉發的貼文的id
-	@ManyToOne
+
+	@ManyToOne(cascade = CascadeType.ALL)
 	private ScheduleBean scheduleBean;
 
 	@ManyToOne

@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "comments")
@@ -21,7 +22,7 @@ public class CommentBean {
 
     @ManyToOne // 多對一關係
     @JoinColumn(name = "postid", nullable = false, foreignKey = @ForeignKey(name = "fk_comments_post")) // 留言_貼文id
-                                                                                                        // 不能NULL
+    @JsonBackReference                                                                        // 不能NULL
     private PostBean postBean;
 
     @Column(name = "commentstate", nullable = false) // 留言_留言狀態 不能NULL

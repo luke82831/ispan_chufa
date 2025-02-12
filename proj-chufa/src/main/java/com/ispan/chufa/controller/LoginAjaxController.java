@@ -1,12 +1,17 @@
 package com.ispan.chufa.controller;
 
 import java.util.Base64;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.jwt.JsonWebTokenUtility;
+import com.ispan.chufa.service.EmailService;
 import com.ispan.chufa.service.MemberService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -34,6 +40,50 @@ public class LoginAjaxController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
+    // 忘記密碼 - 發送驗證碼
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        if (!memberService.isEmailRegistered(email)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("該 Email 未註冊");
+        }
+        emailService.sendVerificationCode(email);
+        return ResponseEntity.ok("驗證碼已發送，請查收 Email");
+    }
+
+    // 忘記密碼 - 驗證驗證碼
+    @PostMapping("/verify-code")
+    public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code) {
+        if (!emailService.verifyCode(email, code)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("驗證碼錯誤或已過期");
+        }
+        // 產生短時效 Token
+        String resetToken = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set("RESET_TOKEN_" + email, resetToken, 10, TimeUnit.MINUTES);
+        return ResponseEntity.ok().body(new JSONObject().put("resetToken", resetToken).toString());
+    }
+
+    // 忘記密碼 - 重設密碼
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String email, @RequestParam String resetToken,
+            @RequestParam String newPassword) {
+        String storedToken = redisTemplate.opsForValue().get("RESET_TOKEN_" + email);
+        if (storedToken == null || !storedToken.equals(resetToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("無效的請求");
+        }
+
+        if (memberService.updatePassword(email, newPassword)) {
+            redisTemplate.delete("RESET_TOKEN_" + email);
+            return ResponseEntity.ok("密碼已更新");
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("密碼更新失敗");
+    }
 
     // 添加地點到會員
     @PostMapping("/{userid}/places/{placeId}")
@@ -444,6 +494,8 @@ public class LoginAjaxController {
                 userJson.put("userid", mb.getUserid());
                 userJson.put("name", mb.getName());
                 userJson.put("email", mb.getEmail());
+                userJson.put("phone_number", mb.getPhoneNumber());
+                userJson.put("gender", mb.getGender());
                 userJson.put("role", mb.getRole() != null ? mb.getRole().toString() : "USER");
                 // 這裡可以再加上更多要顯示的欄位
                 usersArray.put(userJson);
@@ -484,6 +536,65 @@ public class LoginAjaxController {
             return ResponseEntity.ok(responseJson.toString());
         } catch (Exception e) {
             e.printStackTrace();
+            responseJson.put("success", false);
+            responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
+            return ResponseEntity.status(500).body(responseJson.toString());
+        }
+    }
+
+    @PutMapping("/members/{memberId}/email")
+    public ResponseEntity<?> updateMemberEmail(
+            @PathVariable Long memberId,
+            @RequestBody String emailRequestBody,
+            @RequestHeader("Authorization") String authorizationHeader) {
+        JSONObject responseJson = new JSONObject();
+        try {
+            // 1. 驗證 Authorization Header
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                responseJson.put("success", false);
+                responseJson.put("message", "缺少或無效的 Authorization header");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+            String token = authorizationHeader.substring(7);
+            String currentUserEmail = jsonWebTokenUtility.validateToken(token);
+            if (currentUserEmail == null) {
+                responseJson.put("success", false);
+                responseJson.put("message", "無效或過期的 Token");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            // 2. 驗證操作使用者是否為管理員（這裡假設只有管理員可以更新會員資料）
+            MemberBean currentUser = memberService.findByEmail(currentUserEmail);
+            if (currentUser == null || currentUser.getRole() != MemberBean.Role.ADMIN) {
+                responseJson.put("success", false);
+                responseJson.put("message", "只有管理員可以更新會員電子郵件");
+                return ResponseEntity.status(403).body(responseJson.toString());
+            }
+
+            // 3. 從 RequestBody 中解析新的 email
+            JSONObject requestJson = new JSONObject(emailRequestBody);
+            String newEmail = requestJson.optString("email");
+            if (newEmail == null || newEmail.trim().isEmpty()) {
+                responseJson.put("success", false);
+                responseJson.put("message", "請輸入新的電子郵件");
+                return ResponseEntity.badRequest().body(responseJson.toString());
+            }
+
+            // 4. 呼叫 Service 層的方法更新會員電子郵件
+            memberService.updateMemberEmail(memberId, newEmail);
+
+            responseJson.put("success", true);
+            responseJson.put("message", "會員電子郵件更新成功");
+            return ResponseEntity.ok(responseJson.toString());
+        } catch (IllegalArgumentException e) {
+            responseJson.put("success", false);
+            responseJson.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(responseJson.toString());
+        } catch (EntityNotFoundException e) {
+            responseJson.put("success", false);
+            responseJson.put("message", e.getMessage());
+            return ResponseEntity.status(404).body(responseJson.toString());
+        } catch (Exception e) {
             responseJson.put("success", false);
             responseJson.put("message", "伺服器發生錯誤: " + e.getMessage());
             return ResponseEntity.status(500).body(responseJson.toString());

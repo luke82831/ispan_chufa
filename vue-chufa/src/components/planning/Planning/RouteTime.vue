@@ -6,45 +6,47 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { usePlaceStore } from "@/stores/PlaceStore";
+import { ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
 
 const props = defineProps({
-  date: String,
-  index: Number,
+  date: String, // ✅ 確保接收日期
+  index: Number, // ✅ 統一使用 index，而不是 placeOrder
 });
 
-const placeStore = usePlaceStore();
 const itineraryStore = useItineraryStore();
 const routeTime = ref(null);
 
-// 計算路徑時間
-const calculateRouteTime = () => {
-  const routePair = placeStore.routePairs[props.date]?.[props.index];
+// ✅ 取得當日的 `routePairs`（按 index 存取）
+const routePairs = computed(() => itineraryStore.getRoutePairs(props.date));
 
-  if (!routePair || !routePair.origin || !routePair.destination) {
+// ✅ 直接使用 `index` 來取得對應的 `routePair`
+const routePair = computed(() => {
+  if (!routePairs.value) return null;
+  return routePairs.value[props.index] || null;
+});
+
+// **計算路徑時間**
+const calculateRouteTime = () => {
+  const pair = routePair.value;
+  if (!pair || !pair.origin || !pair.destination) {
     console.warn("🚨 起點或終點資訊缺失，無法計算路徑時間");
     return;
   }
 
   const directionsService = new google.maps.DirectionsService();
   const request = {
-    origin: new google.maps.LatLng(routePair.origin.lat, routePair.origin.lng),
-    destination: new google.maps.LatLng(
-      routePair.destination.lat,
-      routePair.destination.lng
-    ),
+    origin: new google.maps.LatLng(pair.origin.lat, pair.origin.lng),
+    destination: new google.maps.LatLng(pair.destination.lat, pair.destination.lng),
     travelMode: google.maps.TravelMode.DRIVING,
   };
 
   directionsService.route(request, (result, status) => {
     if (status === "OK") {
-      routeTime.value = Math.round(
-        result.routes[0].legs[0].duration.value / 60
-      );
-      itineraryStore.setRouteTime(props.date, props.index, routeTime.value); // 存入 ItineraryStore
-      console.log(`✅ 計算成功：${routeTime.value} 分鐘`);
+      const travelMinutes = Math.round(result.routes[0].legs[0].duration.value / 60);
+      routeTime.value = travelMinutes;
+      console.log(`✅ 計算成功：${travelMinutes} 分鐘，正在存入 Pinia`);
+      itineraryStore.setRouteTime(props.date, props.index, travelMinutes); // ✅ 存入 Pinia
     } else {
       console.error("❌ 無法計算路徑時間:", status);
       routeTime.value = null;
@@ -52,15 +54,15 @@ const calculateRouteTime = () => {
   });
 };
 
-// 監聽 routePairs 變更，重新計算時間
+// **監聽 `routePair` 變更，自動重新計算**
 watch(
-  () => placeStore.routePairs[props.date]?.[props.index],
+  routePair,
   (newVal) => {
-    if (newVal && newVal.origin && newVal.destination) {
-      console.log("✅ 觸發計算，開始 calculateRouteTime()");
+    if (newVal?.origin && newVal?.destination) {
+      // console.log("✅ 觸發計算，開始 calculateRouteTime()");
       calculateRouteTime();
     } else {
-      console.warn("⚠️ newVal 為空，未能觸發 calculateRouteTime");
+      console.warn("⚠️ routePair 資料不完整，無法計算");
     }
   },
   { immediate: true, deep: true }

@@ -19,13 +19,12 @@
     
 
     <div class="nav-links">
-      <!-- 只有管理員才顯示後臺管理按鈕 -->
-      <!-- <RouterLink
-        v-if="userStore.isLoggedIn && userStore.member.isAdmin"
+      <!-- 只有管理員才顯示後台管理按鈕 -->
+      <RouterLink
+        v-if="userStore.isLoggedIn && userStore.member.role === 'ADMIN'"
         to="/admin"
         class="admin-button"
-      > -->
-      <RouterLink to="/admin" class="admin-button">
+      >
         <i class="fas fa-cog"></i> 後台管理
       </RouterLink>
 
@@ -55,7 +54,7 @@
             <RouterLink to="/blog/bloghome" class="dropdown-item">
               <i class="fas fa-user-circle"></i> 我的文章
             </RouterLink>
-            <!-- 修改：下拉選單中登出按鈕 -->
+            <!-- 下拉選單中的登出按鈕 -->
             <button @click="logout" class="dropdown-item logout-item">
               <i class="fas fa-sign-out-alt"></i> 登出
             </button>
@@ -78,7 +77,7 @@ import { useRouter,useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import { useSearchStore } from "./stores/search";
 
-const userStore = useUserStore(); // 使用 Pinia 的狀態
+const userStore = useUserStore(); // 使用 Pinia 狀態管理
 const router = useRouter();
 const searchStore = useSearchStore(); // 使用 Pinia 搜尋狀態
 const isDropdownVisible = ref(false);
@@ -143,12 +142,12 @@ watch(
 // 登出行為
 const logout = () => {
   localStorage.removeItem("token");
-  userStore.logout(); // 清空 Pinia 狀態
+  userStore.logout(); // 清除 Pinia 狀態
   isDropdownVisible.value = false; // 關閉下拉選單
   router.push("/secure/Login");
 };
 
-// 處理頭像加載錯誤
+// 處理頭像載入錯誤
 const onAvatarError = () => {
   userStore.member.profile_picture = "/path/to/default-avatar.png";
 };
@@ -289,10 +288,10 @@ onMounted(() => {
 
 /* 登出按鈕美化 */
 .dropdown-menu .logout-item {
-  text-align: right; /* 文字靠右 */
-  padding-right: 20px; /* 右邊內邊距 */
+  text-align: right;
+  padding-right: 20px;
   font-weight: bold;
-  color: #dc3545; /* 紅色文字 */
+  color: #dc3545;
   background-color: transparent;
   border: none;
   width: 100%;
@@ -301,7 +300,7 @@ onMounted(() => {
 }
 
 .dropdown-menu .logout-item:hover {
-  background-color: #f8d7da; /* 淡紅背景 */
+  background-color: #f8d7da;
   color: #c82333;
 }
 
@@ -319,7 +318,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #e74c3c; /* 紅色 */
+  background-color: #e74c3c;
   color: white;
   padding: 8px 16px;
   border-radius: 8px;

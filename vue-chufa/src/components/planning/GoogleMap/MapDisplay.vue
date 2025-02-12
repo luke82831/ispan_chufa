@@ -4,31 +4,38 @@
     <div class="search">
       <PlaceSearch @place-selected="handlePlaceChanged" />
     </div>
-    <!-- 使用 Pinia store 中的 placeDetails -->
-    <PlaceDetail v-if="placeDetails" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
+import { usePlaceStore } from "@/stores/PlaceStore";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
-import PlaceDetail from "./PlaceDetail.vue";
-import { usePlaceStore } from "@/stores/PlaceStore"; // 引入 Pinia store
 
-const placeStore = usePlaceStore(); // 使用 store
+const placeStore = usePlaceStore();
 
-const map = ref(null); // 地圖實例
-const markers = ref([]); // 存儲所有標記
+const map = ref(null);
+const markers = ref([]);
 
+// ✅ 監聽 store 內的 `selectedPlaceDetail`
+const selectedPlaceDetail = computed(() => placeStore.selectedPlaceDetail);
+
+// 地圖初始化
 onMounted(() => {
   initMap();
+});
+
+// ✅ 監聽 `selectedPlaceDetail` 的變化，當地點變更時，自動更新 `marker`
+watch(selectedPlaceDetail, (newPlace) => {
+  if (newPlace) {
+    handlePlaceChanged(newPlace);
+  }
 });
 
 // 初始化地圖
 const initMap = async () => {
   try {
     const { Map } = await google.maps.importLibrary("maps");
-
     map.value = new Map(document.getElementById("map"), {
       zoom: 12,
       center: { lat: 25.0339643, lng: 121.564468 },
@@ -44,17 +51,27 @@ const initMap = async () => {
   }
 };
 
-// 處理地點變更
+// 更新地點
 const handlePlaceChanged = (place) => {
-  if (!place || !place.placeId) {
-    console.error("無效的地點或缺少幾何資料");
+  console.log("選擇的地點", place);
+
+  if (!place || (!place.placeId && !place.googlemapPlaceId)) {
+    console.error("❌ 無效的地點或缺少幾何資料", place);
     return;
   }
 
-  const { lat, lng } = {
-    lat: place.latitude,
-    lng: place.longitude,
-  };
+  if (!map.value) {
+    console.error("❌ 地圖尚未初始化，無法設定標記");
+    return;
+  }
+
+  const lat = place.latitude || place?.location?.lat || null;
+  const lng = place.longitude || place?.location?.lng || null;
+
+  if (!lat || !lng) {
+    console.error("❌ 地點缺少經緯度資訊:", place);
+    return;
+  }
 
   // 更新地圖中心和縮放級別
   map.value.setCenter({ lat, lng });
@@ -62,80 +79,57 @@ const handlePlaceChanged = (place) => {
 
   // 更新標記
   updateMarker({ lat, lng }, place);
-
-  // 格式化地點資料
-  const convertPriceLevel = (priceLevel) => {
-    switch (priceLevel) {
-      case 0:
-        return "便宜";
-      case 1:
-        return "平價";
-      case 2:
-        return "中等";
-      case 3:
-        return "高級";
-      case 4:
-        return "奢華";
-      default:
-        return null;
-    }
-  };
-
-  // 格式化營業時間資料
-  const convertBusinessHours = (openingHours) => {
-    if (!openingHours) return null;
-    return openingHours.split("\n").reduce((acc, line) => {
-      const [day, hours] = line.split(": ");
-      if (day && hours) {
-        acc[day.trim()] = hours.trim();
-      }
-      return acc;
-    }, {});
-  };
-
-  // 格式化訂位資訊
-  const updatedPlace = {
-    displayName: place.placeName || null,
-    formattedAddress: place.placeAddress || null,
-    location: { lat: place.latitude, lng: place.longitude }, // 確保有 lat 和 lng
-    rating: place.rating || null,
-    openingHours: convertBusinessHours(place.businessHours) || null,
-    photos: place.photos || [],
-    types: place.placeType || null,
-    formattedPhoneNumber: place.placePhone || null,
-    website: place.website || null,
-    priceLevel: convertPriceLevel(place.priceLevel) || null,
-    addressComponents: place.address_components || [],
-    reservation: place.reservation || null,
-  };
-
-  // 使用 store 設定 placeDetails
-  placeStore.setPlaceDetails(updatedPlace);
 };
 
-// 更新或新增標記並顯示資訊框
+// 更新或新增標記
 function updateMarker(position, place) {
+  if (!map.value) {
+    console.error("地圖尚未初始化，無法添加標記");
+    return;
+  }
+
+  // 先清除舊標記
+  clearMarkers();
+
+  // 創建新標記
   const marker = new google.maps.Marker({
+    position,
     map: map.value,
-    position: position,
+    title: place.placeName || "標記",
     animation: google.maps.Animation.DROP,
   });
 
+  // 創建資訊視窗
   const infoWindow = new google.maps.InfoWindow({
     content: `<div><h3>${place.placeName}</h3><p>${place.placeAddress}</p></div>`,
   });
 
+  // **監聽標記動畫結束，然後開啟資訊視窗**
   marker.addListener("animation_changed", () => {
-    if (marker.getAnimation() === null) {
+    if (!marker.getAnimation()) {
       infoWindow.open(map.value, marker);
     }
   });
 
+  // 點擊標記時顯示資訊視窗
+  marker.addListener("click", () => {
+    infoWindow.open(map.value, marker);
+  });
+
+  // 儲存標記
   markers.value.push(marker);
 }
 
-// 從 store 中取得 placeDetails
-const placeDetails = placeStore.placeDetails;
+// 清除所有標記
+function clearMarkers() {
+  markers.value.forEach((marker) => {
+    if (marker) {
+      marker.setMap(null);
+    }
+  });
+
+  markers.value = [];
+}
 </script>
 
 <style>

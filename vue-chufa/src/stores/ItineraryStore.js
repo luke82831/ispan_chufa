@@ -1,77 +1,84 @@
 import { defineStore } from "pinia";
-import { v4 as uuidv4 } from "uuid"; // 引入 uuid 库
 
 export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
-    itineraryTitle: "",
-    startDate: "",
-    endDate: "",
-    selectedDate: "",
-    userId: null,
-    coverPhoto: null, // 存封面圖片
-    itineraryDates: {}, // 每一天的行程資料，鍵是日期，值是行程細節
-    routeTimes: {}, // 存儲行車時間
-    stayDurations: {}, // 存儲每個地點的停留時間
-    itineraries: [],
+    itineraryDates: {},
+    startTimes: {},   // 存放每一天的出發時間
+    routeTimes: {},   // 存放每個行程的行車時間 (以 index 為 key)
+    stayDurations: {},// 存放停留時間 (以 index 為 key)
+    isEditingStays: {},
+    tempStayDurations: {},
   }),
 
+  getters: {
+    getItineraryForDay: (state) => (date) => {
+      return state.itineraryDates[date] ?? [];
+    },
+    getStartTime: (state) => (date) => {
+      return state.startTimes[date] ?? "08:00"; // 確保有預設出發時間
+    },
+    getStayDuration: (state) => (date, index) => {
+      return state.stayDurations[date]?.[index] ?? 0;
+    },
+
+    // 🔥 Getter：讀取「是否正在編輯」
+    getIsEditingStay: (state) => (date, index) => {
+      return state.isEditingStays[date]?.[index] ?? false;
+    },
+
+    // 🔥 Getter：讀取「暫存停留時間」
+    getTempStayDuration: (state) => (date, index) => {
+      return state.tempStayDurations[date]?.[index] ?? 0;
+    },
+
+    getRoutePairs: (state) => (date) => {
+      const places = state.itineraryDates[date] ?? [];
+      let routePairs = {};
+      for (let i = 0; i < places.length - 1; i++) {
+        routePairs[i] = {
+          origin: { lat: places[i].latitude, lng: places[i].longitude },
+          destination: {
+            lat: places[i + 1].latitude,
+            lng: places[i + 1].longitude,
+          },
+        };
+      }
+      return routePairs;
+    },
+  },
+
   actions: {
-    setItinerary(title, start, end) {
-      this.itineraryTitle = title;
-      this.startDate = start;
-      this.endDate = end;
-    },
-
-    setSelectedDate(date) {
-      this.selectedDate = date;
-    },
-
-    addItineraryDate(date) {
-      const newDate = new Date(date);
-      if (!this.endDate || newDate > this.endDate) {
-        this.endDate = newDate;
-      }
-    },
-
-    // 新增某個日期的行程
-    addPlaceToDay(date, place) {
-      // 為每個地點生成唯一的 ID
-      const placeWithId = { ...place, id: uuidv4() };
-
-      if (!this.itineraryDates[date]) {
-        this.itineraryDates[date] = []; // 如果該日期尚未有行程，先初始化為空陣列
-      }
-      this.itineraryDates[date].push(placeWithId); // 新增行程
-    },
-
-    // 取得某個日期的行程
-    getItineraryForDay(date) {
-      return this.itineraryDates[date] || []; // 如果該日期沒有行程，回傳空陣列
-    },
-
-    removePlaceFromItinerary(date, index) {
-      // 確保 itineraryDates[date] 不為 undefined
-      if (!this.itineraryDates[date]) {
-        console.warn(`No itinerary found for date: ${date}`);
-        return;
+    // **從後端載入行程**
+    setItinerary(date, itinerary) {
+      if (!Array.isArray(itinerary)) {
+        console.warn(`setItinerary: 預期收到陣列，但收到 ${typeof itinerary}`);
+        itinerary = [];
       }
 
-      // 確保 index 是有效的
-      if (index < 0 || index >= this.itineraryDates[date].length) {
-        console.warn("Invalid index");
-        return;
-      }
+      // ✅ 改用 index，統一管理順序
+      const normalizedItinerary = itinerary
+        .filter((place) => place !== null && place !== undefined)
+        .map((place, index) => ({
+          placeId: place.placeId ?? null,
+          placeName: place.placeName ?? "",
+          placeAddress: place.placeAddress ?? "",
+          latitude: place.latitude ?? null,
+          longitude: place.longitude ?? null,
+          index: index, // ✅ 改成 index
+          travelTime: place.travelTime ?? null,
+          stayDuration: place.stayDuration ?? null,
+          notes: place.notes ?? null,
+          photos: Array.isArray(place.photos) ? place.photos : [],
+        }));
 
-      // 根據 index 刪除對應的地點
-      this.itineraryDates[date].splice(index, 1); // 刪除單一地點
+      console.log("🚀 更新行程資料 (使用 index):", normalizedItinerary);
+      this.itineraryDates[date] = normalizedItinerary;
     },
 
-    // 新增 updateRouteTimesForDay 方法，用來更新該天的路徑時間結果
-    updateRouteTimesForDay(selectedDate, routeTimes) {
-      this.routeTimes[selectedDate] = routeTimes;
+    setStartTime(date, startTime) {
+      this.startTimes[date] = startTime;
     },
 
-    // 新增 setRouteTime 方法，用來儲存行車時間
     setRouteTime(date, index, time) {
       if (!this.routeTimes[date]) {
         this.routeTimes[date] = {};
@@ -79,16 +86,146 @@ export const useItineraryStore = defineStore("itinerary", {
       this.routeTimes[date][index] = time;
     },
 
-    // 新增 StayDuration 方法，用來儲存停留時間
-    setStayDuration(date, placeId, duration) {
+    setStayDuration(date, index, duration) {
       if (!this.stayDurations[date]) {
-        this.stayDurations[date] = {}; // 初始化該日期的停留時間物件
+        this.stayDurations[date] = {};
       }
-      this.stayDurations[date][placeId] = duration;
+      this.stayDurations[date][index] = duration;
     },
 
-    getStayDuration(date, placeId) {
-      return this.stayDurations[date]?.[placeId] || 0; // 預設 0 分鐘
+    // 🔥 Action：設定「是否正在編輯」
+    setIsEditingStay(date, index, isEditing) {
+      if (!this.isEditingStays[date]) {
+        this.isEditingStays[date] = {};
+      }
+      this.isEditingStays[date][index] = isEditing;
+    },
+
+    // 🔥 Action：設定「暫存停留時間」
+    setTempStayDuration(date, index, tempDuration) {
+      if (!this.tempStayDurations[date]) {
+        this.tempStayDurations[date] = {};
+      }
+      this.tempStayDurations[date][index] = tempDuration;
+    },
+
+    // **前端刪除景點**
+    removePlace(date, index) {
+      if (
+        this.itineraryDates[date] &&
+        index >= 0 &&
+        index < this.itineraryDates[date].length
+      ) {
+        // 🔥 移除景點
+        this.itineraryDates[date].splice(index, 1);
+
+        // 🔥 重新計算 `index`
+        this.itineraryDates[date] = this.itineraryDates[date].map(
+          (place, newIndex) => ({
+            ...place,
+            index: newIndex, // 重新排列 index，確保連續
+          })
+        );
+
+        // 🔥 同步更新 routeTimes & stayDurations
+        if (this.routeTimes[date]) {
+          const updatedRouteTimes = {};
+          Object.keys(this.routeTimes[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedRouteTimes[newKey] = this.routeTimes[date][key];
+          });
+          this.routeTimes[date] = updatedRouteTimes;
+        }
+
+        if (this.stayDurations[date]) {
+          const updatedStayDurations = {};
+          Object.keys(this.stayDurations[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedStayDurations[newKey] = this.stayDurations[date][key];
+          });
+          this.stayDurations[date] = updatedStayDurations;
+        }
+
+        // 🔥 同步更新 isEditingStays & tempStayDurations
+        if (this.isEditingStays[date]) {
+          const updatedEditing = {};
+          Object.keys(this.isEditingStays[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedEditing[newKey] = this.isEditingStays[date][key];
+          });
+          this.isEditingStays[date] = updatedEditing;
+        }
+
+        if (this.tempStayDurations[date]) {
+          const updatedTemps = {};
+          Object.keys(this.tempStayDurations[date]).forEach((key) => {
+            const newKey =
+              parseInt(key) > index ? parseInt(key) - 1 : parseInt(key);
+            if (newKey >= 0)
+              updatedTemps[newKey] = this.tempStayDurations[date][key];
+          });
+          this.tempStayDurations[date] = updatedTemps;
+        }
+      } else {
+        console.warn(`removePlace: 無效的索引 ${index}`);
+      }
+    },
+
+    // **前端拖曳排序**
+    updateOrder(date, newOrder) {
+      // ✅ 重新設定 index，確保順序正確
+      this.itineraryDates[date] = newOrder.map((place, index) => ({
+        ...place,
+        index: index, // 重新計算 index
+      }));
+
+      // ✅ 同步調整 `routeTimes` & `stayDurations`
+      const updatedRouteTimes = {};
+      Object.keys(this.routeTimes[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedRouteTimes[newIndex] = this.routeTimes[date][oldIndex];
+      });
+      this.routeTimes[date] = updatedRouteTimes;
+
+      const updatedStayDurations = {};
+      Object.keys(this.stayDurations[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedStayDurations[newIndex] = this.stayDurations[date][oldIndex];
+      });
+      this.stayDurations[date] = updatedStayDurations;
+
+      // 🔥 同步調整 isEditingStays & tempStayDurations
+      const updatedEditing = {};
+      Object.keys(this.isEditingStays[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedEditing[newIndex] = this.isEditingStays[date][oldIndex];
+      });
+      this.isEditingStays[date] = updatedEditing;
+
+      const updatedTemps = {};
+      Object.keys(this.tempStayDurations[date] || {}).forEach((oldIndex) => {
+        const newIndex = newOrder.findIndex(
+          (p) => p.index === parseInt(oldIndex)
+        );
+        if (newIndex !== -1)
+          updatedTemps[newIndex] = this.tempStayDurations[date][oldIndex];
+      });
+      this.tempStayDurations[date] = updatedTemps;
     },
   },
 });

@@ -24,7 +24,7 @@ import com.ispan.chufa.util.PasswordUtil;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@CrossOrigin(origins = "http://192.168.23.105:6173", allowCredentials = "true")
 @RequestMapping("/ajax/secure")
 public class LineLoginController {
 
@@ -136,7 +136,7 @@ public class LineLoginController {
             // 生成 JWT Token
             String token = jsonWebTokenUtility.createToken(email);
             System.out.println("Generated Token: " + token);
-            String redirectUrl = "http://localhost:5173/secure/Profile?token=%s&source=line".formatted(token);
+            String redirectUrl = "http://192.168.23.105:6173/secure/Profile?token=%s&source=line".formatted(token);
 
             if (token == null) {
                 responseJson.put("success", false);

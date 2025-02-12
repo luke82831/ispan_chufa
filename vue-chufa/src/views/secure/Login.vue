@@ -169,7 +169,7 @@ async function login() {
 function redirectToLineLogin() {
   {
   }
-  const backendLoginUrl = "http://localhost:8080/ajax/secure/lineLogin"; // 後端 LINE 登入 URL
+  const backendLoginUrl = "http://192.168.23.105:6173/ajax/secure/lineLogin"; // 後端 LINE 登入 URL
 
   // 跳转到後端 LINE 登入授權路径
   window.location.href = backendLoginUrl;

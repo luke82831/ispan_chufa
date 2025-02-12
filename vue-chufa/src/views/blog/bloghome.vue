@@ -3,7 +3,12 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
-        <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" />
+        <img
+          :src="member.profile_picture"
+          alt="Profile Picture"
+          v-if="member.profile_picture"
+          class="profile-picture"
+        />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
@@ -17,52 +22,76 @@
 
       <!-- Tab Navigation -->
       <div class="tabs-container">
-        <button :class="{ active: activeTab === 'myPosts' }" @click="setActiveTab('myPosts')">我的貼文</button>
-        <button :class="{ active: activeTab === 'likedPosts' }" @click="setActiveTab('likedPosts')">點讚貼文</button>
-        <button :class="{ active: activeTab === 'sharedPosts' }" @click="setActiveTab('sharedPosts')">轉發貼文</button>
-        <button :class="{ active: activeTab === 'savedPosts' }" @click="setActiveTab('savedPosts')">收藏貼文</button>
+        <button
+          :class="{ active: activeTab === 'myPosts' }"
+          @click="setActiveTab('myPosts')"
+        >
+          我的貼文
+        </button>
+        <button
+          :class="{ active: activeTab === 'likedPosts' }"
+          @click="setActiveTab('likedPosts')"
+        >
+          點讚貼文
+        </button>
+        <button
+          :class="{ active: activeTab === 'sharedPosts' }"
+          @click="setActiveTab('sharedPosts')"
+        >
+          轉發貼文
+        </button>
+        <button
+          :class="{ active: activeTab === 'savedPosts' }"
+          @click="setActiveTab('savedPosts')"
+        >
+          收藏貼文
+        </button>
       </div>
 
       <h3 class="section-title">貼文內容</h3>
       <div class="tab-content">
         <ul v-if="posts.length > 0" class="post-list">
-          <li v-for="post in posts" :key="post.postid" 
-    class="post-item" 
-    :class="{ 'hidden-post': postStore.getHiddenReason(post.postid) }">
-  
-  <!-- 隱藏的文章顯示提示 -->
-  <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
-    <p>您的文章已被隱藏</p>
-    <p>原因：文章內有「{{ postStore.getHiddenReason(post.postid) }}」</p>
-  </div>
+          <li
+            v-for="post in posts"
+            :key="post.postid"
+            class="post-item"
+            :class="{ 'hidden-post': postStore.getHiddenReason(post.postid) }"
+          >
+            <!-- 隱藏的文章顯示提示 -->
+            <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
+              <p>您的文章已被隱藏</p>
+              <p>原因：文章內有「{{ postStore.getHiddenReason(post.postid) }}」</p>
+            </div>
 
-  <!-- 正常顯示的文章 -->
-  <div v-else>
-    <div class="post-author">
-      <img 
-        v-if="post.member?.profilePicture" 
-        :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
-        alt="Author's Profile Picture" 
-        class="profile-picture"
-      />
-      <div v-else class="default-profile"></div>
-      <div class="post-author-name">{{ post.member.name }}</div>
-    </div>
-    <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-      <h4>{{ post.postTitle || '無標題' }}</h4>
-    </router-link>
-    <p class="post-content">{{ post.postContent }}</p>
-  </div>
-
+            <!-- 正常顯示的文章 -->
+            <div v-else>
+              <div class="post-author">
+                <img
+                  v-if="post.member?.profilePicture"
+                  :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+                  alt="Author's Profile Picture"
+                  class="profile-picture"
+                />
+                <div v-else class="default-profile"></div>
+                <div class="post-author-name">{{ post.member.name }}</div>
+              </div>
+              <router-link
+                :to="{ name: 'PostDetail', params: { id: post.postid } }"
+                class="post-link"
+              >
+                <h4>{{ post.postTitle || "無標題" }}</h4>
+              </router-link>
+              <p class="post-content">{{ post.postContent }}</p>
+            </div>
 
             <!-- 如果是轉發貼文，顯示被轉發的原始貼文 -->
             <div v-if="post.repost && post.repostDTO" class="repost-container">
               <div class="repost-author">
-                <img 
-                  v-if="post.repostDTO.member?.profilePicture" 
-                  :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
-                  alt="Original Author's Profile Picture" 
-                  class="profile-picture" 
+                <img
+                  v-if="post.repostDTO.member?.profilePicture"
+                  :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture"
+                  alt="Original Author's Profile Picture"
+                  class="profile-picture"
                   @error="event.target.src = '/default-profile.png'"
                 />
                 <div v-else class="default-profile"></div>
@@ -71,7 +100,7 @@
               <p class="repost-content">{{ post.repostDTO.postContent }}</p>
             </div>
 
-            <div class="post-tags">{{ post.tags || '無標籤' }}</div>
+            <div class="post-tags">{{ post.tags || "無標籤" }}</div>
           </li>
         </ul>
         <p v-else class="no-posts">目前沒有相關的貼文。</p>
@@ -83,70 +112,77 @@
   </div>
 </template>
 <script>
-import { ref, onMounted } from 'vue';
-import axios from '@/plugins/axios.js';
-import Swal from 'sweetalert2';
-import { useRouter } from 'vue-router';
-import { usePostStore } from '@/stores/usePostStore';
+import { ref, onMounted } from "vue";
+import axiosapi from "@/plugins/axios.js";
+import Swal from "sweetalert2";
+import { useRouter } from "vue-router";
+import { usePostStore } from "@/stores/usePostStore";
 
 export default {
   setup() {
     const router = useRouter();
     const member = ref({});
     const posts = ref([]);
-    const activeTab = ref('myPosts');
+    const activeTab = ref("myPosts");
     const postStore = usePostStore();
 
     const formatDate = (date) => {
-      if (!date) return '';
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      return new Date(date).toLocaleDateString('zh-TW', options);
+      if (!date) return "";
+      const options = { year: "numeric", month: "2-digit", day: "2-digit" };
+      return new Date(date).toLocaleDateString("zh-TW", options);
     };
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('/ajax/secure/profile', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        const response = await axiosapi.get("/ajax/secure/profile", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.data.success) {
           member.value = response.data.user || {};
         } else {
-          Swal.fire('錯誤', response.data.message, 'error');
+          Swal.fire("錯誤", response.data.message, "error");
         }
       } catch (error) {
-        console.error('Fetch profile failed:', error);
-        Swal.fire('錯誤', '無法獲取會員資料', 'error');
+        console.error("Fetch profile failed:", error);
+        Swal.fire("錯誤", "無法獲取會員資料", "error");
       }
     };
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { userid: member.value.userid };
-    if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
-    if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
-    if (filterType === 'myPosts') {
-      payload.repost = false;  // 不要 repost 的貼文
-    } else if (filterType === 'sharedPosts') {
-      payload.repost = true;  // 只要 repost 的貼文
-    }
+        const payload = { userid: member.value.userid };
+        if (filterType === "likedPosts") {
+          payload.likedBy = member.value.userid;
+          payload.repost = true;
+        }
+        if (filterType === "savedPosts") {
+          payload.collectBy = member.value.userid;
+          payload.repost = true;
+        }
+        if (filterType === "myPosts") {
+          payload.repost = false; // 不要 repost 的貼文
+        } else if (filterType === "sharedPosts") {
+          payload.repost = true; // 只要 repost 的貼文
+        }
 
-    const response = await axios.post('/api/posts/post', payload);
-    let postData = response.data.postdto || [];
+        const response = await axiosapi.post("/api/posts/post", payload);
+        let postData = response.data.postdto || [];
 
-    // 過濾條件
-    if (filterType === 'myPosts') {
-      posts.value = postData.filter(post => !post.repost && post.repostDTO === null);
-    } else if (filterType === 'sharedPosts') {
-      posts.value = postData.filter(post => post.repost || post.repostDTO !== null);
-    } else {
-      posts.value = postData;
-    }
-  } catch (error) {
-    console.error('Fetch posts failed:', error);
-    Swal.fire('錯誤', `無法取得${filterType}的貼文`, 'error');
-  }
+        // 過濾條件
+        if (filterType === "myPosts") {
+          posts.value = postData.filter(
+            (post) => !post.repost && post.repostDTO === null
+          );
+        } else if (filterType === "sharedPosts") {
+          posts.value = postData.filter((post) => post.repost || post.repostDTO !== null);
+        } else {
+          posts.value = postData;
+        }
+      } catch (error) {
+        console.error("Fetch posts failed:", error);
+        Swal.fire("錯誤", `無法取得${filterType}的貼文`, "error");
+      }
     };
-    
 
     const setActiveTab = async (tab) => {
       activeTab.value = tab;
@@ -156,7 +192,7 @@ export default {
     onMounted(async () => {
       await fetchProfile();
       if (member.value.userid) {
-        await fetchPosts('myPosts');
+        await fetchPosts("myPosts");
       }
     });
 
@@ -174,7 +210,7 @@ export default {
 
 <style scoped>
 .profile-page {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   padding: 20px;
   background-color: #f9f9f9;
   color: #333;
@@ -380,6 +416,4 @@ export default {
   text-align: center;
   padding: 10px;
 }
-
-
 </style>

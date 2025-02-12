@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,8 +29,8 @@ import com.ispan.chufa.service.PostService;
 import com.ispan.chufa.service.TimelineService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api/posts")
+@CrossOrigin(origins = "http://192.168.23.105:6173", allowedHeaders = "*", allowCredentials = "true")
 public class PostController {
     @Autowired
     private PostService postService;
@@ -146,7 +145,7 @@ public class PostController {
     // .orElse(ResponseEntity.notFound().build());
     //
     // }
-    
+
     @DeleteMapping("/{postid}")
     public ResponseEntity<?> deletePost(@PathVariable Long postid) {
         boolean deleted = postService.deletePostById(postid);
@@ -157,4 +156,3 @@ public class PostController {
         }
     }
 }
-

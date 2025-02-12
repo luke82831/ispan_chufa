@@ -107,6 +107,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { usePostStore } from "@/stores/usePostStore";
 import { useUserStore } from "@/stores/user";
+import axiosapi from "@/plugins/axios.js";
 
 export default {
   setup() {
@@ -143,7 +144,7 @@ export default {
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get("/ajax/secure/profile", {
+        const response = await axiosapi.get("/ajax/secure/profile", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.data.success) {
@@ -160,7 +161,7 @@ export default {
 
     const fetchPosts = async () => {
       try {
-        const response = await axios.post(
+        const response = await axiosapi.post(
           "/api/posts/post",
           {
             sortByLikes: true,
@@ -202,7 +203,7 @@ export default {
     const repostPost = async (postid) => {
       try {
         const data = { postid, userid: member.value.userid };
-        const response = await axios.post("/api/posts/repost/forward", data, {
+        const response = await axiosapi.post("/api/posts/repost/forward", data, {
           headers: { "Content-Type": "application/json" },
         });
         if (response.data.repost) {
@@ -224,7 +225,7 @@ export default {
           userid: member.value.userid,
           interactionType: "LIKE",
         };
-        const response = await axios.post("/api/posts/insertinteraction", data, {
+        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
           headers: { "Content-Type": "application/json" },
         });
         if (response.data.success) {
@@ -245,7 +246,7 @@ export default {
           userid: member.value.userid,
           interactionType: "COLLECT",
         };
-        const response = await axios.post("/api/posts/insertinteraction", data, {
+        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
           headers: { "Content-Type": "application/json" },
         });
         if (response.data.success) {

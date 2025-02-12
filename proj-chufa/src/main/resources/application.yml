@@ -1,8 +1,12 @@
+server:
+  address: 0.0.0.0
+  port: 8080
+
 #資料庫連線設定
 spring:  
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
+    url: jdbc:sqlserver://192.168.23.105:1433;database=chufa;trustServerCertificate=true
     username: sa
     password: P@ssw0rd
   mvc:
@@ -57,5 +61,5 @@ line:
   login:
     channel-id: "2006733552"
     channel-secret: "2e094b815ed92a5e16cb5938e9576102"
-    callback-url: "http://localhost:8080/ajax/secure/callback/api/auth/line-login"
+    callback-url: "http://192.168.23.105:6173/ajax/secure/callback/api/auth/line-login"
 

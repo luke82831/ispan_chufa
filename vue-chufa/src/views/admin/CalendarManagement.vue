@@ -113,7 +113,7 @@ onMounted(() => {
   border-radius: 15px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.15);
   font-family: "Microsoft JhengHei", sans-serif;
-  border-radius: 10px;
+  
 }
 
 /* 讓標題置中 */

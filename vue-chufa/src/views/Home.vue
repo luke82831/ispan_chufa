@@ -50,12 +50,7 @@
       </div>
 
       <p class="post-content">{{ post.postContent }}</p>
-      <a
-        v-if="post.postLink"
-        :href="post.postLink"
-        target="_blank"
-        class="read-more"
-      >
+      <a v-if="post.postLink" :href="post.postLink" target="_blank" class="read-more">
         閱讀更多
       </a>
       <div class="post-meta">
@@ -288,7 +283,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 .main-container {

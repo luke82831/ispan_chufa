@@ -1,7 +1,6 @@
 package com.ispan.chufa.service;
 
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 //import java.sql.Timestamp;
@@ -12,19 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ispan.chufa.dto.TimelinePostDto;
-import com.ispan.chufa.repository.FollowRepository;
 import com.ispan.chufa.repository.InteractionRepository;
-import com.ispan.chufa.repository.PostRepository;
 import com.ispan.chufa.repository.TimelineRepository;
+
 @Service
 public class TimelineService {
 	@Autowired
 	private TimelineRepository timelineRepository;
-	@Autowired
-    private FollowRepository followRepository;
 
-	@Autowired
-	private PostRepository postRepository;
 
 	@Autowired
 	private InteractionRepository interactionRepository;

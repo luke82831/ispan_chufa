@@ -10,7 +10,8 @@
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
           <p><strong>ID:</strong> {{ member.userid }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ member.followersCount || 0 }}</p>
+            <p><strong>關注人數:</strong> {{ followersCount }}</p>    
+            <p><strong>粉絲:</strong> {{ followingCount }}</p>
           </router-link>
         </div>
       </div>
@@ -24,58 +25,15 @@
       </div>
 
       <h3 class="section-title">貼文內容</h3>
-      <div class="tab-content">
-        <ul v-if="posts.length > 0" class="post-list">
-          <li v-for="post in posts" :key="post.postid" 
-    class="post-item" 
-    :class="{ 'hidden-post': postStore.getHiddenReason(post.postid) }">
-  
-  <!-- 隱藏的文章顯示提示 -->
-  <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
-    <p>您的文章已被隱藏</p>
-    <p>原因：文章內有「{{ postStore.getHiddenReason(post.postid) }}」</p>
-    <p>請聯絡客服協助處裡，Email: Chufa.service@gmail.com</p>
-  </div>
-
-  <!-- 正常顯示的文章 -->
-  <div v-else>
-    <div class="post-author">
-      <img 
-        v-if="post.member?.profilePicture" 
-        :src="'data:image/jpeg;base64,' + post.member.profilePicture" 
-        alt="Author's Profile Picture" 
-        class="profile-picture"
-      />
-      <div v-else class="default-profile"></div>
-      <div class="post-author-name">{{ post.member.name }}</div>
-    </div>
-    <router-link :to="{ name: 'PostDetail', params: { id: post.postid } }" class="post-link">
-      <h4>{{ post.postTitle || '無標題' }}</h4>
-    </router-link>
-    <p class="post-content">{{ post.postContent }}</p>
-  </div>
-
-
-            <!-- 如果是轉發貼文，顯示被轉發的原始貼文 -->
-            <div v-if="post.repost && post.repostDTO" class="repost-container">
-              <div class="repost-author">
-                <img 
-                  v-if="post.repostDTO.member?.profilePicture" 
-                  :src="'data:image/jpeg;base64,' + post.repostDTO.member.profilePicture" 
-                  alt="Original Author's Profile Picture" 
-                  class="profile-picture" 
-                  @error="event.target.src = '/default-profile.png'"
-                />
-                <div v-else class="default-profile"></div>
-                <div class="repost-author-name">{{ post.repostDTO.member.name }}</div>
-              </div>
-              <p class="repost-content">{{ post.repostDTO.postContent }}</p>
-            </div>
-
-            <div class="post-tags">{{ post.tags || '無標籤' }}</div>
-          </li>
-        </ul>
-        <p v-else class="no-posts">目前沒有相關的貼文。</p>
+      <div class="posts-grid">
+        <PostCard
+          v-for="post in posts"
+          :key="post.postid"
+          :post="post"
+          :member="member"
+          :formatDate="formatDate"
+          @update-posts="fetchPosts()"
+        />
       </div>
     </div>
     <div v-else class="loading">
@@ -88,15 +46,51 @@ import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
-import { usePostStore } from '@/stores/usePostStore';
+import axiosapi from '@/plugins/axios.js';
+import PostCard from "@/components/Postcard.vue";
+import { useUserStore } from "@/stores/user.js";
+import { useRoute } from 'vue-router';
+
 
 export default {
+  components: {
+    PostCard // 註冊 PostCard 元件
+  },
+  
   setup() {
     const router = useRouter();
     const member = ref({});
     const posts = ref([]);
     const activeTab = ref('myPosts');
-    const postStore = usePostStore();
+    //const postStore = usePostStore();
+
+    const followersCount = ref(0); // 使用 ref 來定義自適應資料
+    const followingCount = ref(0);
+
+    
+
+    // 用來從後端取得關注者和被關注者的人數
+    const fetchCount = async (type) => {
+      const url = type === 'followers'
+        ? `/follow/followercount/${member.value.userid}`
+        : `/follow/followingcount/${member.value.userid}`;
+
+      try {
+        const response = await axiosapi.get(url);
+        console.log("jdgfbdis"+followersCount)
+        // 假設返回的資料是一個物件，包含 `count` 資料欄
+        return response.data || 0; // 如果沒有資料則返回0
+      } catch (error) {
+        console.error(`Error fetching ${type}:`, error);
+        return 0;
+      }
+    }; 
+
+    // 載入關注人數和被關注人數
+    const loadCounts = async () => {
+      followersCount.value = await fetchCount('followers');
+      followingCount.value = await fetchCount('followed');
+    };
 
     const formatDate = (date) => {
       if (!date) return '';
@@ -106,7 +100,7 @@ export default {
 
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('/ajax/secure/profile', {
+        const response = await axiosapi.get('/ajax/secure/profile', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         });
         if (response.data.success) {
@@ -122,16 +116,18 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { userid: member.value.userid };
+    const payload = { };
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
     if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
-      payload.repost = false;  // 不要 repost 的貼文
+      payload.repost = false;  // 不要 repost 的貼文\
+      payload.userid=member.value.userid;
     } else if (filterType === 'sharedPosts') {
       payload.repost = true;  // 只要 repost 的貼文
+      payload.userid=member.value.userid;
     }
-
-    const response = await axios.post('/api/posts/post', payload);
+    //userid: member.value.userid 
+    const response = await axiosapi.post('/api/posts/post', payload);
     let postData = response.data.postdto || [];
 
     // 過濾條件
@@ -147,15 +143,41 @@ export default {
     Swal.fire('錯誤', `無法取得${filterType}的貼文`, 'error');
   }
     };
-    
 
     const setActiveTab = async (tab) => {
       activeTab.value = tab;
       await fetchPosts(tab);
     };
 
+    const getFirstImage = (content) => {
+      const match = content.match(/<img[^>]+src="([^">]+)"/);
+      return match ? match[1] : null;
+    };
+
+    const getTextPreview = (content, length) => {
+      // 移除圖片和其他 HTML 標籤
+      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
+      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+    };
+    const userStore = useUserStore(); // 使用 Pinia 的狀態
+
+    const navigateToDetail = (postid, event) => {
+      const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+      for (let selector of excludedElements) {
+        if (event.target.closest(selector)) {
+          return; // 如果點擊的是按鈕、連結，就不觸發跳轉
+        }
+      }
+      router.push(`/blog/find/${postid}`);
+    };
+
+
+    const route = useRoute();
+
+
     onMounted(async () => {
       await fetchProfile();
+      await loadCounts();
       if (member.value.userid) {
         await fetchPosts('myPosts');
       }
@@ -167,7 +189,8 @@ export default {
       formatDate,
       setActiveTab,
       activeTab,
-      postStore, // 傳遞 Pinia
+      followersCount,
+      followingCount,
     };
   },
 };
@@ -365,21 +388,10 @@ export default {
   margin: 0;
 }
 
-/*=========================已隱藏CSS================*/
-.hidden-post {
-  background: #f5f5f5;
-  color: #888;
-  border: 1px solid #ddd;
-  opacity: 0.7;
-  pointer-events: none; /* 防止點擊 */
-}
-
-.hidden-message {
-  font-size: 14px;
-  font-weight: bold;
-  color: red;
-  text-align: center;
-  padding: 10px;
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 

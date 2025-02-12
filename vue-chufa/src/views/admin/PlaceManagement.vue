@@ -1,82 +1,85 @@
 <template>
   <div class="place-management">
-  <div><h1 class="page-title">地點管理</h1></div>
-  <div class="container">
-    <div v-if="loading" class="loading-text">載入中...</div>
-    <div v-else-if="!places.length" class="no-data">沒有地點可顯示</div>
-    <div v-else class="table-wrapper">
-      <table class="place-table">
-        <thead>
-          <tr>
-            <th class="number-col">ID</th>
-            <th class="small-col">類型</th>
-            <th class="mid-col">名稱</th>
-            <th class="large-col">照片</th>
-            <th class="scroll-col">地址</th>
-            <th class="xsmall-col">城市</th>
-            <th class="xsmall-col">地區</th>
-            <th class="phone-col">電話</th>
-            <th class="scroll-col">營業時間</th>
-            <th class="number-col">評分</th>
-            <th class="number-col">網址</th>
-            <th class="xsmall-col">價錢</th>
-            <th class="xsmall-col">狀態</th>
-            <th class="large-col">更改/刪除</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="place in places" :key="place.placeId" class="hover-effect">
-            <td>{{ place.placeId }}</td>
-            <td>{{ place.placeType }}</td>
-            <td>{{ place.placeName }}</td>
-            <td>
-              <div v-if="place.photos.length">
-                <img :src="place.photos[0]" alt="Place Photo" class="place-photo" />
-              </div>
-              <div v-else>無圖片</div>
-            </td>
-            <td><div class="scroll-container">{{ place.placeAddress }}</div></td>
-            <td>{{ place.city }}</td>
-            <td>{{ place.region }}</td>
-            <td>{{ place.placePhone }}</td>
-            <td><div class="scroll-container">{{ place.businessHours }}</div></td>
-            <td>{{ place.rating }}</td>
-            <td><a :href="place.website" target="_blank">連結</a></td>
-            <td>{{ place.priceLevel }}</td>
-            <td>{{ place.isClosed ? '休息中' : '營業中' }}</td>
-            <td>
-              <div class="action-buttons">
+    <div><h1 class="page-title">地點管理</h1></div>
+    <div class="container">
+      <div v-if="loading" class="loading-text">載入中...</div>
+      <div v-else-if="!places.length" class="no-data">沒有地點可顯示</div>
+      <div v-else class="table-wrapper">
+        <table class="place-table">
+          <thead>
+            <tr>
+              <th class="number-col">ID</th>
+              <th class="small-col">類型</th>
+              <th class="small-col">名稱</th>
+              <th class="large-col">照片</th>
+              <th class="scroll-col">地址</th>
+              <th class="xsmall-col">城市</th>
+              <th class="xsmall-col">地區</th>
+              <th class="phone-col">電話</th>
+              <th class="scroll-col">營業時間</th>
+              <th class="number-col">評分</th>
+              <th class="xsmall-col">網址</th>
+              <th class="xsmall-col">價錢</th>
+              <th class="xsmall-col">狀態</th>
+              <th class="large-col">更改/刪除</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="place in places" :key="place.placeId" class="hover-effect">
+              <td>{{ place.placeId }}</td>
+              <td>{{ place.placeType }}</td>
+              <td>{{ place.placeName }}</td>
+              <td>
+                <div v-if="place.photos.length">
+                  <img :src="place.photos[0]" alt="Place Photo" class="place-photo" />
+                </div>
+                <div v-else>無圖片</div>
+              </td>
+              <td>
+                <div class="scroll-container">{{ place.placeAddress }}</div>
+              </td>
+              <td>{{ place.city }}</td>
+              <td>{{ place.region }}</td>
+              <td>{{ place.placePhone }}</td>
+              <td>
+                <div class="scroll-container">{{ place.businessHours }}</div>
+              </td>
+              <td>{{ place.rating }}</td>
+              <td><a :href="place.website" target="_blank">連結</a></td>
+              <td>{{ place.priceLevel }}</td>
+              <td>{{ place.isClosed ? "休息中" : "營業中" }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="edit-btn" @click="openEditModal(place)">更新</button>
+                  <button class="delete-btn" @click="confirmDelete(place.placeId)">
+                    刪除
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-              <button class="edit-btn" @click="openEditModal(place)">更新</button>
-              <button class="delete-btn" @click="confirmDelete(place.placeId)">刪除</button>
-            </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- 分頁控制 -->
+      <div class="pagination">
+        <button :disabled="currentPage === 0" @click="fetchPlaces(currentPage - 1)">
+          上一頁
+        </button>
+        <span>第 {{ currentPage + 1 }} 頁 / 共 {{ totalPages }} 頁</span>
+        <button
+          :disabled="currentPage === totalPages - 1"
+          @click="fetchPlaces(currentPage + 1)"
+        >
+          下一頁
+        </button>
+      </div>
 
-
-    <!-- 分頁控制 -->
-    <div class="pagination">
-      <button :disabled="currentPage === 0" @click="fetchPlaces(currentPage - 1)">
-        上一頁
-      </button>
-      <span>第 {{ currentPage + 1 }} 頁 / 共 {{ totalPages }} 頁</span>
-      <button
-        :disabled="currentPage === totalPages - 1"
-        @click="fetchPlaces(currentPage + 1)"
-      >
-        下一頁
-      </button>
-    </div>
-
-
-    <!-- 編輯模態框 -->
-    <div v-if="showEditModal" class="modal">
-      <div class="modal-content">
-        <h3>編輯地點</h3>
-        <label>類型:</label>
+      <!-- 編輯模態框 -->
+      <div v-if="showEditModal" class="modal">
+        <div class="modal-content">
+          <h3>編輯地點</h3>
+          <label>類型:</label>
           <input v-model="editedPlace.placeType" type="text" class="input-box" />
         </div>
 
@@ -107,12 +110,24 @@
 
         <div class="input-group">
           <label>評分:</label>
-          <input v-model="editedPlace.rating" type="number" step="0.1" min="0" max="5" class="input-box" />
+          <input
+            v-model="editedPlace.rating"
+            type="number"
+            step="0.1"
+            min="0"
+            max="5"
+            class="input-box"
+          />
         </div>
 
         <div class="input-group">
           <label>價錢:</label>
-          <input v-model="editedPlace.priceLevel" type="number" min="0" class="input-box" />
+          <input
+            v-model="editedPlace.priceLevel"
+            type="number"
+            min="0"
+            class="input-box"
+          />
         </div>
 
         <div class="input-group">
@@ -126,19 +141,17 @@
         <div class="modal-buttons">
           <button @click="saveChanges" class="save-btn">儲存</button>
           <button @click="closeEditModal" class="cancel-btn">取消</button>
-
-
         </div>
       </div>
     </div>
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
+import axiosapi from "@/plugins/axios.js";
 
 const places = ref([]);
 const loading = ref(true);
@@ -146,8 +159,6 @@ const showEditModal = ref(false);
 const editedPlace = ref({});
 const currentPage = ref(0); // 當前頁碼
 const totalPages = ref(0); // 總頁數
-
-
 
 // 取得地點資料（支援分頁）
 const fetchPlaces = async (page = 0) => {
@@ -202,8 +213,8 @@ const confirmDelete = async (placeId) => {
 
   if (result.isConfirmed) {
     try {
-      await axios.delete(`/api/places/${placeId}`);
-      places.value = places.value.filter(place => place.placeId !== placeId);
+      await axiosapi.delete(`/api/places/${placeId}`);
+      places.value = places.value.filter((place) => place.placeId !== placeId);
       Swal.fire("已刪除", "地點已成功刪除", "success");
     } catch (error) {
       console.error("❌ 刪除失敗:", error);
@@ -212,17 +223,11 @@ const confirmDelete = async (placeId) => {
   }
 };
 
-
 onMounted(fetchPlaces);
-
 </script>
 
 <style scoped>
-
-
 /*------------------------主頁面功能----------------*/
-
-
 
 .container {
   max-width: 100%;
@@ -235,21 +240,16 @@ onMounted(fetchPlaces);
   padding-top: 20px; /* 增加上方間距，給標題留空間 */
   width: 100%;
   padding: 20px;
-
 }
-
 
 .place-management {
   width: 100%;
-  max-width: 2000px;
+  max-width: 1500px;
   padding: 30px;
   background: white;
-  border-radius: 15px;            /* 使用文章管理的圓角 */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.2),
-    0 5px 15px rgba(0, 0, 0, 0.15);
+  border-radius: 15px; /* 使用文章管理的圓角 */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.15);
   font-family: "Microsoft JhengHei", sans-serif;
-
 }
 
 .table-wrapper {
@@ -269,7 +269,6 @@ onMounted(fetchPlaces);
   table-layout: fixed; /* 讓內容自然分配寬度 */
 }
 
-
 /*框線*/
 .place-table th,
 .place-table td {
@@ -285,8 +284,6 @@ onMounted(fetchPlaces);
   background-color: #f4f4f4;
 }
 
-
-
 .loading-text,
 .no-data {
   text-align: center;
@@ -299,7 +296,7 @@ onMounted(fetchPlaces);
 }
 
 .edit-btn {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -337,7 +334,6 @@ onMounted(fetchPlaces);
   width: 110px;
 }
 
-
 /* 放大電話欄位 */
 .phone-col {
   width: 100px;
@@ -350,7 +346,7 @@ onMounted(fetchPlaces);
 
 /* 給數字使用的欄位 */
 .number-col {
-  width: 50px;
+  width: 30px;
 }
 
 /* 滾動區域 */
@@ -370,16 +366,13 @@ onMounted(fetchPlaces);
   max-width: 200px;
 }
 
-
 .page-title {
   text-align: center;
   font-size: 28px;
   color: #343a40;
   border-bottom: 2px solid #ccc;
   margin-bottom: 0px;
-
 }
-
 
 .main-content {
   flex: 1;
@@ -396,10 +389,9 @@ onMounted(fetchPlaces);
   padding: 20px;
 }
 
-
 /* 確保 更新 和 刪除 按鈕是並排對齊 */
 .action-buttons {
-  display: inline-flex;  /* 讓按鈕維持 inline 並排 */
+  display: inline-flex; /* 讓按鈕維持 inline 並排 */
   justify-content: center; /* 置中對齊 */
   align-items: center; /* 垂直對齊 */
   gap: 8px; /* 調整按鈕間距 */
@@ -420,12 +412,7 @@ onMounted(fetchPlaces);
   align-self: flex-start;
 }
 
-
-
-
 /*------------------------編輯頁面----------------*/
-
-
 
 .modal {
   position: fixed;
@@ -543,9 +530,7 @@ onMounted(fetchPlaces);
   }
 }
 
-
 /*------------------------分頁功能----------------*/
-
 
 .pagination {
   display: flex;
@@ -576,7 +561,6 @@ onMounted(fetchPlaces);
   border-color: #007bff;
   color: #007bff;
   transform: scale(1.1);
-
 }
 
 .pagination button:disabled {
@@ -593,20 +577,13 @@ onMounted(fetchPlaces);
   font-weight: bold;
 }
 
-
-
-
-
 /*------------------------hover功能----------------*/
-
-
 
 /* 滑鼠懸停時的行高亮顯示 */
 .hover-effect {
   transition: background-color 0.3s ease-in-out;
   position: relative; /* 確保內部的按鈕不會受到影響 */
 }
-
 
 /* 滑鼠移上去變成淡綠色 */
 .hover-effect:hover {
@@ -619,8 +596,8 @@ onMounted(fetchPlaces);
   z-index: 10;
 }
 
-
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
   position: relative;
   z-index: 11;
 }

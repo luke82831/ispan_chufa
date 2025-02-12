@@ -16,13 +16,12 @@
     </div>
 
     <div class="nav-links">
-      <!-- 只有管理員才顯示後臺管理按鈕 -->
-      <!-- <RouterLink
-        v-if="userStore.isLoggedIn && userStore.member.isAdmin"
+      <!-- 只有管理員才顯示後台管理按鈕 -->
+      <RouterLink
+        v-if="userStore.isLoggedIn && userStore.member.role === 'ADMIN'"
         to="/admin"
         class="admin-button"
-      > -->
-      <RouterLink to="/admin" class="admin-button">
+      >
         <i class="fas fa-cog"></i> 後台管理
       </RouterLink>
 
@@ -76,7 +75,6 @@ import { useUserStore } from "@/stores/user.js";
 
 const userStore = useUserStore(); // 使用 Pinia 狀態管理
 const router = useRouter();
-
 
 const isDropdownVisible = ref(false);
 
@@ -331,6 +329,3 @@ onMounted(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 </style>
-
-
-

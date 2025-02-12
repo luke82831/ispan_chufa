@@ -1,4 +1,4 @@
-package com.ispan.chufa;
+package com.ispan.chufa.util;
 
 public class LineUserInfo {
     private String userId; // LINE 的使用者 ID

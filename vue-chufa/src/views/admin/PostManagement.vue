@@ -242,7 +242,7 @@ onMounted(fetchPosts);
 /* 外層容器 */
 .post-management {
   width: 100%;
-  max-width: 2000px;
+  max-width: 1500px;
   padding: 30px;
   background: white;
   border-radius: 15px;

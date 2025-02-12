@@ -1,4 +1,4 @@
-package com.ispan.chufa;
+package com.ispan.chufa.util;
 
 public class AccessToken {
     private String access_token;

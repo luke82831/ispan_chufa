@@ -31,6 +31,10 @@
                 </div>
             </div>
 
+            <div class="addTagsBox">
+                <addTags :optTagsId="optTagsId"></addTags>
+            </div>
+
             <!-- 提交按鈕 -->
             <div>
                 <button @click="submitArticle" class="outputPost">提交文章</button>
@@ -46,8 +50,9 @@ import "quill/dist/quill.snow.css";
 import axiosapi from '@/plugins/axios.js';
 import { useRouter } from "vue-router";
 import { useUserStore } from '@/stores/user'
-import inputSchedule from "@/components/Post/inputSchedule.vue";
+import inputSchedule from "@/components/PostCreate/inputSchedule.vue";
 import eventBus from "@/eventBus";
+import addTags from "@/components/PostCreate/addTags.vue";
 
 const buttonSchedule = ref(false)
 const Schedule = () => {
@@ -68,7 +73,7 @@ const user = useUserStore()
 const { member, isLoggedIn } = user
 const editorContainer = ref(null);
 let quill;
-
+const optTagsId = ref([])
 onMounted(() => {
     quill = new Quill(editorContainer.value, {
         theme: "snow",
@@ -92,20 +97,19 @@ onMounted(() => {
 const schedule = ref(null)
 
 const submitArticle= async () => {
-    let body = {}
-    if(schedule.value == null){
-        body = {
-            "postTitle":title.value,
-            "postContent":quill.root.innerHTML,
-            "userid":member.userid,
-        }
-    }else{
-        body = {
-            "postTitle":title.value,
-            "postContent":quill.root.innerHTML,
-            "userid":member.userid,
-            "tripId":`${schedule.value.tripId}`,
-        }
+    let body = {
+        "postTitle":title.value,
+        "postContent":quill.root.innerHTML,
+        "userid":member.userid,
+        "tripId":"",
+        "tagId":[],
+    }
+
+    if(schedule.value != null){
+        body.tripId=schedule.value.tripId
+    }
+    if(optTagsId.value.length!=0){
+        body.tagId=optTagsId.value
     }
     const response = await axiosapi.post('/post/create',body);
     alert(response.data.message);

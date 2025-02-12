@@ -28,9 +28,9 @@ public class ScheduleBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
     @Column(name = "trip_id")
     private Long tripId;
-    
+
     @Lob
-    @Column(name = "cover_photo", columnDefinition = "VARBINARY(MAX)") 
+    @Column(name = "cover_photo", columnDefinition = "VARBINARY(MAX)")
     private byte[] coverPhoto; // 封面照片（Base64 編碼數據）
 
     @Column(name = "trip_name", nullable = false)
@@ -41,7 +41,7 @@ public class ScheduleBean {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
-    
+
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<EventBean> events;
@@ -51,8 +51,27 @@ public class ScheduleBean {
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 
+    @OneToMany
+    private List<PostBean> PostBeans;
+
     // Constructors
     public ScheduleBean() {
+    }
+
+    public List<EventBean> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<EventBean> events) {
+        this.events = events;
+    }
+
+    public List<PostBean> getPostBeans() {
+        return PostBeans;
+    }
+
+    public void setPostBeans(List<PostBean> postBeans) {
+        PostBeans = postBeans;
     }
 
     public ScheduleBean(byte[] coverPhoto, String tripName, LocalDate startDate, LocalDate endDate, MemberBean userid) {
@@ -79,7 +98,7 @@ public class ScheduleBean {
     public void setCoverPhoto(byte[] coverPhoto) {
         this.coverPhoto = coverPhoto;
     }
-    
+
     public String getCoverPhotoBase64() {
         if (this.coverPhoto != null) {
             return Base64.getEncoder().encodeToString(this.coverPhoto);
@@ -125,7 +144,8 @@ public class ScheduleBean {
 
     @Override
     public String toString() {
-        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + (coverPhoto != null ? "Base64 Data" : "null") + ", tripName=" + tripName +
+        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + (coverPhoto != null ? "Base64 Data" : "null")
+                + ", tripName=" + tripName +
                 ", startDate=" + startDate + ", endDate=" + endDate + "]";
     }
 }

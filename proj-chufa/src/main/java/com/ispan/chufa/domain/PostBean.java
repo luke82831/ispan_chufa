@@ -65,7 +65,7 @@ public class PostBean {
 	private Set<PlaceBean> place = new HashSet<>();
 	// private Set<TagsBean> tag;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	private ScheduleBean scheduleBean;
 
 	@ManyToOne

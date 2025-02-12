@@ -47,8 +47,8 @@ public class ScheduleBean {
     private List<EventBean> events;
 
     @ManyToOne
+    @JsonIgnoreProperties("places")
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
-    @JsonIgnoreProperties({"places"})
     private MemberBean user;
 
     // Constructors

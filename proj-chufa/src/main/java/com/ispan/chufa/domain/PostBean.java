@@ -32,10 +32,9 @@ public class PostBean {
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // 設定為自增
 	private Long postid; // 貼文_貼文id
 	private String postStatus; // 貼文_貼文狀態
-	@Column(columnDefinition = "NVARCHAR")
 	private String postTitle; // 貼文_貼文標題
 	private LocalDateTime postTime; // 貼文_貼文時間
-	@Column(columnDefinition = "NVARCHAR(MAX)")
+	@Column(columnDefinition = "VARCHAR(MAX)")
 	private String postContent; // 貼文_自定義內文
 	private String postLink; // 貼文_貼文超連結(文章、影片連結)
 

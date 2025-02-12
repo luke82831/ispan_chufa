@@ -42,7 +42,6 @@ public class EventBean {
 
 	@ManyToOne
 	@JoinColumn(name = "FK_schedule", referencedColumnName = "trip_id", nullable = false)
-	//@JsonIgnoreProperties("user")
 	@JsonBackReference
 	private ScheduleBean schedule; // 多對一關聯 (行程內容 -> 行程)
 

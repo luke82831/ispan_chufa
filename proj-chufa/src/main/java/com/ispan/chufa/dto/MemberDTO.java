@@ -29,6 +29,12 @@ public class MemberDTO {
 		this.birth = birth;
 	}
 
+	public MemberDTO() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+
 	public byte[] getProfilePicture() {
 		return profilePicture;
 	}

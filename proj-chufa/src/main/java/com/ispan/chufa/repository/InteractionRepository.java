@@ -16,4 +16,7 @@ public interface InteractionRepository extends JpaRepository<InteractionBean, Lo
 
 	public List<InteractionBean> findByMemberAndPost(MemberBean memberbean, PostBean postbean);
 
+	public boolean existsByPost_PostidAndMember_UseridAndInteractionType(Long postid, Long currentUserId,
+			String string);
+
 }

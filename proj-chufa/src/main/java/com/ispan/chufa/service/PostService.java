@@ -1,10 +1,12 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.springframework.beans.BeanUtils;
@@ -24,9 +26,19 @@ import com.ispan.chufa.repository.MemberRepository;
 import com.ispan.chufa.repository.PlaceRepository;
 import com.ispan.chufa.repository.PostRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
 @Service
 // @Transactional
 public class PostService {
+	@PersistenceContext
+	private EntityManager entityManager;
+
 	@Autowired
 	PostRepository postRepository;
 
@@ -240,6 +252,40 @@ public class PostService {
 		}
 
 		return interactDTO;
+	}
+
+	public List<MemberDTO> getMemberByName(String json) {
+		 try {
+	            JSONObject param = new JSONObject(json);
+	            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+	            CriteriaQuery<MemberBean> criteriaQuery = criteriaBuilder.createQuery(MemberBean.class);
+	            Root<MemberBean> memberRoot = criteriaQuery.from(MemberBean.class);
+
+	            // 準備條件列表
+	            List<Predicate> predicates = new ArrayList<>();
+
+	            if (!param.isNull("username")) {
+	                String usernameKeyword = param.getString("username");
+	                Predicate usernameLike = criteriaBuilder.like(memberRoot.get("name"), "%" + usernameKeyword + "%");
+	                Predicate nicknameLike = criteriaBuilder.like(memberRoot.get("nickname"), "%" + usernameKeyword + "%");
+	                predicates.add(nicknameLike);
+	                predicates.add(usernameLike);
+	            }
+
+	            criteriaQuery.select(memberRoot).where(criteriaBuilder.or(predicates.toArray(new Predicate[0])));
+	            List<MemberBean> resultList = entityManager.createQuery(criteriaQuery).getResultList();
+	            List<MemberDTO> MemberDTOList = new ArrayList<>();
+	            for(MemberBean member:resultList) {
+	            MemberDTO memberInfo = new MemberDTO();
+	            BeanUtils.copyProperties(member, memberInfo);
+	            MemberDTOList.add(memberInfo);
+	            }
+	            return MemberDTOList;
+
+	        } catch (Exception e) {
+	            throw new RuntimeException("Error processing criteria query", e);
+	        }
+		
 	}
 
 }

@@ -13,6 +13,7 @@ import followlist from "@/views/blog/followlist.vue";
 import searchresult from "@/views/blog/searchresult.vue";
 import { useUserStore } from "@/stores/user";
 import Swal from "sweetalert2";
+import { ref } from "vue";
 
 const routes = [
   {
@@ -31,7 +32,9 @@ const routes = [
     component: () => import("@/views/cssAnimations.vue"),
   },
   //主頁
-  { path: "/", component: Home },
+  { path: "/", 
+    name:"Home",
+    component: Home },
   //會員系統
   {
     path: "/secure/Login",
@@ -215,6 +218,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+export const isSearch = ref(false);
+router.afterEach((to, from) => {
+  // 這裡可以根據路徑進行條件判斷
+  if (to.path === '/') {
+    // 假設您有一個全局變數 isSearch，可以在這裡將其設置為 false
+    isSearch.value = false;
+  }
 });
 
 // **全域前置守衛**

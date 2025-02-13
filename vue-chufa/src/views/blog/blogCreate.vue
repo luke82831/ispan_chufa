@@ -12,7 +12,6 @@
             <div ref="editorContainer" style="height: 200px;">
                         
             </div>
-
             <div>
                 <button v-if="schedule==null" @click="Schedule" class="addSchedule">加入行程</button>
                 <button v-else @click="Schedule" class="addSchedule">更改行程</button>

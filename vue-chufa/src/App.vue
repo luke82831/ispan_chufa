@@ -1,19 +1,22 @@
 <template>
   <div class="navbar">
     <!-- Logo -->
-    <RouterLink to="/" class="nav-link logo">Chufa首頁</RouterLink>
+    <RouterLink to="/" class="nav-link logo" @click="resetSearch">Chufa首頁</RouterLink>
 
-    <div class="search-bar">
+    <div class="search-bar"  v-if="showSearchBar" >
       <input
         v-model="searchTitle"
         type="text"
-        placeholder="搜尋文章..."
+        placeholder="搜尋文章或用戶..."
         class="p-2 border rounded w-full"
       />
-      <button @click="navigateToSearch" class="p-2 bg-blue-500 text-white rounded">
+      <button @click="onSearch" class="p-2 bg-blue-500 text-white rounded">
         搜索
       </button>
     </div>
+ 
+
+    
 
     <div class="nav-links">
       <!-- 只有管理員才顯示後台管理按鈕 -->
@@ -69,30 +72,73 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, watch,inject } from "vue";
+import { useRouter,useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
+import { useSearchStore } from "./stores/search";
 
 const userStore = useUserStore(); // 使用 Pinia 狀態管理
 const router = useRouter();
-
+const searchStore = useSearchStore(); // 使用 Pinia 搜尋狀態
 const isDropdownVisible = ref(false);
 
+
+// 使用 vue-router 的 useRoute 監聽路由變化
+const route = useRoute();
+const showSearchBar = ref(false);
+// 監聽路由名稱，根據路由名稱判斷是否顯示 SearchBar
+watch(() => route.name, (newRoute) => {
+  showSearchBar.value = newRoute === 'Home' || newRoute === 'SearchResults';
+}, { immediate: true });
+ // 定義 isSearch
+    
 const toggleDropdown = () => {
   isDropdownVisible.value = !isDropdownVisible.value;
 };
 
 const searchTitle = ref("");
 
-const navigateToSearch = () => {
+// 點擊首頁時重設 isSearch
+const resetSearch = () => {
+  //searchStore.resetSearch();
+  searchTitle.value = '';
+  searchStore.isSearch= false;
+  searchStore.searchResults.value = [];
+  // 使用 Vue Router 跳转到首页，并清空查询参数
+  router.push({ path: '/', query: {} }); // 清空查询参数
+  //window.location.reload();
+};
+
+
+
+const onSearch = () => {
   if (searchTitle.value.trim()) {
-    router.push({
-      path: "/search-results",
-      query: { title: searchTitle.value },
-    });
+    searchStore.setSearchTitle(searchTitle.value);
+    searchStore.isSearch = true; // 設定搜尋狀態
+    router.push({ path: '/search-results', query: { title: searchTitle.value } });
   }
 };
 
+// const navigateToSearch = () => {
+//   if (searchTitle.value.trim()) {
+//     router.push({
+//       path: "/search-results",
+//       query: { title: searchTitle.value },
+//     });
+//     //searchTitle.value = ''; // 清空搜索栏
+//     searchStore.resetSearch();
+//   }
+// };
+
+// 監聽路由變化，動態顯示規劃按鈕search-results
+watch(
+  () => router.path,
+  (newPath) => {
+    if (newPath === "/") {
+      isPlanningStarted.value = false;
+    }
+  }
+);
 // 登出行為
 const logout = () => {
   localStorage.removeItem("token");

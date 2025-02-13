@@ -27,21 +27,7 @@ public class EventXPlaceController {
 
 	@Autowired
     private EventXPlaceService eventXPlaceService;
-	
-//	@PostMapping("/eventXPlace")
-//	public ResponseEntity<EventXPlaceBean> addPlaceToEvent(
-//            @RequestParam Long eventId,
-//            @RequestParam Long placeId) {
-//
-//	    EventXPlaceBean savedRelation = eventXPlaceService.addPlaceToEvent(eventId, placeId);
-//
-//	    if (savedRelation == null || savedRelation.getEventmappingId() == null) {
-//	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//	                .body(null); 
-//	    }
-//        return ResponseEntity.ok(savedRelation);
-//    }
-    
+	    
 	//取得某個 eventId 的所有 placeId
     @GetMapping("/{eventId}")
     public ResponseEntity<List<String>> getPlacesByEvent(@PathVariable Long eventId) {
@@ -68,6 +54,21 @@ public class EventXPlaceController {
     }
 }
 
+
+
+//@PostMapping("/eventXPlace")
+//public ResponseEntity<EventXPlaceBean> addPlaceToEvent(
+//        @RequestParam Long eventId,
+//        @RequestParam Long placeId) {
+//
+//    EventXPlaceBean savedRelation = eventXPlaceService.addPlaceToEvent(eventId, placeId);
+//
+//    if (savedRelation == null || savedRelation.getEventmappingId() == null) {
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(null); 
+//    }
+//    return ResponseEntity.ok(savedRelation);
+//}
 	
 //	
 //	

@@ -150,6 +150,21 @@ watch(
   { immediate: true }
 );
 
+const convertTimeToMinutes = (timeString) => {
+  if (!timeString) return 0; // 預設為 0 分鐘
+
+  if (
+    typeof timeString === "string" &&
+    timeString.match(/^\d{2}:\d{2}:\d{2}$/)
+  ) {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
+  }
+
+  console.warn(`⚠️ 無法解析時間: ${timeString}`);
+  return 0;
+};
+
 // ------------- 出發時間 -------------
 const updateDepartureTime = (event) => {
   const newTime = event.target.value;
@@ -199,16 +214,20 @@ watch(
       );
 
       // 將地點詳細資訊合併
-      placesWithDetails = event.eventXPlaceBeans.map((eventPlace) => {
+      placesWithDetails = event.eventXPlaceBeans.map((eventPlace, index) => {
         const placeDetails = placeStore.getPlaceDetailById(eventPlace.placeId);
+
+        console.log(`📍 eventPlace ${index}:`, eventPlace);
+
         return {
           ...eventPlace,
+          index,
           placeName: placeDetails?.placeName ?? "未知地點",
           placeAddress: placeDetails?.placeAddress ?? "未知地址",
           photos: placeDetails?.photos ?? [],
           latitude: placeDetails?.latitude ?? null,
           longitude: placeDetails?.longitude ?? null,
-          stayDuration: eventPlace.stayDuration ?? "00:00:00",
+          stayDuration: convertTimeToMinutes(eventPlace.stayDuration) ?? 0, // ✅ 確保為數字
         };
       });
     }
@@ -216,7 +235,13 @@ watch(
     console.log("✅ 處理後的 `placesWithDetails`:", placesWithDetails);
 
     // 存入 Pinia
-    itineraryStore.setItinerary(newDate, placesWithDetails);
+    itineraryStore.setItinerary(
+      newDate,
+      placesWithDetails.map((place, index) => ({
+        ...place,
+        index,
+      }))
+    );
     itineraryStore.setStartTime(newDate, event.startTime ?? "08:00");
     console.log(
       "✅ 已存入 Pinia：",

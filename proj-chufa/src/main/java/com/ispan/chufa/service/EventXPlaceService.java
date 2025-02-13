@@ -53,28 +53,31 @@ public class EventXPlaceService {
         EventBean event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("行程不存在: " + eventId));
 
-        // 2️⃣ 更新 `EventBean` 的基本資訊
-        event.setStartTime(LocalTime.parse(request.getStartTime()));
-        event.setEndTime(LocalTime.parse(request.getEndTime()));
-        event.setNotes(request.getNotes());
-        eventRepository.save(event);
-
-        // 3️⃣ 取得現有的 `EventXPlaceBean`
+        // 2️⃣ 取得現有的 `EventXPlaceBean`
         List<EventXPlaceBean> existingEventPlaces = eventXPlaceRepository.findByEvent_EventId(eventId);
         Map<Long, EventXPlaceBean> existingEventPlacesMap = existingEventPlaces.stream()
                 .collect(Collectors.toMap(EventXPlaceBean::getEventmappingId, Function.identity()));
 
         List<EventXPlaceBean> updatedEventPlaces = new ArrayList<>();
 
-        // 4️⃣ 遍歷 `request.getPlaces()`，判斷是「更新」還是「新增」
+        // 3️⃣ 檢查哪些 `eventmappingId` 仍然存在
+        List<Long> incomingEventmappingIds = request.getPlaces().stream()
+                .map(EventXPlaceRequest::getEventmappingId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        // 4️⃣ **先刪除**（不在 `request` 內的 `eventXPlace`）
+        eventXPlaceRepository.deleteByEventIdAndNotIn(eventId, incomingEventmappingIds);
+
+        // 5️⃣ **再更新** 或 **新增**
         for (EventXPlaceRequest placeRequest : request.getPlaces()) {
             EventXPlaceBean eventXPlace;
 
             if (placeRequest.getEventmappingId() != null && existingEventPlacesMap.containsKey(placeRequest.getEventmappingId())) {
-                // ✅ 更新現有的 `EventXPlaceBean`
+                // ✅ 更新 `EventXPlaceBean`
                 eventXPlace = existingEventPlacesMap.get(placeRequest.getEventmappingId());
             } else {
-                // ✅ 新增新的 `EventXPlaceBean`
+                // ✅ 新增 `EventXPlaceBean`
                 eventXPlace = new EventXPlaceBean();
                 eventXPlace.setEvent(event);
             }
@@ -92,15 +95,7 @@ public class EventXPlaceService {
             updatedEventPlaces.add(eventXPlace);
         }
 
-        // 5️⃣ 只刪除前端「沒傳過來」的 `eventXPlace`
-        List<Long> incomingEventmappingIds = request.getPlaces().stream()
-                .map(EventXPlaceRequest::getEventmappingId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        eventXPlaceRepository.deleteByEventIdAndNotIn(eventId, incomingEventmappingIds);
-
-        // 6️⃣ 儲存變更
+        // 6️⃣ **最後才執行批量更新**
         eventXPlaceRepository.saveAll(updatedEventPlaces);
     }
 

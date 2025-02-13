@@ -24,7 +24,7 @@ export const useEventStore = defineStore("eventStore", {
       return (event.eventXPlaceBeans || []).map((p) => p.placeId);
     },
 
-    //取得某天的 Event，並存到 store
+    //取得某天的 Event
     async fetchEventByDate(tripId, date) {
       try {
         // 確保 date 是 string，並轉換為 YYYY-MM-DD 格式

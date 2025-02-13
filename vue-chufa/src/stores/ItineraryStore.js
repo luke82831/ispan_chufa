@@ -24,11 +24,12 @@ export const useItineraryStore = defineStore("itinerary", {
     },
 
     getRouteTime: (state) => (date, index) => {
-      return state.routeTimes[date]?.[index] ?? "00:30:00"; // 預設 30 分鐘
+      return state.routeTimes[date]?.[index] ?? "00:00:00";
     },
 
     getStayDuration: (state) => (date, index) => {
-      return state.stayDurations[date]?.[index] ?? 0;
+      const itinerary = state.itineraryDates[date] ?? [];
+      return itinerary[index]?.stayDuration ?? 99;
     },
 
     // 🔥 Getter：讀取「是否正在編輯」
@@ -68,6 +69,7 @@ export const useItineraryStore = defineStore("itinerary", {
       const normalizedItinerary = itinerary
         .filter((place) => place !== null && place !== undefined)
         .map((place, index) => ({
+          eventmappingId: place.eventmappingId ?? null,
           placeId: place.placeId ?? null,
           placeName: place.placeName ?? "",
           placeAddress: place.placeAddress ?? "",

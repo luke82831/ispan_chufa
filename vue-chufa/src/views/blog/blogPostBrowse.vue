@@ -7,8 +7,8 @@
                 <EditPost v-if="member.userid == memberId" :postData="postData" :tags="tags"></EditPost>
             </div>
             <div class="memberPost">
-                <img v-if="memberPicture!=null" :src="'data:image/jpeg;base64,' + memberPicture" class="memberPicture">
-                <img v-else src="@/assets/empty.png" class="memberPicture"/>
+                <img @click="inBlogprofile" v-if="memberPicture!=null" :src="'data:image/jpeg;base64,' + memberPicture" class="memberPicture">
+                <img @click="inBlogprofile" v-else src="@/assets/empty.png" class="memberPicture">
                 <p class="memberName">{{ memberName }}</p><!-- Post作者 -->
                 <p class="postTime"><strong>發布時間:</strong>{{ postData.postTime }}</p>
                 <p class="postStatus">文章狀態：{{ postData.postStatus }}</p>
@@ -71,6 +71,9 @@
     import { useScheduleStore } from "@/stores/ScheduleStore";
     const scheduleStore = useScheduleStore();
 
+    const inBlogprofile = () => {
+        router.push(`/blog/blogprofile/${memberId.value}`);
+    }
     const openSchedule = ref(false)
 
     const router = useRouter();
@@ -191,6 +194,7 @@
         border-radius: 50%;
         border: 2px solid #ddd;
         margin: 5px;
+        cursor: pointer;
     }
     .memberName{
         margin: 5px;

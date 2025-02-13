@@ -6,7 +6,7 @@
         <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
         首頁
       </button>
-      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')">
+      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')" v-if="userStore.isLoggedIn">
         關注
       </button>
       <button
@@ -28,7 +28,7 @@
   </div>
 </div>
     <!-- 貼文網格布局 -->
-    <div class="posts-grid">
+    <div class="posts-grid" v-if="posts.length > 0">
       <div
         v-for="post in posts"
         :key="post.postid"
@@ -82,6 +82,9 @@
         <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
           <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
         </div>
+        <div v-else class="post-image-container">
+          <img :src="defaultpicture" class="post-image" />
+        </div>
 <!-- 
         移除圖片後的內容
         <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
@@ -89,21 +92,6 @@
         {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
         </p>
 
-        <!-- 貼文元信息 -->
-        <div class="post-meta">
-          <p>
-            發佈時間:
-            {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
-          </p>
-          <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-          <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
-        </div>
-
-        <!-- 貼文統計 -->
-        <div class="post-stats">
-          <p>轉發次數: {{ post.repostCount }}</p>
-          <p>點讚數: {{ post.likeCount }}</p>
-        </div>
 
         <!-- 互動按鈕 -->
         <div class="post-actions" @click.stop>
@@ -113,10 +101,11 @@
             :class="{ active: post.likedByCurrentUser }"
           >
           <span class="heart-icon"></span> 
-            {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
+            <!-- {{ post.likedByCurrentUser ? '已點讚' : '點讚' }} -->
+            {{ post.likeCount }}
           </button>
           <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-            🔁 轉發
+            🔁 {{ post.repostCount }}
           </button>
           <button @click.stop="collectPost(post.postid)" 
           class="action-btn collect-btn"
@@ -125,6 +114,9 @@
           </button>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p>沒有文章喔~</p>
     </div>
 
     <!-- 分頁控制 -->
@@ -156,6 +148,7 @@ import { useSearchStore } from '@/stores/search.js';
 import axiosapi from "@/plugins/axios.js";
 import { usePostStore } from "@/stores/usePostStore";
 import defaultProfilePicture from "@/assets/empty.png"
+import defaultback from "@/assets/default.jpg";
 
 
 export default {
@@ -175,6 +168,7 @@ export default {
     const searchStore = useSearchStore();
     const selectedPlace = ref(null); 
     const defaultProfilePic=ref(defaultProfilePicture);
+    const defaultpicture=ref(defaultback)
     
     //place
     //const selectedPlace = ref(null);
@@ -280,9 +274,9 @@ export default {
           // );
           noPosts.value = false; 
         } else {
-          //posts.value = [];
-          currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
-          Swal.fire("已經到底啦!", "no post。", "info"); 
+          posts.value = [];
+          // currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
+          // Swal.fire("已經到底啦!", "no post。", "info"); 
         }
       } catch (error) {
         console.error("Fetch posts failed:", error);
@@ -340,7 +334,7 @@ export default {
         }
       } catch (error) {
         console.error("轉發請求失敗:", error);
-        Swal.fire("錯誤", "無法執行轉發操作", "error");
+        Swal.fire("請先登入", "登入體驗更好", "error");
       }
     };
 
@@ -383,7 +377,7 @@ export default {
 }
 } catch (error) {
 console.error("點讚請求失敗:", error);
-Swal.fire("錯誤", "無法執行點讚操作", "error");
+Swal.fire("請先登入", "登入體驗更好", "error");
 }
     };
 
@@ -418,7 +412,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
         }
       } catch (error) {
         console.error("點讚請求失敗:", error);
-        Swal.fire("錯誤", "無法執行點讚操作", "error");
+        Swal.fire("請先登入", "登入體驗更好", "error");
       }
     };
     
@@ -486,6 +480,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
       searchStore,
       users,
       defaultProfilePic,
+      defaultpicture,
     };
   },
 };
@@ -497,33 +492,83 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
   margin: 0 auto;
 }
 
+/* Tab 容器 */
 .tabs-container {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  overflow-x: auto;
   padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0; /* 底部邊框 */
+  overflow-x: auto;
 }
 
+/* Tab 按鈕 */
 .tab {
   padding: 10px 20px;
   border: none;
-  background-color: #f0f0f0;
-  border-radius: 20px;
+  background-color: transparent;
+  border-radius: 0;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
+  color: #666;
+  transition: color 0.3s, border-bottom 0.3s;
   white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Tab 按鈕懸停效果 */
 .tab:hover {
-  background-color: #e0e0e0;
+  color: #333;
 }
 
+/* 當前選中的 Tab */
 .tab.active {
-  background-color: #005AB5;
-  color: white;
+  color: #000;
+  font-weight: 500;
+}
+
+/* 選中 Tab 的下劃線效果 */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* 對齊底部邊框 */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #000; /* 黑色下劃線 */
+  border-radius: 2px;
+}
+
+/* 排序選擇器 */
+.sort-select-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+.sort-select-container select {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.sort-select-container select:hover {
+  border-color: #ccc;
+}
+
+.sort-select-container select:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
 .posts-grid {
@@ -874,3 +919,4 @@ select {
   animation: fillBookmark 0.5s ease-out forwards;
 }
 </style>
+

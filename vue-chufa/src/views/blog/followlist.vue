@@ -45,9 +45,8 @@
           </div>
           <div class="follower-info">
             <p class="follower-nickname">{{ item.nickname }}</p>
-            <p class="follower-id">ID: {{ item.userid }}</p>
             <p class="follower-name">Name: {{ item.name }}</p>
-          </div><p>{{ item.isFollowing }}</p>
+          </div>
           <!-- 關注按鈕 -->
           <button
             :class="['follow-button', { active: item.isFollowing }]"

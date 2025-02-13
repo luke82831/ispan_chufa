@@ -120,11 +120,11 @@ public class PostDaoImpl implements PostDao {
 		// 加入條件：篩選 city
 		if (!param.isNull("places")) {
 			Join<PostBean, ScheduleBean> scheduleJoin = postRoot.join("scheduleBean", JoinType.INNER);
-	        // Step 2: Join 到 EventBean
+	        //  Join 到 EventBean
 			Join<ScheduleBean, EventBean> eventJoin = scheduleJoin.join("events", JoinType.INNER);
-			// Step 3: Join 到 EventXPlaceBean
+			// Join 到 EventXPlaceBean
 			Join<EventBean, EventXPlaceBean> eventXPlaceJoin = eventJoin.join("eventXPlaceBeans", JoinType.INNER);
-			// Step 4: 最終 Join 到 PlaceBean
+			// Join 到 PlaceBean
 			Join<EventXPlaceBean, PlaceBean> placeJoin = eventXPlaceJoin.join("place", JoinType.INNER);
 		    String places = param.getString("places");
 		    Predicate placePredicate = criteriaBuilder.equal(placeJoin.get("city"), places);
@@ -169,8 +169,8 @@ public class PostDaoImpl implements PostDao {
 		    );
 		}
 
-		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
-		System.out.println("Generated SQL: " + sql);
+//		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
+//		System.out.println("Generated SQL: " + sql);
 
 		// 建立查詢並執行
 		TypedQuery<PostBean> query = entityManager.createQuery(criteriaQuery);
@@ -213,7 +213,7 @@ public class PostDaoImpl implements PostDao {
 			long repostCount = postRepository.countByForwardedFrom(postlist);
 			postDTO.setRepostCount(repostCount);
 			
-			  // 檢查是否已點讚
+			// 檢查是否已點讚
 		    boolean likedByCurrentUser = false;
 		    if (currentUserId != null) {
 		        likedByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
@@ -233,7 +233,7 @@ public class PostDaoImpl implements PostDao {
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);
 		}
-//
+
 //		// 根據點讚數排序
 //		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
 //			postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());

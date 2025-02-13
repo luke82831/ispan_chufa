@@ -54,7 +54,7 @@
                     :post="post"
                     :member="member"
                     :formatDate="formatDate"
-                    @update-posts="fetchPosts()"
+                    @update-posts="fetchPosts"
                     />
         </div>
     
@@ -271,8 +271,8 @@ const toggleFollow = async (user) => {
                 );
                 noPosts.value = false; 
             } else {
-                //posts.value = [];
-                Swal.fire("sorry", "沒有貼文", );     
+                posts.value = [];
+                Swal.fire("沒有結果喔", "沒有貼文", );     
             }
             } catch (error) {
             console.error("Fetch posts failed:", error);
@@ -464,6 +464,7 @@ const toggleFollow = async (user) => {
             users,
             toggleFollow,
             defaultProfilePic,
+            fetchPosts,
         };
         },
     };

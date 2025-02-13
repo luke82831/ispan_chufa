@@ -26,14 +26,26 @@
 
       <h3 class="section-title">貼文內容</h3>
       <div class="posts-grid">
-        <PostCard
+        <div
           v-for="post in posts"
           :key="post.postid"
-          :post="post"
-          :member="member"
-          :formatDate="formatDate"
-          @update-posts="fetchPosts()"
-        />
+          :class="{'hidden-post': postStore.getHiddenReason(post.postid)}"
+          style="position: relative;"
+        >
+          <PostCard
+            :post="post"
+            :member="member"
+            :formatDate="formatDate"
+            @update-posts="fetchPosts()"
+          />
+          <div
+            v-if="postStore.getHiddenReason(post.postid)"
+            class="hidden-message"
+          >
+            此文章已被隱藏，原因：{{ postStore.getHiddenReason(post.postid) }}，
+            請聯繫客服信箱：Chufa@service.com
+          </div>
+        </div>
       </div>
     </div>
     <div v-else class="loading">
@@ -41,6 +53,8 @@
     </div>
   </div>
 </template>
+
+
 <script>
 import { ref, onMounted } from 'vue';
 import axios from '@/plugins/axios.js';
@@ -50,6 +64,7 @@ import axiosapi from '@/plugins/axios.js';
 import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from 'vue-router';
+import { usePostStore } from '@/stores/usePostStore';
 
 
 export default {
@@ -67,7 +82,7 @@ export default {
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
 
-    
+    const postStore = usePostStore();
 
     // 用來從後端取得關注者和被關注者的人數
     const fetchCount = async (type) => {
@@ -191,6 +206,7 @@ export default {
       activeTab,
       followersCount,
       followingCount,
+      postStore,
     };
   },
 };
@@ -394,5 +410,33 @@ export default {
   gap: 20px;
 }
 
+
+.hidden-post {
+  background-color: rgba(80, 73, 73, 0.2) !important; /* 變得更透明 */
+  color: #aaa !important; /* 讓字體變灰 */
+  pointer-events: none; /* 禁止任何互動 */
+  filter: grayscale(80%); /* 增加灰階效果 */
+  position: relative; /* 確保 .hidden-message 絕對定位基於它 */
+}
+
+/* ★★★★★ 明顯顯示隱藏訊息 ★★★★★ */
+.hidden-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(156, 156, 156, 0.9); /* 更加明顯的紅色背景 */
+  text-align: center;
+  font-size: 16px;
+  padding: 15px 25px;
+  color: rgb(255, 0, 0); /* 白色文字提高對比 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold; /* 文字加粗 */
+  border-radius: 8px; /* 圓角讓樣式更好看 */
+  min-width: 320px; /* 讓提示訊息不會太窄 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 添加陰影讓它浮起來 */
+}
 
 </style>

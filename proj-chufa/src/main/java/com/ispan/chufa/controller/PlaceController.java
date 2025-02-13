@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.PlaceBean;
@@ -55,7 +57,7 @@ public class PlaceController {
 
     
     // 修改指定 ID 的 Place
-    @PutMapping("/place/{id}")
+    @PutMapping("/places/{id}")
     public ResponseEntity<PlaceBean> updatePlace(@PathVariable Long id, @RequestBody PlaceBean placeDetails) {
         PlaceBean updatedPlace = placeService.updatePlace(id, placeDetails);
         if (updatedPlace == null) {
@@ -65,16 +67,17 @@ public class PlaceController {
     }
 
     // 刪除指定 ID 的 Place
-    @DeleteMapping("/place/{id}")
+    @DeleteMapping("/places/{id}")
     public ResponseEntity<Void> deletePlace(@PathVariable Long id) {
         boolean isDeleted = placeService.deletePlace(id);
         if (isDeleted) {
-            placeService.deletePlace(id);
+            // 注意：避免重複呼叫 deletePlace(id)
             return ResponseEntity.noContent().build();  // 刪除成功，回傳 204 No Content
         } else {
-            return ResponseEntity.notFound().build();  // 如果找不到對應的 Place
+            return ResponseEntity.notFound().build();  // 找不到對應的資料
         }
     }
+
     
  // 查詢地點是否存在
     @PostMapping("/checkPlace")
@@ -141,4 +144,12 @@ public class PlaceController {
 
         return placeService.getPlacesByIds(placeIds);
     }
+    
+ // 取得 Place 分頁數據
+    @GetMapping("/places/paged") 
+    public ResponseEntity<Page<PlaceBean>> getPlacesPaged(@RequestParam int page, @RequestParam int size) {
+    	Page<PlaceBean> places = placeService.getPlacesWithPagination(page, size); 
+    	return ResponseEntity.ok(places); }
+    
+    
 }

@@ -9,39 +9,39 @@ Go
 
 -- members
 INSERT INTO members (role, username, password, phone_number, email, name, gender, nickname, bio, birth) VALUES
-('USER', 'user1', 0x616161616161, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
+('USER', 'user1', 0x616263, '0912345678', 'user1@example.com', 'User One', 'Male', 'U1', 'Hello, I am User One.', '1990-01-01'),
 ('USER', 'user2', 0x626364, '0923456789', 'user2@example.com', 'User Two', 'Female', 'U2', 'Hello, I am User Two.', '1992-02-02'),
 ('USER', 'user3', 0x636465, '0934567890', 'user3@example.com', 'User Three', NULL, 'U3', NULL, '1994-03-03'),
 ('USER', 'user4', 0x646566, '0945678901', 'user4@example.com', 'User Four', 'Male', 'U4', 'I love traveling.', '1996-04-04'),
 ('USER', 'user5', 0x656667, '0956789012', 'user5@example.com', 'User Five', 'Female', 'U5', 'I enjoy reading books.', '1998-05-05');
-
 Go
 
 -- schedule
-INSERT INTO schedule (cover_photo, trip_name, start_date, end_date, FK_user)
+INSERT INTO schedule (trip_name, start_date, end_date, cover_photo, FK_user)
 VALUES 
-(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000001F1F7A1F' AS VARBINARY(MAX)), 'Summer Vacation', '2025-06-15', '2025-06-25', 1),
-(CAST('0x89504E470D0A1A0A0000000D4948445200000010000000100806000000C65A3F3D' AS VARBINARY(MAX)), 'Winter Getaway', '2025-12-01', '2025-12-10', 2),
-(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000002ACBC21E' AS VARBINARY(MAX)), 'Spring Adventure', '2025-03-10', '2025-03-20', 3),
-(CAST('0x89504E470D0A1A0A0000000D4948445200000010000000100806000000479F5C6D' AS VARBINARY(MAX)), 'Autumn Retreat', '2025-09-05', '2025-09-15', 4),
-(CAST('0x89504E470D0A1A0A0000000D49484452000000100000001008060000009E81D7FE' AS VARBINARY(MAX)), 'City Break', '2025-07-20', '2025-07-25', 5);
+('Trip 1', '2025-02-01', '2025-02-06', 0x89504E470D0A1A0A0000000D49484452, 1),
+('Trip 2', '2025-03-15', '2025-03-20', 0x89504E470D0A1A0A0000000D49484452, 1),
+('Trip 3', '2025-04-10', '2025-04-15', 0x89504E470D0A1A0A0000000D49484452, 1),
+('Trip 4', '2025-05-05', '2025-05-10', 0x89504E470D0A1A0A0000000D49484452, 1),
+('Trip 5', '2025-06-01', '2025-06-06', 0x89504E470D0A1A0A0000000D49484452, 1);
+
 Go
 
 -- event
 INSERT INTO event (start_time, end_time, notes, FK_schedule, FK_calendar) VALUES
-('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 8, '2025-01-20'),
-('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 8, '2025-01-23'),
-('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 8, '2025-01-26'),
-('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 8, '2025-02-01'),
-('22:00:00', '23:00:00', 'Family vacation in Bali.', 8, '2025-03-10');
+('09:00:00', '10:00:00', 'Visit Tokyo and Kyoto.', 1, '2025-01-20'),
+('09:10:00', '10:13:00', 'Explore Osaka and Nara.', 1, '2025-01-23'),
+('11:50:00', '12:00:00', 'Relax in Hakone hot springs.', 1, '2025-01-26'),
+('12:00:00', '22:00:00', 'Attend business meetings in Taipei.', 2, '2025-02-01'),
+('22:00:00', '23:00:00', 'Family vacation in Bali.', 3, '2025-03-10');
 Go
 
 -- followlist
 INSERT INTO followlist (follower_id, followed_id, followTime, followStatus) VALUES
-(1, 2, '2025-01-20T10:00:00', 'ACTIVE'),  -- user1 ï¿½ï¿½ï¿½` user2
-(2, 3, '2025-01-21T14:30:00', 'ACTIVE'),  -- user2 ï¿½ï¿½ï¿½` user3
-(3, 1, '2025-01-22T09:15:00', 'BLOCKED'), -- user3 ï¿½Q user1 ï¿½ï¿½ï¿½`ï¿½Ãªï¿½ï¿½ï¿½
-(1, 3, '2025-01-23T16:45:00', 'ACTIVE');  -- user1 ï¿½ï¿½ï¿½` user3
+(1, 2, '2025-01-20T10:00:00', 'ACTIVE'),  -- user1 Ãöª` user2
+(2, 3, '2025-01-21T14:30:00', 'ACTIVE'),  -- user2 Ãöª` user3
+(3, 1, '2025-01-22T09:15:00', 'BLOCKED'), -- user3 ³Q user1 Ãöª`¨Ãªý¾×
+(1, 3, '2025-01-23T16:45:00', 'ACTIVE');  -- user1 Ãöª` user3
 Go
 
 -- post
@@ -57,95 +57,73 @@ Go
 -- tags
 INSERT INTO tags (tag_state, tag_name, tag_created_at, tag_updated_at)
 VALUES
-('ACTIVE', 'ï¿½È¹C', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('ACTIVE', 'ï¿½ï¿½ï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('INACTIVE', 'ï¿½Bï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('ACTIVE', 'ï¿½ï¿½ï¿½ï¿½', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
-('INACTIVE', 'ï¿½qï¿½v', '2025-01-19 01:08:07', '2025-01-19 01:08:07');
+('ACTIVE', '®È¹C', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('ACTIVE', '¬ü­¹', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('INACTIVE', '¹B°Ê', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('ACTIVE', '­µ¼Ö', '2025-01-19 01:08:07', '2025-01-19 01:08:07'),
+('INACTIVE', '¹q¼v', '2025-01-19 01:08:07', '2025-01-19 01:08:07');
 Go
 
 -- interaction
 INSERT INTO interaction (member_id, postid, interction_type, interaction_time) VALUES
-(1, 1, 'LIKE', '2025-01-20T10:00:00'),  -- user1 ï¿½Iï¿½gï¿½Kï¿½ï¿½ 1
-(2, 1, 'SHARE', '2025-01-21T14:30:00'), -- user2 ï¿½ï¿½oï¿½Kï¿½ï¿½ 1
-(1, 2, 'COLLECT', '2025-01-22T09:15:00'), -- user1 ï¿½ï¿½ï¿½Ã¶Kï¿½ï¿½ 2
-(2, 2, 'LIKE', '2025-01-23T16:45:00');   -- user2 ï¿½Iï¿½gï¿½Kï¿½ï¿½ 2
+(1, 1, 'LIKE', '2025-01-20T10:00:00'),  -- user1 ÂIÆg¶K¤å 1
+(2, 1, 'SHARE', '2025-01-21T14:30:00'), -- user2 Âàµo¶K¤å 1
+(1, 2, 'COLLECT', '2025-01-22T09:15:00'), -- user1 ¦¬ÂÃ¶K¤å 2
+(2, 2, 'LIKE', '2025-01-23T16:45:00');   -- user2 ÂIÆg¶K¤å 2
 Go
 
 -- place
-INSERT INTO dbo.place (
-    googlemapPlaceId, placeType, placeName, city, region, placeAddress, 
-    longitude, latitude, photos, placePhone, businessHours, 
-    placeInfo, rating, website, bookingUrl, priceLevel, 
-    accommodationType, reservation, isClosed
-) 
+INSERT INTO place (placeType, placeName, city, region, placeAddress, longitude, latitude, placePhone, businessHours, placeInfo, rating, website, bookingUrl, price, accommodationType, reservation)
+VALUES
+('À\ÆU', '«°¥«À\ÆU', '¥x¥_', '¤¤¥¿°Ï', '¥x¥_¥«¤¤¥¿°Ï¥«©²¸ô100¸¹', 121.5074, 25.0300, '02-12345678', '08:00-22:00', '´£¨Ñ¦U¦¡¬ü­¹', 4.5, 'http://example.com', 'http://example.com/booking', 1200.50, 'À\ÆU', 1),
+('´ºÂI', '¥x¥_101', '¥x¥_', '«H¸q°Ï', '¥x¥_¥««H¸q°Ï«H¸q¸ô¤­¬q7¸¹', 121.5654, 25.0330, '02-87654321', '09:00-18:00', '¥xÆWªº¦a¼Ð«Ø¿v', 4.8, 'http://taipei101.com', 'http://taipei101.com/booking', 0.00, '´ºÂI', 0),
+('®ÈÀ]', '©¯ºÖ®ÈÀ]', '°ª¶¯', '¥ªÀç°Ï', '°ª¶¯¥«¥ªÀç°Ï¦Û¥Ñ¸ô1¸¹', 120.2769, 22.6273, '07-12345678', '24¤p®ÉÀç·~', '´£¨ÑµÎ¾A¦í±J', 4.3, 'http://happinesshotel.com', 'http://happinesshotel.com/booking', 3000.00, '®ÈÀ]', 1),
+('À\ÆU', '®üÂA¤jÀ\', '¥x¤¤', '«n°Ï', '¥x¤¤¥««n°Ï«Ø°ê¸ô88¸¹', 120.6620, 24.1460, '04-12398765', '10:00-21:00', '·sÂA®üÂA®Æ²z', 4.7, 'http://seafoodrestaurant.com', 'http://seafoodrestaurant.com/booking', 1500.00, 'À\ÆU', 1),
+('´ºÂI', '¤é¤ë¼æ', '«n§ë', '³½¦À¶m', '«n§ë¿¤³½¦À¶m¤é¤ë¼æ', 120.9217, 23.8531, '04-98765432', '08:00-17:00', '¥xÆWµÛ¦Wªº­·´º°Ï', 4.6, 'http://sunmoonlake.com', 'http://sunmoonlake.com/booking', 0.00, '´ºÂI', 0);
+
+-- place_photos
+INSERT INTO place_photos (place_placeId, photos)
 VALUES 
-('ChIJD7fiBh9u5kcR7tJp0NxA-2c', 'Restaurant', 'The Seafood Place', 'New York', 'NY', '123 Ocean Ave, NY, 10001', 
--74.0060, 40.7128, '["https://image1.jpg", "https://image2.jpg"]', '123-456-7890', 'Mon-Sun 10:00-22:00', 
-'Fresh seafood, great views', 4.5, 'https://www.seafoodplace.com', 'https://www.seafoodplace.com/book', 3, 
-'Restaurant', 1, 0),
-
-('ChIJCzYy5IS16lQR4oQJ6pZlFf0', 'Hotel', 'Sunset Resort', 'Miami', 'FL', '456 Beach Rd, Miami, FL, 33139', 
--80.1918, 25.7617, '["https://image3.jpg", "https://image4.jpg"]', '987-654-3210', 'Mon-Sun 24 hours', 
-'Luxury resort with beach access', 4.7, 'https://www.sunsetresort.com', 'https://www.sunsetresort.com/book', 5, 
-'Resort', 0, 0),
-
-('ChIJwzS0bZVm1jURdX-Ktnklnmo', 'Cafe', 'The Cozy Cafe', 'San Francisco', 'CA', '789 Market St, San Francisco, CA, 94103', 
--122.4194, 37.7749, '["https://image5.jpg", "https://image6.jpg"]', '555-789-1234', 'Mon-Sun 07:00-19:00', 
-'Cozy atmosphere with delicious pastries', 4.2, 'https://www.cozycafe.com', 'https://www.cozycafe.com/book', 2, 
-'Cafe', 1, 0),
-
-('ChIJPVxGlZoUwoARUqtnZQdZlck', 'Museum', 'Art Museum', 'Los Angeles', 'CA', '321 Museum Rd, Los Angeles, CA, 90015', 
--118.2500, 34.0522, '["https://image7.jpg", "https://image8.jpg"]', '222-333-4444', 'Mon-Sun 09:00-17:00', 
-'Art and history exhibitions', 4.8, 'https://www.artmuseum.com', 'https://www.artmuseum.com/book', 4, 
-'Museum', 0, 0),
-
-('ChIJ2Z5sXwFm3FMRkFfb3lJl5Ug', 'Park', 'Central Park', 'New York', 'NY', 'Central Park, New York, NY, 10024', 
--73.9654, 40.7851, '["https://image9.jpg", "https://image10.jpg"]', 'N/A', 'Mon-Sun 06:00-23:00', 
-'Large park with walking trails and ponds', 4.9, 'https://www.centralparknyc.org', 'https://www.centralparknyc.org/book', 1, 
-'Park', 0, 0);
+(1, 'http://example.com/photo1.jpg'),
+(1, 'http://example.com/photo2.jpg');
+Go
 
 -- comments
 INSERT INTO comments (postid, commentstate, user_id, comment_created_at, content, parentid)
 VALUES 
-(1, 'active', 1, '2025-01-19 10:00:00', 'ï¿½oï¿½Oï¿½Ä¤@ï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
-(1, 'active', 2, '2025-01-19 11:00:00', 'ï¿½oï¿½Oï¿½Ä¤Gï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
-(1, 'active', 3, '2025-01-19 12:00:00', 'ï¿½oï¿½Oï¿½Ä¤Tï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½e', NULL),
-(1, 'active', 2, '2025-01-19 13:00:00', 'ï¿½oï¿½Oï¿½ï¿½Ä¤@ï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½ï¿½', 1),
-(1, 'active', 3, '2025-01-19 14:00:00', 'ï¿½oï¿½Oï¿½ï¿½Ä¤Gï¿½ï¿½ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½^ï¿½ï¿½', 2);
+(1, 'active', 1, '2025-01-19 10:00:00', '³o¬O²Ä¤@±ø¯d¨¥ªº¤º®e', NULL),
+(1, 'active', 2, '2025-01-19 11:00:00', '³o¬O²Ä¤G±ø¯d¨¥ªº¤º®e', NULL),
+(1, 'active', 3, '2025-01-19 12:00:00', '³o¬O²Ä¤T±ø¯d¨¥ªº¤º®e', NULL),
+(1, 'active', 2, '2025-01-19 13:00:00', '³o¬O¹ï²Ä¤@±ø¯d¨¥ªº¦^ÂÐ', 1),
+(1, 'active', 3, '2025-01-19 14:00:00', '³o¬O¹ï²Ä¤G±ø¯d¨¥ªº¦^ÂÐ', 2);
 Go
 
 -- coupon
 INSERT INTO coupon (coupon_code, remaining, Title, Subtitle, Content, State, Web, Picture, starttime, endtime, placeId) VALUES
-('DISCOUNT50', 100, '­­®É§é¦©50%', '¶È­­¥»¤ë', '¨Ï¥Î¦¹Àu´f¨é¥i¨É 50% §é¦©', 1, 'https://example.com/discount50', NULL, '2024-02-01 00:00:00', '2024-02-28 23:59:59', 1),
-
-('FREESHIP', 500, '§K¹B¶OÀu´f', '®ø¶Oº¡¤d§K¹B', '¦b¥»©±®ø¶Oº¡ 1000 ¤¸¡A§Y¥i¨É§K¹BÀu´f', 1, 'https://example.com/freeship', NULL, '2024-02-01 00:00:00', '2024-03-31 23:59:59', 2),
-
-('WELCOME10', 300, '·s·|­û±MÄÝ 10% §é¦©', '­º¦¸ÁÊª«Àu´f', '·s·|­ûµù¥U«á­ºµ§­q³æ¥i¨É 10% §é¦©', 1, 'https://example.com/welcome10', NULL, '2024-02-01 00:00:00', '2024-06-30 23:59:59', 3),
-
-('HOLIDAY20', 200, '¸`¤é¯S´f 20% §é¦©', '­­¶q200±i', '¨Ï¥Î¦¹Àu´f¨é¥i¦b¸`¤é´Á¶¡Àò±o 20% §é¦©', 1, 'https://example.com/holiday20', NULL, '2024-12-01 00:00:00', '2024-12-31 23:59:59', 4),
-
-('FLASHSALE', 50, '­­®É°{ÁÊ 30% OFF', '­­®É­­¶q', '­­¶q 50 ±iªº 30% §é¦©Àu´f¨é¡A¥ý·m¥ýÄ¹', 1, 'https://example.com/flashsale', NULL, '2024-02-10 00:00:00', '2024-02-15 23:59:59', 5);
-
+('NEWYEAR2025', 500, 'New Year Sale', 'NY Sale', 'Get 20% off on all items this New Year', 1, 'https://newyear.com', 'newyear2025.jpg', '2025-01-01T00:00:00', '2025-01-31T23:59:59', 1),  -- New Year Sale
+('SUMMER25', 1000, 'Summer Discount', 'Summer Deal', 'Save 25% on all summer products', 1, 'https://summerdeal.com', 'summer25.jpg', '2025-06-01T00:00:00', '2025-08-31T23:59:59', 2),  -- Summer Discount
+('FALL2025', 300, 'Fall Promotion', 'Fall Offer', 'Get $10 off your purchase over $50', 1, 'https://fallpromo.com', 'fall2025.jpg', '2025-09-01T00:00:00', '2025-11-30T23:59:59', 3),  -- Fall Promotion
+('WINTER2025', 200, 'Winter Clearance', 'Winter Sale', 'Up to 50% off on winter clothes', 1, 'https://wintersale.com', 'winter2025.jpg', '2025-12-01T00:00:00', '2025-12-31T23:59:59', 4),  -- Winter Clearance
+('BLACKFRIDAY25', 1500, 'Black Friday Sale', 'BF Deal', 'Get 25% off on selected items this Black Friday', 1, 'https://blackfriday.com', 'blackfriday25.jpg', '2025-11-27T00:00:00', '2025-11-27T23:59:59', 5);  -- Black Friday Sale
 GO
 
 -- mycoupon
 INSERT INTO mycoupon (fk_couponid, fk_userid, gettime) VALUES
-(1, 1, '2025-01-01T10:00:00'),  -- ï¿½Ï¥Îªï¿½ user1 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ NEWYEAR2025
-(2, 2, '2025-06-02T14:30:00'),  -- ï¿½Ï¥Îªï¿½ user2 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ SUMMER25
-(3, 3, '2025-09-03T09:00:00'),  -- ï¿½Ï¥Îªï¿½ user3 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ FALL2025
-(4, 4, '2025-12-04T16:45:00'),  -- ï¿½Ï¥Îªï¿½ user4 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ WINTER2025
-(5, 5, '2025-11-05T11:30:00');  -- ï¿½Ï¥Îªï¿½ user5 ï¿½ï¿½ï¿½ï¿½uï¿½fï¿½ï¿½ BLACKFRIDAY25
+(1, 1, '2025-01-01T10:00:00'),  -- ¨Ï¥ÎªÌ user1 »â¨úÀu´f¨é NEWYEAR2025
+(2, 2, '2025-06-02T14:30:00'),  -- ¨Ï¥ÎªÌ user2 »â¨úÀu´f¨é SUMMER25
+(3, 3, '2025-09-03T09:00:00'),  -- ¨Ï¥ÎªÌ user3 »â¨úÀu´f¨é FALL2025
+(4, 4, '2025-12-04T16:45:00'),  -- ¨Ï¥ÎªÌ user4 »â¨úÀu´f¨é WINTER2025
+(5, 5, '2025-11-05T11:30:00');  -- ¨Ï¥ÎªÌ user5 »â¨úÀu´f¨é BLACKFRIDAY25
 GO
 
 -- placewithposts
 INSERT INTO placewithposts (fk_place_id, fk_post_id)
 VALUES
-    (1, 1),  -- ï¿½N placeId ï¿½ï¿½ 1 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 101 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
-    (2, 2),  -- ï¿½N placeId ï¿½ï¿½ 2 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 102 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
-    (3, 3),  -- ï¿½N placeId ï¿½ï¿½ 3 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 103 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
-    (4, 4),  -- ï¿½N placeId ï¿½ï¿½ 4 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 104 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
-    (5, 5);  -- ï¿½N placeId ï¿½ï¿½ 5 ï¿½ï¿½ï¿½aï¿½Iï¿½P postId ï¿½ï¿½ 105 ï¿½ï¿½ï¿½Kï¿½ï¿½ï¿½ï¿½ï¿½p
+    (1, 1),  -- ±N placeId ¬° 1 ªº¦aÂI»P postId ¬° 101 ªº¶K¤åÃöÁp
+    (2, 2),  -- ±N placeId ¬° 2 ªº¦aÂI»P postId ¬° 102 ªº¶K¤åÃöÁp
+    (3, 3),  -- ±N placeId ¬° 3 ªº¦aÂI»P postId ¬° 103 ªº¶K¤åÃöÁp
+    (4, 4),  -- ±N placeId ¬° 4 ªº¦aÂI»P postId ¬° 104 ªº¶K¤åÃöÁp
+    (5, 5);  -- ±N placeId ¬° 5 ªº¦aÂI»P postId ¬° 105 ªº¶K¤åÃöÁp
 Go
 
 -- post_tags
@@ -156,30 +134,24 @@ Go
 
 -- Tags_Members
 INSERT INTO Tags_Members (tagsBean_tagId, memberBean_userid) VALUES
-(1, 1),  -- ï¿½ï¿½ï¿½ï¿½ Travel ï¿½P ï¿½ï¿½ï¿½ï¿½ user1
-(2, 2);  -- ï¿½ï¿½ï¿½ï¿½ Adventure ï¿½P ï¿½ï¿½ï¿½ï¿½ user2
+(1, 1),  -- ¼ÐÅÒ Travel »P ¦¨­û user1
+(2, 2);  -- ¼ÐÅÒ Adventure »P ¦¨­û user2
 Go
 
 -- member_place
 INSERT INTO myplace (userid, placeId) 
 VALUES
-(1, 1),  -- ï¿½ï¿½ï¿½ï¿½ID 1 ï¿½P ï¿½aï¿½IID 101
-(1, 2),  -- ï¿½ï¿½ï¿½ï¿½ID 1 ï¿½P ï¿½aï¿½IID 102
-(2, 3),  -- ï¿½ï¿½ï¿½ï¿½ID 2 ï¿½P ï¿½aï¿½IID 103
-(3, 4),  -- ï¿½ï¿½ï¿½ï¿½ID 3 ï¿½P ï¿½aï¿½IID 104
-(4, 5);  -- ï¿½ï¿½ï¿½ï¿½ID 4 ï¿½P ï¿½aï¿½IID 105
+(1, 1),  -- ¦¨­ûID 1 »P ¦aÂIID 101
+(1, 2),  -- ¦¨­ûID 1 »P ¦aÂIID 102
+(2, 3),  -- ¦¨­ûID 2 »P ¦aÂIID 103
+(3, 4),  -- ¦¨­ûID 3 »P ¦aÂIID 104
+(4, 5);  -- ¦¨­ûID 4 »P ¦aÂIID 105
 Go
 
 -- eventXplace
 INSERT INTO eventXplace (fk_event_id, fk_place_id, place_order, arrival_time, stay_duration, notes)
 VALUES
-<<<<<<< HEAD
-(1, 1, 1, '08:00:00', 120, 'ï¿½ï¿½ï¿½Wï¿½ï¿½Fï¿½Aï¿½wï¿½Æ°ï¿½ï¿½[ï¿½aï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Iï¿½C'),
-(1, 2, 2, '10:30:00', 90, 'ï¿½ï¿½ï¿½[ï¿½aï¿½IBï¿½Aï¿½]ï¿½tï¿½@ï¿½pï¿½Éªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½C'),
-(1, 3, 3, '13:00:00', 150, 'ï¿½ï¿½ï¿½\ï¿½Mï¿½ð®§®É¶ï¿½ï¿½Aï¿½wï¿½Æ¦bï¿½aï¿½ICï¿½ï¿½ï¿½\ï¿½Uï¿½C');
-=======
 (1, 1, 1, '08:00:00', '09:00:00', '¦­¤W©è¹F¡A¦w±Æ°ÑÆ[¦a¤èAªº´ºÂI¡C'),
 (1, 2, 2, '10:30:00', '11:30:00', '°ÑÆ[¦aÂIB¡A¥]§t¤@¤p®Éªº¾ÉÄý¡C'),
 (1, 3, 3, '13:00:00', '14:00:00', '¤ÈÀ\©M¥ð®§®É¶¡¡A¦w±Æ¦b¦aÂICªºÀ\ÆU¡C');
->>>>>>> origin/dev
 Go

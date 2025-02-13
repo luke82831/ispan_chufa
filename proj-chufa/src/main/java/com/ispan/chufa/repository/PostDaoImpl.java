@@ -133,7 +133,7 @@ public class PostDaoImpl implements PostDao {
 
 		// 分頁設定
 		int page = param.has("page") ? param.getInt("page") : 1; // 預設是第1頁
-		int size = param.has("size") ? param.getInt("size") : 10; // 預設每頁10條
+		int size = param.has("size") ? param.getInt("size") : 100; // 預設每頁10條
 		int firstResult = (page - 1) * size;
 
 		// 按 postTime 排序（按降序排列最新的貼文）

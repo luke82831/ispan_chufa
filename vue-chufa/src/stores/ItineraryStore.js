@@ -28,8 +28,12 @@ export const useItineraryStore = defineStore("itinerary", {
     },
 
     getStayDuration: (state) => (date, index) => {
-      const itinerary = state.itineraryDates[date] ?? [];
-      return itinerary[index]?.stayDuration ?? 99;
+      console.log(`🧐 getStayDuration(${date}, ${index}):`, {
+        temp: state.tempStayDurations[date]?.[index],
+        stay: state.stayDurations[date]?.[index],
+      });
+      return state.tempStayDurations[date]?.[index] ?? state.stayDurations[date]?.[index] ?? 0;
+
     },
 
     // 🔥 Getter：讀取「是否正在編輯」
@@ -126,6 +130,10 @@ export const useItineraryStore = defineStore("itinerary", {
       if (!this.tempStayDurations[date]) {
         this.tempStayDurations[date] = {};
       }
+      console.log(
+        `📌 存暫時時間入 Pinia [${date}] index: ${index} =>`,
+        this.stayDurations[date][index]
+      );
       this.tempStayDurations[date][index] = tempDuration;
     },
 

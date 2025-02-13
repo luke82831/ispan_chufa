@@ -23,6 +23,7 @@ import com.ispan.chufa.dto.JackPostDTO;
 import com.ispan.chufa.dto.JackTagsDTO;
 import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.repository.MemberRepository;
+import com.ispan.chufa.repository.PostRepository;
 import com.ispan.chufa.service.JackPostService;
 import com.ispan.chufa.service.ScheduleService;
 import com.ispan.chufa.service.TagsService;
@@ -35,6 +36,8 @@ public class JackPostController {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private PostRepository postRepository;
     @Autowired
     private TagsService tagsService;
     @Autowired
@@ -345,6 +348,67 @@ public class JackPostController {
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查不到這筆ID");
+            }
+        }
+
+        return response;
+    }
+
+    // 更新貼文標籤
+    // 測試 http://localhost:8080/post/updateTags
+    // 測試 RequestBody => {"postid":"1","tagId":[1,2,3,4,5]}
+    @PutMapping("/updateTags")
+    public Response updateTags(@RequestBody String json) {
+        JSONObject requestJson = new JSONObject(json);
+        Response response = new Response();
+        PostBean bean;
+
+        Long postid;
+        JSONArray tagIds;
+
+        // 驗證request資料(防呆)
+        {
+            if (!requestJson.isNull("postid")) {
+                try {
+                    postid = requestJson.getLong("postid");
+                } catch (JSONException e) {
+                    response.setSuccesss(false);
+                    response.setMessage("postid請輸入整數");
+                    return response;
+                }
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("請輸入postid");
+                return response;
+            }
+
+            if (!requestJson.isNull("tagId") && requestJson.getJSONArray("tagId").length() != 0) {
+                tagIds = requestJson.getJSONArray("tagId");
+            } else {
+                tagIds = null;
+            }
+        }
+
+        // 搜尋貼文
+        bean = postService.findById(postid);
+        // 更新貼文標籤
+        bean.getTagsBeans().clear();
+        if (tagIds != null) {
+            for (int i = 0; i < tagIds.length(); i++) {
+                TagsBean tagsBean = tagsService.findById(tagIds.getLong(i));
+                bean.getTagsBeans().add(tagsBean);
+            }
+        }
+
+        // 設定response
+        {
+            postRepository.save(bean);
+            if (bean != null) {
+                // 將Bean映射到DTO用的
+                JackPostDTO dto = modelMapper.map(bean, JackPostDTO.class);
+                response.setSuccesss(true);
+                response.setMessage("更新成功");
+                response.getList().add(dto);
             }
         }
 

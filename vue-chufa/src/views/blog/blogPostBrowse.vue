@@ -4,7 +4,7 @@
         <div class="postBody">
             <div class="title-editPost">
                 <h1 class="title">{{ postData.postTitle }}</h1><!-- 標題 -->
-                <EditPost v-show="member.userid == memberId" :postData="postData"></EditPost>
+                <EditPost v-if="member.userid == memberId" :postData="postData" :tags="tags"></EditPost>
             </div>
             <div class="memberPost">
                 <img v-if="memberPicture!=null" :src="'data:image/jpeg;base64,' + memberPicture" class="memberPicture">
@@ -32,6 +32,11 @@
 
             <div v-html="htmlContent"></div>
             <p v-if="postData.postLink!=null">連結：<a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
+            <div v-if="tags.length!=0" class="TagsBox">
+                <div v-for="tagData in tags">
+                    <tagBrowse :tagData="tagData"></tagBrowse>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -49,6 +54,7 @@
 </template>
 
 <script setup>
+    import tagBrowse from "@/components/Post/tagBrowse.vue";
     import EditPost from "@/components/Post/EditPost.vue";
     import InputComment from "@/components/Comment/InputComment.vue";
     import Comment from "@/components/Comment/Comment.vue";
@@ -66,15 +72,6 @@
     const scheduleStore = useScheduleStore();
 
     const openSchedule = ref(false)
-
-    const getImageSource = (coverPhoto) =>
-    coverPhoto
-    ? coverPhoto.startsWith("data:image")
-    ? coverPhoto
-    : `data:image/jpeg;base64,${coverPhoto}`
-    : "";
-
-
 
     const router = useRouter();
     const route = useRoute();
@@ -100,14 +97,19 @@
     });
     };
 
+    const tags = ref([])
     const img = ref(null)
     const schedule = ref(null)
     const findPost=async ()=>{
-        await console.log("搜尋Post文章")
+        console.log("搜尋Post文章")
         const response =await axiosapi.get(`/post/findById/${postid.value}`);
         if (response.data.successs) {
+            console.log(response.data)
             postData.value = response.data.list[0]
             memberName.value = postData.value.member.name
+            for(let tag in postData.value.tagsBeans){
+                tags.value.push(postData.value.tagsBeans[tag])
+            }
             if(postData.value.member.profilePicture!=null){
                 memberPicture.value = postData.value.member.profilePicture
             }
@@ -260,5 +262,9 @@
     .Comment{
         border: 5px solid black;
         margin: 20px;
+    }
+    .TagsBox {
+        display: flex;
+        flex-wrap: wrap;
     }
 </style>

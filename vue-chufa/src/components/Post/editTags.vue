@@ -1,15 +1,14 @@
 <template>
+    <button @click="editTagsOk">確認編輯</button>
     <div class="openTagsBox">
-        <button v-if="!openTags" class="addTags" @click="openTagsAction">加入標籤</button> 
-        <button v-if="openTags" class="addTags" @click="openTagsAction">關閉標籤</button>  
         <div v-if="optTags.length!=0" class="optTags">
             <p>已加入的標籤{{ optTags }}最多五個</p>
             <button @click="clear">清空</button>
         </div>
     </div>
-    <div v-if="openTags" class="TagsBox">
-        <div v-if="tagsData!=null" v-for="(tagData, key) in tagsData.data.list">
-            <tag :tagData="tagData" :optTags="optTags" :optTagsId="optTagsId"></tag>
+    <div class="editTagsBox">
+        <div v-if="tagsData!=null" v-for="tagData in tagsData.data.list">
+            <editTag :tagData="tagData" :optTags="optTags" :optTagsId="optTagsId"></editTag>
         </div>
         <div>
             <newTag :findAllTags="findAllTags"></newTag>
@@ -18,20 +17,36 @@
 </template>
     
 <script setup>
-    import newTag from './newTag.vue';
-    import tag from './tag.vue';
-    import { ref } from 'vue';
+    import newTag from '../PostCreate/newTag.vue';
+    import editTag from './editTag.vue';
+    import { ref, onMounted } from 'vue';
     import axiosapi from '@/plugins/axios.js';
     import eventBus from "@/eventBus";
-    const props = defineProps(['optTagsId'])
+    const props = defineProps(['tags','postData'])
     const tagsData = ref(null)
-    const openTags = ref(false)
+    const optTagsId = ref([])
     const optTags = ref([])
-    const openTagsAction = () => {
-        openTags.value = !openTags.value
-        if(openTags.value){
-            findAllTags()
+    onMounted(()=>{
+        findAllTags()
+            for(let i=0;i<props.tags.length;i++){
+                optTags.value.push(props.tags[i].tagName)
+                optTagsId.value.push(props.tags[i].tagId)
+            }
+    })
+    const editTagsOk = async () => {
+        console.log("更新貼文標籤")
+        const body = {
+            "postid":props.postData.postid,
+            "tagId":optTagsId.value,
         }
+        const response = await axiosapi.put(`/post/updateTags`,body);
+        
+        alert(response.data.message);
+        if(response.data.successs){
+            console.log(response.data)
+            window.location.reload();
+        }
+
     }
     const findAllTags = async () => {
         console.log("抓標籤")
@@ -41,7 +56,6 @@
     }
     const clear = () => {
         optTags.value = []
-        props.optTagsId.length = 0
         eventBus.emit('clearOptTags');
     }
 </script>
@@ -61,9 +75,10 @@
     .addTags:hover {
         transform: scale(1.05);
     }
-    .TagsBox {
+    .editTagsBox {
         display: flex;
         flex-wrap: wrap;
+        width: 400px;
     }
     .tag {
         padding: 10px 20px;

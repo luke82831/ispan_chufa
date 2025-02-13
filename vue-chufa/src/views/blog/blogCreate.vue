@@ -106,11 +106,12 @@ const submitArticle= async () => {
     }
 
     if(schedule.value != null){
-        body.tripId=schedule.value.tripId
+        body.tripId=`${schedule.value.tripId}`
     }
     if(optTagsId.value.length!=0){
         body.tagId=optTagsId.value
     }
+    console.log(body)
     const response = await axiosapi.post('/post/create',body);
     alert(response.data.message);
     if(response.data.successs){

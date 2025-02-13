@@ -1,4 +1,4 @@
-package com.ispan.chufa;
+package com.ispan.chufa.util;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;

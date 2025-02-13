@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -27,9 +28,9 @@ public class ScheduleBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 自動生成流水號
     @Column(name = "trip_id")
     private Long tripId;
-    
+
     @Lob
-    @Column(name = "cover_photo", columnDefinition = "VARBINARY(MAX)") 
+    @Column(name = "cover_photo", columnDefinition = "VARBINARY(MAX)")
     private byte[] coverPhoto; // 封面照片（Base64 編碼數據）
 
     @Column(name = "trip_name", nullable = false)
@@ -40,8 +41,12 @@ public class ScheduleBean {
 
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate; // 行程結束日期
-    
+
+    @OneToMany(mappedBy = "scheduleBean", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostBean> posts;
+
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<EventBean> events;
 
     @ManyToOne
@@ -77,7 +82,7 @@ public class ScheduleBean {
     public void setCoverPhoto(byte[] coverPhoto) {
         this.coverPhoto = coverPhoto;
     }
-    
+
     public String getCoverPhotoBase64() {
         if (this.coverPhoto != null) {
             return Base64.getEncoder().encodeToString(this.coverPhoto);
@@ -123,7 +128,8 @@ public class ScheduleBean {
 
     @Override
     public String toString() {
-        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + (coverPhoto != null ? "Base64 Data" : "null") + ", tripName=" + tripName +
+        return "ScheduleBean [tripId=" + tripId + ", coverPhoto=" + (coverPhoto != null ? "Base64 Data" : "null")
+                + ", tripName=" + tripName +
                 ", startDate=" + startDate + ", endDate=" + endDate + "]";
     }
 }

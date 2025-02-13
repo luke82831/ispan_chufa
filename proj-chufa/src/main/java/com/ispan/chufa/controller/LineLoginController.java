@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.ispan.chufa.AccessToken;
-import com.ispan.chufa.LineUserInfo;
 import com.ispan.chufa.domain.MemberBean;
 import com.ispan.chufa.jwt.JsonWebTokenUtility;
 import com.ispan.chufa.service.LineAPIService;
 import com.ispan.chufa.service.MemberService;
+import com.ispan.chufa.util.AccessToken;
+import com.ispan.chufa.util.LineUserInfo;
 import com.ispan.chufa.util.PasswordUtil;
 
 import jakarta.servlet.http.HttpSession;

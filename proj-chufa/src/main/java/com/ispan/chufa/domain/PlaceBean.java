@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,7 +50,7 @@ public class PlaceBean {
 	private Double rating;
 	private String website;
 	private String bookingUrl;
-	private Integer priceLevel; 
+	private String priceLevel; 
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 	private boolean isClosed;
@@ -61,8 +62,7 @@ public class PlaceBean {
 	private List<CouponBean> coupons;
 
     @OneToMany(mappedBy = "place")
-//    @JsonIgnoreProperties("place")
-    @JsonIgnore
+    @JsonIgnoreProperties({"eventXPlaceBeans","place","event"})
     private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 	
 	@ManyToMany(mappedBy = "place") // 多對多，對應 MemberBean 的 places
@@ -214,11 +214,11 @@ public class PlaceBean {
 		this.bookingUrl = bookingUrl;
 	}
 
-	public Integer getPriceLevel() {
+	public String getPriceLevel() {
 		return priceLevel;
 	}
 
-	public void setPriceLevel(Integer priceLevel) {
+	public void setPriceLevel(String priceLevel) {
 		this.priceLevel = priceLevel;
 	}
 

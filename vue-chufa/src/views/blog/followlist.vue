@@ -4,7 +4,7 @@
     <h1 class="page-title">用戶 ID: {{ followid }}</h1>
 
     <!-- 分頁按鈕 -->
-  
+
     <div class="tabs">
       <button
         :class="['tab-button', { active: activeTab === 'followed' }]"
@@ -42,7 +42,11 @@
         <li v-for="item in listData" :key="item.userid" class="follower-item">
           <div class="profile-picture">
             <img
-              :src="item.profilePicture ? 'data:image/jpeg;base64,' + item.profilePicture :  defaultProfilePicture"
+              :src="
+                item.profilePicture
+                  ? 'data:image/jpeg;base64,' + item.profilePicture
+                  : defaultProfilePicture
+              "
               alt="profile picture"
               class="profile-image"
             />
@@ -51,13 +55,14 @@
             <h3 class="follower-nickname">{{ item.nickname }}</h3>
             <p class="follower-id">ID: {{ item.userid }}</p>
             <p class="follower-name">Name: {{ item.name }}</p>
-          </div><p>{{ item.isFollowing }}</p>
+          </div>
+          <p>{{ item.isFollowing }}</p>
           <!-- 關注按鈕 -->
           <button
             :class="['follow-button', { active: item.isFollowing }]"
             @click="toggleFollow(item)"
           >
-            {{ item.isFollowing ? '已關注' : '未關注' }}
+            {{ item.isFollowing ? "已關注" : "未關注" }}
           </button>
         </li>
       </ul>
@@ -65,11 +70,10 @@
   </div>
 </template>
 <script>
-import { ref, onMounted, watch } from 'vue';
-import axiosapi from '@/plugins/axios';
-import defaultProfilePic from '@/assets/empty.png';
-import Swal from 'sweetalert2';
-
+import { ref, onMounted, watch } from "vue";
+import axiosapi from "@/plugins/axios";
+import defaultProfilePic from "@/assets/empty.png";
+import Swal from "sweetalert2";
 
 export default {
   props: {
@@ -82,27 +86,25 @@ export default {
     const listData = ref([]); // 儲存當前列表數據（關注者或粉絲）
     const isLoading = ref(false); // 是否正在加載
     const isError = ref(false); // 是否出現錯誤
-    const activeTab = ref('followed'); // 當前選中的分頁
+    const activeTab = ref("followed"); // 當前選中的分頁
     const defaultProfilePicture = ref(defaultProfilePic); // 默認頭像路徑
     const userId = ref(null);
     const member = ref({});
     const profileLoaded = ref(false);
 
-
-
     const fetchProfile = async () => {
       try {
-        const response = await axiosapi.get('/ajax/secure/profile', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        const response = await axiosapi.get("/ajax/secure/profile", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (response.data.success) {
           member.value = response.data.user || {};
         } else {
-          Swal.fire('錯誤', response.data.message, 'error');
+          //Swal.fire('錯誤', response.data.message, 'error');
         }
       } catch (error) {
-        console.error('Fetch profile failed:', error);
-        Swal.fire('錯誤', '無法獲取會員資料', 'error');
+        console.error("Fetch profile failed:", error);
+        //Swal.fire('錯誤', '無法獲取會員資料', 'error');
       }
     };
 
@@ -113,7 +115,7 @@ export default {
         isError.value = false;
 
         const endpoint =
-          activeTab.value === 'followed'
+          activeTab.value === "followed"
             ? `/follow/followedList/${props.followid}`
             : `/follow/followerList/${props.followid}`;
 
@@ -125,67 +127,68 @@ export default {
           listData.value = [];
         }
       } catch (error) {
-        console.error('Fetch data failed:', error);
+        console.error("Fetch data failed:", error);
         isError.value = true;
       } finally {
         isLoading.value = false;
       }
     };
 
-  
     // 切換分頁
-    const switchTab =  async(tab) => {
+    const switchTab = async (tab) => {
       activeTab.value = tab;
       await fetchData();
       await fetchDataWithStatus();
     };
 
-
-        // 查詢是否關注
+    // 查詢是否關注
     const checkFollowingStatus = async (item) => {
       try {
-        const response = await axiosapi.post('/follow/isFollowing', {
+        const response = await axiosapi.post("/follow/isFollowing", {
           followedid: item.userid,
           followerid: member.value.userid,
         });
         item.isFollowing = response.data;
-        console.log(item.userid +" " +item.isFollowing);
+        console.log(item.userid + " " + item.isFollowing);
       } catch (error) {
-        console.error('Error checking following status:', error);
+        console.error("Error checking following status:", error);
       }
     };
 
     // 切換關注狀態
-      const toggleFollow = async (item) => {
-    try {
-      const action = item.isFollowing ? 'unfollow' : 'follow';
-      const response = await axiosapi.post('/follow/verb', {
-        followerid: member.value.userid,
-        followedid: item.userid,
-        action,
-      });
+    const toggleFollow = async (item) => {
+      try {
+        const action = item.isFollowing ? "unfollow" : "follow";
+        const response = await axiosapi.post("/follow/verb", {
+          followerid: member.value.userid,
+          followedid: item.userid,
+          action,
+        });
 
-      if (response.data.success) {
-        // 切換狀態
-        item.isFollowing = !item.isFollowing;
-        console.log(`User ${item.userid} is now ${item.isFollowing ? 'following' : 'not following'}`);
-      } else {
-        console.error('Failed to toggle follow status:', response.data.message);
+        if (response.data.success) {
+          // 切換狀態
+          item.isFollowing = !item.isFollowing;
+          console.log(
+            `User ${item.userid} is now ${
+              item.isFollowing ? "following" : "not following"
+            }`
+          );
+          await fetchData(); // 重新加載列表
+        } else {
+          console.error("Failed to toggle follow status:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Failed to toggle follow status:", error);
+        Swal.fire("錯誤", "無法更新關注狀態", "error");
       }
-    } catch (error) {
-      console.error('Failed to toggle follow status:', error);
-      Swal.fire('錯誤', '無法更新關注狀態', 'error');
-    }
-  };
+    };
 
     // 初始化檢查列表中的每個用戶是否關注
     const fetchDataWithStatus = async () => {
-    await fetchData(); // 先抓取列表資料
-    const checkPromises = listData.value.map(item => checkFollowingStatus(item)); // 并行检查每个用户的关注状态
-    await Promise.all(checkPromises); // 等待所有的检查完成
+      await fetchData(); // 先抓取列表資料
+      const checkPromises = listData.value.map((item) => checkFollowingStatus(item)); // 并行检查每个用户的关注状态
+      await Promise.all(checkPromises); // 等待所有的检查完成
     };
-
-    
 
     // 組件加載時自動執行
     onMounted(async () => {
@@ -247,8 +250,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* 錯誤提示樣式 */

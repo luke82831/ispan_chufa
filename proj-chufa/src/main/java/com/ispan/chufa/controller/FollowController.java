@@ -20,15 +20,15 @@ import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.service.FollowService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+@CrossOrigin(origins = "http://192.168.23.105:6173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/follow")
 public class FollowController {
 	@Autowired
 	private FollowService followService;
-	
+
 	@PostMapping("/isFollowing")
 	public boolean isUserFollowing(@RequestBody FollowRequest followRequest) {
-	       return followService.isUserFollowing(followRequest.getFollowerid(), followRequest.getFollowedid());
+		return followService.isUserFollowing(followRequest.getFollowerid(), followRequest.getFollowedid());
 	}
 
 	@PostMapping("/verb")
@@ -75,16 +75,17 @@ public class FollowController {
 	public List<MemberInfo> getFollowerList(@PathVariable Long followedId) {
 		return followService.getFollowerList(followedId);
 	}
-	//count
+
+	// count
 	@GetMapping("/followercount/{followedId}")
 	public Long followercount(@PathVariable Long followedId) {
-		return followService.followercount(followedId);	
+		return followService.followercount(followedId);
 	}
-	//count
+
+	// count
 	@GetMapping("/followingcount/{followingId}")
 	public Long followingcount(@PathVariable Long followingId) {
-		return followService.followingcount(followingId);	
+		return followService.followingcount(followingId);
 	}
-	
 
 }

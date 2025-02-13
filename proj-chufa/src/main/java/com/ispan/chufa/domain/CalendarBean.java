@@ -1,9 +1,15 @@
 package com.ispan.chufa.domain;
 
 import java.time.LocalDate;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -23,6 +29,9 @@ public class CalendarBean {
 	@Column(name = "description", nullable = true)
 	private String description;
 
+	@OneToMany(mappedBy = "calendar")
+    private List<EventBean> eventBean;  // 一對多關聯
+	
 	// Constructors
 	public CalendarBean() {
 	}
@@ -66,6 +75,7 @@ public class CalendarBean {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 
 	@Override
 	public String toString() {

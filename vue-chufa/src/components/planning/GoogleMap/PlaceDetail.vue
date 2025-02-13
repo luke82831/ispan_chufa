@@ -1,18 +1,15 @@
 <template>
   <div v-if="place">
-    <h2 style="padding-left: 20px">{{ place.displayName }}</h2>
+    <h2 style="padding-left: 20px">{{ place.placeName }}</h2>
     <div class="place-details">
       <!-- 照片區域 -->
-      <div
-        v-if="place.photos && place.photos.length"
-        class="photo-gallery-container"
-      >
+      <div v-if="photos.length" class="photo-gallery-container">
         <div class="photo-gallery">
           <img
-            v-for="(photo, index) in place.photos"
+            v-for="(photo, index) in photos"
             :key="index"
             :src="getPhotoUrl(photo)"
-            :alt="place.displayName"
+            :alt="place.placeName"
             class="photo"
           />
         </div>
@@ -20,27 +17,25 @@
 
       <!-- 文字資訊區 -->
       <div class="text-info">
-        <p>{{ place.formattedAddress }}</p>
-        <!-- <p>經緯度: {{ place.location.lat }}, {{ place.location.lng }}</p> -->
+        <p>{{ place.placeAddress }}</p>
         <p v-if="place.rating">評分: {{ place.rating }}</p>
-        <p v-if="place.formattedPhoneNumber">
-          電話: {{ place.formattedPhoneNumber }}
-        </p>
+        <p v-if="place.placePhone">電話: {{ place.placePhone }}</p>
         <p v-if="place.priceLevel">價位資訊: {{ place.priceLevel }}</p>
-        <p v-if="place.openingHours">營業時間:</p>
-        <ul v-if="place.openingHours">
-          <li v-for="(hours, day) in place.openingHours" :key="day">
-            {{ day }}: {{ hours }}
+
+        <!-- 營業時間 -->
+        <p v-if="formattedBusinessHours.length">營業時間:</p>
+        <ul v-if="formattedBusinessHours.length">
+          <li v-for="(item, index) in formattedBusinessHours" :key="index">
+            {{ item.day }}: {{ item.hours }}
           </li>
         </ul>
+
         <p v-if="place.website">
           網站: <a :href="place.website" target="_blank">{{ place.website }}</a>
         </p>
-        <p v-if="place.url">
+        <p v-if="place.reservation">
           是否可訂位:
-          <a :href="place.reservation" target="_blank">{{
-            place.reservation
-          }}</a>
+          <a :href="place.reservation" target="_blank">{{ place.reservation }}</a>
         </p>
       </div>
     </div>
@@ -48,29 +43,33 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { computed } from "vue";
 
-// 接收父組件傳遞的 place prop
+// 接收 `place` 物件
 const props = defineProps({
   place: {
     type: Object,
-    default: () => null, // 預設為 null
+    default: () => ({}), // ✅ 確保 `place` 預設為空物件，避免 `null` 錯誤
   },
 });
 
-const place = ref(props.place);
-
-watch(
-  () => props.place,
-  (newPlace) => {
-    place.value = newPlace;
-  }
+// ✅ 確保 `photos` 為陣列，避免 `null.length` 錯誤
+const photos = computed(() =>
+  Array.isArray(props.place?.photos) ? props.place.photos : []
 );
 
+// ✅ 格式化營業時間
+const formattedBusinessHours = computed(() => {
+  if (!props.place?.businessHours) return [];
+
+  return props.place.businessHours.split("\n").map((line) => {
+    const [day, hours] = line.split(": ");
+    return { day: day.trim(), hours: hours ? hours.trim() : "未提供" };
+  });
+});
+
 // 獲取照片 URL 的方法
-const getPhotoUrl = (photo) => {
-  return photo; // 假設你有其他方法處理 URL
-};
+const getPhotoUrl = (photo) => photo || "";
 </script>
 
 <style>

@@ -28,12 +28,15 @@ public class PostDTO {
 	@JsonIgnoreProperties({ "memberBeans", "postBeans" })
 	private Set<TagsBean> tagsBeans = new HashSet<>();
 	// private List<CommentDTO>CommentDTO ;
+	private boolean likedByCurrentUser;
+	private boolean collectByCurrentUser;
 	private boolean isRepost;
 	private MemberInfo repostMember; // 如果是轉發貼文，則會包含原貼文數據
 
 	private Long forwardedFrom;
 
 	private PostDTO repostDTO;
+	
 
 	// public List<CommentDTO> getCommentDTO() {
 	// return CommentDTO;
@@ -42,9 +45,28 @@ public class PostDTO {
 	// public void setCommentDTO(List<CommentDTO> commentDTO) {
 	// CommentDTO = commentDTO;
 	// }
+	
+	
+	
 
 	public boolean isRepost() {
 		return isRepost;
+	}
+
+	public boolean isCollectByCurrentUser() {
+		return collectByCurrentUser;
+	}
+
+	public void setCollectByCurrentUser(boolean collectByCurrentUser) {
+		this.collectByCurrentUser = collectByCurrentUser;
+	}
+
+	public boolean isLikedByCurrentUser() {
+		return likedByCurrentUser;
+	}
+
+	public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+		this.likedByCurrentUser = likedByCurrentUser;
 	}
 
 	public PostDTO getRepostDTO() {

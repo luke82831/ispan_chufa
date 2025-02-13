@@ -1,8 +1,17 @@
 package com.ispan.chufa.domain;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,13 +42,16 @@ public class EventBean {
 
 	@ManyToOne
 	@JoinColumn(name = "FK_schedule", referencedColumnName = "trip_id", nullable = false)
+	@JsonBackReference
 	private ScheduleBean schedule; // 多對一關聯 (行程內容 -> 行程)
 
 	@ManyToOne
 	@JoinColumn(name = "FK_calendar", referencedColumnName = "date", nullable = false)
+	@JsonIgnore
 	private CalendarBean calendar; // 多對一關聯 (行程內容 -> 行事曆)
 	
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event",cascade = CascadeType.ALL)
+    @JsonIgnoreProperties({"eventXPlaceBeans","place","event"})
     private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
 
 	// Constructors, getters, and setters
@@ -108,12 +120,31 @@ public class EventBean {
 	public void setEventXPlaceBeans(List<EventXPlaceBean> eventXPlaceBeans) {
 		this.eventXPlaceBeans = eventXPlaceBeans;
 	}
-
-	@Override
-	public String toString() {
-		return "EventBean [eventId=" + eventId + ", startTime=" + startTime + ", endTime=" + endTime + ", notes="
-				+ notes + ", schedule=" + schedule + ", calendar=" + calendar + ", eventXPlaceBeans=" + eventXPlaceBeans
-				+ "]";
-	}
-
+	
+	 @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	    public LocalDate getDate() {
+	        return (calendar != null) ? calendar.getDate() : null;
+	    }
+	 
+	 public List<Long> getPlaceIds() {
+		    return (eventXPlaceBeans != null)
+		        ? eventXPlaceBeans.stream()
+	                .map(EventXPlaceBean::getPlaceId) // ✅ 取出 placeId
+	                .distinct() // ✅ 避免重複
+		            .collect(Collectors.toList())
+		        : List.of();
+		}
+	 
+	 
+	 @Override
+	    public String toString() {
+	        return "EventBean{" +
+	                "eventId=" + eventId +
+	                ", date=" + getDate() +
+	                ", startTime=" + startTime +
+	                ", notes='" + notes + '\'' +
+	            
+	                '}';
+	    }
+	
 }

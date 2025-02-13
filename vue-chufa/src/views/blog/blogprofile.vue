@@ -259,7 +259,7 @@ const toggleFollow = async (member) => {
     };
     </script>
     
-    <style>
+    <style scoped>
   /* 整體頁面樣式 */
 .profile-page {
     padding: 20px;

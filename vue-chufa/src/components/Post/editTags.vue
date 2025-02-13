@@ -55,7 +55,8 @@
         console.log(response)
     }
     const clear = () => {
-        optTags.value = []
+        optTags.value.length = 0
+        optTagsId.value.length = 0
         eventBus.emit('clearOptTags');
     }
 </script>

@@ -208,6 +208,7 @@ watch(
           photos: placeDetails?.photos ?? [],
           latitude: placeDetails?.latitude ?? null,
           longitude: placeDetails?.longitude ?? null,
+          stayDuration: eventPlace.stayDuration ?? "00:00:00",
         };
       });
     }
@@ -311,9 +312,35 @@ const getPhotoUrl = (photo) => {
 
 // ------------- 監聽行程變更 -------------
 watch(
+  () => formattedSelectedDate.value, // 🔥 監聽選擇的日期，而不是 `itineraryForSelectedDay`
+  async (newDate, oldDate) => {
+    const eventPlaceStore = useEventPlaceStore();
+    if (!oldDate || !eventData.value?.eventId) return; // 🔥 確保有舊日期，且 `eventId` 存在
+
+    console.log(`📅 準備切換行程：${oldDate} ➝ ${newDate}`);
+
+    if (hasUnsavedChanges.value) {
+      console.log(`💾 正在儲存 ${oldDate} 的行程...`);
+      try {
+        await eventPlaceStore.saveItineraryToBackend(
+          eventData.value.eventId,
+          oldDate
+        );
+        console.log(`✅ ${oldDate} 行程儲存成功`);
+        hasUnsavedChanges.value = false; // 成功儲存後重置
+      } catch (error) {
+        console.error(`❌ 無法儲存 ${oldDate} 行程`, error);
+      }
+    }
+  },
+  { immediate: false }
+);
+
+watch(
   itineraryForSelectedDay,
   () => {
     hasUnsavedChanges.value = true;
+    console.log(`📝 行程修改: ${formattedSelectedDate.value}`);
   },
   { deep: true }
 );

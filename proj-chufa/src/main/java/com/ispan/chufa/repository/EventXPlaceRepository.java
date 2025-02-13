@@ -38,5 +38,8 @@ public interface EventXPlaceRepository extends JpaRepository<EventXPlaceBean, Lo
     @Query("DELETE FROM EventXPlaceBean ep WHERE ep.event.eventId = :eventId")
     void deleteByEventId(@Param("eventId") Long eventId);
     
-    
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM EventXPlaceBean e WHERE e.event.eventId = :eventId AND e.eventmappingId NOT IN (:eventmappingIds)")
+    void deleteByEventIdAndNotIn(@Param("eventId") Long eventId, @Param("eventmappingIds") List<Long> eventmappingIds);
 }

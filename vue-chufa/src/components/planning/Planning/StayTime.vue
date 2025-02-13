@@ -44,6 +44,8 @@ const computedItinerary = computed(() => {
     // 停留時間：直接從 store 取對應 index 的停留時間 (預設為 0)
     let stayTime = stayTimes[index] ?? 0;
 
+    console.log(`📌 檢查行程 index ${index}:`, { 原始停留時間: stayTime });
+
     let startTime;
     if (index === 0) {
       // ✅ 第 1 個地點，直接使用出發時間

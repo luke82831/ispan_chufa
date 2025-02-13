@@ -87,11 +87,14 @@ export const useEventPlaceStore = defineStore("eventPlaceStore", {
           .getItineraryForDay(selectedDate)
           .map((place, index) => {
             const travelTimeRaw =
-              itineraryStore.getRouteTime(selectedDate, index) ?? 0;
+              itineraryStore.getRouteTime(selectedDate, index) ?? "00:00:00";
             const stayDurationRaw =
-              itineraryStore.getStayDuration(selectedDate, index) ?? 0;
+              itineraryStore.getStayDuration(selectedDate, index) ?? "00:00:00";
 
             console.log(`🕒 檢查 index ${index}:`, {
+              eventmappingId: place.eventmappingId ?? null, // ✅ 確保包含 eventmappingId
+              placeId: place.placeId,
+              placeOrder: index + 1,
               travelTimeRaw,
               stayDurationRaw,
               formattedTravelTime: this.formatTime(travelTimeRaw),
@@ -99,6 +102,7 @@ export const useEventPlaceStore = defineStore("eventPlaceStore", {
             });
 
             return {
+              eventmappingId: place.eventmappingId ?? null, // ✅ 傳給後端，避免刪除舊關聯
               placeId: place.placeId,
               placeOrder: index + 1,
               travelTime: this.formatTime(travelTimeRaw), // ✅ 確保格式正確

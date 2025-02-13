@@ -1,6 +1,7 @@
 package com.ispan.chufa.dto;
 
 public class EventXPlaceRequest {
+    private Long eventmappingId; 
     private Long placeId;
     private Integer placeOrder;
     private String travelTime;
@@ -9,6 +10,13 @@ public class EventXPlaceRequest {
     
     // Getter & Setter
     
+	public Long getEventmappingId() {
+		return eventmappingId;
+	}
+	public void setEventmappingId(Long eventmappingId) {
+		this.eventmappingId = eventmappingId;
+	}
+	
 	public Long getPlaceId() {
 		return placeId;
 	}

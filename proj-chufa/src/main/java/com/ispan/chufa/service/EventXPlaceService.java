@@ -1,7 +1,12 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,14 +59,27 @@ public class EventXPlaceService {
         event.setNotes(request.getNotes());
         eventRepository.save(event);
 
-        // 3️⃣ 刪除舊的 `EventXPlaceBean`
-        eventXPlaceRepository.deleteByEventId(eventId);
+        // 3️⃣ 取得現有的 `EventXPlaceBean`
+        List<EventXPlaceBean> existingEventPlaces = eventXPlaceRepository.findByEvent_EventId(eventId);
+        Map<Long, EventXPlaceBean> existingEventPlacesMap = existingEventPlaces.stream()
+                .collect(Collectors.toMap(EventXPlaceBean::getEventmappingId, Function.identity()));
 
-        // 4️⃣ 插入新的 `EventXPlaceBean`
+        List<EventXPlaceBean> updatedEventPlaces = new ArrayList<>();
+
+        // 4️⃣ 遍歷 `request.getPlaces()`，判斷是「更新」還是「新增」
         for (EventXPlaceRequest placeRequest : request.getPlaces()) {
-            EventXPlaceBean eventXPlace = new EventXPlaceBean();
-            eventXPlace.setEvent(event);
-            
+            EventXPlaceBean eventXPlace;
+
+            if (placeRequest.getEventmappingId() != null && existingEventPlacesMap.containsKey(placeRequest.getEventmappingId())) {
+                // ✅ 更新現有的 `EventXPlaceBean`
+                eventXPlace = existingEventPlacesMap.get(placeRequest.getEventmappingId());
+            } else {
+                // ✅ 新增新的 `EventXPlaceBean`
+                eventXPlace = new EventXPlaceBean();
+                eventXPlace.setEvent(event);
+            }
+
+            // 設定 `place`
             PlaceBean place = placeRepository.findById(placeRequest.getPlaceId())
                     .orElseThrow(() -> new RuntimeException("找不到地點: " + placeRequest.getPlaceId()));
             eventXPlace.setPlace(place);
@@ -69,16 +87,23 @@ public class EventXPlaceService {
             eventXPlace.setPlaceOrder(placeRequest.getPlaceOrder());
             eventXPlace.setTravelTime(LocalTime.parse(placeRequest.getTravelTime()));
             eventXPlace.setStayDuration(LocalTime.parse(placeRequest.getStayDuration()));
+            eventXPlace.setNotes(placeRequest.getNotes() != null ? placeRequest.getNotes().toCharArray() : null);
 
-            if (placeRequest.getNotes() != null) {
-                eventXPlace.setNotes(placeRequest.getNotes().toCharArray());
-            } else {
-                eventXPlace.setNotes(null);
-            }
-
-            eventXPlaceRepository.save(eventXPlace);
+            updatedEventPlaces.add(eventXPlace);
         }
+
+        // 5️⃣ 只刪除前端「沒傳過來」的 `eventXPlace`
+        List<Long> incomingEventmappingIds = request.getPlaces().stream()
+                .map(EventXPlaceRequest::getEventmappingId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        eventXPlaceRepository.deleteByEventIdAndNotIn(eventId, incomingEventmappingIds);
+
+        // 6️⃣ 儲存變更
+        eventXPlaceRepository.saveAll(updatedEventPlaces);
     }
+
 }
 
 

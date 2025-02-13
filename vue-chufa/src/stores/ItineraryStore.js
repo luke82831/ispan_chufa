@@ -65,7 +65,6 @@ export const useItineraryStore = defineStore("itinerary", {
         itinerary = [];
       }
 
-      // ✅ 改用 index，統一管理順序
       const normalizedItinerary = itinerary
         .filter((place) => place !== null && place !== undefined)
         .map((place, index) => ({
@@ -104,7 +103,12 @@ export const useItineraryStore = defineStore("itinerary", {
       if (!this.stayDurations[date]) {
         this.stayDurations[date] = {};
       }
+
       this.stayDurations[date][index] = duration;
+      console.log(
+        `📌 存入 Pinia [${date}] index: ${index} =>`,
+        this.stayDurations[date][index]
+      );
     },
 
     // 🔥 Action：設定「是否正在編輯」

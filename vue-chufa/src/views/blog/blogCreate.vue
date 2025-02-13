@@ -249,4 +249,8 @@ const submitArticle= async () => {
     .outputPost:hover {
         transform: scale(1.05);
     }
+    element{
+        left: 0;
+        top: 0;
+    }
 </style>

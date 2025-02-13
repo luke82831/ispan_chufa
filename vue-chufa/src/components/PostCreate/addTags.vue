@@ -4,7 +4,7 @@
         <button v-if="openTags" class="addTags" @click="openTagsAction">關閉標籤</button>  
         <div v-if="optTags.length!=0" class="optTags">
             <p>已加入的標籤{{ optTags }}最多五個</p>
-            <button @click="clear">清空</button>
+            <button @click="clear" class="recallTags">清空</button>
         </div>
     </div>
     <div v-if="openTags" class="TagsBox">
@@ -85,5 +85,19 @@
     }
     .optTags{
         display: flex;
+    }
+    .recallTags{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: rgb(226, 66, 66);
+        color: white;
+        margin-bottom: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .recallTags:hover {
+        transform: scale(1.05);
     }
 </style>

@@ -50,35 +50,34 @@ public class PlaceBean {
 	private Double rating;
 	private String website;
 	private String bookingUrl;
-	private String priceLevel; 
+	private String priceLevel;
 	private String accommodationType; // 旅宿類型
 	private boolean reservation; // 只有在餐廳類型時使用
 	private boolean isClosed;
 
-	//  一對多
+	// 一對多
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
-//	@JsonIgnoreProperties({"myCoupons", "place"})
+	// @JsonIgnoreProperties({"myCoupons", "place"})
 	@JsonIgnore
 	private List<CouponBean> coupons;
 
-    @OneToMany(mappedBy = "place")
-    @JsonIgnoreProperties({"eventXPlaceBeans","place","event"})
-    private List<EventXPlaceBean> eventXPlaceBeans;  // 一對多關聯
-	
+	@OneToMany(mappedBy = "place")
+	@JsonIgnoreProperties({ "eventXPlaceBeans", "place", "event" })
+	private List<EventXPlaceBean> eventXPlaceBeans; // 一對多關聯
+
 	@ManyToMany(mappedBy = "place") // 多對多，對應 MemberBean 的 places
-//	@JsonIgnoreProperties("places")
+	// @JsonIgnoreProperties("places")
 	@JsonIgnore
 	private List<MemberBean> members;
-	
+
 	@ManyToMany
 	@JoinTable(name = "placewithposts", // 中介表名稱
 			joinColumns = @JoinColumn(name = "fk_Place_Id", foreignKey = @ForeignKey(name = "placeId")), // PlaceBean關聯的外鍵
 			inverseJoinColumns = @JoinColumn(name = "fk_Post_Id", foreignKey = @ForeignKey(name = "postid")) // PostBean關聯的外鍵
 	)
-//	@JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
+	// @JsonIgnoreProperties("places") // 避免貼文的 places 被序列化
 	@JsonIgnore
 	private Set<PostBean> posts = new HashSet<>();
-	
 
 	// getter and setter
 	public Long getPlaceId() {
@@ -146,26 +145,27 @@ public class PlaceBean {
 	}
 
 	// 設置圖片 URL 列表的方法，將 List<String> 轉換為 JSON 字串
-    public void setPhotos(List<String> photos) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            this.photos = objectMapper.writeValueAsString(photos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	public void setPhotos(List<String> photos) {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			this.photos = objectMapper.writeValueAsString(photos);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-    // 轉換 JSON 字串為 List<String> 的方法
-    public List<String> getPhotos() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.readValue(photos, new TypeReference<List<String>>() {});
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    
+	// 轉換 JSON 字串為 List<String> 的方法
+	public List<String> getPhotos() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		try {
+			return objectMapper.readValue(photos, new TypeReference<List<String>>() {
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	public String getPlacePhone() {
 		return placePhone;
 	}
@@ -237,7 +237,7 @@ public class PlaceBean {
 	public void setReservation(boolean reservation) {
 		this.reservation = reservation;
 	}
-	
+
 	public boolean getClosed() {
 		return isClosed;
 	}
@@ -253,11 +253,11 @@ public class PlaceBean {
 	public void setPosts(Set<PostBean> posts) {
 		this.posts = posts;
 	}
-	
+
 	public List<MemberBean> getMembers() {
 		return members;
 	}
-	
+
 	public void setMembers(List<MemberBean> members) {
 		this.members = members;
 	}
@@ -285,5 +285,5 @@ public class PlaceBean {
 	public void setGooglemapPlaceId(String googlemapPlaceId) {
 		this.googlemapPlaceId = googlemapPlaceId;
 	}
-	
+
 }

@@ -1,9 +1,9 @@
 <template>
-    <button @click="editTagsOk">確認編輯</button>
     <div class="openTagsBox">
+        <button @click="editTagsOk" class="inputEditTags">確認編輯</button>
         <div v-if="optTags.length!=0" class="optTags">
+            <button @click="clear" class="recallEditTags">清空</button>
             <p>已加入的標籤{{ optTags }}最多五個</p>
-            <button @click="clear">清空</button>
         </div>
     </div>
     <div class="editTagsBox">
@@ -98,8 +98,37 @@
     }
     .openTagsBox{
         display: flex;
+        flex-wrap: wrap;
+        width: 400px;
     }
     .optTags{
         display: flex;
+    }
+    .recallEditTags{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: rgb(226, 66, 66);
+        color: white;
+        margin: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .recallEditTags:hover {
+        transform: scale(1.05);
+    }
+    .inputEditTags{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: rgb(28, 119, 155);
+        color: white;
+        margin: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }.inputEditTags:hover {
+        transform: scale(1.05);
     }
 </style>

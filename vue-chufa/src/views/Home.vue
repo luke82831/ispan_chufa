@@ -1,6 +1,11 @@
 <template>
   <div class="main-container">
     <!-- 標籤切換 -->
+
+  <div>
+  <Carousel />
+  </div>
+  
 <div>
     <div class="tabs-container" >
         <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
@@ -149,9 +154,13 @@ import axiosapi from "@/plugins/axios.js";
 import { usePostStore } from "@/stores/usePostStore";
 import defaultProfilePicture from "@/assets/empty.png"
 import defaultback from "@/assets/default.jpg";
+import Carousel from "@/components/blog/Carousel.vue";
 
 
 export default {
+  components: {
+    Carousel // 註冊 PostCard 元件
+  },
   setup() {
     const router = useRouter();
     const profileLoaded = ref(false);
@@ -168,7 +177,8 @@ export default {
     const searchStore = useSearchStore();
     const selectedPlace = ref(null); 
     const defaultProfilePic=ref(defaultProfilePicture);
-    const defaultpicture=ref(defaultback)
+    const defaultpicture=ref(defaultback);
+    const isCarouselFlag = ref(false); 
     
     //place
     //const selectedPlace = ref(null);
@@ -181,6 +191,16 @@ export default {
     watch(sortBy, () => {
       fetchPosts();  // 每次排序方式改變時重新抓取資料
     });
+
+    // 切換到下一張
+const nextSlide = () => {
+  currentIndex.value = (currentIndex.value + 1) % posts.value.length;
+};
+
+// 切換到上一張
+const prevSlide = () => {
+  currentIndex.value = (currentIndex.value - 1 + posts.value.length) % posts.value.length;
+};
 
     const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -481,6 +501,10 @@ Swal.fire("請先登入", "登入體驗更好", "error");
       users,
       defaultProfilePic,
       defaultpicture,
+
+      nextSlide,
+      prevSlide,
+      isCarouselFlag,
     };
   },
 };

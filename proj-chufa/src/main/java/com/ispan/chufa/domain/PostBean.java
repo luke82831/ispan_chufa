@@ -43,7 +43,7 @@ public class PostBean {
 	@JsonBackReference
 	private MemberBean member;
 
-	@OneToMany(mappedBy = "postBean")
+	@OneToMany(mappedBy = "postBean", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private Set<CommentBean> commentBeans;
 

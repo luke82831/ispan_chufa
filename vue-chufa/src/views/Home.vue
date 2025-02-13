@@ -243,7 +243,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 5,
+          size: 100,
           checklike:member.value.userid,
           repost:true,
         };

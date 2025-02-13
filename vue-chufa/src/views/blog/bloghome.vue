@@ -412,29 +412,31 @@ export default {
 
 
 .hidden-post {
-  background-color: rgba(245, 245, 245, 0.3) !important;  /* ★★★★★ 修改：使用 RGBA 設定背景透明度 0.3 ★★★★★ */
-  color: #888 !important;
+  background-color: rgba(80, 73, 73, 0.2) !important; /* 變得更透明 */
+  color: #aaa !important; /* 讓字體變灰 */
   pointer-events: none; /* 禁止任何互動 */
-  /* 移除了 opacity 屬性 */
-  position: relative; /* 確保 .hidden-message 的絕對定位是相對於 .hidden-post */
+  filter: grayscale(80%); /* 增加灰階效果 */
+  position: relative; /* 確保 .hidden-message 絕對定位基於它 */
 }
 
-/* ★★★★★【MODIFIED】：隱藏提示訊息設定，並新增 min-width 讓提示訊息更寬 ★★★★★ */
+/* ★★★★★ 明顯顯示隱藏訊息 ★★★★★ */
 .hidden-message {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgba(179, 164, 164, 0.9);
+  background-color: rgba(156, 156, 156, 0.9); /* 更加明顯的紅色背景 */
   text-align: center;
-  font-size: 14px;
-  padding: 10px 20px;
-  color: #ff0000;
+  font-size: 16px;
+  padding: 15px 25px;
+  color: rgb(255, 0, 0); /* 白色文字提高對比 */
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 1; /* 保持100%不透明 */
-  min-width: 300px;  /* ★★★★★ 新增：設定最小寬度 300px ★★★★★ */
+  font-weight: bold; /* 文字加粗 */
+  border-radius: 8px; /* 圓角讓樣式更好看 */
+  min-width: 320px; /* 讓提示訊息不會太窄 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 添加陰影讓它浮起來 */
 }
 
 </style>

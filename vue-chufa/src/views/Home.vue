@@ -35,7 +35,7 @@
     <!-- 貼文網格布局 -->
     <div class="posts-grid" v-if="posts.length > 0">
       <div
-        v-for="post in posts"
+        v-for="post in visiblePosts"
         :key="post.postid"
         class="post-card"
         @click="navigateToDetail(post.postid, $event)"
@@ -179,6 +179,8 @@ export default {
     const defaultProfilePic=ref(defaultProfilePicture);
     const defaultpicture=ref(defaultback);
     const isCarouselFlag = ref(false); 
+
+
     
     //place
     //const selectedPlace = ref(null);
@@ -257,7 +259,7 @@ const prevSlide = () => {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 50,
+          size: 100,
           checklike:member.value.userid,
           repost:true,
         };

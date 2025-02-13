@@ -43,7 +43,7 @@ public class PostBean {
 	@JsonBackReference
 	private MemberBean member;
 
-	@OneToMany(mappedBy = "postBean")
+	@OneToMany(mappedBy = "postBean", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonManagedReference
 	private Set<CommentBean> commentBeans;
 
@@ -65,7 +65,7 @@ public class PostBean {
 	private Set<PlaceBean> place = new HashSet<>();
 	// private Set<TagsBean> tag;
 
-	@ManyToOne(cascade = CascadeType.ALL)
+	@ManyToOne
 	private ScheduleBean scheduleBean;
 
 	@ManyToOne

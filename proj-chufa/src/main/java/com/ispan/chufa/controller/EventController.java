@@ -24,48 +24,45 @@ import com.ispan.chufa.repository.CalendarRepository;
 import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
 
-
 @RestController
 @RequestMapping("/api")
 public class EventController {
-    
-	@Autowired
+
+    @Autowired
     private EventService eventService;
-	
-	@Autowired
+
+    @Autowired
     private ScheduleRepository scheduleRepository;
-	
-	@Autowired
+
+    @Autowired
     private CalendarRepository calendarRepository;
 
-	
-	// POST: 創建行程內容資料
+    // POST: 創建行程內容資料
     @PostMapping("/event")
     public ResponseEntity<EventBean> createEvent(@RequestBody EventBean event) {
         EventBean savedEvent = eventService.saveEvent(event);
         return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
     }
-    
-//    @PutMapping(""/event/{id}"")
-//    public ResponseEntity<EventBean> updateEvent(
-//            @PathVariable Long id,  // 這是 eventId
-//            @RequestBody EventUpdateRequest request) {
-//        EventBean updatedEvent = eventService.updateEvent(id, request);
-//        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
-//    }
-    
+
+    // @PutMapping("/event/{id}")
+    // public ResponseEntity<EventBean> updateEvent(
+    // @PathVariable Long id, // 這是 eventId
+    // @RequestBody EventUpdateRequest request) {
+    // EventBean updatedEvent = eventService.updateEvent(id, request);
+    // return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+    // }
+
     // GET: 根據 event_id 查詢 Event 資料
-//    @GetMapping(""/event/{eventId}"")
-//    public ResponseEntity<EventBean> getEventById(@PathVariable Long eventId) {
-//        EventBean event = eventService.findEventById(eventId);  // 透過服務查詢 Event 資料
-//        if (event != null) {
-//            return new ResponseEntity<>(event, HttpStatus.OK);  // 資料存在，返回 200 和資料
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);  // 資料不存在，返回 404
-//        }
-//    }
-    
-    
+    // @GetMapping("/event/{eventId}")
+    // public ResponseEntity<EventBean> getEventById(@PathVariable Long eventId) {
+    // EventBean event = eventService.findEventById(eventId); // 透過服務查詢 Event 資料
+    // if (event != null) {
+    // return new ResponseEntity<>(event, HttpStatus.OK); // 資料存在，返回 200 和資料
+    // } else {
+    // return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 資料不存在，返回 404
+    // }
+    // }
+
     // GET: 根據 event_id 查詢 Event 資料
     @GetMapping("/event/{tripId}/date/{date}")
     public ResponseEntity<List<EventBean>> getEventsByTripAndDate(
@@ -80,7 +77,7 @@ public class EventController {
 
         // 2️⃣ 查詢 Calendar (行事曆) 是否存在
         CalendarBean calendar = calendarRepository.findByDate(date)
-                .orElseGet(() -> { 
+                .orElseGet(() -> {
                     System.out.println("⚠️ 無對應 Calendar，建立新 Calendar...");
                     CalendarBean newCalendar = new CalendarBean();
                     newCalendar.setDate(date);
@@ -107,7 +104,7 @@ public class EventController {
         System.out.println("📡 回傳 JSON: " + events);
         return new ResponseEntity<>(events, HttpStatus.OK);
     }
-     
+
     // PUT: 更新行程內容資料
     @PutMapping("/event/{eventId}")
     public ResponseEntity<?> updateEvent(@PathVariable Long eventId, @RequestBody EventBean updatedEvent) {
@@ -130,8 +127,7 @@ public class EventController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 資料不存在，返回 404 和錯誤訊息
         }
     }
-    
-    
+
     // DELETE: 根據 eventId 刪除 Event 資料
     @DeleteMapping("/event/{eventId}")
     public ResponseEntity<?> deleteEvent(@PathVariable Long eventId) {

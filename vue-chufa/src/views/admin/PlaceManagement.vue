@@ -272,13 +272,15 @@ onMounted(fetchPlaces);
 /*框線*/
 .place-table th,
 .place-table td {
-  border: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   padding: 8px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .place-table th {
   background-color: #f4f4f4;

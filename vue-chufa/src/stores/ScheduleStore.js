@@ -6,7 +6,6 @@ export const useScheduleStore = defineStore("scheduleStore", {
     schedules: [], // 所有行程列表
     currentSchedule: null, // 當前選中的行程
     selectedDate: "", // 當前選中的行程日期
-    itinerary: {}, // 行程地點資料 { "YYYY-MM-DD": [地點列表] }
   }),
 
   actions: {
@@ -30,7 +29,9 @@ export const useScheduleStore = defineStore("scheduleStore", {
     /** 🔹 獲取特定schedule */
     async fetchScheduleById(tripId) {
       try {
+        console.log("fetchScheduleById 被呼叫，tripId:", tripId); // 🔍 檢查是否進入函數
         const response = await axiosapi.get(`/api/schedule/${tripId}`);
+        console.log("API 回傳fetchScheduleById資料:", response.data);
         this.currentSchedule = response.data;
       } catch (error) {
         console.error("載入行程詳細資料失敗:", error);

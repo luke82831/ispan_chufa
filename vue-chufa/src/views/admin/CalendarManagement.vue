@@ -179,9 +179,13 @@ onMounted(() => {
 }
 
 .calendar-table th, .calendar-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendar-table th {

@@ -6,9 +6,9 @@
         <div class="sort-select-container">
             <div class="tabs-container">
             <button class="tab" :class="{ active: selectedTab === 'posts' }" @click="switchTab('posts')">文章</button>
-            <button class="tab" :class="{ active: selectedTab === 'users' }" @click="switchTab('users')">使用者</button>
+            <button class="tab" :class="{ active: selectedTab === 'users' }" @click="switchTab('users')">用戶</button>
             </div>
-            <select  v-if="selectedTab === 'posts'" id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">\
+            <select  v-if="selectedTab === 'posts'" id="sortSelect" v-model="sortBy" @change="fetchPosts(searchStore.searchTitle)" class="border p-2 rounded">\
             
             <option value="likes">熱度排序</option>
             <option value="time">時間排序</option>
@@ -165,18 +165,10 @@ const toggleFollow = async (user) => {
     }
 };
     
-        watch(sortBy, () => {
-            fetchPosts();  // 每次排序方式改變時重新抓取資料
-        });
-    
         const getFirstImage = (content) => {
             const match = content.match(/<img[^>]+src="([^">]+)"/);
             return match ? match[1] : null;
         };
-    
-        // const getContentWithoutImages = (content) => {
-        //   return content.replace(/<img[^>]*>/g, "");
-        // };
     
         const getTextPreview = (content, length) => {
             // 移除圖片和其他 HTML 標籤
@@ -246,15 +238,6 @@ const toggleFollow = async (user) => {
             requestData.postTitle = query; // 加入搜尋條件
             isSearch.value=true;
             } 
-            if (selectedPlace.value === 'follow') {
-            requestData.repost=true;
-            requestData.followerId = member.value.userid;  
-            } else if (selectedPlace.value !== null||selectedPlace!=='users') {
-            // 只有選擇地點時才加入 place
-            requestData.place = selectedPlace.value;
-            }
-        
-    
             const response = await axiosapi.post(
                 "/api/posts/post",requestData,
                 {
@@ -289,10 +272,6 @@ const toggleFollow = async (user) => {
             selectedPlace.value = placeName; 
         }
         currentPage.value = 1;
-        // const url = new URL(window.location.href);
-        // url.search = ''; // 清空查詢參數
-        // window.history.replaceState(null, '', url);
-    
         searchStore.resetSearch(); // 清空搜索
         fetchPosts();
         };
@@ -396,27 +375,32 @@ const toggleFollow = async (user) => {
             Swal.fire("錯誤", "無法執行點讚操作", "error");
             }
         };
-        
+        const route = useRoute();
+        //const query = ref(route.query.title || ""); 
+        // console.log(query);
+        // console.log(query.value)
         const setSort = (type) => {
             if (sortBy.value !== type) {
             sortBy.value = type;
             fetchPosts();
             }
         };
-        const route = useRoute();
+    
         const resetSearch = () => {
         searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
-    };
+        };
     
         watch(
             () => route.query.title,
-            (newQuery) => {
-            if (newQuery) {
-                fetchPosts(newQuery); // 如果有搜尋條件就請求搜尋
+            (query) => {
+            if (query) {
+                fetchPosts(query); // 如果有搜尋條件就請求搜尋
             } else {
                 fetchPosts(); // 沒有搜尋條件則請求普通的 fetchPosts
             }
             },
+            sortBy, () => {
+            fetchPosts(query); },
             { immediate: true }
             
         );
@@ -425,11 +409,8 @@ const toggleFollow = async (user) => {
         // 監聽 sortBy 的變化，當選擇變更時請求 fetchPost
     
         onMounted(async () => {
-            selectedPlace.value = null;
-            //selectedPlace.value = places.value[0].id;
             await fetchPosts();
             await fetchProfile();
-            //await fetchDataWithStatus();
             const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
             fetchPosts(query); // 根據查詢條件抓取貼文
         });
@@ -476,135 +457,59 @@ const toggleFollow = async (user) => {
   margin: 0 auto;
 }
 
+
+
 .tabs-container {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  border-bottom: 1px solid #e0e0e0; /* 底部邊框 */
   overflow-x: auto;
-  padding-bottom: 10px;
   justify-content: flex-start; /* 将内容靠左 */
   width: 100%;
 }
 
+/* Tab 按鈕 */
 .tab {
   padding: 10px 20px;
   border: none;
-  background-color: #f0f0f0;
-  border-radius: 20px;
+  background-color: transparent;
+  border-radius: 0;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
+  color: #666;
+  transition: color 0.3s, border-bottom 0.3s;
   white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Tab 按鈕懸停效果 */
 .tab:hover {
-  background-color: #e0e0e0;
+  color: #333;
 }
 
+/* 當前選中的 Tab */
 .tab.active {
-  background-color: #005AB5;
-  color: white;
+  color: #000;
+  font-weight: 500;
 }
 
-    .posts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    }
-
-    .post-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    overflow: hidden;
-    background-color: white;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .post-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .post-image-container {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    position: relative;
-    }
-
-    .post-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s;
-    }
-
-    .post-image-container:hover .post-image {
-    transform: scale(1.05);
-    }
-
-    .post-content-preview{
-    padding: 16px;
-    font-size: 14px;
-    color: #555;
-    line-height: 1.5;
-    }
-
-    .post-content h3 {
-    margin: 0 0 10px;
-    font-size: 18px;
-    color: #333;
-    }
-
-    .read-more {
-    display: inline-block;
-    margin: 10px 0;
-    color: #ff4757;
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-    }
-
-    .read-more:hover {
-    color: #ff6b81;
-    }
-
-    .post-meta,
-    .post-stats {
-    padding: 0 16px 10px;
-    font-size: 12px;
-    color: #888;
-    }
-
-    .post-meta p,
-    .post-stats p {
-    margin: 5px 0;
-    }
-
-    .post-actions {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px;
-    border-top: 1px solid #e0e0e0;
-    background-color: #f9f9f9;
-    }
-
-    .action-btn {
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 14px;
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: color 0.3s;
-    }
-
-    .pagination {
+/* 選中 Tab 的下劃線效果 */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* 對齊底部邊框 */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #000; /* 黑色下劃線 */
+  border-radius: 2px;
+}
+ .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -612,7 +517,7 @@ const toggleFollow = async (user) => {
     gap: 10px;
     }
 
-    .pagination button {
+.pagination button {
     padding: 8px 16px;
     border: none;
     border-radius: 20px;
@@ -624,7 +529,7 @@ const toggleFollow = async (user) => {
     }
 
     .pagination button:hover {
-    background-color: #ff4757;
+    background-color: #5889d7;
     color: white;
     }
 
@@ -637,74 +542,6 @@ const toggleFollow = async (user) => {
     .pagination span {
     font-size: 14px;
     color: #333;
-    }
-
-    /* 作者信息樣式 */
-    .author-info {
-    padding: 16px;
-    }
-
-    .author-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    }
-
-    .profile-picture-container {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    overflow: hidden;
-    }
-
-    .profile-picture {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    }
-
-    .default-profile {
-    width: 100%;
-    height: 100%;
-    background-color: #ccc;
-    border-radius: 50%;
-    }
-
-    .author-name {
-    font-size: 14px;
-    color: #333;
-    }
-
-    /* REPOST 樣式 */
-    .repost-header {
-    padding: 10px 16px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #e0e0e0;
-    }
-
-    .interaction-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    }
-
-    .repost-profile-container {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    overflow: hidden;
-    }
-
-    .small-profile {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    }
-
-    .interaction-name {
-    font-size: 12px;
-    color: #666;
-    margin: 0;
     }
 
     /* 發文/規劃按鈕 */
@@ -777,6 +614,7 @@ const toggleFollow = async (user) => {
     margin: 5px;
     cursor: pointer;
     border-radius: 4px;
+    margin-bottom: 0px;
     }
 
   /* 用戶列表容器 */
@@ -844,7 +682,7 @@ const toggleFollow = async (user) => {
   padding: 8px 16px;
   border: none;
   border-radius: 20px; /* 圓角按鈕 */
-  background-color: #ff5a5f; /* 小紅書風格紅色 */
+  background-color: #5a95d5; /* 小紅書風格紅色 */
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -857,7 +695,7 @@ const toggleFollow = async (user) => {
 }
 
 .follower-button:hover {
-  background-color: #e04a50; /* 懸停效果 */
+  background-color: #14a5e8; /* 懸停效果 */
 }
 
 /* 確保用戶卡片內部的排版不會有額外的元素 */

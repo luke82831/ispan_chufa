@@ -1,17 +1,9 @@
 <template>
-    <div class="carousel">
-      <!-- 圖片與內文輪播區域 -->
-      <!-- <div class="input-section">
-      <label for="post-ids">輸入文章 ID（以逗號分隔）:</label>
-      <input
-        id="post-ids"
-        type="text"
-        v-model="postIdsInput"
-        placeholder="例如：20067,20068,20069"
-      />
-      <button @click="updatePostIds">更新文章</button>
+  <div class="hero-text">
+      <h1>出發！發現台灣之美，規劃每一刻的精彩！</h1>
+      <p class="subtext">專屬你的台灣之旅，從規劃開始</p>
     </div>
-       -->
+    <div class="carousel">
       <div
         class="carousel-item"
         v-for="(post, index) in posts"
@@ -58,7 +50,7 @@ const currentIndex = ref(0);
 let autoSlideInterval = null;
 
 
-const postIds = ref([6,7,8,9,10]); // 在內部管理 postIds
+const postIds = ref([20067,20068,20069]); // 在內部管理 postIds
 const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 
@@ -155,6 +147,26 @@ onBeforeUnmount(() => {
 });
 </script>
 <style scoped>
+
+.hero-text {
+  text-align: left; /* 使標語靠左 */
+  margin-top: 20px;
+  padding: 10px 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+  text-align: left; /* 確保主標題靠左 */
+}
+
+.subtext {
+  font-size: 1.1rem;
+  margin-top: 8px;
+  opacity: 0.8;
+  text-align: left; /* 確保副標題靠左 */
+}
+
 
 .carousel {
   position: relative;

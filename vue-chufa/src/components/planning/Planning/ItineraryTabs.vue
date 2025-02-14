@@ -29,13 +29,19 @@
       {{ scheduleStore.currentSchedule.endDate }}
     </p>
 
-    <!-- 日期分頁 -->
+    <div class="list-container">
+      <!-- 按鈕來控制展開/收合 -->
+      <button @click="toggleExpanded" class="toggle-button">
+        {{ isExpanded ? "收合行程" : "查看完整行程" }}
+      </button>
+
+      <!-- 傳遞 isExpanded 狀態給子組件 -->
+      <ItineraryList :isExpanded="isExpanded" @close="isExpanded = false" />
+    </div>
+
     <div class="date-tabs">
-      <button
-        class="arrow-button"
-        @click="changeDate('prev')"
-        :disabled="isFirstDay"
-      >
+      <!-- 日期分頁 -->
+      <button class="arrow-button" @click="changeDate('prev')" :disabled="isFirstDay">
         &lt;
       </button>
 
@@ -48,15 +54,9 @@
         {{ formatDate(date) }}
       </button>
 
-      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
-        ＋
-      </button>
+      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">＋</button>
 
-      <button
-        class="arrow-button"
-        @click="changeDate('next')"
-        :disabled="isLastDay"
-      >
+      <button class="arrow-button" @click="changeDate('next')" :disabled="isLastDay">
         &gt;
       </button>
     </div>
@@ -74,6 +74,7 @@ import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import PlanningDay from "./PlanningDay.vue";
+import ItineraryList from "@/components/planning/Itinerary/ItineraryList.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -84,6 +85,22 @@ const tripId = route.params.tripId;
 const selectedDate = ref(""); // 當前選擇的日期
 const isEditing = ref(false);
 const newTitle = ref("");
+const isExpanded = ref(false);
+
+// 模擬行程數據
+const events = ref([
+  { id: 1, date: "2025-02-11", name: "博物館參觀" },
+  { id: 2, date: "2025-02-12", name: "海灘散步" },
+  { id: 3, date: "2025-02-13", name: "美食之旅" },
+  { id: 4, date: "2025-02-14", name: "購物中心" },
+  { id: 5, date: "2025-02-15", name: "動物園" },
+]);
+
+// 展開所有行程
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value;
+  console.log("isExpanded:", isExpanded.value); // 測試是否變更
+};
 
 // **初始化行程數據**
 onMounted(async () => {
@@ -173,10 +190,7 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (
-    direction === "next" &&
-    currentIndex < dateRange.value.length - 1
-  ) {
+  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -219,13 +233,9 @@ const addOneMoreDay = async () => {
 };
 
 // **是否為第一天 / 最後一天**
-const isFirstDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[0])
-);
+const isFirstDay = computed(() => selectedDate.value === formatDate(dateRange.value[0]));
 const isLastDay = computed(
-  () =>
-    selectedDate.value ===
-    formatDate(dateRange.value[dateRange.value.length - 1])
+  () => selectedDate.value === formatDate(dateRange.value[dateRange.value.length - 1])
 );
 
 // **返回行程列表**
@@ -340,5 +350,19 @@ button:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.list-container {
+  position: relative;
+  padding: 20px;
+}
+
+.toggle-button {
+  padding: 10px 15px;
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>

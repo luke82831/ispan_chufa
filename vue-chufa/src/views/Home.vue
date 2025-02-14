@@ -1,55 +1,55 @@
 <template>
   <div class="main-container">
-    <!-- 標籤切換 -->
-
-  <div>
-  <Carousel />
-  </div>
-  <!-- <div class="carousel-admin">
-    <h2>輪播管理</h2>
-    <label for="postid-input">輸入 Post ID（用逗號分隔）:</label>
-    <input
-      id="postid-input"
-      v-model="postidInput"
-      placeholder="例如：1,2,3,4,5"
-    />
-    <button @click="updateCarousel">更新輪播</button>  
-    <Carousel :postIds="postIds" />
-  </div> -->
-  
-<div>
-    <div class="tabs-container" >
-        <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
-        首頁
-      </button>
-      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')" v-if="userStore.isLoggedIn">
-        關注
-      </button>
-      <button
-        v-for="place in places"
-        :key="place.id"
-        class="tab"
-        :class="{ active: selectedPlace === place.name }"
-        @click="switchPlace(place.name)"
-      >
-        {{ place.name }}
-      </button>
-
-      <div class="sort-select-container">
-      <select id="sortSelect" v-model="sortBy" @change="fetchPosts" class="border p-2 rounded">
-        <option value="likes">熱度排序</option>
-        <option value="time">時間排序</option>
-      </select>
+    <div>
+      <Carousel />
     </div>
-  </div>
-</div>
+    <div>
+      <div class="tabs-container">
+        <button
+          class="tab"
+          :class="{ active: selectedPlace === null }"
+          @click="switchPlace(null)"
+        >
+          首頁
+        </button>
+        <button
+          class="tab"
+          :class="{ active: selectedPlace === 'follow' }"
+          @click="switchPlace('follow')"
+          v-if="userStore.isLoggedIn"
+        >
+          關注
+        </button>
+        <button
+          v-for="place in places"
+          :key="place.id"
+          class="tab"
+          :class="{ active: selectedPlace === place.name }"
+          @click="switchPlace(place.name)"
+        >
+          {{ place.name }}
+        </button>
+
+        <div class="sort-select-container">
+          <select
+            id="sortSelect"
+            v-model="sortBy"
+            @change="fetchPosts"
+            class="border p-2 rounded"
+          >
+            <option value="likes">熱度排序</option>
+            <option value="time">時間排序</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <!-- 貼文網格布局 -->
     <div class="posts-grid" v-if="posts.length > 0">
       <div
         v-for="post in visiblePosts"
         :key="post.postid"
         class="post-card"
-        @click="navigateToDetail(post.postid, $event)"
+        @click="navigateToDetail(post, $event)"
       >
         <!-- REPOST 版型處理 -->
         <div v-if="post.repost" class="repost-header">
@@ -61,54 +61,97 @@
                 alt="Interaction Profile Picture"
                 class="profile-picture small-profile"
               />
+              <div v-else>
+                <img
+                  :src="defaultProfilePic"
+                  alt="Default Profile Picture"
+                  class="profile-picture small-profile"
+                />
+              </div>
             </div>
             <p class="interaction-name">
-              {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
+              {{
+                post.member.nickname ? post.member.nickname : post.member.name
+              }}
+              轉發貼文
             </p>
           </div>
         </div>
 
         <!-- 作者信息 -->
-        <div class="author-info" >
+        <div class="author-info">
           <div class="author-header">
             <div class="profile-picture-container">
               <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
                 <img
-                  v-if="post.repostDTO ? post.repostDTO.member?.profilePicture : post.member?.profilePicture"
-                  :src="'data:image/jpeg;base64,' + (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)"
+                  v-if="
+                    post.repostDTO
+                      ? post.repostDTO.member?.profilePicture
+                      : post.member?.profilePicture
+                  "
+                  :src="
+                    'data:image/jpeg;base64,' +
+                    (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)
+                  "
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
+                <img
+                  v-else
+                  :src="defaultProfilePic"
+                  alt="Default Profile Picture"
+                  class="profile-picture"
+                />
               </router-link>
             </div>
             <div class="author-name">
-              <strong>
-                {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-                ({{ post.repostDTO?.member?.name || post.member.name }})
+              <strong
+                v-if="
+                  post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname
+                "
+              >
+                {{
+                  post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname
+                }}
               </strong>
+              <strong v-else>
+                {{ post.repostDTO?.member?.name || post.member.name }}
+              </strong>
+              <p class="post-time">{{ formatDate(post.postTime) }}</p>
             </div>
           </div>
-          <h3>
-            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-          </h3>
         </div>
 
         <!-- 顯示第一張圖片 -->
-        <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
-          <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
+        <div
+          v-if="
+            getFirstImage(post.repostDTO ? post.repostDTO.postContent : post.postContent)
+          "
+          class="post-image-container"
+        >
+          <img
+            :src="
+              getFirstImage(
+                post.repostDTO ? post.repostDTO.postContent : post.postContent
+              )
+            "
+            class="post-image"
+          />
         </div>
         <div v-else class="post-image-container">
           <img :src="defaultpicture" class="post-image" />
         </div>
-<!-- 
-        移除圖片後的內容
-        <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
-        <p class="post-content-preview">
-        {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
-        </p>
-
-
+        <div class="post-content-preview">
+          <p>
+            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+          </p>
+          {{
+            getTextPreview(
+              post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題",
+              30
+            )
+          }}
+        </div>
         <!-- 互動按鈕 -->
         <div class="post-actions" @click.stop>
           <button
@@ -116,17 +159,19 @@
             class="action-btn like-btn"
             :class="{ active: post.likedByCurrentUser }"
           >
-          <span class="heart-icon"></span> 
+            <span class="heart-icon"></span>
             <!-- {{ post.likedByCurrentUser ? '已點讚' : '點讚' }} -->
             {{ post.likeCount }}
           </button>
           <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
             🔁 {{ post.repostCount }}
           </button>
-          <button @click.stop="collectPost(post.postid)" 
-          class="action-btn collect-btn"
-          :class="{ active: post.collectByCurrentUser }">
-            {{ post.collectByCurrentUser ? '已收藏' : '收藏' }}
+          <button
+            @click.stop="collectPost(post.postid)"
+            class="action-btn collect-btn"
+            :class="{ active: post.collectByCurrentUser }"
+          >
+            {{ post.collectByCurrentUser ? "已收藏" : "收藏" }}
           </button>
         </div>
       </div>
@@ -153,24 +198,53 @@
     </div>
     <RouterView></RouterView>
   </div>
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>探索下一個旅程</h3>
+        <ul>
+          <li><a href="#">關於我們</a></li>
+          <li><a href="#">官方粉專</a></li>
+          <li><a :href="mailToLink">聯絡我們</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>公司資訊</h3>
+        <ul>
+          <li>快樂出發有限公司</li>
+          <li>統一編號：12345678</li>
+          <li>旅行業註冊編號：CHUFA</li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>其他產品</h3>
+        <ul>
+          <li>統一編號：9999999</li>
+          <li>聯繫地址：106台北市大安區復興南路一段390號2樓</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© Chufa, Inc. 2025</p>
+    </div>
+  </footer>
 </template>
 <script>
-import { ref, onMounted,watch,inject,computed} from "vue";
+import { ref, onMounted, watch, inject, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import Swal from "sweetalert2";
-import { useRoute } from 'vue-router';
-import { useSearchStore } from '@/stores/search.js';
+import { useRoute } from "vue-router";
+import { useSearchStore } from "@/stores/search.js";
 import axiosapi from "@/plugins/axios.js";
 import { usePostStore } from "@/stores/usePostStore";
-import defaultProfilePicture from "@/assets/empty.png"
+import defaultProfilePicture from "@/assets/empty.png";
 import defaultback from "@/assets/default.jpg";
 import Carousel from "@/components/blog/Carousel.vue";
 
-
 export default {
   components: {
-    Carousel // 註冊 PostCard 元件
+    Carousel, // 註冊 PostCard 元件
   },
   setup() {
     const router = useRouter();
@@ -183,13 +257,13 @@ export default {
     const currentPage = ref(1); // 當前頁數
     const noPosts = ref(false);
     const sortBy = ref("likes"); // 排序狀態
-    const searchQuery = ref('');
+    const searchQuery = ref("");
     const isSearch = ref(false);
     const searchStore = useSearchStore();
-    const selectedPlace = ref(null); 
-    const defaultProfilePic=ref(defaultProfilePicture);
-    const defaultpicture=ref(defaultback);
-    const isCarouselFlag = ref(false); 
+    const selectedPlace = ref(null);
+    const defaultProfilePic = ref(defaultProfilePicture);
+    const defaultpicture = ref(defaultback);
+    const isCarouselFlag = ref(false);
     // 管理輸入的 postid
     const postidInput = ref("");
     const postIds = ref([]);
@@ -203,34 +277,38 @@ export default {
     //     .filter((id) => !isNaN(id));
     // };
 
-
-    
     //place
     //const selectedPlace = ref(null);
     const places = ref([
-  { id: 1, name: "台北市" },
-  { id: 2, name: "新北市" },
-  { id: 3, name: "桃園市" },
-  { id: 4, name: "台中市" },
-  { id: 5, name: "臺南市" },
-  { id: 6, name: "高雄市" },
-  { id: 7, name: "宜蘭縣" },
-  { id: 8, name: "花蓮縣" },
+      { id: 1, name: "台北市" },
+      { id: 2, name: "新北市" },
+      { id: 3, name: "桃園市" },
+      { id: 4, name: "台中市" },
+      { id: 5, name: "臺南市" },
+      { id: 6, name: "高雄市" },
+      { id: 7, name: "宜蘭縣" },
+      { id: 8, name: "花蓮縣" },
     ]);
 
+    const email = "chufa@gmail.com";
+    const mailToLink = computed(() => {
+      return `mailto:${email}`;
+    });
+
     watch(sortBy, () => {
-      fetchPosts();  // 每次排序方式改變時重新抓取資料
+      fetchPosts(); // 每次排序方式改變時重新抓取資料
     });
 
     // 切換到下一張
-const nextSlide = () => {
-  currentIndex.value = (currentIndex.value + 1) % posts.value.length;
-};
+    const nextSlide = () => {
+      currentIndex.value = (currentIndex.value + 1) % posts.value.length;
+    };
 
-// 切換到上一張
-const prevSlide = () => {
-  currentIndex.value = (currentIndex.value - 1 + posts.value.length) % posts.value.length;
-};
+    // 切換到上一張
+    const prevSlide = () => {
+      currentIndex.value =
+        (currentIndex.value - 1 + posts.value.length) % posts.value.length;
+    };
 
     const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -250,14 +328,20 @@ const prevSlide = () => {
     });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
-    const navigateToDetail = (postid, event) => {
+    const navigateToDetail = (post, event) => {
       const excludedElements = [".post-actions", ".action-btn", "a", "button"];
       for (let selector of excludedElements) {
         if (event.target.closest(selector)) {
           return; // 如果點擊的是按鈕、連結，就不觸發跳轉
         }
       }
-      router.push(`/blog/find/${postid}`);
+      // 如果是轉發的貼文，跳轉到原貼文的詳細頁
+      if (post.repost && post.repostDTO) {
+        router.push(`/blog/find/${post.repostDTO.postid}`);
+      } else {
+        // 否則跳轉到當前貼文的詳細頁
+        router.push(`/blog/find/${post.postid}`);
+      }
     };
 
     const formatDate = (date) => {
@@ -288,45 +372,41 @@ const prevSlide = () => {
         const requestData = {
           page: currentPage.value,
           size: 100,
-          checklike:member.value.userid,
-          repost:true,
+          checklike: member.value.userid,
+          repost: true,
         };
 
-      // 動態設定排序條件
-      requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
+        // 動態設定排序條件
+        requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
 
-      if (query) {
-        requestData.postTitle = query; // 加入搜尋條件
-        isSearch.value=true;
-      } 
-      if (selectedPlace.value === 'follow') {
-        //requestData.repost=true;
-        requestData.followerId = member.value.userid;  
-      } else if (selectedPlace.value !== null||selectedPlace!=='users') {
-        // 只有選擇地點時才加入 place
-        requestData.places = selectedPlace.value;
-      }
-    
+        if (query) {
+          requestData.postTitle = query; // 加入搜尋條件
+          isSearch.value = true;
+        }
+        if (selectedPlace.value === "follow") {
+          //requestData.repost=true;
+          requestData.followerId = member.value.userid;
+        } else if (selectedPlace.value !== null || selectedPlace !== "users") {
+          // 只有選擇地點時才加入 place
+          requestData.places = selectedPlace.value;
+        }
 
-      const response = await axiosapi.post(
-          "/api/posts/post",requestData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-cache",
-            },
-          }
-        );
+        const response = await axiosapi.post("/api/posts/post", requestData, {
+          headers: {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+          },
+        });
         if (response.data.postdto && response.data.postdto.length > 0) {
-          posts.value = response.data.postdto
+          posts.value = response.data.postdto;
           // .filter(
-          //   (post) => !post.repost && post.repostDTO === null      
+          //   (post) => !post.repost && post.repostDTO === null
           // );
-          noPosts.value = false; 
+          noPosts.value = false;
         } else {
           posts.value = [];
           // currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
-          // Swal.fire("已經到底啦!", "no post。", "info"); 
+          // Swal.fire("已經到底啦!", "no post。", "info");
         }
       } catch (error) {
         console.error("Fetch posts failed:", error);
@@ -336,20 +416,19 @@ const prevSlide = () => {
 
     //tab
     const switchPlace = (placeName) => {
-      if (placeName === 'follow') {
-      selectedPlace.value = 'follow';
-    } else{
-      selectedPlace.value = placeName; 
-    }
-    currentPage.value = 1;
-    // const url = new URL(window.location.href);
-    // url.search = ''; // 清空查詢參數
-    // window.history.replaceState(null, '', url);
+      if (placeName === "follow") {
+        selectedPlace.value = "follow";
+      } else {
+        selectedPlace.value = placeName;
+      }
+      currentPage.value = 1;
+      // const url = new URL(window.location.href);
+      // url.search = ''; // 清空查詢參數
+      // window.history.replaceState(null, '', url);
 
-    searchStore.resetSearch(); // 清空搜索
-    fetchPosts();
-  };
-
+      searchStore.resetSearch(); // 清空搜索
+      fetchPosts();
+    };
 
     //分頁
     const nextPage = () => {
@@ -388,47 +467,48 @@ const prevSlide = () => {
       }
     };
 
-
     // 判断当前用户是否已经点赞
     const likePost = async (postid) => {
-      try {   
+      try {
         // 查找当前操作的帖子
-       const postToUpdate = posts.value.find(post => post.postid === postid);
-      const data = {
-        postid: postid,
-        userid: member.value.userid,
-        interactionType: "LIKE",  // 如果点赞则是 LIKE，取消点赞则是 DISLIKE
-      };
+        const postToUpdate = posts.value.find((post) => post.postid === postid);
+        const data = {
+          postid: postid,
+          userid: member.value.userid,
+          interactionType: "LIKE", // 如果点赞则是 LIKE，取消点赞则是 DISLIKE
+        };
 
-      const response = await axiosapi.post("/api/posts/insertinteraction", data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
-      if (response.data.success) {
-        // 更新本地状态：更新点赞状态和点赞数量
-        // 更新本地状态：根据操作更新点赞状态和点赞数量
-        const updatedPosts = posts.value.map(post => {
-              if (post.postid === postid) {
-                return { 
-                  ...post, 
-                  likedByCurrentUser: !post.likedByCurrentUser,  // 反转点赞状态
-                  likeCount: post.likedByCurrentUser ? post.likeCount - 1 : post.likeCount + 1  // 根据点赞状态增加或减少点赞数
-                };
-              }
-              return post;
-            });
+        if (response.data.success) {
+          // 更新本地状态：更新点赞状态和点赞数量
+          // 更新本地状态：根据操作更新点赞状态和点赞数量
+          const updatedPosts = posts.value.map((post) => {
+            if (post.postid === postid) {
+              return {
+                ...post,
+                likedByCurrentUser: !post.likedByCurrentUser, // 反转点赞状态
+                likeCount: post.likedByCurrentUser
+                  ? post.likeCount - 1
+                  : post.likeCount + 1, // 根据点赞状态增加或减少点赞数
+              };
+            }
+            return post;
+          });
 
-            // 更新本地 posts 状态
-            posts.value = updatedPosts;
-} else {
-  Swal.fire("錯誤", "點讚操作失敗！", "error");
-}
-} catch (error) {
-console.error("點讚請求失敗:", error);
-Swal.fire("請先登入", "登入體驗更好", "error");
-}
+          // 更新本地 posts 状态
+          posts.value = updatedPosts;
+        } else {
+          Swal.fire("錯誤", "點讚操作失敗！", "error");
+        }
+      } catch (error) {
+        console.error("點讚請求失敗:", error);
+        Swal.fire("請先登入", "登入體驗更好", "error");
+      }
     };
 
     const collectPost = async (postid) => {
@@ -445,18 +525,18 @@ Swal.fire("請先登入", "登入體驗更好", "error");
           },
         });
         if (response.data.success) {
-          const updatedPosts = posts.value.map(post => {
-              if (post.postid === postid) {
-                return { 
-                  ...post, 
-                  collectByCurrentUser: !post.collectByCurrentUser,  // 反转点赞状态
-                    };
-              }
-              return post;
-            });
+          const updatedPosts = posts.value.map((post) => {
+            if (post.postid === postid) {
+              return {
+                ...post,
+                collectByCurrentUser: !post.collectByCurrentUser, // 反转点赞状态
+              };
+            }
+            return post;
+          });
 
-            // 更新本地 posts 状态
-            posts.value = updatedPosts;
+          // 更新本地 posts 状态
+          posts.value = updatedPosts;
         } else {
           Swal.fire("錯誤", "點讚失敗！", "error");
         }
@@ -465,7 +545,7 @@ Swal.fire("請先登入", "登入體驗更好", "error");
         Swal.fire("請先登入", "登入體驗更好", "error");
       }
     };
-    
+
     const setSort = (type) => {
       if (sortBy.value !== type) {
         sortBy.value = type;
@@ -474,8 +554,8 @@ Swal.fire("請先登入", "登入體驗更好", "error");
     };
     const route = useRoute();
     const resetSearch = () => {
-  searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
-};
+      searchStore.resetSearch(); // 调用 Pinia store 中的 resetSearch 方法
+    };
 
     watch(
       () => route.query.title,
@@ -487,7 +567,6 @@ Swal.fire("請先登入", "登入體驗更好", "error");
         }
       },
       { immediate: true }
-      
     );
 
     //watch
@@ -498,7 +577,7 @@ Swal.fire("請先登入", "登入體驗更好", "error");
       //selectedPlace.value = places.value[0].id;
       await fetchPosts();
       await fetchProfile();
-      const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
+      const query = route.query.title || ""; // 如果 query.title 為 undefined，則使用空字串
       fetchPosts(query); // 根據查詢條件抓取貼文
     });
 
@@ -536,7 +615,8 @@ Swal.fire("請先登入", "登入體驗更好", "error");
       prevSlide,
       isCarouselFlag,
       //updateCarousel,
-      postIds
+      postIds,
+      mailToLink,
     };
   },
 };
@@ -588,7 +668,7 @@ Swal.fire("請先登入", "登入體驗更好", "error");
 
 /* 選中 Tab 的下劃線效果 */
 .tab.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -1px; /* 對齊底部邊框 */
   left: 0;
@@ -627,168 +707,135 @@ Swal.fire("請先登入", "登入體驗更好", "error");
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
+/* 帖子网格布局 */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  padding: 20px;
 }
 
+/* 帖子卡片样式 */
 .post-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  background-color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .post-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 转发布局样式 */
+.repost-header {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.interaction-info {
+  display: flex;
+  align-items: center;
+}
+
+.repost-profile-container {
+  margin-right: 10px;
+}
+
+.profile-picture.small-profile {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.interaction-name {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 作者信息样式 */
+.author-info {
+  padding: 15px;
+}
+
+.author-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.profile-picture-container {
+  margin-right: 10px;
+}
+
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.post-time {
+  font-size: 12px;
+  color: #999;
+  margin: 5px 0;
+  text-align: left;
+}
+
+h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* 帖子图片样式 */
 .post-image-container {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  position: relative;
 }
 
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
 }
 
-.post-image-container:hover .post-image {
-  transform: scale(1.05);
-}
-
-.post-content-preview{
-  padding: 16px;
+/* 帖子内容预览样式 */
+.post-content-preview {
   font-size: 14px;
-  color: #555;
+  color: #666;
+  padding: 0 12px 12px;
+  margin: 0;
   line-height: 1.5;
+  text-align: left;
 }
 
-.post-content h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  color: #333;
-}
-
-.read-more {
-  display: inline-block;
-  margin: 10px 0;
-  color: #ff4757;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.read-more:hover {
-  color: #ff6b81;
-}
-
-.post-meta,
-.post-stats {
-  padding: 0 16px 10px;
-  font-size: 12px;
-  color: #888;
-}
-
-.post-meta p,
-.post-stats p {
-  margin: 5px 0;
-}
-
+/* 互动按钮容器样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   padding: 10px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
 }
 
-.action-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 14px;
+/* 没有文章时的提示样式 */
+.posts-grid + div {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
   color: #666;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: color 0.3s;
-}
-
-.action-btn:hover {
-  color: #ff4757;
-}
-
-.action-btn.active {
-  color: #ff4757;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
-  gap: 10px;
-}
-
-.pagination button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 20px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.pagination button:hover {
-  background-color: #ff4757;
-  color: white;
-}
-
-.pagination button:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 14px;
-  color: #333;
-}
-
-/* 作者信息樣式 */
-.author-info {
-  padding: 16px;
-}
-
-.author-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-picture-container {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profile-picture {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .default-profile {
@@ -796,43 +843,6 @@ Swal.fire("請先登入", "登入體驗更好", "error");
   height: 100%;
   background-color: #ccc;
   border-radius: 50%;
-}
-
-.author-name {
-  font-size: 14px;
-  color: #333;
-}
-
-/* REPOST 樣式 */
-.repost-header {
-  padding: 10px 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.interaction-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.repost-profile-container {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.small-profile {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.interaction-name {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
 }
 
 /* 發文/規劃按鈕 */
@@ -921,11 +931,11 @@ select {
 }
 
 .like-btn.active::before {
-  content: '❤️'; /* 实心爱心 */
+  content: "❤️"; /* 实心爱心 */
 }
 
 .like-btn:not(.active)::before {
-  content: '🖤'; /* 空心爱心 */
+  content: "🖤"; /* 空心爱心 */
 }
 
 /* 点击时的动画效果 */
@@ -946,11 +956,11 @@ select {
 }
 
 .collect-btn.active::before {
-  content: '⭐'; /* 实心书签 */
+  content: "⭐"; /* 实心书签 */
 }
 
 .collect-btn:not(.active)::before {
-  content: '⭐'; /* 空心书签 */
+  content: "⭐"; /* 空心书签 */
 }
 
 /* 点击时的动画效果 */
@@ -974,5 +984,91 @@ select {
 .collect-btn.active {
   animation: fillBookmark 0.5s ease-out forwards;
 }
-</style>
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #ff4757;
+  color: white;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: #333;
+}
+
+footer {
+  background-color: #9acbd0;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #121322;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.footer-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.footer-section h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+  line-height: 1.6; /* 統一文字行高 */
+}
+
+.footer-section ul li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.footer-section ul li a:hover {
+  color: #007bff;
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-top: 20px;
+}
+</style>

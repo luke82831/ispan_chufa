@@ -1,7 +1,10 @@
 package com.ispan.chufa.controller;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ispan.chufa.domain.TagsBean;
+import com.ispan.chufa.dto.CommentDTO;
+import com.ispan.chufa.dto.JackTagsDTO;
 import com.ispan.chufa.dto.Response;
 import com.ispan.chufa.service.TagsService;
 
@@ -21,6 +26,9 @@ import com.ispan.chufa.service.TagsService;
 public class TagsController {
     @Autowired
     private TagsService tagsService;
+
+    // 將Bean映射到DTO用的
+    private final ModelMapper modelMapper = new ModelMapper();
 
     // 創建標籤
     // http://localhost:8080/Tags/create
@@ -140,6 +148,31 @@ public class TagsController {
                 response.setSuccesss(true);
                 response.setMessage("查詢標籤成功");
                 response.getList().add(bean);
+            } else {
+                response.setSuccesss(false);
+                response.setMessage("查詢不到這筆標籤");
+            }
+        }
+
+        return response;
+    }
+
+    // 查找所有標籤
+    // 測試 http://localhost:8080/Tags/findAll
+    @GetMapping("/findAll")
+    public Response findAll() {
+        Response response = new Response();
+
+        // 用tagId查詢標籤
+        {
+            List<TagsBean> beans = tagsService.findAll();
+            if (beans.size() != 0) {
+                response.setSuccesss(true);
+                response.setMessage("查詢標籤成功");
+                for (int i = 0; i < beans.size(); i++) {
+                    JackTagsDTO dto = modelMapper.map(beans.get(i), JackTagsDTO.class);
+                    response.getList().add(dto);
+                }
             } else {
                 response.setSuccesss(false);
                 response.setMessage("查詢不到這筆標籤");

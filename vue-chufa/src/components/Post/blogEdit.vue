@@ -39,9 +39,10 @@ onMounted( () => {
         modules: {
         toolbar: [
             [{ header: [1, 2, false] }], // 標題級別
+            [{ 'size': ['small', false, 'large', 'huge'] }],
             ['bold', 'italic', 'underline'], // 字體樣式
             [{ list: 'ordered' }, { list: 'bullet' }], // 列表
-            ['link', 'image', "video"], // 嵌入超連接和圖片和視頻
+            ['image', "video"], // 嵌入超連接和圖片和視頻
         ],
         },
     });

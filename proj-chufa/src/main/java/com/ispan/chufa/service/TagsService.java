@@ -1,6 +1,7 @@
 package com.ispan.chufa.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,11 @@ public class TagsService {
             }
         }
         return null;
+    }
+
+    // 查找所有標籤
+    public List<TagsBean> findAll() {
+        return tagsRepository.findAll();
     }
 
     // 更新標籤

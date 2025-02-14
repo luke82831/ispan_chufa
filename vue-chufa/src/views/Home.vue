@@ -1,12 +1,14 @@
 <template>
   <div class="main-container">
-    <!-- 標籤切換 -->
+  <div>
+  <Carousel />
+  </div>
 <div>
     <div class="tabs-container" >
         <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
         首頁
       </button>
-      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')">
+      <button class="tab" :class="{ active: selectedPlace === 'follow' }" @click="switchPlace('follow')" v-if="userStore.isLoggedIn">
         關注
       </button>
       <button
@@ -28,12 +30,12 @@
   </div>
 </div>
     <!-- 貼文網格布局 -->
-    <div class="posts-grid">
+    <div class="posts-grid" v-if="posts.length > 0">
       <div
         v-for="post in visiblePosts"
         :key="post.postid"
         class="post-card"
-        @click="navigateToDetail(post.postid, $event)"
+        @click="navigateToDetail(post, $event)"
       >
         <!-- REPOST 版型處理 -->
         <div v-if="post.repost" class="repost-header">
@@ -45,9 +47,12 @@
                 alt="Interaction Profile Picture"
                 class="profile-picture small-profile"
               />
+              <div v-else>
+                  <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture small-profile">
+              </div>
             </div>
             <p class="interaction-name">
-              {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
+              {{ post.member.nickname?post.member.nickname:post.member.name}} 轉發貼文
             </p>
           </div>
         </div>
@@ -63,49 +68,35 @@
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <div v-else class="default-profile"></div>
+                <img v-else :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
               </router-link>
             </div>
             <div class="author-name">
-              <strong>
+              <strong v-if="post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname">
                 {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-                ({{ post.repostDTO?.member?.name || post.member.name }})
               </strong>
+            <strong v-else>
+              {{ post.repostDTO?.member?.name || post.member.name }} 
+            </strong>
+              <p class="post-time">{{ formatDate(post.postTime) }}</p>
             </div>
           </div>
-          <h3>
-            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-          </h3>
         </div>
-
+        
         <!-- 顯示第一張圖片 -->
         <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
           <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
         </div>
-<!-- 
-        移除圖片後的內容
-        <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
-        <p class="post-content-preview">
+        <div v-else class="post-image-container">
+          <img :src="defaultpicture" class="post-image" />
+        </div>
+      <p class="post-content-preview">
+        <h3>
+            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+          </h3>
         {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
-        </p>
-
-        <!-- 貼文元信息 -->
-        <div class="post-meta">
-          <p>
-            發佈時間:
-            {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
-          </p>
-          <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-          <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
-        </div>
-
-        <!-- 貼文統計 -->
-        <div class="post-stats">
-          <p>轉發次數: {{ post.repostCount }}</p>
-          <p>點讚數: {{ post.likeCount }}</p>
-        </div>
-
-        <!-- 互動按鈕 -->
+      </p>
+      <!-- 互動按鈕 -->
         <div class="post-actions" @click.stop>
           <button
             @click.stop="likePost(post.postid)"
@@ -113,10 +104,11 @@
             :class="{ active: post.likedByCurrentUser }"
           >
           <span class="heart-icon"></span> 
-            {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
+            <!-- {{ post.likedByCurrentUser ? '已點讚' : '點讚' }} -->
+            {{ post.likeCount }}
           </button>
           <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-            🔁 轉發
+            🔁 {{ post.repostCount }}
           </button>
           <button @click.stop="collectPost(post.postid)" 
           class="action-btn collect-btn"
@@ -125,6 +117,9 @@
           </button>
         </div>
       </div>
+    </div>
+    <div v-else>
+      <p>沒有文章喔~</p>
     </div>
 
     <!-- 分頁控制 -->
@@ -145,6 +140,36 @@
     </div>
     <RouterView></RouterView>
   </div>
+  <footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>探索下一個旅程</h3>
+      <ul>
+        <li><a href="#">關於我們</a></li>
+        <li><a href="#">官方粉專</a></li>
+        <li><a :href="mailToLink">聯絡我們</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>公司資訊</h3>
+      <ul>
+        <li>快樂出發有限公司</li>
+        <li>統一編號：12345678</li>
+        <li>旅行業註冊編號：CHUFA</li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>其他產品</h3>
+      <ul>
+        <li>統一編號：9999999</li>
+        <li>聯繫地址：106台北市大安區復興南路一段390號2樓</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© Chufa, Inc. 2025</p>
+  </div>
+</footer>
 </template>
 <script>
 import { ref, onMounted,watch,inject,computed} from "vue";
@@ -155,9 +180,15 @@ import { useRoute } from 'vue-router';
 import { useSearchStore } from '@/stores/search.js';
 import axiosapi from "@/plugins/axios.js";
 import { usePostStore } from "@/stores/usePostStore";
+import defaultProfilePicture from "@/assets/empty.png"
+import defaultback from "@/assets/default.jpg";
+import Carousel from "@/components/blog/Carousel.vue";
 
 
 export default {
+  components: {
+    Carousel // 註冊 PostCard 元件
+  },
   setup() {
     const router = useRouter();
     const profileLoaded = ref(false);
@@ -173,20 +204,55 @@ export default {
     const isSearch = ref(false);
     const searchStore = useSearchStore();
     const selectedPlace = ref(null); 
+    const defaultProfilePic=ref(defaultProfilePicture);
+    const defaultpicture=ref(defaultback);
+    const isCarouselFlag = ref(false); 
+    // 管理輸入的 postid
+    const postidInput = ref("");
+    const postIds = ref([]);
+
+    // 更新 Carousel 的 postIds
+    // const updateCarousel = () => {
+    //   // 將輸入字串轉換成 postid 陣列
+    //   postIds.value = postidInput.value
+    //     .split(",")
+    //     .map((id) => parseInt(id.trim()))
+    //     .filter((id) => !isNaN(id));
+    // };
 
 
     
     //place
     //const selectedPlace = ref(null);
     const places = ref([
-      { id: 1, name: "Los Angeles" },
-      { id: 2, name: "New York" },
-      { id: 3, name: "Chicago" },
+  { id: 1, name: "台北市" },
+  { id: 2, name: "新北市" },
+  { id: 3, name: "桃園市" },
+  { id: 4, name: "台中市" },
+  { id: 5, name: "臺南市" },
+  { id: 6, name: "高雄市" },
+  { id: 7, name: "宜蘭縣" },
+  { id: 8, name: "花蓮縣" },
     ]);
+
+    const email="chufa@gmail.com"
+    const mailToLink = computed(() => {
+      return `mailto:${email}`;
+    });
 
     watch(sortBy, () => {
       fetchPosts();  // 每次排序方式改變時重新抓取資料
     });
+
+    // 切換到下一張
+const nextSlide = () => {
+  currentIndex.value = (currentIndex.value + 1) % posts.value.length;
+};
+
+// 切換到上一張
+const prevSlide = () => {
+  currentIndex.value = (currentIndex.value - 1 + posts.value.length) % posts.value.length;
+};
 
     const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -206,15 +272,21 @@ export default {
     });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
-    const navigateToDetail = (postid, event) => {
-      const excludedElements = [".post-actions", ".action-btn", "a", "button"];
-      for (let selector of excludedElements) {
+    const navigateToDetail = (post, event) => { 
+    const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+    for (let selector of excludedElements) {
         if (event.target.closest(selector)) {
-          return; // 如果點擊的是按鈕、連結，就不觸發跳轉
+            return; // 如果點擊的是按鈕、連結，就不觸發跳轉
         }
-      }
-      router.push(`/blog/find/${postid}`);
-    };
+    }
+    // 如果是轉發的貼文，跳轉到原貼文的詳細頁
+    if (post.repost && post.repostDTO) {
+        router.push(`/blog/find/${post.repostDTO.postid}`);
+    } else {
+        // 否則跳轉到當前貼文的詳細頁
+        router.push(`/blog/find/${post.postid}`);
+    }
+  };
 
     const formatDate = (date) => {
       if (!date) return "";
@@ -260,7 +332,7 @@ export default {
         requestData.followerId = member.value.userid;  
       } else if (selectedPlace.value !== null||selectedPlace!=='users') {
         // 只有選擇地點時才加入 place
-        requestData.place = selectedPlace.value;
+        requestData.places = selectedPlace.value;
       }
     
 
@@ -280,9 +352,9 @@ export default {
           // );
           noPosts.value = false; 
         } else {
-          //posts.value = [];
-          currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
-          Swal.fire("已經到底啦!", "no post。", "info"); 
+          posts.value = [];
+          // currentPage.value = Math.max(1, currentPage.value - 1); // 返回有效的上一頁
+          // Swal.fire("已經到底啦!", "no post。", "info"); 
         }
       } catch (error) {
         console.error("Fetch posts failed:", error);
@@ -340,7 +412,7 @@ export default {
         }
       } catch (error) {
         console.error("轉發請求失敗:", error);
-        Swal.fire("錯誤", "無法執行轉發操作", "error");
+        Swal.fire("請先登入", "登入體驗更好", "error");
       }
     };
 
@@ -383,7 +455,7 @@ export default {
 }
 } catch (error) {
 console.error("點讚請求失敗:", error);
-Swal.fire("錯誤", "無法執行點讚操作", "error");
+Swal.fire("請先登入", "登入體驗更好", "error");
 }
     };
 
@@ -418,7 +490,7 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
         }
       } catch (error) {
         console.error("點讚請求失敗:", error);
-        Swal.fire("錯誤", "無法執行點讚操作", "error");
+        Swal.fire("請先登入", "登入體驗更好", "error");
       }
     };
     
@@ -430,8 +502,8 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
     };
     const route = useRoute();
     const resetSearch = () => {
-  searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
-};
+      searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
+    };
 
     watch(
       () => route.query.title,
@@ -485,6 +557,15 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
       isSearch,
       searchStore,
       users,
+      defaultProfilePic,
+      defaultpicture,
+      //postidInput,
+      nextSlide,
+      prevSlide,
+      isCarouselFlag,
+      //updateCarousel,
+      postIds,
+      mailToLink,
     };
   },
 };
@@ -496,197 +577,215 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
   margin: 0 auto;
 }
 
+/* Tab 容器 */
 .tabs-container {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  overflow-x: auto;
   padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0; /* 底部邊框 */
+  overflow-x: auto;
 }
 
+/* Tab 按鈕 */
 .tab {
   padding: 10px 20px;
   border: none;
-  background-color: #f0f0f0;
-  border-radius: 20px;
+  background-color: transparent;
+  border-radius: 0;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
+  color: #666;
+  transition: color 0.3s, border-bottom 0.3s;
   white-space: nowrap;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Tab 按鈕懸停效果 */
 .tab:hover {
-  background-color: #e0e0e0;
+  color: #333;
 }
 
+/* 當前選中的 Tab */
 .tab.active {
-  background-color: #005AB5;
-  color: white;
+  color: #000;
+  font-weight: 500;
 }
 
+/* 選中 Tab 的下劃線效果 */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; /* 對齊底部邊框 */
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #000; /* 黑色下劃線 */
+  border-radius: 2px;
+}
+
+/* 排序選擇器 */
+.sort-select-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+.sort-select-container select {
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.sort-select-container select:hover {
+  border-color: #ccc;
+}
+
+.sort-select-container select:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 帖子网格布局 */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  padding: 20px;
 }
 
+/* 帖子卡片样式 */
 .post-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  background-color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .post-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 转发布局样式 */
+.repost-header {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.interaction-info {
+  display: flex;
+  align-items: center;
+}
+
+.repost-profile-container {
+  margin-right: 10px;
+}
+
+.profile-picture.small-profile {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.interaction-name {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 作者信息样式 */
+.author-info {
+  padding: 15px;
+}
+
+.author-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.profile-picture-container {
+  margin-right: 10px;
+}
+
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.post-time {
+  font-size: 12px;
+  color: #999;
+  margin: 5px 0;
+  text-align: left;
+}
+
+h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* 帖子图片样式 */
 .post-image-container {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  position: relative;
 }
 
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
 }
 
-.post-image-container:hover .post-image {
-  transform: scale(1.05);
-}
-
-.post-content-preview{
-  padding: 16px;
+/* 帖子内容预览样式 */
+.post-content-preview {
   font-size: 14px;
-  color: #555;
+  color: #666;
+  padding: 0 12px 12px;
+  margin: 0;
   line-height: 1.5;
+  text-align: left;
 }
 
-.post-content h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  color: #333;
-}
-
-.read-more {
-  display: inline-block;
-  margin: 10px 0;
-  color: #ff4757;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.read-more:hover {
-  color: #ff6b81;
-}
-
-.post-meta,
-.post-stats {
-  padding: 0 16px 10px;
-  font-size: 12px;
-  color: #888;
-}
-
-.post-meta p,
-.post-stats p {
-  margin: 5px 0;
-}
-
+/* 互动按钮容器样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   padding: 10px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
 }
 
-.action-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 14px;
+
+/* 没有文章时的提示样式 */
+.posts-grid + div {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
   color: #666;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: color 0.3s;
-}
-
-.action-btn:hover {
-  color: #ff4757;
-}
-
-.action-btn.active {
-  color: #ff4757;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
-  gap: 10px;
-}
-
-.pagination button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 20px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.pagination button:hover {
-  background-color: #ff4757;
-  color: white;
-}
-
-.pagination button:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 14px;
-  color: #333;
-}
-
-/* 作者信息樣式 */
-.author-info {
-  padding: 16px;
-}
-
-.author-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-picture-container {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profile-picture {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .default-profile {
@@ -694,43 +793,6 @@ Swal.fire("錯誤", "無法執行點讚操作", "error");
   height: 100%;
   background-color: #ccc;
   border-radius: 50%;
-}
-
-.author-name {
-  font-size: 14px;
-  color: #333;
-}
-
-/* REPOST 樣式 */
-.repost-header {
-  padding: 10px 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.interaction-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.repost-profile-container {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.small-profile {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.interaction-name {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
 }
 
 /* 發文/規劃按鈕 */
@@ -872,4 +934,95 @@ select {
 .collect-btn.active {
   animation: fillBookmark 0.5s ease-out forwards;
 }
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #ff4757;
+  color: white;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: #333;
+}
+
+
+footer {
+  background-color: #b9dae6;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #121322;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.footer-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.footer-section h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+  line-height: 1.6; /* 統一文字行高 */
+}
+
+.footer-section ul li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.footer-section ul li a:hover {
+  color: #007bff;
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-top: 20px;
+}
+
 </style>
+

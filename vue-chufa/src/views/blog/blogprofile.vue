@@ -1,37 +1,38 @@
     <template>
         <div class="profile-page">
         <div v-if="member" class="profile-container">
-            <h2 class="section-title">會員資料</h2>
-            <div class="profile-details">
-            <!-- <img :src="'data:image/jpeg;base64,' + member.profilePicture" alt="Profile Picture" v-if="member.profilePicture" class="profile-picture" />
-            -->
+            <div class="profile-header">
             <img 
                 :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePicture"
                 alt="Profile Picture" 
                 v-if="member.profilePicture || defaultProfilePicture" 
                 class="profile-picture" />
             <div class="info"> 
-                <p><strong>姓名:</strong> {{ member.name }}</p>
+                <h2 class="section-title">{{ member.nickname?member.nickname:member.name}}</h2>
+                <p><strong></strong>{{ member.bio }}</p>
                 <p><strong>Email:</strong> {{ member.email }}</p>
                 <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
-                <p> {{ member.bio }}</p>
-                <div class="follow-stats">
-                        <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-                            <span><strong>關注:</strong> {{ followersCount }}</span>
-                            <span><strong>粉絲:</strong> {{ followingCount }}</span>
-                        </router-link>
-                </div>
-            <button
-            :class="['follow-button', { active: member.isFollowing }]"
-            @click.stop="toggleFollow(member)"
-            >
-            {{ member.isFollowing ? '已關注' : '未關注' }}
+            <div class="follow-button-container">
+                <button
+                :class="['follow-button', { active: member.isFollowing }]"
+                @click.stop="toggleFollow(member)"
+                >
+                {{ member.isFollowing ? '已關注' : '關注' }}
             </button>
             </div>
+            <div class="follow-section">
+                <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
+                <p class="follow-count"><strong>關注:</strong> {{ followersCount }}
+                <strong>粉絲:</strong> {{ followingCount }}</p>
+                </router-link>
             </div>
+            
+            </div>
+            </div>
+        </div>
 
         <div class="tabs-container">
-        <button :class="{ active: activeTab === 'myPosts' }" @click="setActiveTab('myPosts')">我的貼文</button>
+        <button :class="{ active: activeTab === 'myPosts' }" @click="setActiveTab('myPosts')">他的貼文</button>
         <button :class="{ active: activeTab === 'likedPosts' }" @click="setActiveTab('likedPosts')">點讚貼文</button>
         <button :class="{ active: activeTab === 'sharedPosts' }" @click="setActiveTab('sharedPosts')">轉發貼文</button>
         <button :class="{ active: activeTab === 'savedPosts' }" @click="setActiveTab('savedPosts')">收藏貼文</button>
@@ -44,13 +45,12 @@
                     :post="post"
                     :member="member"
                     :formatDate="formatDate"
-                    @update-posts="fetchPosts()"
+                    @update-posts="fetchPosts"
                     />
             </div>
 
 
             <p v-else>沒有貼文。</p>
-            </div>
 
             <div v-else>
             <p>載入中...</p>
@@ -197,7 +197,7 @@ const toggleFollow = async (member) => {
     
         const fetchPosts = async (filterType) => {
             try {
-            const payload = { };
+            const payload = {checklike:member.value.userid};
             if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
             if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
             if (filterType === 'myPosts') {
@@ -254,155 +254,246 @@ const toggleFollow = async (member) => {
             setActiveTab,
             activeTab,
             defaultProfilePicture,
+            fetchPosts,
             };
         },
     };
     </script>
     
     <style>
-  /* 整體頁面樣式 */
+/* 基本頁面布局 */
 .profile-page {
+    font-family: 'Arial', sans-serif;
+    background-color: rgba(74, 149, 207, 0.001);
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Arial', sans-serif;
-    color: #333;
 }
 
-/* 會員資料容器 */
+/* 會員資料區域 */
 .profile-container {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: rgba(11, 144, 238, 0.2);
+    border-radius: 10px;
     padding: 20px;
-    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
 }
-
-/* 標題樣式 */
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+/* 標題 */
 .section-title {
     font-size: 24px;
     font-weight: bold;
-    margin-bottom: 20px;
     color: #333;
+    margin-bottom: 20px;
+}
+.profile-info {
+  flex: 1;
 }
 
-/* 會員資料區塊 */
-.profile-details {
-    display: flex;
-    align-items: flex-start; /* 讓內容靠上對齊 */
-    gap: 20px;
-    position: relative; /* 讓關注按鈕可以定位 */
+.nickname {
+  font-size: 24px;
+  margin: 0;
 }
 
-/* 大頭照樣式 */
+.email, .birthday, .bio {
+  margin: 0px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.follow-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.follow-count {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+
+.follow-button.active {
+  background-color: #ccc;
+}
+
+.content-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.post-card {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.post-caption {
+  padding: 10px;
+  font-size: 14px;
+  color: #333;
+  margin: 0;
+}
+
+/* 會員圖片 */
 .profile-picture {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ddd;
+    border: 4px solid #ddd;
+    margin-right: 20px;
 }
 
-/* 會員資訊樣式 */
+/* 會員資訊區域 */
 .info {
-    flex: 1;
-}
-
-.info p {
-    margin: 8px 0;
-    font-size: 14px;
-    color: #555;
-}
-
-.info strong {
-    color: #333;
-    font-weight: bold;
-}
-
-/* 關注和粉絲樣式 */
-.follow-stats {
     display: flex;
-    gap: 16px; /* 關注和粉絲之間的間距 */
-    margin-top: 8px;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.follow-stats span {
-    font-size: 14px;
+/* 單行資訊樣式 */
+.info p {
+    font-size: 16px;
     color: #333;
+    margin: 10px 0;
 }
 
-.follow-stats strong {
-    color: #333;
-    font-weight: bold;
+/* 強調的文字 */
+.info strong {
+    color: #007bff; /* Instagram 風格的藍色 */
 }
 
-/* 關注按鈕樣式 */
+/* 去除連結的下劃線 */
+.follow-link {
+    text-decoration: none;
+    color: inherit; /* 保持文字顏色繼承父元素的顏色 */
+    transition: transform 0.3s ease, margin 0.3s ease; /* 添加過渡效果 */
+}
+
+/* 讓關注和粉絲顯示在同一行 */
+.follow-link p {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+/* 強調文字顏色 */
+.follow-link p strong {
+    color: #007bff; /* 可以根據需要調整顏色 */
+}
+
+/* 懸停時放大並靠近 */
+.follow-link:hover {
+    transform: scale(1.1); /* 放大 1.1 倍 */
+    margin-left: 5px; /* 讓元素稍微向右移動，達到“靠近”的效果 */
+}
+/* 關注按鈕 */
+
+.follow-button-container {
+  position: absolute; /* 絕對定位 */
+  top: 200px; /* 距離頂部 20px */
+  right: 600px; /* 距離右側 20px */
+}
+
 .follow-button {
-    position: absolute; /* 絕對定位 */
-    top: 0; /* 置頂 */
-    right: 0; /* 置右 */
-    padding: 8px 16px;
-    border: none;
-    border-radius: 20px;
-    background-color: #46a1e2;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  padding:12px 30px;
+  border: none;
+  border-radius: 40px;
+  background-color: #0d5ad7;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
 }
 
 .follow-button.active {
-    background-color: #ccc;
+  background-color: #ccc;
 }
 
 .follow-button:hover {
-    background-color: #4a97e0;
+  background-color: #2980b9;
 }
 
-/* 標籤按鈕容器 */
+.follow-section {
+  margin-bottom: 20px;
+}
+
+.follow-count {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+/* 分頁按鈕 */
 .tabs-container {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    border-bottom: 1px solid #ddd;
+    justify-content: space-between;
+    margin-top: 30px;
+    border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
 }
 
-/* 標籤按鈕樣式 */
 .tabs-container button {
-    padding: 8px 16px;
+    font-size: 16px;
+    padding: 10px 20px;
+    background-color: transparent;
     border: none;
-    border-radius: 20px;
-    background-color: #f0f0f0;
     color: #333;
-    font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.tabs-container button.active {
-    background-color: #4179ea;
-    color: #fff;
+    transition: color 0.3s ease, border-bottom 0.3s ease;
 }
 
 .tabs-container button:hover {
-    background-color: #ddd;
+    color: #007bff;
 }
 
-/* 貼文網格樣式 */
+.tabs-container button.active {
+    color: #007bff;
+    border-bottom: 2px solid #007bff;
+}
+
+/* 貼文區域 */
 .posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
     margin-top: 20px;
 }
 
-/* 無貼文提示樣式 */
+/* 沒有貼文的提示文字 */
 p {
-    text-align: center;
-    color: #888;
     font-size: 16px;
+    color: #777;
+    text-align: center;
     margin-top: 20px;
 }
+
+/* 貼文卡片 (PostCard) */
+.post-card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
     </style>
         

@@ -3,15 +3,20 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
-        <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" />
+        <!-- <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" /> -->
+        <img 
+          :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePic"
+          alt="Profile Picture" 
+          v-if="member.profilePicture || defaultProfilePic" 
+          class="profile-picture" />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
-          <p><strong>ID:</strong> {{ member.userid }}</p>
+          <p><strong></strong> {{ member.bio }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ followersCount }}</p>    
-            <p><strong>粉絲:</strong> {{ followingCount }}</p>
+            <p><strong>關注:</strong> {{ followersCount }}    
+            <strong>粉絲:</strong> {{ followingCount }}</p>
           </router-link>
         </div>
       </div>
@@ -36,7 +41,7 @@
             :post="post"
             :member="member"
             :formatDate="formatDate"
-            @update-posts="fetchPosts()"
+            @update-posts="fetchPosts"
           />
           <div
             v-if="postStore.getHiddenReason(post.postid)"
@@ -64,6 +69,7 @@ import axiosapi from '@/plugins/axios.js';
 import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from 'vue-router';
+import defaultProfilePicture from "@/assets/empty.png"
 import { usePostStore } from '@/stores/usePostStore';
 
 
@@ -81,6 +87,7 @@ export default {
 
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
+    const defaultProfilePic=ref(defaultProfilePicture);
 
     const postStore = usePostStore();
 
@@ -131,7 +138,7 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { };
+    const payload = {checklike:member.value.userid};
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
     if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
@@ -206,6 +213,7 @@ export default {
       activeTab,
       followersCount,
       followingCount,
+      defaultProfilePic,
       postStore,
     };
   },
@@ -226,7 +234,7 @@ export default {
   font-size: 1.8em;
   color: #444;
   margin-bottom: 20px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 2px solid #0d74e2;
   padding-bottom: 10px;
   font-weight: 600;
 }
@@ -251,7 +259,7 @@ export default {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  border: 3px solid #0000C6;
 }
 
 .info p {
@@ -259,10 +267,13 @@ export default {
   font-size: 1.1em;
   color: #555;
 }
+.info strong{
+  color: #093b8c;
+}
 
 .follow-link {
   text-decoration: none;
-  color: #007bff;
+  color: #0a4c93;
   font-weight: 500;
 }
 
@@ -292,11 +303,11 @@ export default {
 
 .tabs-container button:hover {
   background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  color: #6da6de;
 }
 
 .tabs-container button.active {
-  background: #007bff;
+  background: #0e80b4;
   color: white;
   font-weight: 600;
 }

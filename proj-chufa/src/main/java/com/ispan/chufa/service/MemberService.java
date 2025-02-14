@@ -87,7 +87,21 @@ public class MemberService {
 	}
 
 	public MemberBean findByEmail(String email) {
-		return memberRepository.findByEmail(email).orElse(null);
+		Optional<MemberBean> optionalMember = memberRepository.findByEmail(email);
+
+		if (optionalMember.isPresent()) {
+			MemberBean member = optionalMember.get();
+
+			// ✅ 如果 avatar 是 null，設定預設值並儲存到資料庫
+			if (member.getAvatar() == null || member.getAvatar().isEmpty()) {
+				member.setAvatar("/images/avatar.jpg");
+				memberRepository.save(member); // **存入資料庫**
+			}
+
+			return member;
+		}
+
+		return null;
 	}
 
 	public List<MemberBean> findAllMembers() {
@@ -149,6 +163,9 @@ public class MemberService {
 		if (memberBean.getRole() == null) {
 			memberBean.setRole(MemberBean.Role.USER);
 		}
+		if (memberBean.getAvatar() == null || memberBean.getAvatar().isEmpty()) {
+			memberBean.setAvatar("/images/avatar.jpg");
+		}
 		System.out.println("Saving member: " + memberBean.getEmail() + ", Phone: " + memberBean.getPhoneNumber());
 		memberRepository.save(memberBean);
 	} // 儲存 MemberBean 物件到資料庫
@@ -171,7 +188,9 @@ public class MemberService {
 		if (bio != null && !bio.isEmpty()) {
 			member.setBio(bio);
 		}
-
+		if (member.getAvatar() == null || member.getAvatar().isEmpty()) {
+			member.setAvatar("/images/avatar.jpg");
+		}
 		// 儲存更新後的會員資料
 		return memberRepository.save(member);
 	}

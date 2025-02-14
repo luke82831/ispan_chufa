@@ -6,6 +6,8 @@ export const useUserStore = defineStore('user', {
         member: {}, // 儲存會員資料
         isLoggedIn: false, // 是否已登入
         profileLoaded: false, // 加載完成標記
+        avatar: '/images/avatar.jpg',
+        profile_picture: '',
     }),
     actions: {
         // 初始化會員資料

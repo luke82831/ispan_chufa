@@ -193,13 +193,19 @@ public class LoginAjaxController {
                             Base64.getEncoder().encodeToString(member.getProfilePicture());
                 }
 
+                // ✅ 確保 avatar 不為 null，若為 null 則使用預設圖片
+                String avatarUrl = (member.getAvatar() == null || member.getAvatar().isEmpty())
+                        ? "/images/avatar.jpg"
+                        : member.getAvatar();
+
                 responseJson.put("success", true);
                 responseJson.put("user", new JSONObject()
                         .put("userid", member.getUserid())
                         .put("name", member.getName())
                         .put("email", member.getEmail())
                         .put("nickname", member.getNickname())
-                        .put("profile_picture", profilePictureBase64) // 返回 Base64
+                        .put("profile_picture", profilePictureBase64) // Base64 圖片
+                        .put("avatar", avatarUrl) // ✅ 加入 avatar
                         .put("birth", member.getBirth())
                         .put("bio", member.getBio())
                         .put("phone_number", member.getPhoneNumber())

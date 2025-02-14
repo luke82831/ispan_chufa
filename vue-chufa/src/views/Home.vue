@@ -360,7 +360,7 @@ export default {
           userid: member.value.userid,
         };
 
-        const response = await axiosapi.post("/api/posts/repost/forward", data, {
+        const response = await axiosapi.post("/api/posts/repost", data, {
           headers: {
             "Content-Type": "application/json",
           },

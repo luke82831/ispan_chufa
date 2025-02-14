@@ -64,6 +64,9 @@ public class MemberBean {
 	@Column(name = "profile_picture")
 	private byte[] profilePicture;
 
+	@Column(name = "avatar") // 預設大頭貼
+	private String avatar = "/images/avatar.jpg"; // 設定預設值
+
 	@Transient // 不會入庫
 	private String base64Pic;
 
@@ -212,6 +215,14 @@ public class MemberBean {
 
 	public void setProfilePicture(byte[] profilePicture) {
 		this.profilePicture = profilePicture;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 
 	public String getBase64Pic() {

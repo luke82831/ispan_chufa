@@ -3,7 +3,7 @@
     <!-- Header: 大頭貼、會員名稱、暱稱等資訊始終顯示 -->
     <div class="profile-header">
       <img
-        :src="member.profile_picture"
+        :src="computedAvatar"
         alt="Profile Picture"
         class="profile-picture"
         @error="onImageError"
@@ -168,11 +168,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
+
+// 預設大頭貼路徑
+const defaultAvatar = "/images/avatar.jpg";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -196,6 +199,14 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString("zh-TW", options);
 };
 
+// computed 屬性：決定圖片來源
+const computedAvatar = computed(() => {
+  // 若有上傳大頭貼 (profile_picture) 則使用它，
+  // 否則使用會員資料中的 avatar，
+  // 若仍未有，則 fallback 到 defaultAvatar
+  return member.value.profile_picture || member.value.avatar || defaultAvatar;
+});
+
 const fetchProfile = async () => {
   try {
     const token = localStorage.getItem("token");
@@ -209,6 +220,11 @@ const fetchProfile = async () => {
     });
     if (response.data.success) {
       let memberData = { ...response.data.user };
+      console.log("API 回傳的 avatar:", response.data.user.avatar);
+      // 若 avatar 為空則補上預設值
+      if (!memberData.avatar) {
+        memberData.avatar = defaultAvatar;
+      }
       if (response.data.socialLinks) {
         memberData.socialLinks = response.data.socialLinks;
       }
@@ -309,6 +325,7 @@ const uploadProfilePicture = async (event) => {
       headers: { "Content-Type": "multipart/form-data" },
     });
     if (response.data.success) {
+      // 更新 store 中的 profile_picture
       userStore.member.profile_picture = response.data.profilePicture;
       Swal.fire("成功", "大頭貼已更新！", "success");
     } else {
@@ -329,11 +346,21 @@ const logout = () => {
 };
 
 const onImageError = (event) => {
-  event.target.src = "預設圖片連結";
+  event.target.src = defaultAvatar;
 };
+
+watch(
+  () => userStore.member,
+  (newVal) => {
+    console.log("Pinia member 更新：", newVal);
+  }
+);
+
+console.log("member:", member);
 </script>
 
 <style scoped>
+/* 你的 CSS 保持不變 */
 .profile-container {
   max-width: 800px;
   margin: 0 auto;
@@ -357,7 +384,7 @@ const onImageError = (event) => {
 .profile-picture {
   width: 130px;
   height: 130px;
-  flex-shrink: 0; /* 防止圖片因 flex 收縮 */
+  flex-shrink: 0;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 25px;
@@ -388,7 +415,6 @@ const onImageError = (event) => {
 
 /* 左側文字區 */
 .text-info {
-  /* 讓文字區不被影響 */
 }
 .text-info h1 {
   margin: 0;
@@ -536,12 +562,12 @@ const onImageError = (event) => {
 }
 
 .btn-save {
-  background: linear-gradient(45deg, #5fa65e, #559d55); /* 較柔和的綠色 */
+  background: linear-gradient(45deg, #5fa65e, #559d55);
   color: #fff;
   border: none;
-  border-radius: 12px; /* 增加圓角 */
+  border-radius: 12px;
   padding: 12px 30px;
-  margin: 20px 10px 0 auto; /* 上方與左右都有間距，自動向右推 */
+  margin: 20px 10px 0 auto;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   display: inline-block;
 }
@@ -553,12 +579,12 @@ const onImageError = (event) => {
 }
 
 .btn-secondary {
-  background: linear-gradient(45deg, #a8a8a8, #969696); /* 較柔和的灰色 */
+  background: linear-gradient(45deg, #a8a8a8, #969696);
   color: #fff;
   border: none;
-  border-radius: 12px; /* 增加圓角 */
+  border-radius: 12px;
   padding: 12px 30px;
-  margin: 20px 10px 0 0; /* 上方與左右都有間距 */
+  margin: 20px 10px 0 0;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   display: inline-block;
 }

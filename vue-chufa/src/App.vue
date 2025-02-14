@@ -3,20 +3,15 @@
     <!-- Logo -->
     <RouterLink to="/" class="nav-link logo" @click="resetSearch">Chufa首頁</RouterLink>
 
-    <div class="search-bar"  v-if="showSearchBar" >
+    <div class="search-bar" v-if="showSearchBar">
       <input
         v-model="searchTitle"
         type="text"
         placeholder="搜尋文章或用戶..."
         class="p-2 border rounded w-full"
       />
-      <button @click="onSearch" class="p-2 bg-blue-500 text-white rounded">
-        搜索
-      </button>
+      <button @click="onSearch" class="p-2 bg-blue-500 text-white rounded">搜索</button>
     </div>
- 
-
-    
 
     <div class="nav-links">
       <!-- 只有管理員才顯示後台管理按鈕 -->
@@ -32,7 +27,7 @@
       <div v-if="userStore.isLoggedIn" class="member-section">
         <div class="avatar-container" @click="toggleDropdown">
           <img
-            :src="userStore.member.profile_picture || '/path/to/default-avatar.png'"
+            :src="computedAvatar"
             alt="會員大頭貼"
             class="avatar"
             @error="onAvatarError"
@@ -72,65 +67,63 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch,inject } from "vue";
-import { useRouter,useRoute } from "vue-router";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import { useSearchStore } from "./stores/search";
 
-const userStore = useUserStore(); // 使用 Pinia 狀態管理
+const userStore = useUserStore();
 const router = useRouter();
-const searchStore = useSearchStore(); // 使用 Pinia 搜尋狀態
+const searchStore = useSearchStore();
 const isDropdownVisible = ref(false);
+const defaultAvatar = "/images/avatar.jpg"; // 預設大頭貼
 
+// 計算用戶的大頭貼來源
+const computedAvatar = computed(() => {
+  return userStore.member.profile_picture || userStore.member.avatar || defaultAvatar;
+});
 
-// 使用 vue-router 的 useRoute 監聽路由變化
+// 當圖片載入錯誤時，自動替換為預設大頭貼
+const onAvatarError = (event) => {
+  event.target.src = defaultAvatar;
+};
+
+// 使用 vue-router 監聽路由變化，控制 search bar 是否顯示
 const route = useRoute();
 const showSearchBar = ref(false);
-// 監聽路由名稱，根據路由名稱判斷是否顯示 SearchBar
-watch(() => route.name, (newRoute) => {
-  showSearchBar.value = newRoute === 'Home' || newRoute === 'SearchResults';
-}, { immediate: true });
- // 定義 isSearch
-    
+watch(
+  () => route.name,
+  (newRoute) => {
+    showSearchBar.value = newRoute === "Home" || newRoute === "SearchResults";
+  },
+  { immediate: true }
+);
+
+// 控制下拉選單開關
 const toggleDropdown = () => {
   isDropdownVisible.value = !isDropdownVisible.value;
 };
 
 const searchTitle = ref("");
 
-// 點擊首頁時重設 isSearch
+// 點擊首頁時重設搜尋狀態
 const resetSearch = () => {
-  //searchStore.resetSearch();
-  searchTitle.value = '';
-  searchStore.isSearch= false;
+  searchTitle.value = "";
+  searchStore.isSearch = false;
   searchStore.searchResults.value = [];
-  // 使用 Vue Router 跳转到首页，并清空查询参数
-  router.push({ path: '/', query: {} }); // 清空查询参数
-  //window.location.reload();
+  router.push({ path: "/", query: {} });
 };
 
-
-
+// 搜尋功能
 const onSearch = () => {
   if (searchTitle.value.trim()) {
     searchStore.setSearchTitle(searchTitle.value);
-    searchStore.isSearch = true; // 設定搜尋狀態
-    router.push({ path: '/search-results', query: { title: searchTitle.value } });
+    searchStore.isSearch = true;
+    router.push({ path: "/search-results", query: { title: searchTitle.value } });
   }
 };
 
-// const navigateToSearch = () => {
-//   if (searchTitle.value.trim()) {
-//     router.push({
-//       path: "/search-results",
-//       query: { title: searchTitle.value },
-//     });
-//     //searchTitle.value = ''; // 清空搜索栏
-//     searchStore.resetSearch();
-//   }
-// };
-
-// 監聽路由變化，動態顯示規劃按鈕search-results
+// 監聽路由變化
 watch(
   () => router.path,
   (newPath) => {
@@ -139,17 +132,13 @@ watch(
     }
   }
 );
-// 登出行為
+
+// 登出
 const logout = () => {
   localStorage.removeItem("token");
-  userStore.logout(); // 清除 Pinia 狀態
-  isDropdownVisible.value = false; // 關閉下拉選單
+  userStore.logout();
+  isDropdownVisible.value = false;
   router.push("/secure/Login");
-};
-
-// 處理頭像載入錯誤
-const onAvatarError = () => {
-  userStore.member.profile_picture = "/path/to/default-avatar.png";
 };
 
 // 初始化會員資料

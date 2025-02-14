@@ -137,7 +137,7 @@ public class PostController {
     // return ResponseEntity.ok(posts);
     // }
 
-    @PostMapping("/repost/forward")
+    @PostMapping("/repost")
     public PostDTO forwardPost(@RequestBody String json) {
 
         return postService.forwardPost(json);

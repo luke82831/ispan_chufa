@@ -376,13 +376,13 @@ const toggleFollow = async (user) => {
             }
         };
         const route = useRoute();
-        const query = ref(route.query.title || ""); 
-        console.log(query);
-        console.log(query.value)
+        //const query = ref(route.query.title || ""); 
+        // console.log(query);
+        // console.log(query.value)
         const setSort = (type) => {
             if (sortBy.value !== type) {
             sortBy.value = type;
-            fetchPosts(query.value);
+            fetchPosts();
             }
         };
     
@@ -392,15 +392,15 @@ const toggleFollow = async (user) => {
     
         watch(
             () => route.query.title,
-            (newQuery) => {
-            if (newQuery) {
-                fetchPosts(newQuery); // 如果有搜尋條件就請求搜尋
+            (query) => {
+            if (query) {
+                fetchPosts(query); // 如果有搜尋條件就請求搜尋
             } else {
                 fetchPosts(); // 沒有搜尋條件則請求普通的 fetchPosts
             }
             },
             sortBy, () => {
-            fetchPosts(newQuery); console.log(newQuery) },
+            fetchPosts(query); },
             { immediate: true }
             
         );
@@ -412,7 +412,7 @@ const toggleFollow = async (user) => {
             await fetchPosts();
             await fetchProfile();
             const query = route.query.title || ''; // 如果 query.title 為 undefined，則使用空字串
-            fetchPosts(searchStore.setSearchTitle); // 根據查詢條件抓取貼文
+            fetchPosts(query); // 根據查詢條件抓取貼文
         });
     
         return {

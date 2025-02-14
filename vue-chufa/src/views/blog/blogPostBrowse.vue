@@ -35,12 +35,12 @@
                         <eventButton :hasEvent="hasEvent" :event="event" v-for="event in schedule.events"></eventButton>
                     </div>
                     <div v-if="hasEvent!=[]" v-for="(eventData,index) in hasEvent[0]" class="postPlaceBox">
-                        <h2 v-if="index==0">開始時間:{{hasEvent[1]}}</h2>
-                        <div v-else>
-                            <h2>⬇️路程:{{ hasEvent[0][index-1].travelTime }}</h2>
-                            <h2>抵達時間:{{ hasEvent[1] }} + {{ hasEvent[0][index-1].travelTime }}</h2>
+                        <h2 v-if="index!=0">⬇️路程:{{ hasEvent[0][index-1].travelTime }}</h2>
+                        <div class="eventTimeBox">
+                            <h2 v-if="index==0">開始時間:{{setStartTime(hasEvent[1],eventData.stayDuration)}}</h2>
+                            <h2 v-else>抵達時間:{{ addTime(hasEvent[0][index-1].travelTime,eventData.stayDuration) }}</h2>
+                            <h2>停留時間:{{eventData.stayDuration}}</h2>
                         </div>
-                        <h2>停留時間:{{eventData.stayDuration}}</h2>
                         <postPlaceData :placeId="eventData.placeId"></postPlaceData>
                     </div>
                 </div>
@@ -78,16 +78,13 @@
     import Comment from "@/components/Comment/Comment.vue";
 
     import axiosapi from "@/plugins/axios.js";
-    import { ref, onMounted, watch } from "vue";
+    import { ref, onMounted } from "vue";
     import { useRoute, useRouter } from "vue-router";
     import Swal from "sweetalert2";
 
     import { useUserStore } from '@/stores/user'
     const user = useUserStore()
-    const { member, isLoggedIn } = user
-
-    import { useScheduleStore } from "@/stores/ScheduleStore";
-    const scheduleStore = useScheduleStore();
+    const { member } = user
 
     const inBlogprofile = () => {
         router.push(`/blog/blogprofile/${memberId.value}`);
@@ -97,17 +94,42 @@
     const router = useRouter();
     const route = useRoute();
     const postid = ref(route.params.postid); // 取得動態路由參數
+    let setOffTime 
+    const setStartTime = (startTime,stayDuration) => {
+        const [aHours, aMinutes, aSeconds] = startTime.split(":").map(Number);
+        const [bHours, bMinutes, bSeconds] = stayDuration.split(":").map(Number);
+        const date = new Date();  // 整理抵達時間(開始時間+停留時間)
+        date.setHours(aHours+bHours, aMinutes+bMinutes, aSeconds+bSeconds, 0); // 設定時、分、秒，毫秒為 0
+        const hours = date.getHours();       // 取得時
+        const minutes = date.getMinutes();   // 取得分
+        const seconds = date.getSeconds();   // 取得秒
+        setOffTime =`${hours}:${minutes}:${seconds}`
+        return startTime
+    }
+    const addTime = (travelTime,stayDuration) => {
+        const [aHours, aMinutes, aSeconds] = setOffTime.split(":").map(Number);
+        const [bHours, bMinutes, bSeconds] = travelTime.split(":").map(Number);
+        const [cHours, cMinutes, cSeconds] = stayDuration.split(":").map(Number);
+        const date = new Date();  // 整理抵達時間(出發時間+路程)
+        date.setHours(aHours+bHours, aMinutes+bMinutes, aSeconds+bSeconds, 0); // 設定時、分、秒，毫秒為 0
+        const hours = date.getHours();       // 取得時
+        const minutes = date.getMinutes();   // 取得分
+        const seconds = date.getSeconds();   // 取得秒
 
+        const date2 = new Date();  // 整理下次出發時間(抵達時間+停留時間)
+        date2.setHours(hours+cHours, minutes+cMinutes, seconds+cSeconds, 0); // 設定時、分、秒，毫秒為 0
+        const hours2 = date2.getHours();       // 取得時
+        const minutes2 = date2.getMinutes();   // 取得分
+        const seconds2 = date2.getSeconds();   // 取得秒
+        setOffTime =`${hours2}:${minutes2}:${seconds2}`
+        return `${hours}:${minutes}:${seconds}`
+    }
     const memberName=ref('')
     const memberPicture=ref(null)
     const memberId=ref('')
     const postData = ref('')
     const htmlContent = ref('')
     const hasEvent = ref([])
-    let EventButtonClass = "openEventButton"
-    const showEvent = (index) => {
-        hasEvent.value = schedule.value.events[index].eventXPlaceBeans
-    }
     const Check = async () => {
     Swal.fire({
         title: "錯誤",
@@ -322,5 +344,9 @@
         border-radius: 12px;
         border: 1px solid #e0e0e0;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .eventTimeBox{
+        display: flex;
+        justify-content: space-around;
     }
 </style>

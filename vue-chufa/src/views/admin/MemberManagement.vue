@@ -20,7 +20,7 @@
               <td class="name-cell">{{ user.name }}</td>
               <td>{{ user.role }}</td>
               <!-- 電子郵件欄位：限制顯示長度，並附上「編輯」按鈕 -->
-              <td class="ll-cell">
+              <td class="email-cell">
                 <span class="email-text">{{ user.email }}</span>
                 <button
                   @click="updateEmail(user.userid, user.email)"
@@ -39,14 +39,22 @@
                 >
                   設為管理員
                 </button>
+                <!-- 修改點1：只對非管理員且非會員顯示「設為會員」按鈕 -->
                 <button
-                  v-if="user.role !== 'USER'"
+                  v-if="user.role !== 'USER' && user.role !== 'ADMIN'"
                   @click="updateRole(user.userid, 'USER')"
                   class="btn user-btn"
                 >
                   設為會員
                 </button>
-                <button @click="deleteMember(user.userid)" class="btn delete-btn">
+                <!---->
+
+                <!-- 修改點2：只對非管理員顯示「刪除會員」按鈕 -->
+                <button
+                  v-if="user.role !== 'ADMIN'"
+                  @click="deleteMember(user.userid)"
+                  class="btn delete-btn"
+                >
                   刪除會員
                 </button>
               </td>
@@ -427,3 +435,4 @@ fetchUsers();
   margin: 0 10px;
 }
 </style>
+

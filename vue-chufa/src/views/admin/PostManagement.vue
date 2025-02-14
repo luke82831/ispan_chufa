@@ -70,14 +70,20 @@
                       {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
                     </h3>
                   </div>
-                  <p class="post-content">{{ post.postContent }}</p>
+                  <!-- 修改：用 v-html 渲染轉換後的內容 -->
+                  <div class="post-content" v-html="transformContent(post.postContent)"></div>
+
                 </div>
               </td>
               <td>{{ post.postTitle }}</td>
-              <td>{{ post.postContent }}</td>
+              <!-- 修改：用 v-html 渲染轉換後的內容 -->
+              <td>
+                <div v-html="transformContent(post.postContent)"></div>
+              </td>
               <td>{{ post.postStatus }}</td>
               <td>{{ formatDate(post.postTime) }}</td>
               <td>
+
                 <div class="action-buttons">
                   <!-- 如果該貼文已隱藏，顯示取消隱藏的綠色按鈕；否則顯示隱藏按鈕 -->
                   <template v-if="postStore.getHiddenReason(post.postid)">
@@ -147,6 +153,22 @@ const formatDate = (date) => {
   const options = { year: "numeric", month: "2-digit", day: "2-digit" };
   return new Date(date).toLocaleDateString("zh-TW", options);
 };
+
+// 新增轉換函式：移除 <p> 標籤，並為 <img> 標籤加上大小限制
+  const transformContent = (content) => {
+  if (!content) return '';
+  // 移除 <p> 與 </p> 標籤
+  let result = content.replace(/<\/?p>/g, '');
+  // 針對 img 標籤，加入 inline style 限制大小為 100px
+  result = result.replace(/<img([^>]*?)>/g, (match, p1) => {
+    // 移除原有的 style 屬性後再加入新 style
+    let cleaned = p1.replace(/\s*style="[^"]*"/, '');
+    return `<img${cleaned} style="max-width:100px; max-height:100px;" />`;
+  });
+  return result;
+};
+
+
 
 const hidePost = async (postId) => {
   const { value: reason } = await Swal.fire({
@@ -256,7 +278,7 @@ onMounted(fetchPosts);
   text-align: center;
   font-size: 28px;
   color: #343a40;
-  border-bottom: 2px solid #ccc;
+  border-bottom: 2px solid #290909;
   margin-bottom: 0px;
 }
 
@@ -293,12 +315,24 @@ onMounted(fetchPosts);
 
 .post-table th,
 .post-table td {
-  border: 1px solid #ddd;
+  border-top: 1px solid #ddd; /* 只保留橫向邊框 */
+  border-bottom: 1px solid #ddd; /* 只保留橫向邊框 */
   padding: 8px;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 去掉縱向邊框 */
+.post-table th:first-child,
+.post-table td:first-child {
+  border-left: none;
+}
+
+.post-table th:last-child,
+.post-table td:last-child {
+  border-right: none;
 }
 
 .post-table th {
@@ -311,7 +345,6 @@ onMounted(fetchPosts);
   text-align: center;
   font-size: 18px;
 }
-
 
 /* 各欄位寬度調整 */
 .preview-col {
@@ -332,7 +365,6 @@ onMounted(fetchPosts);
 .action-col {
   width: 150px;
   text-align: center;
-
 }
 
 .hover-effect {
@@ -352,7 +384,6 @@ onMounted(fetchPosts);
   min-width: 80px;
   text-align: center;
   font-size: 14px;
-
 }
 
 /* 確保按鈕留在操作欄 */
@@ -362,7 +393,6 @@ onMounted(fetchPosts);
   align-items: center;
   gap: 30px;
   white-space: nowrap;
-  
 }
 
 .hide-btn {
@@ -413,12 +443,9 @@ onMounted(fetchPosts);
   background-color: #218838;
 }
 
-
-
 .delete-btn:hover {
   background-color: #c82333;
 }
-
 
 /* 分頁控制 */
 .pagination {
@@ -461,9 +488,6 @@ onMounted(fetchPosts);
   font-weight: bold;
 }
 
-
-
-
 /* 貼文預覽區塊 */
 .post-item-preview {
   text-align: left;
@@ -499,9 +523,5 @@ onMounted(fetchPosts);
   margin: 0;
   font-size: 16px;
 }
-.post-content {
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-}
+
 </style>

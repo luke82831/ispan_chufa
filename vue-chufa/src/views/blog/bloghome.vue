@@ -13,7 +13,7 @@
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
-          <p><strong>ID:</strong> {{ member.userid }}</p>
+          <p><strong></strong> {{ member.bio }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
             <p><strong>關注:</strong> {{ followersCount }}    
             <strong>粉絲:</strong> {{ followingCount }}</p>
@@ -234,7 +234,7 @@ export default {
   font-size: 1.8em;
   color: #444;
   margin-bottom: 20px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 2px solid #0d74e2;
   padding-bottom: 10px;
   font-weight: 600;
 }
@@ -259,7 +259,7 @@ export default {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  border: 3px solid #0000C6;
 }
 
 .info p {
@@ -267,10 +267,13 @@ export default {
   font-size: 1.1em;
   color: #555;
 }
+.info strong{
+  color: #093b8c;
+}
 
 .follow-link {
   text-decoration: none;
-  color: #007bff;
+  color: #0a4c93;
   font-weight: 500;
 }
 
@@ -300,11 +303,11 @@ export default {
 
 .tabs-container button:hover {
   background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  color: #6da6de;
 }
 
 .tabs-container button.active {
-  background: #007bff;
+  background: #0e80b4;
   color: white;
   font-weight: 600;
 }

@@ -1,22 +1,8 @@
 <template>
   <div class="main-container">
-    <!-- 標籤切換 -->
-
   <div>
   <Carousel />
   </div>
-  <!-- <div class="carousel-admin">
-    <h2>輪播管理</h2>
-    <label for="postid-input">輸入 Post ID（用逗號分隔）:</label>
-    <input
-      id="postid-input"
-      v-model="postidInput"
-      placeholder="例如：1,2,3,4,5"
-    />
-    <button @click="updateCarousel">更新輪播</button>  
-    <Carousel :postIds="postIds" />
-  </div> -->
-  
 <div>
     <div class="tabs-container" >
         <button class="tab" :class="{ active: selectedPlace ===null }" @click="switchPlace(null)">
@@ -49,7 +35,7 @@
         v-for="post in visiblePosts"
         :key="post.postid"
         class="post-card"
-        @click="navigateToDetail(post.postid, $event)"
+        @click="navigateToDetail(post, $event)"
       >
         <!-- REPOST 版型處理 -->
         <div v-if="post.repost" class="repost-header">
@@ -61,9 +47,12 @@
                 alt="Interaction Profile Picture"
                 class="profile-picture small-profile"
               />
+              <div v-else>
+                  <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture small-profile">
+              </div>
             </div>
             <p class="interaction-name">
-              {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
+              {{ post.member.nickname?post.member.nickname:post.member.name}} 轉發貼文
             </p>
           </div>
         </div>
@@ -79,21 +68,21 @@
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
+                <img v-else :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
               </router-link>
             </div>
             <div class="author-name">
-              <strong>
+              <strong v-if="post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname">
                 {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-                ({{ post.repostDTO?.member?.name || post.member.name }})
               </strong>
+            <strong v-else>
+              {{ post.repostDTO?.member?.name || post.member.name }} 
+            </strong>
+              <p class="post-time">{{ formatDate(post.postTime) }}</p>
             </div>
           </div>
-          <h3>
-            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-          </h3>
         </div>
-
+        
         <!-- 顯示第一張圖片 -->
         <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
           <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
@@ -101,15 +90,13 @@
         <div v-else class="post-image-container">
           <img :src="defaultpicture" class="post-image" />
         </div>
-<!-- 
-        移除圖片後的內容
-        <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
-        <p class="post-content-preview">
+      <p class="post-content-preview">
+        <h3>
+            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+          </h3>
         {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
-        </p>
-
-
-        <!-- 互動按鈕 -->
+      </p>
+      <!-- 互動按鈕 -->
         <div class="post-actions" @click.stop>
           <button
             @click.stop="likePost(post.postid)"
@@ -153,6 +140,40 @@
     </div>
     <RouterView></RouterView>
   </div>
+  <footer>
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>探索下一個旅程</h3>
+      <ul>
+        <li><a href="#">關於我們</a></li>
+        <li><a href="#">媒體專區</a></li>
+        <li><a href="#">聯絡我們</a></li>
+        <li><a href="#">QRcode教學</a></li>
+        <li><a href="#">官方部落格</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>公司資訊</h3>
+      <ul>
+        <li>快樂出發有限公司</li>
+        <li>統一編號：9999999</li>
+        <li>旅行業註冊編號：CHUFA</li>
+        <li>品保協會編號：北0090</li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>其他產品</h3>
+      <ul>
+        <li>由趣放假股份有限公司提供</li>
+        <li>統一編號：9999999</li>
+        <li>聯繫地址：台北市大安區出發路 999號 9 樓之 9</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© Chufa, Inc. 2025</p>
+  </div>
+</footer>
 </template>
 <script>
 import { ref, onMounted,watch,inject,computed} from "vue";
@@ -250,15 +271,21 @@ const prevSlide = () => {
     });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
-    const navigateToDetail = (postid, event) => {
-      const excludedElements = [".post-actions", ".action-btn", "a", "button"];
-      for (let selector of excludedElements) {
+    const navigateToDetail = (post, event) => {
+    const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+    for (let selector of excludedElements) {
         if (event.target.closest(selector)) {
-          return; // 如果點擊的是按鈕、連結，就不觸發跳轉
+            return; // 如果點擊的是按鈕、連結，就不觸發跳轉
         }
-      }
-      router.push(`/blog/find/${postid}`);
-    };
+    }
+    // 如果是轉發的貼文，跳轉到原貼文的詳細頁
+    if (post.repost && post.repostDTO) {
+        router.push(`/blog/find/${post.repostDTO.postid}`);
+    } else {
+        // 否則跳轉到當前貼文的詳細頁
+        router.push(`/blog/find/${post.postid}`);
+    }
+};
 
     const formatDate = (date) => {
       if (!date) return "";
@@ -474,8 +501,8 @@ Swal.fire("請先登入", "登入體驗更好", "error");
     };
     const route = useRoute();
     const resetSearch = () => {
-  searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
-};
+      searchStore.resetSearch();  // 调用 Pinia store 中的 resetSearch 方法
+    };
 
     watch(
       () => route.query.title,
@@ -627,168 +654,136 @@ Swal.fire("請先登入", "登入體驗更好", "error");
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
 }
 
+/* 帖子网格布局 */
 .posts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+  padding: 20px;
 }
 
+/* 帖子卡片样式 */
 .post-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  background-color: white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .post-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* 转发布局样式 */
+.repost-header {
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eee;
+}
+
+.interaction-info {
+  display: flex;
+  align-items: center;
+}
+
+.repost-profile-container {
+  margin-right: 10px;
+}
+
+.profile-picture.small-profile {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.interaction-name {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 作者信息样式 */
+.author-info {
+  padding: 15px;
+}
+
+.author-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.profile-picture-container {
+  margin-right: 10px;
+}
+
+.profile-picture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-size: 16px;
+  color: #333;
+}
+
+.post-time {
+  font-size: 12px;
+  color: #999;
+  margin: 5px 0;
+  text-align: left;
+}
+
+h3 {
+  font-size: 18px;
+  color: #333;
+  margin: 10px 0;
+}
+
+/* 帖子图片样式 */
 .post-image-container {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  position: relative;
 }
 
 .post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
 }
 
-.post-image-container:hover .post-image {
-  transform: scale(1.05);
-}
-
-.post-content-preview{
-  padding: 16px;
+/* 帖子内容预览样式 */
+.post-content-preview {
   font-size: 14px;
-  color: #555;
+  color: #666;
+  padding: 0 12px 12px;
+  margin: 0;
   line-height: 1.5;
+  text-align: left;
 }
 
-.post-content h3 {
-  margin: 0 0 10px;
-  font-size: 18px;
-  color: #333;
-}
-
-.read-more {
-  display: inline-block;
-  margin: 10px 0;
-  color: #ff4757;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.read-more:hover {
-  color: #ff6b81;
-}
-
-.post-meta,
-.post-stats {
-  padding: 0 16px 10px;
-  font-size: 12px;
-  color: #888;
-}
-
-.post-meta p,
-.post-stats p {
-  margin: 5px 0;
-}
-
+/* 互动按钮容器样式 */
 .post-actions {
   display: flex;
   justify-content: space-around;
   padding: 10px;
-  border-top: 1px solid #e0e0e0;
-  background-color: #f9f9f9;
+  border-top: 1px solid #eee;
 }
 
-.action-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 14px;
+
+/* 没有文章时的提示样式 */
+.posts-grid + div {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
   color: #666;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: color 0.3s;
-}
-
-.action-btn:hover {
-  color: #ff4757;
-}
-
-.action-btn.active {
-  color: #ff4757;
-}
-
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 30px;
-  gap: 10px;
-}
-
-.pagination button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 20px;
-  background-color: #f0f0f0;
-  cursor: pointer;
-  font-size: 14px;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-.pagination button:hover {
-  background-color: #ff4757;
-  color: white;
-}
-
-.pagination button:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
-.pagination span {
-  font-size: 14px;
-  color: #333;
-}
-
-/* 作者信息樣式 */
-.author-info {
-  padding: 16px;
-}
-
-.author-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.profile-picture-container {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profile-picture {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
 .default-profile {
@@ -796,43 +791,6 @@ Swal.fire("請先登入", "登入體驗更好", "error");
   height: 100%;
   background-color: #ccc;
   border-radius: 50%;
-}
-
-.author-name {
-  font-size: 14px;
-  color: #333;
-}
-
-/* REPOST 樣式 */
-.repost-header {
-  padding: 10px 16px;
-  background-color: #f9f9f9;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.interaction-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.repost-profile-container {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.small-profile {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.interaction-name {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
 }
 
 /* 發文/規劃按鈕 */
@@ -974,5 +932,95 @@ select {
 .collect-btn.active {
   animation: fillBookmark 0.5s ease-out forwards;
 }
+
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination button:hover {
+  background-color: #ff4757;
+  color: white;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  font-size: 14px;
+  color: #333;
+}
+
+
+footer {
+  background-color: #b9dae6;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #121322;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.footer-section {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.footer-section h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+  line-height: 1.6; /* 統一文字行高 */
+}
+
+.footer-section ul li a {
+  text-decoration: none;
+  color: #333;
+}
+
+.footer-section ul li a:hover {
+  color: #007bff;
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+  margin-top: 20px;
+}
+
 </style>
 

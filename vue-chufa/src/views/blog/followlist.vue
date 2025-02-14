@@ -1,7 +1,6 @@
 <template>
-  <p>{{ member.name }}</p>
   <div class="followlist-page">
-    <h1 class="page-title">用戶 ID: {{ followid }}</h1>
+    <h1 class="page-title">他的關注</h1>
     <!-- 分頁按鈕 -->
   
     <div class="tabs">
@@ -88,7 +87,7 @@ export default {
         if (response.data.success) {
           member.value = response.data.user || {};
         } else {
-          Swal.fire('錯誤', response.data.message, 'error');
+          //Swal.fire('錯誤', response.data.message, 'error');
         }
       } catch (error) {
         console.error('Fetch profile failed:', error);

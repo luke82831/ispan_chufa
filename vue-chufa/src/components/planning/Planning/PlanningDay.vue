@@ -101,6 +101,7 @@
 </template>
 
 <script setup>
+import Swal from "sweetalert2";
 import { onBeforeRouteLeave } from "vue-router";
 import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
@@ -431,15 +432,38 @@ const warnUnsavedChanges = (event) => {
   if (hasUnsavedChanges.value) {
     event.preventDefault();
     event.returnValue = "你有未儲存的變更，確定要離開嗎？";
+    return "你有未儲存的變更，確定要離開嗎？";
+  }
+};
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === "hidden" && hasUnsavedChanges.value) {
+    Swal.fire({
+      title: "未儲存的變更",
+      text: "你有未儲存的變更，確定要離開嗎？",
+      icon: "warning",
+      confirmButtonText: "知道了",
+    });
+  }
+};
+
+const handlePageHide = (event) => {
+  if (hasUnsavedChanges.value) {
+    event.preventDefault();
+    event.returnValue = "你有未儲存的變更，確定要離開嗎？";
   }
 };
 
 onMounted(() => {
   window.addEventListener("beforeunload", warnUnsavedChanges);
+  window.addEventListener("pagehide", handlePageHide);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener("beforeunload", warnUnsavedChanges);
+  window.removeEventListener("pagehide", handlePageHide);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
 </script>
 

@@ -66,5 +66,29 @@ export const useScheduleStore = defineStore("scheduleStore", {
         throw error;
       }
     },
+
+    async updateScheduleTitle(tripId, newTitle) {
+      try {
+        await axiosapi.patch(`/api/schedule/${tripId}`, {
+          tripName: newTitle,
+        });
+
+        // 更新本地 store
+        if (this.currentSchedule && this.currentSchedule.tripId === tripId) {
+          this.currentSchedule.tripName = newTitle;
+        }
+
+        // 更新 schedules 陣列中的對應行程
+        const schedule = this.schedules.find(
+          (schedule) => schedule.tripId === tripId
+        );
+        if (schedule) {
+          schedule.tripName = newTitle;
+        }
+      } catch (error) {
+        console.error("更新行程標題失敗:", error);
+        throw error;
+      }
+    },
   },
 });

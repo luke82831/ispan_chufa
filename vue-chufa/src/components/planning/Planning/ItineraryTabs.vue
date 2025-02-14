@@ -107,9 +107,17 @@ const editTitle = () => {
 };
 
 // **儲存標題**
-const saveTitle = () => {
+const saveTitle = async () => {
   if (scheduleStore.currentSchedule) {
-    scheduleStore.currentSchedule.tripName = newTitle.value;
+    try {
+      await scheduleStore.updateScheduleTitle(
+        scheduleStore.currentSchedule.tripId,
+        newTitle.value
+      );
+      console.log("行程標題已更新");
+    } catch (error) {
+      console.error("行程標題更新失敗", error);
+    }
   }
   isEditing.value = false;
 };

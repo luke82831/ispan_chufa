@@ -208,9 +208,14 @@ export default {
     //place
     //const selectedPlace = ref(null);
     const places = ref([
-      { id: 1, name: "Los Angeles" },
-      { id: 2, name: "New York" },
-      { id: 3, name: "Chicago" },
+  { id: 1, name: "台北市" },
+  { id: 2, name: "新北市" },
+  { id: 3, name: "桃園市" },
+  { id: 4, name: "台中市" },
+  { id: 5, name: "臺南市" },
+  { id: 6, name: "高雄市" },
+  { id: 7, name: "宜蘭縣" },
+  { id: 8, name: "花蓮縣" },
     ]);
 
     watch(sortBy, () => {

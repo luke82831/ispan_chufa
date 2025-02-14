@@ -5,6 +5,17 @@
   <div>
   <Carousel />
   </div>
+  <!-- <div class="carousel-admin">
+    <h2>輪播管理</h2>
+    <label for="postid-input">輸入 Post ID（用逗號分隔）:</label>
+    <input
+      id="postid-input"
+      v-model="postidInput"
+      placeholder="例如：1,2,3,4,5"
+    />
+    <button @click="updateCarousel">更新輪播</button>  
+    <Carousel :postIds="postIds" />
+  </div> -->
   
 <div>
     <div class="tabs-container" >
@@ -179,6 +190,18 @@ export default {
     const defaultProfilePic=ref(defaultProfilePicture);
     const defaultpicture=ref(defaultback);
     const isCarouselFlag = ref(false); 
+    // 管理輸入的 postid
+    const postidInput = ref("");
+    const postIds = ref([]);
+
+    // 更新 Carousel 的 postIds
+    // const updateCarousel = () => {
+    //   // 將輸入字串轉換成 postid 陣列
+    //   postIds.value = postidInput.value
+    //     .split(",")
+    //     .map((id) => parseInt(id.trim()))
+    //     .filter((id) => !isNaN(id));
+    // };
 
 
     
@@ -503,10 +526,12 @@ Swal.fire("請先登入", "登入體驗更好", "error");
       users,
       defaultProfilePic,
       defaultpicture,
-
+      //postidInput,
       nextSlide,
       prevSlide,
       isCarouselFlag,
+      //updateCarousel,
+      postIds
     };
   },
 };

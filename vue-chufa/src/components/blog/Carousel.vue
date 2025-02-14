@@ -1,10 +1,21 @@
 <template>
     <div class="carousel">
       <!-- 圖片與內文輪播區域 -->
+      <!-- <div class="input-section">
+      <label for="post-ids">輸入文章 ID（以逗號分隔）:</label>
+      <input
+        id="post-ids"
+        type="text"
+        v-model="postIdsInput"
+        placeholder="例如：20067,20068,20069"
+      />
+      <button @click="updatePostIds">更新文章</button>
+    </div>
+       -->
       <div
         class="carousel-item"
         v-for="(post, index) in posts"
-        :key="post.postid"
+        :key="post.postid||index"
         :class="{ active: index === currentIndex }"
         @click="navigateToDetail(post.postid, $event)"
       >
@@ -29,15 +40,26 @@
   
   
   <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount ,watch} from "vue";
 import { useRouter } from "vue-router";
 import axiosapi from "@/plugins/axios"; // 根據你的專案路徑修改
+// 接收 postIds 作為 prop
+const props = defineProps({
+  postIds: {
+    type: Array,
+    default: () => [],
+  },
+});
+
 
 // 狀態管理
 const posts = ref([]);
 const currentIndex = ref(0);
 let autoSlideInterval = null;
 
+
+const postIds = ref([6,7,8,9,10]); // 在內部管理 postIds
+const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 
 const getFirstImage = (content) => {
@@ -63,14 +85,15 @@ const navigateToDetail = (postid, event) => {
 };
 
 // 逐一傳入 postid 並抓取資料
-const postIds = [10066, 10067, 10068, 10062, 10069];
+//const postIds = [20067, 20068, 20069,20070];
 const fetchPosts = async () => {
   try {
     posts.value = []; // 清空 posts
-    for (let postid of postIds) {
+    for (let postid of postIds.value) {
       const requestData = {
         postid: postid,
       };
+
 
       const response = await axiosapi.post("/api/posts/post", requestData, {
         headers: {
@@ -78,15 +101,25 @@ const fetchPosts = async () => {
           "Cache-Control": "no-cache",
         },
       });
+      console.log("回傳資料:", response.data); // 檢查 API 回傳的資料
 
       if (response.data.postdto && response.data.postdto.length > 0) {
         posts.value.push(response.data.postdto[0]);
       }
+      console.log("posts 陣列:", posts.value); // 最終的 posts 陣列
     }
   } catch (error) {
     console.error("Fetch posts failed:", error);
   }
 };
+
+watch(
+  () => props.postIds,
+  () => {
+    fetchPosts();
+  },
+  { immediate: true }
+);
 
 // 下一張
 const nextSlide = () => {

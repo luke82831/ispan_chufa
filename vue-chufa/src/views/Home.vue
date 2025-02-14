@@ -30,7 +30,7 @@
     <!-- 貼文網格布局 -->
     <div class="posts-grid">
       <div
-        v-for="post in posts"
+        v-for="post in visiblePosts"
         :key="post.postid"
         class="post-card"
         @click="navigateToDetail(post.postid, $event)"
@@ -173,6 +173,8 @@ export default {
     const isSearch = ref(false);
     const searchStore = useSearchStore();
     const selectedPlace = ref(null); 
+
+
     
     //place
     //const selectedPlace = ref(null);
@@ -241,7 +243,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 5,
+          size: 100,
           checklike:member.value.userid,
           repost:true,
         };

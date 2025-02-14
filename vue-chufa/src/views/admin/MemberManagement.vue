@@ -20,7 +20,7 @@
               <td class="name-cell">{{ user.name }}</td>
               <td>{{ user.role }}</td>
               <!-- 電子郵件欄位：限制顯示長度，並附上「編輯」按鈕 -->
-              <td class="email-cell">
+              <td class="ll-cell">
                 <span class="email-text">{{ user.email }}</span>
                 <button
                   @click="updateEmail(user.userid, user.email)"

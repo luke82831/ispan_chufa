@@ -68,18 +68,27 @@ const computedItinerary = computed(() => {
     // );
   });
 
+  // ✅ 計算完畢後，將最後一個地點的 `endTime` 存入 `itineraryStore`
+  if (itineraryWithTimes.length > 0) {
+    const lastEndTime =
+      itineraryWithTimes[itineraryWithTimes.length - 1].endTime;
+    itineraryStore.setEndTime(props.date, formatTime(lastEndTime));
+  }
+
   return itineraryWithTimes;
 });
 
 // **取得對應 `index` 的地點時間**
-const currentPlaceTime = computed(() => computedItinerary.value[props.index] || null);
+const currentPlaceTime = computed(
+  () => computedItinerary.value[props.index] || null
+);
 
 // **格式化時間 (HH:MM)**
 const formatTime = (date) => {
-  if (!date) return "時間未設定";
-  return new Date(date).toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (!date || !(date instanceof Date)) return "00:00:00";
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`; // 確保格式為 HH:mm:ss
 };
 </script>

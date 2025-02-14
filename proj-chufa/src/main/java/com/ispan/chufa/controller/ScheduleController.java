@@ -153,10 +153,11 @@ public class ScheduleController {
             schedule.setEndDate(newEndDate);
             scheduleRepository.save(schedule);
 
-            // ✅ 自動新增對應的 Event
-            eventService.createEventFromSchedule(schedule);
+            // ✅ 只為尚未建立的日期新增 Event
+            List<LocalDate> existingEventDates = eventService.getExistingEventDatesBySchedule(schedule);
+            eventService.createMissingEvents(schedule, existingEventDates);
 
-            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增對應的事件");
+            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增缺少的事件");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }

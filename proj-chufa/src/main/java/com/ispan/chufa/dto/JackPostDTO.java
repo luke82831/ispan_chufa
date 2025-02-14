@@ -1,6 +1,8 @@
 package com.ispan.chufa.dto;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 public class JackPostDTO {
     private Long postid; // 貼文_貼文id
@@ -17,7 +19,7 @@ public class JackPostDTO {
     // @JsonIgnore
     // private List<InteractionBean> interactions; // 貼文的互動行為
     // @JsonIgnore
-    // private Set<TagsBean> tagsBeans = new HashSet<>();
+    private Set<JackTagsDTO> tagsBeans;
     // @JsonIgnore
     // private Set<PlaceBean> place = new HashSet<>();
 
@@ -83,6 +85,14 @@ public class JackPostDTO {
 
     public void setScheduleBean(JackScheduleDTO scheduleBean) {
         this.scheduleBean = scheduleBean;
+    }
+
+    public Set<JackTagsDTO> getTagsBeans() {
+        return tagsBeans;
+    }
+
+    public void setTagsBeans(Set<JackTagsDTO> tagsBeans) {
+        this.tagsBeans = tagsBeans;
     }
 
 }

@@ -1,10 +1,10 @@
 <template>
-  <div>
-    <div v-for="comment in commentData" class="comment">
-      <RootComment :comment="comment"></RootComment>
-      <ReplyComment :parentId="comment.commentId"></ReplyComment>
+    <div v-if="commentData!=null" class="getCommentBody">
+        <div v-for="comment in commentData">
+            <RootComment :comment="comment"></RootComment>
+            <ReplyComment :parentId="comment.commentId"></ReplyComment>
+        </div>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -34,8 +34,11 @@ const lookComment = async () => {
 </script>
 
 <style>
-    .comment{
-        border: 5px solid black;
-        margin: 20px;
+    .getCommentBody{
+        padding: 10px;
+        margin: 0px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
 </style>

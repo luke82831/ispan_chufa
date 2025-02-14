@@ -117,9 +117,9 @@ public class EventXPlaceBean {
 	public void setNotes(char[] notes) {
 		this.notes = notes;
 	}
-	
+
 	public Long getPlaceId() {
-        return (place != null) ? place.getPlaceId() : null;
-    }
+		return (place != null) ? place.getPlaceId() : null;
+	}
 
 }

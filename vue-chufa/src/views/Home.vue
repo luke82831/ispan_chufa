@@ -146,27 +146,23 @@
       <h3>探索下一個旅程</h3>
       <ul>
         <li><a href="#">關於我們</a></li>
-        <li><a href="#">媒體專區</a></li>
+        <li><a href="#">官方粉專</a></li>
         <li><a :href="mailToLink">聯絡我們</a></li>
-        <li><a href="#">QRcode教學</a></li>
-        <li><a href="#">官方部落格</a></li>
       </ul>
     </div>
     <div class="footer-section">
       <h3>公司資訊</h3>
       <ul>
         <li>快樂出發有限公司</li>
-        <li>統一編號：9999999</li>
+        <li>統一編號：12345678</li>
         <li>旅行業註冊編號：CHUFA</li>
-        <li>品保協會編號：北0090</li>
       </ul>
     </div>
     <div class="footer-section">
       <h3>其他產品</h3>
       <ul>
-        <li>由趣放假股份有限公司提供</li>
         <li>統一編號：9999999</li>
-        <li>聯繫地址：台北市大安區出發路 999號 9 樓之 9</li>
+        <li>聯繫地址：106台北市大安區復興南路一段390號2樓</li>
       </ul>
     </div>
   </div>

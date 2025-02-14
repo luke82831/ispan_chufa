@@ -19,49 +19,48 @@
             <tr v-for="user in users" :key="user.userid">
               <td class="name-cell">{{ user.name }}</td>
               <td>{{ user.role }}</td>
-              <!-- 電子郵件欄位：限制顯示長度，並附上「編輯」按鈕 -->
-              <td class="email-cell">
-                <span class="email-text">{{ user.email }}</span>
-                <button
-                  @click="updateEmail(user.userid, user.email)"
-                  class="btn edit-email-btn"
-                >
-                  編輯
-                </button>
+              <td>
+                <div class="email-cell">
+                  <span class="email-text">{{ user.email }}</span>
+                  <button
+                    @click="updateEmail(user.userid, user.email)"
+                    class="btn edit-email-btn"
+                  >
+                    編輯
+                  </button>
+                </div>
               </td>
               <td>{{ user.phone_number }}</td>
               <td>{{ user.gender }}</td>
               <td class="action-cell">
-                <button
-                  v-if="user.role !== 'ADMIN'"
-                  @click="updateRole(user.userid, 'ADMIN')"
-                  class="btn admin-btn"
-                >
-                  設為管理員
-                </button>
-                <!-- 修改點1：只對非管理員且非會員顯示「設為會員」按鈕 -->
-                <button
-                  v-if="user.role !== 'USER' && user.role !== 'ADMIN'"
-                  @click="updateRole(user.userid, 'USER')"
-                  class="btn user-btn"
-                >
-                  設為會員
-                </button>
-                <!---->
-
-                <!-- 修改點2：只對非管理員顯示「刪除會員」按鈕 -->
-                <button
-                  v-if="user.role !== 'ADMIN'"
-                  @click="deleteMember(user.userid)"
-                  class="btn delete-btn"
-                >
-                  刪除會員
-                </button>
+                <template v-if="user.role !== 'ADMIN'">
+                  <button
+                    @click="updateRole(user.userid, 'ADMIN')"
+                    class="btn admin-btn"
+                  >
+                    設為管理員
+                  </button>
+                  <button
+                    v-if="user.role !== 'USER'"
+                    @click="updateRole(user.userid, 'USER')"
+                    class="btn user-btn"
+                  >
+                    設為會員
+                  </button>
+                  <button
+                    @click="deleteMember(user.userid)"
+                    class="btn delete-btn"
+                  >
+                    刪除會員
+                  </button>
+                </template>
+                <template v-else>
+                  <div class="empty-placeholder">&#xfeff;</div>
+                </template>
               </td>
             </tr>
           </tbody>
         </table>
-        <!-- 分頁控制 -->
         <div class="pagination">
           <button :disabled="currentPage === 0" @click="fetchUsers(currentPage - 1)">
             上一頁
@@ -78,6 +77,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from "vue";
@@ -272,6 +272,7 @@ fetchUsers();
 .hover-effect:hover {
   background-color: #f0f8e6;
 }
+
 .member-management h1 {
   text-align: center;
   font-size: 28px;
@@ -304,6 +305,22 @@ fetchUsers();
   margin-bottom: 0px;
 }
 
+/* Email 欄位的排版：僅在「非 ADMIN」時才會使用 */
+.email-cell {
+  display: grid;
+  grid-template-columns: 200px auto;
+  align-items: center;
+}
+
+.email-text {
+  width: 200px;
+  margin-right: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 編輯按鈕 */
 .edit-email-btn {
   background: #40bed1;
   color: #fff;
@@ -320,27 +337,13 @@ fetchUsers();
   transform: scale(1.05);
 }
 
-.email-cell {
-  display: grid;
-  grid-template-columns: 200px auto;
-  align-items: center;
-  gap: 10px;
-}
-
-.email-text {
-  width: 200px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
 /* 操作按鈕容器 */
 .action-cell {
-  display: flex; /* 讓按鈕水平排列 */
-  justify-content: center; /* 水平居中對齊 */
-  align-items: center; /* 垂直居中對齊 */
-  flex-wrap: wrap; /* 如果按鈕過多，自動換行 */
-  gap: 10px; /* 按鈕之間的間距 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 /* 通用按鈕樣式 */
@@ -354,8 +357,8 @@ fetchUsers();
   font-weight: bold;
   transition: background-color 0.3s ease, transform 0.2s ease;
   text-align: center;
-  width: 110px; /* 確保按鈕寬度一致 */
-  height: 40px; /* 確保按鈕高度一致 */
+  width: 110px;
+  height: 40px;
 }
 
 /* 設為管理員按鈕 */
@@ -384,7 +387,7 @@ fetchUsers();
 .delete-btn {
   background-color: #dc3545;
   color: white;
-  position: static; /* 確保按鈕不脫離表格布局 */
+  position: static;
 }
 .delete-btn:hover {
   background-color: #c82333;
@@ -434,5 +437,13 @@ fetchUsers();
   font-weight: bold;
   margin: 0 10px;
 }
+
+/* 讓空白佔位符隱藏但不影響表格高度 */
+.empty-placeholder {
+  visibility: hidden;
+  min-height: 40px;
+  line-height: normal;
+}
 </style>
+
 

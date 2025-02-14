@@ -3,15 +3,20 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
-        <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" />
+        <!-- <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" /> -->
+        <img 
+          :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePic"
+          alt="Profile Picture" 
+          v-if="member.profilePicture || defaultProfilePic" 
+          class="profile-picture" />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
           <p><strong>ID:</strong> {{ member.userid }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ followersCount }}</p>    
-            <p><strong>粉絲:</strong> {{ followingCount }}</p>
+            <p><strong>關注:</strong> {{ followersCount }}    
+            <strong>粉絲:</strong> {{ followingCount }}</p>
           </router-link>
         </div>
       </div>
@@ -36,7 +41,7 @@
             :post="post"
             :member="member"
             :formatDate="formatDate"
-            @update-posts="fetchPosts()"
+            @update-posts="fetchPosts"
           />
           <div
             v-if="postStore.getHiddenReason(post.postid)"
@@ -64,6 +69,7 @@ import axiosapi from '@/plugins/axios.js';
 import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from 'vue-router';
+import defaultProfilePicture from "@/assets/empty.png"
 import { usePostStore } from '@/stores/usePostStore';
 
 
@@ -81,6 +87,7 @@ export default {
 
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
+    const defaultProfilePic=ref(defaultProfilePicture);
 
     const postStore = usePostStore();
 
@@ -131,7 +138,7 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-    const payload = { };
+    const payload = {checklike:member.value.userid};
     if (filterType === 'likedPosts') { payload.likedBy = member.value.userid;payload.repost = true; }
     if (filterType === 'savedPosts') { payload.collectBy = member.value.userid;payload.repost = true; }
     if (filterType === 'myPosts') {
@@ -206,6 +213,7 @@ export default {
       activeTab,
       followersCount,
       followingCount,
+      defaultProfilePic,
       postStore,
     };
   },

@@ -2,9 +2,6 @@
 <!-- 貼文網格布局 -->
 <div class="posts-grid">
       <div
-       
-
-
         class="post-card"
         @click="navigateToDetail(post.postid, $event)"
       >
@@ -18,6 +15,10 @@
                 alt="Interaction Profile Picture"
                 class="profile-picture small-profile"
               />
+
+              <div v-else>
+                  <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
+                </div>
             </div>
             <p class="interaction-name">
               {{ post.member.nickname }} ({{ post.member.name }}) 轉發貼文
@@ -36,7 +37,9 @@
                   alt="Author's Profile Picture"
                   class="profile-picture"
                 />
-                <div v-else class="default-profile"></div>
+                <div v-else >
+                  <img :src="defaultProfilePicture" alt="Default Profile Picture" class="profile-picture">
+                </div>
               </router-link>
             </div>
             <div class="author-name">
@@ -46,6 +49,12 @@
               </strong>
             </div>
           </div>
+          <!-- <div class="post-meta">
+              <p>
+                發佈時間:
+                {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
+              </p>
+          </div> -->
           <h3>
             {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
           </h3>
@@ -55,29 +64,16 @@
         <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
           <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
         </div>
+        <div v-else class="post-image-container">
+          <img :src="defaultpicture" class="post-image" />
+        </div>
 <!-- 
         移除圖片後的內容
         <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
         <p class="post-content-preview">
         {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
         </p>
-
-        <!-- 貼文元信息 -->
-        <div class="post-meta">
-          <p>
-            發佈時間:
-            {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
-          </p>
-          <p v-if="post.repostDTO">互動時間: {{ formatDate(post.postTime) }}</p>
-          <p>貼文類型: {{ post.repost ? "REPOST" : "原創" }}</p>
-        </div>
-
-        <!-- 貼文統計 -->
-        <div class="post-stats">
-          <p>轉發次數: {{ post.repostCount }}</p>
-          <p>點讚數: {{ post.likeCount }}</p>
-        </div>
-
+    
         <!-- 互動按鈕 -->
         <div class="post-actions" @click.stop>
           <button
@@ -86,10 +82,10 @@
             :class="{ active: post.likedByCurrentUser }"
           >
           <span class="heart-icon"></span> 
-            {{ post.likedByCurrentUser ? '已點讚' : '點讚' }}
+          {{ post.likeCount }}
           </button>
           <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-            🔁 轉發
+            🔁 {{ post.repostCount }}
           </button>
           <button @click.stop="collectPost(post.postid)" 
           class="action-btn collect-btn"
@@ -108,15 +104,23 @@ import { defineProps, defineEmits,ref } from "vue";
 import Swal from "sweetalert2";
 import axiosapi from "@/plugins/axios";
 import { useRouter } from "vue-router";
+import defaultProfilePicture from '@/assets/empty.png';
+import { useUserStore } from "@/stores/user.js";
+import defaultpic from "@/assets/default.jpg"
 const posts = ref([]);
 const router = useRouter();
+const defaultProfilePic=ref(defaultProfilePicture);
+const userStore = useUserStore();  
+const defaultpicture=ref(defaultpic);
+
+
 // 接收從父組件傳入的 `post` 資料和 `member`
 const props = defineProps({
   post: Object,
   member: Object,
   formatDate: Function,
 });
-//props.fetchPosts();
+// props.fetchPosts();
 
 const getFirstImage = (content) => {
       const match = content.match(/<img[^>]+src="([^">]+)"/);
@@ -145,7 +149,7 @@ const repostPost = async (postid) => {
   try {
     const data = {
       postid: postid,
-      userid: props.member.userid,
+      userid: userStore.member.userid,
     };
 
     const response = await axiosapi.post("/api/posts/repost/forward", data, {
@@ -162,7 +166,7 @@ const repostPost = async (postid) => {
     }
   } catch (error) {
     console.error("轉發請求失敗:", error);
-    Swal.fire("錯誤", "無法執行轉發操作", "error");
+    Swal.fire("錯誤", "請先登入", "error");
   }
 };
 
@@ -171,7 +175,7 @@ const likePost = async (postid) => {
   try {
     const data = {
       postid: postid,
-      userid: props.member.userid,
+      userid: userStore.member.userid,
       interactionType: "LIKE",
     };
 
@@ -195,7 +199,7 @@ const likePost = async (postid) => {
     }
   } catch (error) {
     console.error("點讚請求失敗:", error);
-    Swal.fire("錯誤", "無法執行點讚操作", "error");
+    Swal.fire("錯誤", "請先登入", "error");
   }
 };
 
@@ -204,7 +208,7 @@ const collectPost = async (postid) => {
   try {
     const data = {
       postid: postid,
-      userid: props.member.userid,
+      userid: userStore.member.userid,
       interactionType: "COLLECT",
     };
 
@@ -225,9 +229,10 @@ const collectPost = async (postid) => {
     }
   } catch (error) {
     console.error("收藏請求失敗:", error);
-    Swal.fire("錯誤", "無法執行收藏操作", "error");
+    Swal.fire("錯誤", "請先登入", "error");
   }
 };
+
 </script>
 
 <style scoped>
@@ -331,17 +336,13 @@ const collectPost = async (postid) => {
   color: #ff6b81;
 }
 
-.post-meta,
-.post-stats {
-  padding: 0 16px 10px;
+.post-meta {
   font-size: 12px;
-  color: #888;
+  color: #999;
+  margin-bottom: 10px;
 }
 
-.post-meta p,
-.post-stats p {
-  margin: 5px 0;
-}
+
 
 .post-actions {
   display: flex;

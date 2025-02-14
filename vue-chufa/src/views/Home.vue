@@ -147,7 +147,7 @@
       <ul>
         <li><a href="#">關於我們</a></li>
         <li><a href="#">媒體專區</a></li>
-        <li><a href="#">聯絡我們</a></li>
+        <li><a :href="mailToLink">聯絡我們</a></li>
         <li><a href="#">QRcode教學</a></li>
         <li><a href="#">官方部落格</a></li>
       </ul>
@@ -239,6 +239,11 @@ export default {
   { id: 8, name: "花蓮縣" },
     ]);
 
+    const email="chufa@gmail.com"
+    const mailToLink = computed(() => {
+      return `mailto:${email}`;
+    });
+
     watch(sortBy, () => {
       fetchPosts();  // 每次排序方式改變時重新抓取資料
     });
@@ -271,7 +276,7 @@ const prevSlide = () => {
     });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
-    const navigateToDetail = (post, event) => {
+    const navigateToDetail = (post, event) => { 
     const excludedElements = [".post-actions", ".action-btn", "a", "button"];
     for (let selector of excludedElements) {
         if (event.target.closest(selector)) {
@@ -285,7 +290,7 @@ const prevSlide = () => {
         // 否則跳轉到當前貼文的詳細頁
         router.push(`/blog/find/${post.postid}`);
     }
-};
+  };
 
     const formatDate = (date) => {
       if (!date) return "";
@@ -563,7 +568,8 @@ Swal.fire("請先登入", "登入體驗更好", "error");
       prevSlide,
       isCarouselFlag,
       //updateCarousel,
-      postIds
+      postIds,
+      mailToLink,
     };
   },
 };

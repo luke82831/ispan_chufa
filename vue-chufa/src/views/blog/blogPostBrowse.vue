@@ -20,14 +20,30 @@
                 行程名稱:{{ schedule.tripName }}
             </div>
             <div v-if="schedule!=null && openSchedule" class="schedule">
-                <div class="scheduleDataText">
-                    <h2>行程資料</h2>
-                    <p>行程名稱:{{ schedule.tripName }}</p>
-                    <p>行程ID:{{ schedule.tripId }}</p>
-                    <p>行程開始時間:{{ schedule.startDate }}</p>
-                    <p>行程結束時間:{{ schedule.endDate }}</p>
+                <div class="scheduleData">
+                    <div class="scheduleDataText">
+                        <h2>行程資料</h2>
+                        <p>行程名稱:{{ schedule.tripName }}</p>
+                        <p>行程ID:{{ schedule.tripId }}</p>
+                        <p>行程開始時間:{{ schedule.startDate }}</p>
+                        <p>行程結束時間:{{ schedule.endDate }}</p>
+                    </div>
+                    <img class="scheduleDataImg" :src="img" alt="Base64 圖片">
                 </div>
-                <img class="scheduleDataImg" :src="img" alt="Base64 圖片">
+                <div class="scheduleEvents">
+                    <div>
+                        <eventButton :hasEvent="hasEvent" :event="event" v-for="event in schedule.events"></eventButton>
+                    </div>
+                    <div v-if="hasEvent!=[]" v-for="(eventData,index) in hasEvent[0]" class="postPlaceBox">
+                        <h2 v-if="index==0">開始時間:{{hasEvent[1]}}</h2>
+                        <div v-else>
+                            <h2>⬇️路程:{{ hasEvent[0][index-1].travelTime }}</h2>
+                            <h2>抵達時間:{{ hasEvent[1] }} + {{ hasEvent[0][index-1].travelTime }}</h2>
+                        </div>
+                        <h2>停留時間:{{eventData.stayDuration}}</h2>
+                        <postPlaceData :placeId="eventData.placeId"></postPlaceData>
+                    </div>
+                </div>
             </div>
 
             <div v-html="htmlContent"></div>
@@ -54,13 +70,15 @@
 </template>
 
 <script setup>
+    import eventButton from "@/components/Comment/eventButton.vue";
+    import postPlaceData from "@/components/Comment/postPlaceData.vue";
     import tagBrowse from "@/components/Post/tagBrowse.vue";
     import EditPost from "@/components/Post/EditPost.vue";
     import InputComment from "@/components/Comment/InputComment.vue";
     import Comment from "@/components/Comment/Comment.vue";
 
     import axiosapi from "@/plugins/axios.js";
-    import { ref, onMounted } from "vue";
+    import { ref, onMounted, watch } from "vue";
     import { useRoute, useRouter } from "vue-router";
     import Swal from "sweetalert2";
 
@@ -85,7 +103,11 @@
     const memberId=ref('')
     const postData = ref('')
     const htmlContent = ref('')
-
+    const hasEvent = ref([])
+    let EventButtonClass = "openEventButton"
+    const showEvent = (index) => {
+        hasEvent.value = schedule.value.events[index].eventXPlaceBeans
+    }
     const Check = async () => {
     Swal.fire({
         title: "錯誤",
@@ -243,6 +265,16 @@
     }
     .schedule{
         display: flex; /* 啟用Flexbox佈局 */
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .scheduleData{
+        display: flex; /* 啟用Flexbox佈局 */
         flex-direction: row-reverse;
         justify-content: space-around;
         padding: 25px;
@@ -270,5 +302,25 @@
     .TagsBox {
         display: flex;
         flex-wrap: wrap;
+    }
+    .scheduleEvents{
+        display: flex; /* 啟用Flexbox佈局 */
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    .postPlaceBox{
+        display: flex; /* 啟用Flexbox佈局 */
+        flex-direction: column;
+        justify-content: space-around;
+        padding: 25px;
+        margin: 20px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
 </style>

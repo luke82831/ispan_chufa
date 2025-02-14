@@ -3,7 +3,6 @@ package com.ispan.chufa.controller;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ispan.chufa.domain.CalendarBean;
 import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.ScheduleBean;
+import com.ispan.chufa.dto.EventUpdateRequest;
 import com.ispan.chufa.repository.CalendarRepository;
 import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
@@ -46,6 +46,14 @@ public class EventController {
         EventBean savedEvent = eventService.saveEvent(event);
         return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
     }
+    
+//    @PutMapping("/event/{id}")
+//    public ResponseEntity<EventBean> updateEvent(
+//            @PathVariable Long id,  // 這是 eventId
+//            @RequestBody EventUpdateRequest request) {
+//        EventBean updatedEvent = eventService.updateEvent(id, request);
+//        return new ResponseEntity<>(updatedEvent, HttpStatus.OK);
+//    }
     
     // GET: 根據 event_id 查詢 Event 資料
 //    @GetMapping("/event/{eventId}")

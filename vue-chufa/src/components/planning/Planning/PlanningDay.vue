@@ -6,7 +6,11 @@
 
     <div class="departure-time">
       <label>出發時間：</label>
-      <input type="time" v-model="departureTime" @change="updateDepartureTime" />
+      <input
+        type="time"
+        v-model="departureTime"
+        @change="updateDepartureTime"
+      />
     </div>
 
     <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
@@ -21,7 +25,9 @@
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
               <!-- 刪除按鈕 -->
-              <button @click="deletePlace(index)" class="delete-button">✖</button>
+              <button @click="deletePlace(index)" class="delete-button">
+                ✖
+              </button>
 
               <div class="itinerary-details">
                 <div class="stay-time-header">
@@ -40,7 +46,12 @@
                     @click.prevent="editStayTime(index)"
                     class="stay-duration-link"
                   >
-                    {{ itineraryStore.getStayDuration(formattedSelectedDate, index) }}
+                    {{
+                      itineraryStore.getStayDuration(
+                        formattedSelectedDate,
+                        index
+                      )
+                    }}
                     分鐘
                   </a>
 
@@ -72,7 +83,10 @@
             </li>
 
             <!-- 在行程之間插入 RouteTime -->
-            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
+            <div
+              v-if="index < itineraryForSelectedDay.length - 1"
+              class="route-time"
+            >
               <RouteTime :date="formattedSelectedDate" :index="index" />
             </div>
           </ul>
@@ -121,8 +135,11 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate;
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
   return `${baseYear}-${month}-${day}`;
 });
 
@@ -137,7 +154,10 @@ watch(
 const convertTimeToMinutes = (timeString) => {
   if (!timeString) return 0; // 預設為 0 分鐘
 
-  if (typeof timeString === "string" && timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
+  if (
+    typeof timeString === "string" &&
+    timeString.match(/^\d{2}:\d{2}:\d{2}$/)
+  ) {
     const [hours, minutes] = timeString.split(":").map(Number);
     return hours * 60 + minutes;
   }
@@ -180,16 +200,28 @@ watch(
 
     let placesWithDetails = [];
     if (event.eventXPlaceBeans) {
-      console.log("📍 從後端獲取的 `eventXPlaceBeans`:", event.eventXPlaceBeans);
+      console.log(
+        "📍 從後端獲取的 `eventXPlaceBeans`:",
+        event.eventXPlaceBeans
+      );
 
       const placeIds = event.eventXPlaceBeans.map((e) => e.placeId);
       // console.log("📍 需要加載的地點 ID:", placeIds);
 
       await placeStore.fetchMultiplePlaces(placeIds);
-      console.log("✅ `placeStore.placeDetailsMap`:", placeStore.placeDetailsMap);
+      console.log(
+        "✅ `placeStore.placeDetailsMap`:",
+        placeStore.placeDetailsMap
+      );
+
+      // **🔹 按照 placeOrder 排序**
+      const sortedPlaces = event.eventXPlaceBeans.sort(
+        (a, b) => a.placeOrder - b.placeOrder
+      );
+      console.log("📌 已排序的行程資料:", sortedPlaces);
 
       // **🚀 存入 `stayDuration` 到 `Pinia`**
-      event.eventXPlaceBeans.forEach((eventPlace, index) => {
+      sortedPlaces.forEach((eventPlace, index) => {
         const stayDurationMinutes = eventPlace.stayDuration
           ? convertTimeToMinutes(eventPlace.stayDuration)
           : 0;
@@ -217,12 +249,15 @@ watch(
       });
     }
 
-    console.log("✅ 處理後的 `placesWithDetails`:", placesWithDetails);
+    console.log("✅ 排序後的 `placesWithDetails`:", placesWithDetails);
 
     // 存入 Pinia
     itineraryStore.setItinerary(newDate, placesWithDetails);
     itineraryStore.setStartTime(newDate, event.startTime ?? "08:00");
-    console.log("✅ 已存入 Pinia：", itineraryStore.getItineraryForDay(newDate));
+    console.log(
+      "✅ 已存入 Pinia：",
+      itineraryStore.getItineraryForDay(newDate)
+    );
   },
   { immediate: true }
 );
@@ -286,7 +321,9 @@ const updateTempStayTime = (index, event) => {
   if (!date) return;
 
   // 讀取使用者輸入的數值
-  const newDuration = isNaN(event.target.value) ? 0 : Number(event.target.value);
+  const newDuration = isNaN(event.target.value)
+    ? 0
+    : Number(event.target.value);
 
   // 即時更新 tempStayDurations，確保畫面同步變更
   itineraryStore.setTempStayDuration(date, index, newDuration);
@@ -329,7 +366,10 @@ watch(
     if (hasUnsavedChanges.value) {
       console.log(`💾 正在儲存 ${oldDate} 的行程...`);
       try {
-        await eventPlaceStore.saveItineraryToBackend(eventData.value.eventId, oldDate);
+        await eventPlaceStore.saveItineraryToBackend(
+          eventData.value.eventId,
+          oldDate
+        );
         console.log(`✅ ${oldDate} 行程儲存成功`);
         hasUnsavedChanges.value = false; // 成功儲存後重置
       } catch (error) {

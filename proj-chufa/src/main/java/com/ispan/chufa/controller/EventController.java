@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ispan.chufa.domain.CalendarBean;
 import com.ispan.chufa.domain.EventBean;
 import com.ispan.chufa.domain.ScheduleBean;
-import com.ispan.chufa.dto.EventUpdateRequest;
 import com.ispan.chufa.repository.CalendarRepository;
 import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
@@ -47,7 +46,7 @@ public class EventController {
         return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
     }
     
-//    @PutMapping("/event/{id}")
+//    @PutMapping(""/event/{id}"")
 //    public ResponseEntity<EventBean> updateEvent(
 //            @PathVariable Long id,  // 這是 eventId
 //            @RequestBody EventUpdateRequest request) {
@@ -56,7 +55,7 @@ public class EventController {
 //    }
     
     // GET: 根據 event_id 查詢 Event 資料
-//    @GetMapping("/event/{eventId}")
+//    @GetMapping(""/event/{eventId}"")
 //    public ResponseEntity<EventBean> getEventById(@PathVariable Long eventId) {
 //        EventBean event = eventService.findEventById(eventId);  // 透過服務查詢 Event 資料
 //        if (event != null) {

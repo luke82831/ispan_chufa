@@ -666,6 +666,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .main-container {
   padding: 20px;

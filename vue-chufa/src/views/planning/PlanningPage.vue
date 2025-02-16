@@ -70,11 +70,8 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate; // 如果已經是 YYYY-MM-DD 格式則直接回傳
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
-    new Date().getFullYear();
-  const [month, day] = cleanedDate
-    .split("/")
-    .map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
 
   return `${baseYear}-${month}-${day}`; // 轉換為 YYYY-MM-DD
 });
@@ -185,13 +182,13 @@ body {
 
 .form-container {
   position: relative; /* 確保 z-index 運作 */
-  flex: 0 0 25%; /* 固定 25% 寬度 */
+  flex: 0 0 30%; /* 固定 25% 寬度 */
   overflow-y: auto; /* 垂直滾動 */
   padding: 5px;
   box-shadow: 8px 0 16px rgba(0, 0, 0, 0.15); /* 陰影 */
   box-sizing: border-box; /* 確保 padding 不影響寬度計算 */
   z-index: 10; /* 讓表單顯示在地圖上方 */
-  background-color: #f9f9f9;
+  background-color: white;
   overflow-x: hidden; /* 隱藏水平滾動條 */
   word-wrap: break-word; /* 自動換行，避免溢出 */
   word-break: break-word; /* 將長單詞或字串強制換行 */
@@ -209,7 +206,7 @@ body {
   width: 25%; /* 占地圖區域的寬度 */
   height: 100%; /* 確保與 .map-container 一樣高 */
   z-index: 15; /* 保證 PlaceDetail 覆蓋在地圖之上 */
-  background-color: #f9f9f9;
+  background-color: white;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* 輕微陰影 */
   overflow-y: auto; /* 當內容超出高度時，允許垂直滾動 */
   overflow-x: hidden; /* 隱藏水平滾動條 */
@@ -248,7 +245,7 @@ body {
   padding: 12px 20px;
   font-size: 16px;
   font-weight: bold;
-  background: #007bff;
+  background: #2973b2;
   color: white;
   border: none;
   border-radius: 8px;

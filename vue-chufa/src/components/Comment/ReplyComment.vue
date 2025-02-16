@@ -6,9 +6,19 @@
     <div v-if="lookReply == '▼'" class="Reply">
       <div v-for="comment in replyData">
         <div :id="`commentId:${comment.commentId}`">
-          <div  class="memberComment">
-            <img @click="inBlogprofile(comment)" v-if="comment.memberBean.profilePicture!=null" :src="'data:image/jpeg;base64,' + comment.memberBean.profilePicture" class="memberPicture" >
-            <img @click="inBlogprofile(comment)" v-else src="@/assets/empty.png" class="memberPicture">
+          <div class="memberComment">
+            <img
+              @click="inBlogprofile(comment)"
+              v-if="comment.memberBean.profilePicture != null"
+              :src="'data:image/jpeg;base64,' + comment.memberBean.profilePicture"
+              class="memberPicture"
+            />
+            <img
+              @click="inBlogprofile(comment)"
+              v-else
+              src="@/assets/empty.png"
+              class="memberPicture"
+            />
             <h3>{{ comment.memberBean.name }}</h3>
           </div>
           <div v-html="comment.content"></div>
@@ -36,8 +46,8 @@ import eventBus from "@/eventBus";
 const router = useRouter();
 const props = defineProps(["parentId"]);
 const inBlogprofile = (comment) => {
-        router.push(`/blog/blogprofile/${comment.memberBean.userid}`);
-    }
+  router.push(`/blog/blogprofile/${comment.memberBean.userid}`);
+};
 const lookReply = ref("▲");
 const openReply = () => {
   if (lookReply.value == "▲") {
@@ -71,21 +81,21 @@ const findReply = async () => {
 };
 </script>
 
-<style>
+<style scoped>
 .Reply {
   margin: 30px;
 }
-.memberPicture{
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        border: 2px solid #ddd;
-        margin: 5px;
-        cursor: pointer;
-    }
-    .memberComment{
-        display: flex; /* 啟用Flexbox佈局 */
-        align-items: center;
-        flex-grow: 1;
-    }
+.memberPicture {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  margin: 5px;
+  cursor: pointer;
+}
+.memberComment {
+  display: flex; /* 啟用Flexbox佈局 */
+  align-items: center;
+  flex-grow: 1;
+}
 </style>

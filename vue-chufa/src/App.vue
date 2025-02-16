@@ -158,7 +158,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 /* Navbar 相關 */
 .navbar {
   background-color: #2973b2;

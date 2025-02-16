@@ -132,7 +132,7 @@ function clearMarkers() {
 }
 </script>
 
-<style>
+<style scoped>
 .search {
   position: absolute;
   top: 20px; /* 距離容器頂部 20px，可根據需要調整 */

@@ -1,13 +1,12 @@
 <template>
-  <div class="container">
+  <div class="container" @click="closePlaceDetail">
     <!-- event -->
     <div class="form-container">
       <ItineraryTabs></ItineraryTabs>
     </div>
 
     <!-- placedetails (only show if a place is selected) -->
-    <!-- `@place-selected="handlePlaceChanged"` 監聽事件 -->
-    <div v-if="selectedPlaceDetail" class="place-container">
+    <div v-if="selectedPlaceDetail" class="place-container" @click.stop>
       <PlaceDetail :place="selectedPlaceDetail" />
 
       <!-- 按鈕區域 -->
@@ -48,6 +47,11 @@ const selectedPlaceDetail = computed(() => placeStore.selectedPlaceDetail);
 const selectedDate = computed(() => scheduleStore.selectedDate || ""); // ✅ 確保不為 null
 
 const selectedPlaceId = computed(() => placeStore.selectedPlaceId);
+
+// 點擊其他區域時關閉 PlaceDetail
+const closePlaceDetail = () => {
+  placeStore.selectedPlaceId = null;
+};
 
 // ✅ 監聽 `selectedPlaceDetail`，當地點變更時自動觸發
 watch(selectedPlaceDetail, (newPlace) => {

@@ -70,9 +70,7 @@
               </div>
             </div>
             <p class="interaction-name">
-              {{
-                post.member.nickname ? post.member.nickname : post.member.name
-              }}
+              {{ post.member.nickname ? post.member.nickname : post.member.name }}
               轉發貼文
             </p>
           </div>
@@ -187,17 +185,59 @@
       <button @click="nextPage">下一頁</button>
     </div>
 
-    <!-- 發文按鈕 -->
     <div v-if="userStore.isLoggedIn">
-      <RouterLink to="/blog/create" id="blogbutton">發文</RouterLink>
-    </div>
+      <!-- 發文按鈕 -->
+      <div id="blogbutton" @mouseenter="hoverBlog = true" @mouseleave="hoverBlog = false">
+        <RouterLink to="/blog/create" class="button">
+          <transition name="fade" mode="out-in">
+            <div v-if="hoverBlog" key="expanded" class="expanded-content">
+              <img
+                class="icon-large"
+                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEj0lEQVR4nO2beYhWVRTAjzaWWws2maAwRaGVlJW2oAhRomG2UBRJpkWS0YKk/VHQHxMF9kdaIoV/qIEGmQ7avlBi0bS5RQmltlDYqubapo3zi9OcNxyf773vjs18ft/73u+vmXvPfe+dc5dz7rn3EykoKCgoKCg7wMPAb8BWYKrUEsC1HMpB4EKpFYAPOJxpUgsAF5HMpVILABcAs4Fm4C9TfoPUIkAPGxHDJO8A5wEvAw8C/aRWAPoATwL/uPn+BzAfOEfyDm09nkYrMF5yPse3ks0cySvALSWUz7cHANYGGGAf0F3yBjCaMJ6RPAKsCFBeF8GzJW8ApwEtAQZ4VfII8FTg8L9C8gZwPLA7QPmNQDfJG8CMwN6/XfIGcAzwTYDyvwI9JW8ANwT2fqNrcwnwAnCx5DTTE+dvYIBrs8rVrQMm60iSagMYQRgLXZsxKTI6jabrTlKqBeD5QAO0Jz+Aj0rI7gHmAoOkkgEGAgcClH/btbmOcPYDyzR7JJUAcCUw2P3/eKAiV5l8d+DzDhjgECPa+8sfQwBDrCfUjdVZWW9gR8CHb452fcAk/j9bbJ3oVQ7F+1kv61BU5rq6ewI/+C6XJPmazkM7oxGo7wrFewB3AttjL/3PZ+swBL4M+Mid0YquhqBrUPe6uNPyjMA4G2ZxtjiZCYEfN8vkewE/0LUctOzz+COOJ4A64OeAKM4HMWmodxho8jMpLz8Bi4Apdv5QDxwXYoAJGQ8dYjLnWkKjFM+ZfF+brxWDZBhgeUqbNU7m2cD3jDD5qcArwGPAjWbA22wfoGtE2ZEU5U+2BSWJ6SYzIENG+dGG3rQO7CLVt5cVSfmYe1PkW6JNDPBIxnPfBU6JPVO9xWBgIvAEsNqSJjol1gBNwFIqxABrU+TfsvqeGXP5aXWdJne1U1Zj+opDEpQfmiE/2c3lOHrud58bzrqBqXgkwQDaY0noOf6JJvNZrE6DpMus7gTN9FIlSAd8/1KTGRsr/xRosLozgC+oIqQDvv8ak3ndlS2LNiLA5Xbji2o2QFOKnO70jgXOcoFPcxRmWmwfkguoOCTQ9883mTtc2dgSLrMqkADfr4x2Fxsj+lqZBjy5MMDHKTLfRpkXPcVNMIBuNnJhgN9TZCY5mZWufJyV3Z/xfHWdS4CRiRFXW/v+FigdFcR9yDsJ9St83i02Sj50Ed/1Fv7qYrnX/p4RmqEx9zs7cGfZqYj7iAZLNu63ed0YKehkvo+1byqVt9fbn8ACuwVyd2y90ejxATfFNMb47qgYoBS2mYnygfEDjChCbL/mApyfkPV93+rqY896CTjV5QweBf6kDEgourtLaK9D9la3PdYF8w0nfyBBviFhPYnC6eHufYPsbqFOqYowQF3Cud9D7j7Aeivb5dq8mPDOm1Kuy7d6A7hnnGRTpvkI1ohfgHl6QzVY0Syckl8BN7us8ZvupZ9knPy0Rr8JsCk1z3p4czSSAk6fJtrIeA/YZCOnxZTdaNNJL2aO6vQDVtp8/jbgzNhdoA2myGvA6a4urmS7S61KaFuhq/8Mv6CgoKCgQCL+BVWzEQZxQJDIAAAAAElFTkSuQmCC"
+                alt="發文圖示"
+              />
+              <span class="button-text">發佈文章</span>
+            </div>
+            <img
+              v-else
+              key="small"
+              class="icon-small"
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEj0lEQVR4nO2beYhWVRTAjzaWWws2maAwRaGVlJW2oAhRomG2UBRJpkWS0YKk/VHQHxMF9kdaIoV/qIEGmQ7avlBi0bS5RQmltlDYqubapo3zi9OcNxyf773vjs18ft/73u+vmXvPfe+dc5dz7rn3EykoKCgoKCg7wMPAb8BWYKrUEsC1HMpB4EKpFYAPOJxpUgsAF5HMpVILABcAs4Fm4C9TfoPUIkAPGxHDJO8A5wEvAw8C/aRWAPoATwL/uPn+BzAfOEfyDm09nkYrMF5yPse3ks0cySvALSWUz7cHANYGGGAf0F3yBjCaMJ6RPAKsCFBeF8GzJW8ApwEtAQZ4VfII8FTg8L9C8gZwPLA7QPmNQDfJG8CMwN6/XfIGcAzwTYDyvwI9JW8ANwT2fqNrcwnwAnCx5DTTE+dvYIBrs8rVrQMm60iSagMYQRgLXZsxKTI6jabrTlKqBeD5QAO0Jz+Aj0rI7gHmAoOkkgEGAgcClH/btbmOcPYDyzR7JJUAcCUw2P3/eKAiV5l8d+DzDhjgECPa+8sfQwBDrCfUjdVZWW9gR8CHb452fcAk/j9bbJ3oVQ7F+1kv61BU5rq6ewI/+C6XJPmazkM7oxGo7wrFewB3AttjL/3PZ+swBL4M+Mid0YquhqBrUPe6uNPyjMA4G2ZxtjiZCYEfN8vkewE/0LUctOzz+COOJ4A64OeAKM4HMWmodxho8jMpLz8Bi4Apdv5QDxwXYoAJGQ8dYjLnWkKjFM+ZfF+brxWDZBhgeUqbNU7m2cD3jDD5qcArwGPAjWbA22wfoGtE2ZEU5U+2BSWJ6SYzIENG+dGG3rQO7CLVt5cVSfmYe1PkW6JNDPBIxnPfBU6JPVO9xWBgIvAEsNqSJjol1gBNwFIqxABrU+TfsvqeGXP5aXWdJne1U1Zj+opDEpQfmiE/2c3lOHrud58bzrqBqXgkwQDaY0noOf6JJvNZrE6DpMus7gTN9FIlSAd8/1KTGRsr/xRosLozgC+oIqQDvv8ak3ndlS2LNiLA5Xbji2o2QFOKnO70jgXOcoFPcxRmWmwfkguoOCTQ9883mTtc2dgSLrMqkADfr4x2Fxsj+lqZBjy5MMDHKTLfRpkXPcVNMIBuNnJhgN9TZCY5mZWufJyV3Z/xfHWdS4CRiRFXW/v+FigdFcR9yDsJ9St83i02Sj50Ed/1Fv7qYrnX/p4RmqEx9zs7cGfZqYj7iAZLNu63ed0YKehkvo+1byqVt9fbn8ACuwVyd2y90ejxATfFNMb47qgYoBS2mYnygfEDjChCbL/mApyfkPV93+rqY896CTjV5QweBf6kDEgourtLaK9D9la3PdYF8w0nfyBBviFhPYnC6eHufYPsbqFOqYowQF3Cud9D7j7Aeivb5dq8mPDOm1Kuy7d6A7hnnGRTpvkI1ohfgHl6QzVY0Syckl8BN7us8ZvupZ9knPy0Rr8JsCk1z3p4czSSAk6fJtrIeA/YZCOnxZTdaNNJL2aO6vQDVtp8/jbgzNhdoA2myGvA6a4urmS7S61KaFuhq/8Mv6CgoKCgQCL+BVWzEQZxQJDIAAAAAElFTkSuQmCC"
+              alt="發文圖示"
+            />
+          </transition>
+        </RouterLink>
+      </div>
 
-    <!-- 開始規劃按鈕 -->
-    <div v-if="userStore.isLoggedIn">
-      <RouterLink to="/myitineraries" id="planningbutton">開始規劃</RouterLink>
+      <!-- 開始規劃按鈕 -->
+      <div
+        id="planningbutton"
+        @mouseenter="hoverPlanning = true"
+        @mouseleave="hoverPlanning = false"
+      >
+        <RouterLink to="/myitineraries" class="button">
+          <transition name="fade" mode="out-in">
+            <div v-if="hoverPlanning" key="expanded" class="expanded-content">
+              <img
+                class="icon-large"
+                src="data:image/png;base64,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"
+                alt="規劃圖示"
+              />
+              <span class="button-text">開始規劃</span>
+            </div>
+            <img
+              v-else
+              key="small"
+              class="icon-small"
+              src="data:image/png;base64,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"
+              alt="規劃圖示"
+            />
+          </transition>
+        </RouterLink>
+      </div>
     </div>
-    <RouterView></RouterView>
   </div>
+
   <footer>
     <div class="footer-content">
       <div class="footer-section">
@@ -229,6 +269,7 @@
     </div>
   </footer>
 </template>
+
 <script>
 import { ref, onMounted, watch, inject, computed } from "vue";
 import { useRouter } from "vue-router";
@@ -267,6 +308,8 @@ export default {
     // 管理輸入的 postid
     const postidInput = ref("");
     const postIds = ref([]);
+    const hoverBlog = ref(false);
+    const hoverPlanning = ref(false);
 
     // 更新 Carousel 的 postIds
     // const updateCarousel = () => {
@@ -617,6 +660,8 @@ export default {
       //updateCarousel,
       postIds,
       mailToLink,
+      hoverBlog,
+      hoverPlanning,
     };
   },
 };
@@ -626,6 +671,7 @@ export default {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  height: 100vh;
 }
 
 /* Tab 容器 */
@@ -845,78 +891,6 @@ h3 {
   border-radius: 50%;
 }
 
-/* 發文/規劃按鈕 */
-#planningbutton {
-  position: fixed;
-  bottom: 50px;
-  right: 50px;
-  width: 100px;
-  height: 100px;
-  background-color: #84baf5;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 10px;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#planningbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a95d5;
-}
-
-#blogbutton {
-  position: fixed;
-  bottom: 200px;
-  right: 50px;
-  width: 100px;
-  height: 100px;
-  background-color: #85a98f;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  font-size: 35px;
-  font-weight: bold;
-  text-decoration: none;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: normal;
-  overflow-wrap: break-word;
-  padding: 10px;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-#blogbutton:hover {
-  transform: scale(1.1);
-  background-color: #5a6c57;
-}
-
-.sort-select-container {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  flex-grow: 1;
-}
-select {
-  padding: 8px;
-  margin: 5px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
 /* 基本的愛心按鈕樣式 */
 .action-btn {
   background: none;
@@ -1021,7 +995,7 @@ select {
 }
 
 footer {
-  background-color: #9acbd0;
+  background-color: #f2efe7;
   padding: 20px;
   font-family: Arial, sans-serif;
   color: #121322;
@@ -1070,5 +1044,102 @@ footer {
   border-top: 1px solid #ddd;
   padding-top: 10px;
   margin-top: 20px;
+}
+
+/* 按鈕內容 */
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  transition: width 0.4s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+/* 發文 & 開始規劃按鈕 */
+#blogbutton,
+#planningbutton {
+  position: fixed;
+  right: 50px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: width 0.4s ease-in-out;
+  cursor: pointer;
+  min-width: 80px;
+}
+
+/* 個別按鈕顏色 */
+#blogbutton {
+  bottom: 150px;
+  background-color: #48a6a7;
+}
+
+#planningbutton {
+  bottom: 50px;
+  background-color: #48a6a7;
+}
+
+/* 懸停時展開 */
+#blogbutton:hover,
+#planningbutton:hover {
+  width: 200px;
+  justify-content: flex-start;
+}
+
+/* 小圖示（收合狀態） */
+.icon-small {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* 展開後的內容 */
+.expanded-content {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 圖示與文字之間的間距 */
+}
+
+/* 大圖示（展開狀態） */
+.icon-large {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* 文字樣式 */
+.button-text {
+  white-space: nowrap;
+  font-size: 25px;
+  color: white;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* 懸停時讓文字顯示 */
+#blogbutton:hover .button-text,
+#planningbutton:hover .button-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 動畫效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

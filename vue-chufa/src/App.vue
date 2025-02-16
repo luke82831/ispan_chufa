@@ -174,11 +174,20 @@ onMounted(() => {
   align-items: center;
 }
 
+.nav-link {
+  margin-left: 20px;
+  margin-right: 50px;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s;
+}
+
 /* 會員區域 */
 .member-section {
   display: flex;
   align-items: center;
-  margin-right: 80px; /* 調小這個數值 */
+  margin-right: 50px;
 }
 
 .avatar-container {
@@ -339,7 +348,7 @@ onMounted(() => {
 }
 
 .search-bar button {
-  background-color: #48a6a7;
+  background-color: #2973b2;
   color: white;
   border: none;
   padding: 10px 14px;
@@ -351,7 +360,7 @@ onMounted(() => {
 }
 
 .search-bar button:hover {
-  background-color: #477ab2;
+  background-color: #48a6a7;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 

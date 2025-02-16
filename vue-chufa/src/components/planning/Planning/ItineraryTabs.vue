@@ -21,6 +21,16 @@
         alt="封面照片"
         class="cover-photo"
       />
+
+      <!-- 固定在圖片右下角的按鈕 -->
+      <button @click="toggleExpanded" class="toggle-button fixed-button">
+        {{ isExpanded ? "收合行程" : "查看完整行程" }}
+      </button>
+
+      <div class="list-container">
+        <!-- 傳遞 isExpanded 狀態給子組件 -->
+        <ItineraryList :isExpanded="isExpanded" @close="isExpanded = false" />
+      </div>
     </div>
 
     <!-- 行程日期範圍 -->
@@ -29,19 +39,11 @@
       {{ scheduleStore.currentSchedule.endDate }}
     </h2>
 
-    <div class="list-container">
-      <!-- 按鈕來控制展開/收合 -->
-      <button @click="toggleExpanded" class="toggle-button">
-        {{ isExpanded ? "收合行程" : "查看完整行程" }}
-      </button>
-
-      <!-- 傳遞 isExpanded 狀態給子組件 -->
-      <ItineraryList :isExpanded="isExpanded" @close="isExpanded = false" />
-    </div>
-
     <div class="date-tabs-container">
       <!-- 左側箭頭 -->
-      <button class="arrow-button arrow-left" @click="scrollTabs('left')">&lt;</button>
+      <button class="arrow-button arrow-left" @click="scrollTabs('left')">
+        &lt;
+      </button>
 
       <!-- 日期滾動區 -->
       <div class="date-tabs" ref="tabsContainer">
@@ -59,7 +61,9 @@
       <button class="add-day-btn" @click="addOneMoreDay">＋</button>
 
       <!-- 右側箭頭 -->
-      <button class="arrow-button arrow-right" @click="scrollTabs('right')">&gt;</button>
+      <button class="arrow-button arrow-right" @click="scrollTabs('right')">
+        &gt;
+      </button>
     </div>
 
     <!-- 傳遞選擇的日期到 PlanningDay 組件 -->
@@ -194,7 +198,10 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
+  } else if (
+    direction === "next" &&
+    currentIndex < dateRange.value.length - 1
+  ) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -258,7 +265,7 @@ const goBack = () => {
 /* 返回按鈕 */
 .back-button {
   background: white;
-  color: #007bff;
+  color: #2973b2;
   font-size: 1.2rem; /* 調大字體 */
   padding: 10px 15px;
   border-radius: 50px;
@@ -270,7 +277,7 @@ const goBack = () => {
   margin-right: 20px;
 }
 .back-button:hover {
-  background: #007bff;
+  background: #2973b2;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
@@ -458,5 +465,30 @@ button:hover {
   border-radius: 5px;
   font-size: 1.3rem; /* 加大字體 */
   cursor: pointer;
+}
+
+.cover-photo-container {
+  position: relative; /* 設定相對定位 */
+  display: inline-block;
+  width: 100%;
+}
+
+.fixed-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #2973b2;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.fixed-button:hover {
+  background-color: #20527e;
+  color: white;
 }
 </style>

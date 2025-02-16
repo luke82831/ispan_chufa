@@ -1,120 +1,257 @@
 <template>
-  <!-- 只有當 isExpanded 為 true 且 currentSchedule 存在時才顯示 -->
-  <div v-if="isExpanded && scheduleStore.currentSchedule" ref="popup" class="popup">
-    <h2>{{ scheduleStore.currentSchedule.tripName }} 的所有行程</h2>
-    <ul>
-      <li v-for="event in scheduleStore.currentSchedule.events" :key="event.eventId">
-        📅 {{ event.date }}
-        <ul>
-          <li v-for="placeId in getPlacesForEvent(event)" :key="placeId">
-            📍 {{ getPlaceName(placeId) || `地點 ID: ${placeId} (載入中...)` }}
+  <div
+    v-if="isExpanded && scheduleStore.currentSchedule"
+    ref="popup"
+    class="popup"
+  >
+    <h2 class="title">
+      {{ scheduleStore.currentSchedule.tripName }} 的所有行程
+    </h2>
+
+    <div class="event-list">
+      <div
+        v-for="event in scheduleStore.currentSchedule.events"
+        :key="event.eventId"
+        class="event-card"
+      >
+        <div class="event-header">
+          <h3 class="event-date">📅 {{ event.date }}</h3>
+          <p v-if="event.eventXPlaceBeans.length > 0" class="event-time">
+            ⏰ {{ getStartTime(event.date) }} -
+            {{ getEndTime(event.date) }}
+          </p>
+        </div>
+
+        <ul v-if="event.eventXPlaceBeans.length > 0" class="place-list">
+          <li
+            v-for="(placeInfo, index) in computedItinerary(
+              event.date,
+              event.eventXPlaceBeans
+            )"
+            :key="index"
+            class="place-card"
+          >
+            <span class="place-name"
+              >📍
+              {{
+                placeInfo.placeName ||
+                `地點 ID: ${placeInfo.placeId} (載入中...)`
+              }}</span
+            >
+            <p class="place-time">
+              🕒 {{ formatTime(placeInfo.startTime) }} -
+              {{ formatTime(placeInfo.endTime) }}
+            </p>
+            <p class="stay-time">
+              ⏳ 停留時間:
+              <strong>{{ formatDuration(placeInfo.stayDuration) }}</strong>
+            </p>
           </li>
         </ul>
-      </li>
-    </ul>
+
+        <p v-else class="no-plan">📌 當天尚未安排行程</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, watch, onMounted, computed } from "vue";
+import { defineProps } from "vue";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
+import { useItineraryStore } from "@/stores/ItineraryStore";
 import { useRoute } from "vue-router";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+
+dayjs.extend(duration);
 
 const route = useRoute();
 const scheduleStore = useScheduleStore();
 const placeStore = usePlaceStore();
+const itineraryStore = useItineraryStore();
 
 const props = defineProps({
-  isExpanded: Boolean, // 父組件傳來的開關狀態
+  isExpanded: Boolean,
 });
 
-// 📌 監聽 `isExpanded`，當 `true` 時自動讀取行程資料
-watch(
-  () => props.isExpanded,
-  async (newVal) => {
-    console.log("isExpanded 變更:", newVal);
-    if (newVal) {
-      const tripId = route.params.scheduleId;
-      console.log("讀取行程 ID:", tripId);
+// 📌 計算每天的行程時間
+const computedItinerary = (date, itinerary) => {
+  if (!itinerary.length) return [];
 
-      if (
-        tripId &&
-        (!scheduleStore.currentSchedule ||
-          scheduleStore.currentSchedule.tripId !== tripId)
-      ) {
-        console.log("發送 API 請求...");
-        await scheduleStore.fetchScheduleById(tripId);
-      }
+  let [year, month, day] = date.split("-").map(Number);
+  let [hours, minutes] = getStartTime(date).split(":").map(Number);
+  let baseTime = new Date(year, month - 1, day, hours, minutes);
+  let currentTime = new Date(baseTime);
 
-      // 獲取所有 placeId
-      const allPlaceIds = getAllPlaceIds();
-      if (allPlaceIds.length) {
-        console.log("載入所有地點資料:", allPlaceIds);
-        await placeStore.fetchMultiplePlaces(allPlaceIds);
-      }
+  const routeTimes = itineraryStore.routeTimes[date] || {};
+  const stayTimes = itineraryStore.stayDurations[date] || {};
+
+  let itineraryWithTimes = [];
+
+  itinerary.forEach((place, index) => {
+    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0;
+    let stayTime = stayTimes[index] ?? 0;
+
+    let startTime;
+    if (index === 0) {
+      startTime = new Date(currentTime.getTime());
+    } else {
+      startTime = new Date(itineraryWithTimes[index - 1].endTime);
+      startTime.setMinutes(startTime.getMinutes() + travelTime);
     }
-  }
-);
 
-// 📌 當組件掛載時，確認是否已經有 `tripId`
-onMounted(async () => {
-  const tripId = route.params.scheduleId;
-  console.log("onMounted 讀取的 tripId:", tripId);
+    let endTime = new Date(startTime.getTime());
+    endTime.setMinutes(endTime.getMinutes() + stayTime);
 
-  if (tripId) {
-    await scheduleStore.fetchScheduleById(tripId);
+    itineraryWithTimes.push({
+      placeId: place.placeId,
+      placeName: getPlaceName(place.placeId),
+      stayDuration: stayTime,
+      startTime,
+      endTime,
+    });
+  });
 
-    // 獲取所有 placeId
-    const allPlaceIds = getAllPlaceIds();
-    if (allPlaceIds.length) {
-      console.log("載入所有地點資料:", allPlaceIds);
-      await placeStore.fetchMultiplePlaces(allPlaceIds);
-    }
-  }
-});
-
-// 📌 取得特定 `event` 下的所有地點 ID
-const getPlacesForEvent = (event) => {
-  // 從 eventXPlaceBeans 獲取 placeId
-  const eventPlaces = event.eventXPlaceBeans?.map((p) => p.placeId) || [];
-
-  // 加上 event 內的 placeIds（確保不重複）
-  return [...new Set([...eventPlaces, ...event.placeIds])];
+  return itineraryWithTimes;
 };
 
-// 📌 取得所有行程內的地點 ID（用於批次加載）
-const getAllPlaceIds = () => {
-  if (!scheduleStore.currentSchedule) return [];
+// 📌 修正格式化停留時間
+const formatDuration = (duration) => {
+  if (!duration) return "無停留";
 
-  return [
-    ...new Set(
-      scheduleStore.currentSchedule.events.flatMap((event) => getPlacesForEvent(event))
-    ),
-  ];
+  let durationInMinutes =
+    duration >= 60 ? Math.round(duration / 60) : Math.round(duration);
+  return durationInMinutes > 0 ? `${durationInMinutes} 分鐘` : "無停留";
+};
+
+// 📌 格式化時間（08:00:00 → 08:00）
+const formatTime = (time) => {
+  if (!time) return "尚未設定"; // 處理 `undefined` 或 `null`
+
+  if (typeof time === "string") {
+    if (time.match(/^\d{2}:\d{2}:\d{2}$/)) {
+      return dayjs(time, "HH:mm:ss").format("HH:mm"); // 轉換 `08:00:00` → `08:00`
+    }
+    if (time.match(/^\d{2}:\d{2}$/)) {
+      return time; // 已經是 `HH:mm`，直接返回
+    }
+  } else if (time instanceof Date) {
+    return dayjs(time).format("HH:mm");
+  }
+
+  return "尚未設定"; // 預防錯誤
 };
 
 // 📌 透過 `placeId` 取得 `placeName`
 const getPlaceName = (placeId) => {
   return placeStore.getPlaceDetailById(placeId)?.placeName || null;
 };
+
+// 📌 取得每天的 `startTime` 和 `endTime`
+const getStartTime = (date) => itineraryStore.getStartTime(date);
+const getEndTime = (date) => itineraryStore.getEndTime(date);
 </script>
 
 <style scoped>
+/* 整體彈出視窗樣式 */
 .popup {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 80%;
-  max-width: 500px;
-  background: white;
-  border: 1px solid #ddd;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  width: 85%;
+  max-width: 50%;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
   padding: 20px;
-  border-radius: 10px;
+  overflow-y: auto;
+  max-height: 80vh;
   z-index: 1000000;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  margin-left: 100px;
+}
+
+/* 標題樣式 */
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* 行程列表 */
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 單日行程卡片 */
+.event-card {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 日期 + 時間 */
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-date {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #007aff;
+}
+
+.event-time {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* 地點列表 */
+.place-list {
+  list-style: none; /* 移除點點 */
+  padding: 0; /* 取消縮進 */
+}
+
+/* 讓地點資訊更清楚 */
+.place-card {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 地點名稱 */
+.place-name {
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* 時間顯示 */
+.place-time {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.stay-time {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* 無行程時的提示 */
+.no-plan {
+  text-align: center;
+  font-size: 1rem;
+  color: #ff3b30;
+  font-weight: bold;
+  margin-top: 10px;
 }
 </style>

@@ -278,7 +278,7 @@ onMounted(fetchPosts);
   text-align: center;
   font-size: 28px;
   color: #343a40;
-  border-bottom: 2px solid #290909;
+  border-bottom: 2px solid #ccc;
   margin-bottom: 0px;
 }
 

@@ -4,12 +4,7 @@
     <form @submit.prevent="handleSubmit" class="itinerary-form">
       <div class="form-group">
         <label for="coverPhoto">封面照片：</label>
-        <input
-          type="file"
-          @change="onFileChange"
-          id="coverPhoto"
-          class="input-file"
-        />
+        <input type="file" @change="onFileChange" id="coverPhoto" class="input-file" />
       </div>
 
       <div class="form-group">
@@ -99,11 +94,7 @@ watch(
 // 提交行程
 const handleSubmit = async () => {
   if (!userId.value || !itineraryStore.coverPhoto) {
-    Swal.fire(
-      "錯誤",
-      userId.value ? "封面照片是必填的" : "無法找到使用者ID",
-      "error"
-    );
+    Swal.fire("錯誤", userId.value ? "封面照片是必填的" : "無法找到使用者ID", "error");
     return;
   }
 
@@ -203,7 +194,7 @@ h1 {
 
 .input-text:focus,
 .input-date:focus {
-  border-color: #0056b3;
+  border-color: #2973b2;
   outline: none;
 }
 
@@ -212,7 +203,7 @@ h1 {
   width: 100%;
   padding: 12px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #2973b2;
   color: white;
   border: none;
   border-radius: 4px;
@@ -221,7 +212,7 @@ h1 {
 }
 
 .submit-button:hover {
-  background-color: #0056b3;
+  background-color: #2973b2;
 }
 
 /* 錯誤訊息 */

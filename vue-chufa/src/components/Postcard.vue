@@ -1,121 +1,151 @@
 <template>
-<!-- 貼文網格布局 -->
-<div class="posts-grid">
-      <div
-        class="post-card"
-        @click="navigateToDetail(post, $event)"
-      >
-        <!-- REPOST 版型處理 -->
-        <div v-if="post.repost" class="repost-header">
-          <div class="interaction-info">
-            <div class="repost-profile-container">
+  <!-- 貼文網格布局 -->
+  <div class="posts-grid">
+    <div class="post-card" @click="navigateToDetail(post, $event)">
+      <!-- REPOST 版型處理 -->
+      <div v-if="post.repost" class="repost-header">
+        <div class="interaction-info">
+          <div class="repost-profile-container">
+            <img
+              v-if="post.member?.profilePicture"
+              :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+              alt="Interaction Profile Picture"
+              class="profile-picture small-profile"
+            />
+
+            <div v-else>
               <img
-                v-if="post.member?.profilePicture"
-                :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-                alt="Interaction Profile Picture"
-                class="profile-picture small-profile"
+                :src="defaultProfilePic"
+                alt="Default Profile Picture"
+                class="profile-picture"
               />
-
-              <div v-else>
-                  <img :src="defaultProfilePic" alt="Default Profile Picture" class="profile-picture">
-                </div>
             </div>
-            <p class="interaction-name">
-              {{ post.member.nickname?post.member.nickname:post.member.name}} 轉發貼文
-            </p>
           </div>
+          <p class="interaction-name">
+            {{ post.member.nickname ? post.member.nickname : post.member.name }} 轉發貼文
+          </p>
         </div>
+      </div>
 
-        <!-- 作者信息 -->
-        <div class="author-info" >
-          <div class="author-header">
-            <div class="profile-picture-container">
-              <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
+      <!-- 作者信息 -->
+      <div class="author-info">
+        <div class="author-header">
+          <div class="profile-picture-container">
+            <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
+              <img
+                v-if="
+                  post.repostDTO
+                    ? post.repostDTO.member?.profilePicture
+                    : post.member?.profilePicture
+                "
+                :src="
+                  'data:image/jpeg;base64,' +
+                  (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)
+                "
+                alt="Author's Profile Picture"
+                class="profile-picture"
+              />
+              <div v-else>
                 <img
-                  v-if="post.repostDTO ? post.repostDTO.member?.profilePicture : post.member?.profilePicture"
-                  :src="'data:image/jpeg;base64,' + (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)"
-                  alt="Author's Profile Picture"
+                  :src="defaultProfilePicture"
+                  alt="Default Profile Picture"
                   class="profile-picture"
                 />
-                <div v-else >
-                  <img :src="defaultProfilePicture" alt="Default Profile Picture" class="profile-picture">
-                </div>
-              </router-link>
-            </div>
-            <div class="author-name">
-              <strong v-if="post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname">
-                {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
-              </strong>
-              <strong v-else>
-                {{ post.repostDTO?.member?.name || post.member.name }} 
-              </strong>
-              <p class="post-time">{{ formatDate(post.postTime) }}</p>
-            </div>
+              </div>
+            </router-link>
           </div>
-          <!-- <div class="post-meta">
+          <div class="author-name">
+            <strong
+              v-if="
+                post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname
+              "
+            >
+              {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
+            </strong>
+            <strong v-else>
+              {{ post.repostDTO?.member?.name || post.member.name }}
+            </strong>
+            <p class="post-time">{{ formatDate(post.postTime) }}</p>
+          </div>
+        </div>
+        <!-- <div class="post-meta">
               <p>
                 發佈時間:
                 {{ formatDate(post.repost ? post.repostDTO.postTime : post.postTime) }}
               </p>
           </div> -->
-        </div>
+      </div>
 
-        <!-- 顯示第一張圖片 -->
-        <div v-if="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent )" class="post-image-container" >
-          <img :src="getFirstImage( post.repostDTO ? post.repostDTO.postContent : post.postContent)" class="post-image" />
-        </div>
-        <div v-else class="post-image-container">
-          <img :src="defaultpicture" class="post-image" />
-        </div>
-<!-- 
+      <!-- 顯示第一張圖片 -->
+      <div
+        v-if="
+          getFirstImage(post.repostDTO ? post.repostDTO.postContent : post.postContent)
+        "
+        class="post-image-container"
+      >
+        <img
+          :src="
+            getFirstImage(post.repostDTO ? post.repostDTO.postContent : post.postContent)
+          "
+          class="post-image"
+        />
+      </div>
+      <div v-else class="post-image-container">
+        <img :src="defaultpicture" class="post-image" />
+      </div>
+      <!-- 
         移除圖片後的內容
         <div v-html="getContentWithoutImages(post.postContent)" class="post-content"></div> -->
-        <p class="post-content-preview">
-          <h3>
-            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-          </h3>
-        {{ getTextPreview(post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題" , 30) }}
+      <div class="post-content-preview">
+        <p>
+          {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
         </p>
-    
-        <!-- 互動按鈕 -->
-        <div class="post-actions" @click.stop>
-          <button
-            @click.stop="likePost(post.postid)"
-            class="action-btn like-btn"
-            :class="{ active: post.likedByCurrentUser }"
-          >
-          <span class="heart-icon"></span> 
+        {{
+          getTextPreview(
+            post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題",
+            30
+          )
+        }}
+      </div>
+
+      <!-- 互動按鈕 -->
+      <div class="post-actions" @click.stop>
+        <button
+          @click.stop="likePost(post.postid)"
+          class="action-btn like-btn"
+          :class="{ active: post.likedByCurrentUser }"
+        >
+          <span class="heart-icon"></span>
           {{ post.likeCount }}
-          </button>
-          <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-            🔁 {{ post.repostCount }}
-          </button>
-          <button @click.stop="collectPost(post.postid)" 
+        </button>
+        <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
+          🔁 {{ post.repostCount }}
+        </button>
+        <button
+          @click.stop="collectPost(post.postid)"
           class="action-btn collect-btn"
-          :class="{ active: post.collectByCurrentUser }">
-            {{ post.collectByCurrentUser ? '已收藏' : '收藏' }}
-          </button>
-        </div>
+          :class="{ active: post.collectByCurrentUser }"
+        >
+          {{ post.collectByCurrentUser ? "已收藏" : "收藏" }}
+        </button>
       </div>
     </div>
-
+  </div>
 </template>
 
-
 <script setup>
-import { defineProps, defineEmits,ref } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
 import Swal from "sweetalert2";
 import axiosapi from "@/plugins/axios";
 import { useRouter } from "vue-router";
-import defaultProfilePicture from '@/assets/empty.png';
+import defaultProfilePicture from "@/assets/empty.png";
 import { useUserStore } from "@/stores/user.js";
-import defaultpic from "@/assets/default.jpg"
+import defaultpic from "@/assets/default.jpg";
 const posts = ref([]);
 const router = useRouter();
-const defaultProfilePic=ref(defaultProfilePicture);
-const userStore = useUserStore();  
-const defaultpicture=ref(defaultpic);
-
+const defaultProfilePic = ref(defaultProfilePicture);
+const userStore = useUserStore();
+const defaultpicture = ref(defaultpic);
 
 // 接收從父組件傳入的 `post` 資料和 `member`
 const props = defineProps({
@@ -126,15 +156,15 @@ const props = defineProps({
 // props.fetchPosts();
 
 const getFirstImage = (content) => {
-      const match = content.match(/<img[^>]+src="([^">]+)"/);
-      return match ? match[1] : null;
-    };
+  const match = content.match(/<img[^>]+src="([^">]+)"/);
+  return match ? match[1] : null;
+};
 
 const getTextPreview = (content, length) => {
-      // 移除圖片和其他 HTML 標籤
-      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
-      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
-    };
+  // 移除圖片和其他 HTML 標籤
+  const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
+  return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+};
 // 定義事件發射器
 const emit = defineEmits(["update-posts"]);
 
@@ -148,21 +178,21 @@ const emit = defineEmits(["update-posts"]);
 //       router.push(`/blog/find/${postid}`);
 //     };
 
-const navigateToDetail = (post, event) => { 
-    const excludedElements = [".post-actions", ".action-btn", "a", "button"];
-    for (let selector of excludedElements) {
-        if (event.target.closest(selector)) {
-            return; // 如果點擊的是按鈕、連結，就不觸發跳轉
-        }
+const navigateToDetail = (post, event) => {
+  const excludedElements = [".post-actions", ".action-btn", "a", "button"];
+  for (let selector of excludedElements) {
+    if (event.target.closest(selector)) {
+      return; // 如果點擊的是按鈕、連結，就不觸發跳轉
     }
-    // 如果是轉發的貼文，跳轉到原貼文的詳細頁
-    if (post.repost && post.repostDTO) {
-        router.push(`/blog/find/${post.repostDTO.postid}`);
-    } else {
-        // 否則跳轉到當前貼文的詳細頁
-        router.push(`/blog/find/${post.postid}`);
-    }
-  };
+  }
+  // 如果是轉發的貼文，跳轉到原貼文的詳細頁
+  if (post.repost && post.repostDTO) {
+    router.push(`/blog/find/${post.repostDTO.postid}`);
+  } else {
+    // 否則跳轉到當前貼文的詳細頁
+    router.push(`/blog/find/${post.postid}`);
+  }
+};
 
 // 轉發貼文
 const repostPost = async (postid) => {
@@ -199,15 +229,11 @@ const likePost = async (postid) => {
       interactionType: "LIKE",
     };
 
-    const response = await axiosapi.post(
-      "/api/posts/insertinteraction",
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axiosapi.post("/api/posts/insertinteraction", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.data.success) {
       props.post.likedByCurrentUser = !props.post.likedByCurrentUser;
@@ -232,15 +258,11 @@ const collectPost = async (postid) => {
       interactionType: "COLLECT",
     };
 
-    const response = await axiosapi.post(
-      "/api/posts/insertinteraction",
-      data,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axiosapi.post("/api/posts/insertinteraction", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
     if (response.data.success) {
       props.post.collectByCurrentUser = !props.post.collectByCurrentUser;
@@ -252,7 +274,6 @@ const collectPost = async (postid) => {
     Swal.fire("錯誤", "請先登入", "error");
   }
 };
-
 </script>
 
 <style scoped>
@@ -265,7 +286,7 @@ const collectPost = async (postid) => {
 .tabs-container {
   display: flex;
   gap: 10px;
-  margin-bottom:0px;
+  margin-bottom: 0px;
   overflow-x: auto;
   padding-bottom: 0px;
 }
@@ -287,7 +308,7 @@ const collectPost = async (postid) => {
 }
 
 .tab.active {
-  background-color: #005AB5;
+  background-color: #005ab5;
   color: white;
 }
 
@@ -414,7 +435,6 @@ h3 {
   border-top: 1px solid #eee;
 }
 
-
 /* 没有文章时的提示样式 */
 .posts-grid + div {
   text-align: center;
@@ -463,7 +483,6 @@ h3 {
   font-size: 14px;
   color: #333;
 }
-
 
 /* 發文/規劃按鈕 */
 #planningbutton {
@@ -551,11 +570,11 @@ select {
 }
 
 .like-btn.active::before {
-  content: '❤️'; /* 实心爱心 */
+  content: "❤️"; /* 实心爱心 */
 }
 
 .like-btn:not(.active)::before {
-  content: '🖤'; /* 空心爱心 */
+  content: "🖤"; /* 空心爱心 */
 }
 
 /* 点击时的动画效果 */
@@ -576,11 +595,11 @@ select {
 }
 
 .collect-btn.active::before {
-  content: '⭐'; /* 实心书签 */
+  content: "⭐"; /* 实心书签 */
 }
 
 .collect-btn:not(.active)::before {
-  content: '⭐'; /* 空心书签 */
+  content: "⭐"; /* 空心书签 */
 }
 
 /* 点击时的动画效果 */

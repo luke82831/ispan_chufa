@@ -6,7 +6,6 @@ export const useScheduleStore = defineStore("scheduleStore", {
     schedules: [], // 所有行程列表
     currentSchedule: null, // 當前選中的行程
     selectedDate: "", // 當前選中的行程日期
-    itinerary: {}, // 行程地點資料 { "YYYY-MM-DD": [地點列表] }
   }),
 
   actions: {
@@ -30,7 +29,9 @@ export const useScheduleStore = defineStore("scheduleStore", {
     /** 🔹 獲取特定schedule */
     async fetchScheduleById(tripId) {
       try {
+        console.log("fetchScheduleById 被呼叫，tripId:", tripId); // 🔍 檢查是否進入函數
         const response = await axiosapi.get(`/api/schedule/${tripId}`);
+        console.log("API 回傳fetchScheduleById資料:", response.data);
         this.currentSchedule = response.data;
       } catch (error) {
         console.error("載入行程詳細資料失敗:", error);
@@ -63,6 +64,30 @@ export const useScheduleStore = defineStore("scheduleStore", {
         }
       } catch (error) {
         console.error("更新行程結束日期失敗:", error);
+        throw error;
+      }
+    },
+
+    async updateScheduleTitle(tripId, newTitle) {
+      try {
+        await axiosapi.patch(`/api/schedule/${tripId}`, {
+          tripName: newTitle,
+        });
+
+        // 更新本地 store
+        if (this.currentSchedule && this.currentSchedule.tripId === tripId) {
+          this.currentSchedule.tripName = newTitle;
+        }
+
+        // 更新 schedules 陣列中的對應行程
+        const schedule = this.schedules.find(
+          (schedule) => schedule.tripId === tripId
+        );
+        if (schedule) {
+          schedule.tripName = newTitle;
+        }
+      } catch (error) {
+        console.error("更新行程標題失敗:", error);
         throw error;
       }
     },

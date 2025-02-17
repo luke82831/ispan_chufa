@@ -87,6 +87,7 @@
 </template>
 
 <script setup>
+import Swal from "sweetalert2";
 import { onBeforeRouteLeave } from "vue-router";
 import { onMounted, onUnmounted, ref, computed, watch } from "vue";
 import { useItineraryStore } from "@/stores/ItineraryStore";
@@ -188,8 +189,14 @@ watch(
       await placeStore.fetchMultiplePlaces(placeIds);
       console.log("✅ `placeStore.placeDetailsMap`:", placeStore.placeDetailsMap);
 
+      // **🔹 按照 placeOrder 排序**
+      const sortedPlaces = event.eventXPlaceBeans.sort(
+        (a, b) => a.placeOrder - b.placeOrder
+      );
+      console.log("📌 已排序的行程資料:", sortedPlaces);
+
       // **🚀 存入 `stayDuration` 到 `Pinia`**
-      event.eventXPlaceBeans.forEach((eventPlace, index) => {
+      sortedPlaces.forEach((eventPlace, index) => {
         const stayDurationMinutes = eventPlace.stayDuration
           ? convertTimeToMinutes(eventPlace.stayDuration)
           : 0;
@@ -217,7 +224,7 @@ watch(
       });
     }
 
-    console.log("✅ 處理後的 `placesWithDetails`:", placesWithDetails);
+    console.log("✅ 排序後的 `placesWithDetails`:", placesWithDetails);
 
     // 存入 Pinia
     itineraryStore.setItinerary(newDate, placesWithDetails);
@@ -391,15 +398,38 @@ const warnUnsavedChanges = (event) => {
   if (hasUnsavedChanges.value) {
     event.preventDefault();
     event.returnValue = "你有未儲存的變更，確定要離開嗎？";
+    return "你有未儲存的變更，確定要離開嗎？";
+  }
+};
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === "hidden" && hasUnsavedChanges.value) {
+    Swal.fire({
+      title: "未儲存的變更",
+      text: "你有未儲存的變更，確定要離開嗎？",
+      icon: "warning",
+      confirmButtonText: "知道了",
+    });
+  }
+};
+
+const handlePageHide = (event) => {
+  if (hasUnsavedChanges.value) {
+    event.preventDefault();
+    event.returnValue = "你有未儲存的變更，確定要離開嗎？";
   }
 };
 
 onMounted(() => {
   window.addEventListener("beforeunload", warnUnsavedChanges);
+  window.addEventListener("pagehide", handlePageHide);
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 });
 
 onUnmounted(() => {
   window.removeEventListener("beforeunload", warnUnsavedChanges);
+  window.removeEventListener("pagehide", handlePageHide);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
 </script>
 

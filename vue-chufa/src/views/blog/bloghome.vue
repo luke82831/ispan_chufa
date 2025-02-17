@@ -54,7 +54,7 @@
       </div>
     </div>
     <div v-else class="loading">
-      <p>載入中...</p>
+      <p>沒有貼文</p>
     </div>
   </div>
 </template>
@@ -234,7 +234,7 @@ export default {
   font-size: 1.8em;
   color: #444;
   margin-bottom: 20px;
-  border-bottom: 2px solid #0d74e2;
+  border-bottom: 2px solid #2973B2;
   padding-bottom: 10px;
   font-weight: 600;
 }
@@ -259,7 +259,7 @@ export default {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #0000C6;
+  border: 3px solid #48a6a7;
 }
 
 .info p {
@@ -268,12 +268,12 @@ export default {
   color: #555;
 }
 .info strong{
-  color: #093b8c;
+  color: #2973B2;
 }
 
 .follow-link {
   text-decoration: none;
-  color: #0a4c93;
+  color: #48a6a7;
   font-weight: 500;
 }
 
@@ -302,7 +302,7 @@ export default {
 }
 
 .tabs-container button:hover {
-  background: rgba(0, 123, 255, 0.1);
+  background: #2973B2;
   color: #6da6de;
 }
 

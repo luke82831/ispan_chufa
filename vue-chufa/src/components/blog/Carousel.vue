@@ -1,38 +1,37 @@
 <template>
   <div class="hero-text">
-      <h1>出發！發現台灣之美，規劃每一刻的精彩！</h1>
-      <p class="subtext">專屬你的台灣之旅，從規劃開始</p>
-    </div>
-    <div class="carousel">
-      <div
-        class="carousel-item"
-        v-for="(post, index) in posts"
-        :key="post.postid||index"
-        :class="{ active: index === currentIndex }"
-        @click="navigateToDetail(post.postid, $event)"
-      >
-        <img :src="getFirstImage( post.postContent)" class="carousel-image" />
-        <div class="carousel-content">
-          <h2>{{ post.postTitle }}</h2>
-          <p>{{ getTextPreview(post.postContent) }}</p>
-        </div>
-      </div>
-  
-      <!-- 輪播控制按鈕 -->
-      <div v-if="posts.length > 1" class="carousel-controls">
-        <button @click="prevSlide">←</button>
-        <button @click="nextSlide">→</button>
-      </div>
-  
-      <div v-else>
-        <p>沒有更多文章可顯示。</p>
+    <h1>出發！發現台灣之美，規劃每一刻的精彩！</h1>
+    <p class="subtext">專屬你的台灣之旅，從規劃開始</p>
+  </div>
+  <div class="carousel">
+    <div
+      class="carousel-item"
+      v-for="(post, index) in posts"
+      :key="post.postid || index"
+      :class="{ active: index === currentIndex }"
+      @click="navigateToDetail(post.postid, $event)"
+    >
+      <img :src="getFirstImage(post.postContent)" class="carousel-image" />
+      <div class="carousel-content">
+        <h2>{{ post.postTitle }}</h2>
+        <p>{{ getTextPreview(post.postContent) }}</p>
       </div>
     </div>
-  </template>
-  
-  
-  <script setup>
-import { ref, onMounted, onBeforeUnmount ,watch} from "vue";
+
+    <!-- 輪播控制按鈕 -->
+    <div v-if="posts.length > 1" class="carousel-controls">
+      <button @click="prevSlide">←</button>
+      <button @click="nextSlide">→</button>
+    </div>
+
+    <div v-else>
+      <p>沒有更多文章可顯示。</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useRouter } from "vue-router";
 import axiosapi from "@/plugins/axios"; // 根據你的專案路徑修改
 // 接收 postIds 作為 prop
@@ -42,7 +41,6 @@ const props = defineProps({
     default: () => [],
   },
 });
-
 
 // 狀態管理
 const posts = ref([]);
@@ -55,15 +53,14 @@ const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 
 const getFirstImage = (content) => {
-      const match = content.match(/<img[^>]+src="([^">]+)"/);
-      return match ? match[1] : null;
-    };
+  const match = content.match(/<img[^>]+src="([^">]+)"/);
+  return match ? match[1] : null;
+};
 const getTextPreview = (content, length) => {
-      // 移除圖片和其他 HTML 標籤
-      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
-      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
-    };
-
+  // 移除圖片和其他 HTML 標籤
+  const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
+  return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+};
 
 // 跳轉到文章詳情頁
 const navigateToDetail = (postid, event) => {
@@ -85,7 +82,6 @@ const fetchPosts = async () => {
       const requestData = {
         postid: postid,
       };
-
 
       const response = await axiosapi.post("/api/posts/post", requestData, {
         headers: {
@@ -146,8 +142,8 @@ onBeforeUnmount(() => {
   stopAutoSlide();
 });
 </script>
-<style scoped>
 
+<style scoped>
 .hero-text {
   text-align: left; /* 使標語靠左 */
   margin-top: 20px;
@@ -167,11 +163,10 @@ h1 {
   text-align: left; /* 確保副標題靠左 */
 }
 
-
 .carousel {
   position: relative;
   width: 100%;
-  max-width: 1200px; /* 调整轮播容器的最大宽度 */
+  max-width: 100%; /* 调整轮播容器的最大宽度 */
   margin: 0 auto;
   overflow: hidden;
 }
@@ -199,7 +194,7 @@ h1 {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0,0,0,0.2); /* 更透明的背景 */
+  background: rgba(0, 0, 0, 0.2); /* 更透明的背景 */
   color: white;
   padding: 20px;
   border-radius: 0 0 8px 8px;

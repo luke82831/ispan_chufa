@@ -23,7 +23,10 @@
             <tr
               v-for="post in paginatedPosts"
               :key="post.postid"
-              :class="['hover-effect', postStore.getHiddenReason(post.postid) ? 'hidden-row' : '']"
+              :class="[
+                'hover-effect',
+                postStore.getHiddenReason(post.postid) ? 'hidden-row' : '',
+              ]"
             >
               <td>
                 <!-- 如果貼文被隱藏，在上方顯示「已隱藏」標籤 -->
@@ -61,18 +64,28 @@
                       </div>
                       <div class="author-name">
                         <strong>
-                          {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
+                          {{
+                            post.repostDTO
+                              ? post.repostDTO.member.nickname
+                              : post.member.nickname
+                          }}
                           ({{ post.repostDTO?.member?.name || post.member.name }})
                         </strong>
                       </div>
                     </div>
                     <h3>
-                      {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+                      {{
+                        post.repostDTO
+                          ? post.repostDTO.postTitle
+                          : post.postTitle || "無標題"
+                      }}
                     </h3>
                   </div>
                   <!-- 修改：用 v-html 渲染轉換後的內容 -->
-                  <div class="post-content" v-html="transformContent(post.postContent)"></div>
-
+                  <div
+                    class="post-content"
+                    v-html="transformContent(post.postContent)"
+                  ></div>
                 </div>
               </td>
               <td>{{ post.postTitle }}</td>
@@ -83,41 +96,43 @@
               <td>{{ post.postStatus }}</td>
               <td>{{ formatDate(post.postTime) }}</td>
               <td>
-
                 <div class="action-buttons">
                   <!-- 如果該貼文已隱藏，顯示取消隱藏的綠色按鈕；否則顯示隱藏按鈕 -->
                   <template v-if="postStore.getHiddenReason(post.postid)">
-                    <button class="unhide-btn" @click="unhidePost(post.postid)">取消隱藏</button>
+                    <button class="unhide-btn" @click="unhidePost(post.postid)">
+                      取消隱藏
+                    </button>
                   </template>
                   <template v-else>
                     <button class="hide-btn" @click="hidePost(post.postid)">隱藏</button>
                   </template>
-                  <button class="delete-btn" @click="deletePost(post.postid)">刪除</button>
+                  <button class="delete-btn" @click="deletePost(post.postid)">
+                    刪除
+                  </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      
+
       <!-- 分頁控制 -->
       <div class="pagination">
         <button :disabled="currentPage === 0" @click="currentPage--">上一頁</button>
         <span>第 {{ currentPage + 1 }} 頁 / 共 {{ totalPages }} 頁</span>
-        <button :disabled="currentPage >= totalPages - 1" @click="currentPage++">下一頁</button>
+        <button :disabled="currentPage >= totalPages - 1" @click="currentPage++">
+          下一頁
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-
-
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
-import { usePostStore } from '@/stores/usePostStore';
+import { usePostStore } from "@/stores/usePostStore";
 
 const posts = ref([]);
 const loading = ref(true);
@@ -131,7 +146,7 @@ const fetchPosts = async () => {
     const response = await axios.post("/api/posts/post", {
       sortByLikes: true,
       repost: true,
-      page: 1
+      page: 1,
     });
     posts.value = response.data.postdto || [];
   } catch (error) {
@@ -141,7 +156,8 @@ const fetchPosts = async () => {
   }
 };
 
-const paginatedPosts = computed(() => { // 計算分頁資料
+const paginatedPosts = computed(() => {
+  // 計算分頁資料
   const start = currentPage.value * pageSize;
   return posts.value.slice(start, start + pageSize);
 });
@@ -155,30 +171,28 @@ const formatDate = (date) => {
 };
 
 // 新增轉換函式：移除 <p> 標籤，並為 <img> 標籤加上大小限制
-  const transformContent = (content) => {
-  if (!content) return '';
+const transformContent = (content) => {
+  if (!content) return "";
   // 移除 <p> 與 </p> 標籤
-  let result = content.replace(/<\/?p>/g, '');
+  let result = content.replace(/<\/?p>/g, "");
   // 針對 img 標籤，加入 inline style 限制大小為 100px
   result = result.replace(/<img([^>]*?)>/g, (match, p1) => {
     // 移除原有的 style 屬性後再加入新 style
-    let cleaned = p1.replace(/\s*style="[^"]*"/, '');
+    let cleaned = p1.replace(/\s*style="[^"]*"/, "");
     return `<img${cleaned} style="max-width:100px; max-height:100px;" />`;
   });
   return result;
 };
-
-
 
 const hidePost = async (postId) => {
   const { value: reason } = await Swal.fire({
     title: "選擇隱藏原因",
     input: "select",
     inputOptions: {
-      "不當言詞": "不當言詞",
-      "敏感內容": "敏感內容",
-      "隱私問題": "隱私問題",
-      "垃圾內容": "垃圾內容",
+      不當言詞: "不當言詞",
+      敏感內容: "敏感內容",
+      隱私問題: "隱私問題",
+      垃圾內容: "垃圾內容",
       /*========測試========*/
       // "骯髒邪惡又噁心的內容": "骯髒邪惡又噁心的內容",
       // "救命呀~~~救命呀~~~": "救命呀~~~救命呀~~~",
@@ -186,7 +200,7 @@ const hidePost = async (postId) => {
       // "管理員想封鎖你hahaha笑你": "管理員想封鎖你hahaha笑你",
       // "你又騙我": "你又騙我",
       // "我不想看你的程式碼": "我不想看你的程式碼",
-/*========測試========*/
+      /*========測試========*/
     },
     inputPlaceholder: "請選擇隱藏原因",
     showCancelButton: true,
@@ -229,9 +243,6 @@ const unhidePost = async (postId) => {
   }
 };
 
-
-
-
 const deletePost = async (postId) => {
   const result = await Swal.fire({
     title: "確定刪除嗎？",
@@ -255,10 +266,6 @@ const deletePost = async (postId) => {
 onMounted(fetchPosts);
 </script>
 
-
-
-
-
 <style scoped>
 /* 與 PlaceManagement 類似的版面設定 */
 /* 外層容器 */
@@ -268,9 +275,7 @@ onMounted(fetchPosts);
   padding: 30px;
   background: white;
   border-radius: 15px;
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.2),
-    0 5px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.15);
   font-family: "Microsoft JhengHei", sans-serif;
 }
 
@@ -285,7 +290,7 @@ onMounted(fetchPosts);
 /* 主要容器 */
 .container {
   max-width: 100%;
-  height: 100vh; 
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: flex-end; /* 讓內容靠右 */
@@ -523,5 +528,4 @@ onMounted(fetchPosts);
   margin: 0;
   font-size: 16px;
 }
-
 </style>

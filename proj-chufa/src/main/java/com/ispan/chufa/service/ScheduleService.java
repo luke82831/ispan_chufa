@@ -65,6 +65,15 @@ public class ScheduleService {
     public List<ScheduleBean> findSchedulesByUserId(Long userId) {
         return scheduleRepository.findByUser_Userid(userId);
     }
+    
+    /** 🔹 更新行程標題 */
+    public ScheduleBean updateScheduleTitle(Long tripId, String newTitle) {
+        ScheduleBean schedule = scheduleRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("找不到行程 ID: " + tripId));
+
+        schedule.setTripName(newTitle); // 更新標題
+        return scheduleRepository.save(schedule); // 儲存到資料庫
+    }
 
     
 }

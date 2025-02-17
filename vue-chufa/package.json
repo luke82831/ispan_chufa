@@ -13,6 +13,7 @@
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "dompurify": "^3.2.4",
     "mitt": "^3.0.1",
     "paginate": "^0.1.1",

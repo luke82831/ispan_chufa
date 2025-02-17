@@ -49,27 +49,32 @@ public class EventXPlaceService {
     
     @Transactional
     public void updateEventXPlaces(Long eventId, ItineraryRequest request) {
-        // 1️⃣ 取得 `EventBean`
+        // 取得 `EventBean`
         EventBean event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("行程不存在: " + eventId));
+        
+        // 更新 `Event` 的 `startTime` 和 `endTime`
+        event.setStartTime(LocalTime.parse(request.getStartTime()));
+        event.setEndTime(LocalTime.parse(request.getEndTime()));
+        eventRepository.save(event);  // **儲存更新後的 Event**
 
-        // 2️⃣ 取得現有的 `EventXPlaceBean`
+        // 取得現有的 `EventXPlaceBean`
         List<EventXPlaceBean> existingEventPlaces = eventXPlaceRepository.findByEvent_EventId(eventId);
         Map<Long, EventXPlaceBean> existingEventPlacesMap = existingEventPlaces.stream()
                 .collect(Collectors.toMap(EventXPlaceBean::getEventmappingId, Function.identity()));
 
         List<EventXPlaceBean> updatedEventPlaces = new ArrayList<>();
 
-        // 3️⃣ 檢查哪些 `eventmappingId` 仍然存在
+        // 檢查哪些 `eventmappingId` 仍然存在
         List<Long> incomingEventmappingIds = request.getPlaces().stream()
                 .map(EventXPlaceRequest::getEventmappingId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        // 4️⃣ **先刪除**（不在 `request` 內的 `eventXPlace`）
+        // **先刪除**（不在 `request` 內的 `eventXPlace`）
         eventXPlaceRepository.deleteByEventIdAndNotIn(eventId, incomingEventmappingIds);
 
-        // 5️⃣ **再更新** 或 **新增**
+        // **再更新** 或 **新增**
         for (EventXPlaceRequest placeRequest : request.getPlaces()) {
             EventXPlaceBean eventXPlace;
 
@@ -84,7 +89,7 @@ public class EventXPlaceService {
 
             // 設定 `place`
             PlaceBean place = placeRepository.findById(placeRequest.getPlaceId())
-                    .orElseThrow(() -> new RuntimeException("找不到地點: " + placeRequest.getPlaceId()));
+                    .orElseThrow(() -> new RuntimeException("找不到地點:" + placeRequest.getPlaceId()));
             eventXPlace.setPlace(place);
 
             eventXPlace.setPlaceOrder(placeRequest.getPlaceOrder());
@@ -95,7 +100,7 @@ public class EventXPlaceService {
             updatedEventPlaces.add(eventXPlace);
         }
 
-        // 6️⃣ **最後才執行批量更新**
+        // **最後才執行批量更新**
         eventXPlaceRepository.saveAll(updatedEventPlaces);
     }
 
@@ -105,9 +110,9 @@ public class EventXPlaceService {
 //新增地點到行程
 //public EventXPlaceBean addPlaceToEvent(Long eventId, Long placeId) {
 //  EventBean event = eventRepository.findById(eventId)
-//          .orElseThrow(() -> new RuntimeException("找不到行程: " + eventId));
+//          .orElseThrow(() -> new RuntimeException(""找不到行程: "" + eventId));
 //  PlaceBean place = placeRepository.findById(placeId)
-//          .orElseThrow(() -> new RuntimeException("找不到地點: " + placeId));
+//          .orElseThrow(() -> new RuntimeException(""找不到地點: "" + placeId));
 //
 //  EventXPlaceBean newRelation = new EventXPlaceBean();
 //  newRelation.setEvent(event);
@@ -120,17 +125,17 @@ public class EventXPlaceService {
 //	// 儲存 EventXPlace 資料
 //	public EventXPlaceBean saveEventXPlace(EventXPlaceBean eventXPlaceBean) {
 //
-//		System.out.println("Received EventXPlaceBean: " + eventXPlaceBean);
+//		System.out.println(""Received EventXPlaceBean: "" + eventXPlaceBean);
 //		if (eventXPlaceBean.getEvent() == null) {
-//			System.out.println("Event is null");
+//			System.out.println(""Event is null"");
 //		} else {
-//			System.out.println("Event ID: " + eventXPlaceBean.getEvent().getEventId());
+//			System.out.println(""Event ID: "" + eventXPlaceBean.getEvent().getEventId());
 //		}
 //
 //		if (eventXPlaceBean.getPlace() == null) {
-//			System.out.println("Place is null");
+//			System.out.println(""Place is null"");
 //		} else {
-//			System.out.println("Place ID: " + eventXPlaceBean.getPlace().getPlaceId());
+//			System.out.println(""Place ID: "" + eventXPlaceBean.getPlace().getPlaceId());
 //		}
 //
 //		return eventXPlaceRepository.save(eventXPlaceBean);
@@ -144,7 +149,7 @@ public class EventXPlaceService {
 //	// 更新 EventXPlace 資料
 //	public EventXPlaceBean updateEventXPlace(Long eventmappingId, EventXPlaceBean updatedEventXPlace) {
 //		EventXPlaceBean existingEventXPlace = eventXPlaceRepository.findById(eventmappingId).orElseThrow(
-//				() -> new IllegalArgumentException("EventXPlace with ID " + eventmappingId + " not found."));
+//				() -> new IllegalArgumentException(""EventXPlace with ID "" + eventmappingId + "" not found.""));
 //
 //		// 更新非外鍵欄位
 //		existingEventXPlace.setPlaceOrder(updatedEventXPlace.getPlaceOrder());
@@ -160,7 +165,7 @@ public class EventXPlaceService {
 //		if (eventXPlaceRepository.existsById(eventmappingId)) {
 //			eventXPlaceRepository.deleteById(eventmappingId);
 //		} else {
-//			throw new IllegalArgumentException("EventXPlace with ID " + eventmappingId + " not found.");
+//			throw new IllegalArgumentException(""EventXPlace with ID "" + eventmappingId + "" not found."");
 //		}
 //	}
 //

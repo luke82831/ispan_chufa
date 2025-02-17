@@ -11,7 +11,7 @@ import com.ispan.chufa.domain.CalendarBean;
 
 public interface CalendarRepository extends JpaRepository<CalendarBean, LocalDate>{
 
-	List<CalendarBean> findByIsHoliday(boolean b);
+	List<CalendarBean> findByHoliday(boolean holiday);
 
 	Optional<CalendarBean> findByDate(LocalDate date);
 	

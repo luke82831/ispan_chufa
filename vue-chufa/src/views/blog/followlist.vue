@@ -1,8 +1,6 @@
 <template>
-  <p>{{ member.name }}</p>
   <div class="followlist-page">
-    <h1 class="page-title">用戶 ID: {{ followid }}</h1>
-
+    <h1 class="page-title">他的關注</h1>
     <!-- 分頁按鈕 -->
 
     <div class="tabs">
@@ -19,19 +17,16 @@
         粉絲列表
       </button>
     </div>
-
     <!-- 加載中提示 -->
     <div v-if="isLoading" class="loading">
       <div class="spinner"></div>
       <p>加載中，請稍候...</p>
     </div>
-
     <!-- 錯誤提示 -->
     <div v-if="isError" class="error">
       <p>資料加載失敗，請稍後重試。</p>
       <button @click="fetchData" class="retry-button">重試</button>
     </div>
-
     <!-- 關注者/粉絲列表 -->
     <div v-if="!isLoading && !isError" class="followers-section">
       <div v-if="listData.length === 0" class="empty-state">
@@ -52,11 +47,9 @@
             />
           </div>
           <div class="follower-info">
-            <h3 class="follower-nickname">{{ item.nickname }}</h3>
-            <p class="follower-id">ID: {{ item.userid }}</p>
+            <p class="follower-nickname">{{ item.nickname }}</p>
             <p class="follower-name">Name: {{ item.name }}</p>
           </div>
-          <p>{{ item.isFollowing }}</p>
           <!-- 關注按鈕 -->
           <button
             :class="['follow-button', { active: item.isFollowing }]"
@@ -74,7 +67,6 @@ import { ref, onMounted, watch } from "vue";
 import axiosapi from "@/plugins/axios";
 import defaultProfilePic from "@/assets/empty.png";
 import Swal from "sweetalert2";
-
 export default {
   props: {
     followid: {
@@ -91,7 +83,6 @@ export default {
     const userId = ref(null);
     const member = ref({});
     const profileLoaded = ref(false);
-
     const fetchProfile = async () => {
       try {
         const response = await axiosapi.get("/ajax/secure/profile", {
@@ -104,23 +95,19 @@ export default {
         }
       } catch (error) {
         console.error("Fetch profile failed:", error);
-        //Swal.fire('錯誤', '無法獲取會員資料', 'error');
+        Swal.fire("錯誤", "無法獲取會員資料", "error");
       }
     };
-
     // 根據當前選中的分頁獲取數據
     const fetchData = async () => {
       try {
         isLoading.value = true;
         isError.value = false;
-
         const endpoint =
           activeTab.value === "followed"
             ? `/follow/followedList/${props.followid}`
             : `/follow/followerList/${props.followid}`;
-
         const response = await axiosapi.get(endpoint);
-
         if (response.data && Array.isArray(response.data)) {
           listData.value = response.data;
         } else {
@@ -140,7 +127,6 @@ export default {
       await fetchData();
       await fetchDataWithStatus();
     };
-
     // 查詢是否關注
     const checkFollowingStatus = async (item) => {
       try {
@@ -154,7 +140,6 @@ export default {
         console.error("Error checking following status:", error);
       }
     };
-
     // 切換關注狀態
     const toggleFollow = async (item) => {
       try {
@@ -164,7 +149,6 @@ export default {
           followedid: item.userid,
           action,
         });
-
         if (response.data.success) {
           // 切換狀態
           item.isFollowing = !item.isFollowing;
@@ -173,7 +157,6 @@ export default {
               item.isFollowing ? "following" : "not following"
             }`
           );
-          await fetchData(); // 重新加載列表
         } else {
           console.error("Failed to toggle follow status:", response.data.message);
         }
@@ -182,7 +165,6 @@ export default {
         Swal.fire("錯誤", "無法更新關注狀態", "error");
       }
     };
-
     // 初始化檢查列表中的每個用戶是否關注
     const fetchDataWithStatus = async () => {
       await fetchData(); // 先抓取列表資料
@@ -203,7 +185,6 @@ export default {
         fetchData();
       }
     );
-
     return {
       listData,
       isLoading,
@@ -226,19 +207,16 @@ export default {
   padding: 20px;
   font-family: Arial, sans-serif;
 }
-
 .page-title {
   text-align: center;
   color: #333;
   margin-bottom: 30px;
 }
-
 /* 加載中樣式 */
 .loading {
   text-align: center;
   margin-top: 50px;
 }
-
 .spinner {
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3498db;
@@ -248,7 +226,6 @@ export default {
   animation: spin 1s linear infinite;
   margin: 0 auto 10px;
 }
-
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -257,14 +234,12 @@ export default {
     transform: rotate(360deg);
   }
 }
-
 /* 錯誤提示樣式 */
 .error {
   text-align: center;
   color: #e74c3c;
   margin-top: 50px;
 }
-
 .retry-button {
   background-color: #3498db;
   color: white;
@@ -274,11 +249,9 @@ export default {
   cursor: pointer;
   margin-top: 10px;
 }
-
 .retry-button:hover {
   background-color: #2980b9;
 }
-
 /* 關注者列表樣式 */
 .followers-section {
   background-color: #f9f9f9;
@@ -286,14 +259,12 @@ export default {
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 .followers-list {
   list-style: none;
   padding: 0;
   display: grid;
   gap: 15px;
 }
-
 .follower-item {
   display: flex;
   align-items: center;
@@ -303,39 +274,37 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .follower-item:hover {
   transform: translateY(-5px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
+/* 會員頭像 */
 .profile-picture {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
   margin-right: 15px;
 }
 
 .profile-image {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
-
 .follower-info {
   flex: 1;
 }
-
 .follower-nickname {
   margin: 0;
   color: #333;
   font-size: 1.2em;
 }
-
 .follower-id,
 .follower-name {
   margin: 5px 0;
   color: #777;
 }
-
 /* 空狀態樣式 */
 .empty-state {
   text-align: center;
@@ -348,7 +317,6 @@ export default {
   justify-content: center;
   margin-bottom: 20px;
 }
-
 .tab-button {
   background-color: #f1f1f1;
   border: none;
@@ -358,15 +326,12 @@ export default {
   border-radius: 5px;
   transition: background-color 0.3s;
 }
-
 .tab-button.active {
   background-color: #3498db;
   color: white;
 }
-
 .tab-button:hover {
   background-color: #ddd;
 }
-
 /* 其他樣式保持不變 */
 </style>

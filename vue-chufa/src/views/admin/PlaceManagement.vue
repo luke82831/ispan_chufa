@@ -281,6 +281,7 @@ onMounted(fetchPlaces);
   text-overflow: ellipsis;
 }
 
+
 .place-table th {
   background-color: #f4f4f4;
 }
@@ -554,6 +555,8 @@ onMounted(fetchPlaces);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+
+
 }
 
 .pagination button:hover {
@@ -630,4 +633,6 @@ onMounted(fetchPlaces);
 .delete-btn:hover {
   background-color: #c82333;
 }
+
+
 </style>

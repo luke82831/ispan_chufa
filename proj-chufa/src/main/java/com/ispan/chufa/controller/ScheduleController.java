@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -155,10 +156,11 @@ public class ScheduleController {
             schedule.setEndDate(newEndDate);
             scheduleRepository.save(schedule);
 
-            // ✅ 自動新增對應的 Event
-            eventService.createEventFromSchedule(schedule);
+            // ✅ 只為尚未建立的日期新增 Event
+            List<LocalDate> existingEventDates = eventService.getExistingEventDatesBySchedule(schedule);
+            eventService.createMissingEvents(schedule, existingEventDates);
 
-            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增對應的事件");
+            return ResponseEntity.ok().body("行程結束日期已更新，並自動新增缺少的事件");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("行程不存在");
         }
@@ -172,6 +174,18 @@ public class ScheduleController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 刪除成功，返回 204
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 資料不存在，返回 404 和錯誤訊息
+        }
+    }
+
+    // 更新標題
+    @PatchMapping("/schedule/{tripId}")
+    public ResponseEntity<?> updateScheduleTitle(@PathVariable Long tripId, @RequestBody Map<String, String> request) {
+        try {
+            String newTitle = request.get("tripName");
+            ScheduleBean updatedSchedule = scheduleService.updateScheduleTitle(tripId, newTitle);
+            return ResponseEntity.ok(updatedSchedule);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("更新行程標題失敗：" + e.getMessage());
         }
     }
 }

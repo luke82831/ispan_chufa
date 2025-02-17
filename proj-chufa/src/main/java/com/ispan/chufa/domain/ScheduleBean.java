@@ -54,8 +54,27 @@ public class ScheduleBean {
     @JoinColumn(name = "FK_user", referencedColumnName = "userid", nullable = false)
     private MemberBean user;
 
+    @OneToMany
+    private List<PostBean> PostBeans;
+
     // Constructors
     public ScheduleBean() {
+    }
+
+    public List<EventBean> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<EventBean> events) {
+        this.events = events;
+    }
+
+    public List<PostBean> getPostBeans() {
+        return PostBeans;
+    }
+
+    public void setPostBeans(List<PostBean> postBeans) {
+        PostBeans = postBeans;
     }
 
     public ScheduleBean(byte[] coverPhoto, String tripName, LocalDate startDate, LocalDate endDate, MemberBean userid) {

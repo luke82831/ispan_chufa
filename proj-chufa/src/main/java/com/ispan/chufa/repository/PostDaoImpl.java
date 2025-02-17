@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Repository;
 
+import com.ispan.chufa.domain.EventBean;
+import com.ispan.chufa.domain.EventXPlaceBean;
 import com.ispan.chufa.domain.FollowBean;
 import com.ispan.chufa.domain.InteractionBean;
 import com.ispan.chufa.domain.PlaceBean;
 import com.ispan.chufa.domain.PostBean;
+import com.ispan.chufa.domain.ScheduleBean;
 import com.ispan.chufa.dto.MemberInfo;
 import com.ispan.chufa.dto.PostDTO;
 
@@ -113,6 +116,20 @@ public class PostDaoImpl implements PostDao {
 			predicates.add(likedByMePredicate);
 		}
 		
+		
+		// 加入條件：篩選 city
+		if (!param.isNull("places")) {
+			Join<PostBean, ScheduleBean> scheduleJoin = postRoot.join("scheduleBean", JoinType.INNER);
+	        //  Join 到 EventBean
+			Join<ScheduleBean, EventBean> eventJoin = scheduleJoin.join("events", JoinType.INNER);
+			// Join 到 EventXPlaceBean
+			Join<EventBean, EventXPlaceBean> eventXPlaceJoin = eventJoin.join("eventXPlaceBeans", JoinType.INNER);
+			// Join 到 PlaceBean
+			Join<EventXPlaceBean, PlaceBean> placeJoin = eventXPlaceJoin.join("place", JoinType.INNER);
+		    String places = param.getString("places");
+		    Predicate placePredicate = criteriaBuilder.equal(placeJoin.get("city"), places);
+		    predicates.add(placePredicate);
+		}
 		// 根據關注的人查詢，followerId所關注的人查詢
 		// 子查詢，用於查找被關注者 ID
 		Subquery<Long> subquery = criteriaQuery.subquery(Long.class);
@@ -133,15 +150,14 @@ public class PostDaoImpl implements PostDao {
 
 		// 分頁設定
 		int page = param.has("page") ? param.getInt("page") : 1; // 預設是第1頁
-		int size = param.has("size") ? param.getInt("size") : 10; // 預設每頁10條
+		int size = param.has("size") ? param.getInt("size") : 100; // 預設每頁10條
 		int firstResult = (page - 1) * size;
 
 		// 按 postTime 排序（按降序排列最新的貼文）
 		if (!param.isNull("sortByTime") && param.getBoolean("sortByTime")) {
 			criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
 		}
-		
-		
+	
 		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
 		    Subquery<Long> likeCountSubquery = criteriaQuery.subquery(Long.class);
 		    Root<InteractionBean> interactionRoot = likeCountSubquery.from(InteractionBean.class);
@@ -153,8 +169,8 @@ public class PostDaoImpl implements PostDao {
 		    );
 		}
 
-		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
-		System.out.println("Generated SQL: " + sql);
+//		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
+//		System.out.println("Generated SQL: " + sql);
 
 		// 建立查詢並執行
 		TypedQuery<PostBean> query = entityManager.createQuery(criteriaQuery);
@@ -197,7 +213,7 @@ public class PostDaoImpl implements PostDao {
 			long repostCount = postRepository.countByForwardedFrom(postlist);
 			postDTO.setRepostCount(repostCount);
 			
-			  // 檢查是否已點讚
+			// 檢查是否已點讚
 		    boolean likedByCurrentUser = false;
 		    if (currentUserId != null) {
 		        likedByCurrentUser = interactionRepository.existsByPost_PostidAndMember_UseridAndInteractionType(
@@ -217,7 +233,7 @@ public class PostDaoImpl implements PostDao {
 			// 把轉換後的 PostDTO 加入列表
 			postDTOList.add(postDTO);
 		}
-//
+
 //		// 根據點讚數排序
 //		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
 //			postDTOList.sort(Comparator.comparingLong(PostDTO::getLikeCount).reversed());

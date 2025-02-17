@@ -6,7 +6,7 @@
 
 <script setup>
 import { ref, onMounted, defineEmits } from "vue";
-import { usePlaceStore } from "@/stores/PlaceStore";
+import { usePlaceStore } from "@/stores/placeStore";
 
 // 從剛才新建立的檔案匯入
 import {

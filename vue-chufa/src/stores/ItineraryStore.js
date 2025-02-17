@@ -3,9 +3,10 @@ import { defineStore } from "pinia";
 export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
     itineraryDates: {},
-    startTimes: {},   // 存放每一天的出發時間
-    routeTimes: {},   // 存放每個行程的行車時間 (以 index 為 key)
-    stayDurations: {},// 存放停留時間 (以 index 為 key)
+    startTimes: {}, // 存放每一天的出發時間
+    endTimes: {}, // 存放每一天的結束時間
+    routeTimes: {}, // 存放每個行程的行車時間 (以 index 為 key)
+    stayDurations: {}, // 存放停留時間 (以 index 為 key)
     isEditingStays: {},
     tempStayDurations: {},
   }),
@@ -17,8 +18,25 @@ export const useItineraryStore = defineStore("itinerary", {
     getStartTime: (state) => (date) => {
       return state.startTimes[date] ?? "08:00"; // 確保有預設出發時間
     },
+
+    getEndTime: (state) => (date) => {
+      return state.endTimes[date] ?? "23:59"; // 確保有預設結束時間
+    },
+
+    getRouteTime: (state) => (date, index) => {
+      return state.routeTimes[date]?.[index] ?? "00:00:00";
+    },
+
     getStayDuration: (state) => (date, index) => {
-      return state.stayDurations[date]?.[index] ?? 0;
+      console.log(`🧐 getStayDuration(${date}, ${index}):`, {
+        temp: state.tempStayDurations[date]?.[index],
+        stay: state.stayDurations[date]?.[index],
+      });
+      return (
+        state.tempStayDurations[date]?.[index] ??
+        state.stayDurations[date]?.[index] ??
+        0
+      );
     },
 
     // 🔥 Getter：讀取「是否正在編輯」
@@ -55,16 +73,16 @@ export const useItineraryStore = defineStore("itinerary", {
         itinerary = [];
       }
 
-      // ✅ 改用 index，統一管理順序
       const normalizedItinerary = itinerary
         .filter((place) => place !== null && place !== undefined)
         .map((place, index) => ({
+          eventmappingId: place.eventmappingId ?? null,
           placeId: place.placeId ?? null,
           placeName: place.placeName ?? "",
           placeAddress: place.placeAddress ?? "",
           latitude: place.latitude ?? null,
           longitude: place.longitude ?? null,
-          index: index, // ✅ 改成 index
+          index: index,
           travelTime: place.travelTime ?? null,
           stayDuration: place.stayDuration ?? null,
           notes: place.notes ?? null,
@@ -79,6 +97,10 @@ export const useItineraryStore = defineStore("itinerary", {
       this.startTimes[date] = startTime;
     },
 
+    setEndTime(date, endTime) {
+      this.endTimes[date] = endTime;
+    },
+
     setRouteTime(date, index, time) {
       if (!this.routeTimes[date]) {
         this.routeTimes[date] = {};
@@ -90,7 +112,12 @@ export const useItineraryStore = defineStore("itinerary", {
       if (!this.stayDurations[date]) {
         this.stayDurations[date] = {};
       }
+
       this.stayDurations[date][index] = duration;
+      console.log(
+        `📌 存入 Pinia [${date}] index: ${index} =>`,
+        this.stayDurations[date][index]
+      );
     },
 
     // 🔥 Action：設定「是否正在編輯」
@@ -106,6 +133,10 @@ export const useItineraryStore = defineStore("itinerary", {
       if (!this.tempStayDurations[date]) {
         this.tempStayDurations[date] = {};
       }
+      console.log(
+        `📌 存暫時時間入 Pinia [${date}] index: ${index} =>`,
+        this.stayDurations[date][index]
+      );
       this.tempStayDurations[date][index] = tempDuration;
     },
 
@@ -226,6 +257,18 @@ export const useItineraryStore = defineStore("itinerary", {
           updatedTemps[newIndex] = this.tempStayDurations[date][oldIndex];
       });
       this.tempStayDurations[date] = updatedTemps;
+    },
+
+    clearDayData(date) {
+      if (!date) return;
+      if (this.itineraryDates[date]) delete this.itineraryDates[date];
+      if (this.startTimes[date]) delete this.startTimes[date];
+      if (this.routeTimes[date]) delete this.routeTimes[date];
+      if (this.stayDurations[date]) delete this.stayDurations[date];
+      if (this.isEditingStays[date]) delete this.isEditingStays[date];
+      if (this.tempStayDurations[date]) delete this.tempStayDurations[date];
+
+      console.log(`🗑️ 已清除 ${date} 的行程暫存資料`);
     },
   },
 });

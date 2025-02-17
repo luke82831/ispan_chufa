@@ -1,7 +1,9 @@
 <template>
   <div class="navbar">
     <!-- Logo -->
-    <RouterLink to="/" class="nav-link logo" @click="resetSearch">Chufa首頁</RouterLink>
+    <RouterLink to="/" class="nav-link logo" @click="resetSearch">
+      <img src="./assets/LOGO.png" alt="Chufa首頁" class="logo-img" />
+    </RouterLink>
 
     <div class="search-bar" v-if="showSearchBar">
       <input
@@ -67,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, inject } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 import { useSearchStore } from "./stores/search";
@@ -100,6 +102,8 @@ watch(
 );
 
 // 控制下拉選單開關
+// 定義 isSearch
+
 const toggleDropdown = () => {
   isDropdownVisible.value = !isDropdownVisible.value;
 };
@@ -108,17 +112,19 @@ const searchTitle = ref("");
 
 // 點擊首頁時重設搜尋狀態
 const resetSearch = () => {
+  //searchStore.resetSearch();
   searchTitle.value = "";
   searchStore.isSearch = false;
   searchStore.searchResults.value = [];
-  router.push({ path: "/", query: {} });
+  // 使用 Vue Router 跳转到首页，并清空查询参数
+  router.push({ path: "/", query: {} }); // 清空查询参数
+  //window.location.reload();
 };
 
-// 搜尋功能
 const onSearch = () => {
   if (searchTitle.value.trim()) {
     searchStore.setSearchTitle(searchTitle.value);
-    searchStore.isSearch = true;
+    searchStore.isSearch = true; // 設定搜尋狀態
     router.push({ path: "/search-results", query: { title: searchTitle.value } });
   }
 };
@@ -149,22 +155,15 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style scoped>
 /* Navbar 相關 */
 .navbar {
-  background-color: #5a95d5;
-  padding: 10px 20px;
+  background-color: #2973b2;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
-}
-
-.logo {
-  color: white;
-  text-decoration: none;
-  font-size: 24px;
-  font-weight: bold;
+  width: 100%;
+  height: 20%;
 }
 
 .nav-links {
@@ -174,19 +173,18 @@ onMounted(() => {
 
 .nav-link {
   margin-left: 20px;
+  margin-right: 50px;
   color: white;
   text-decoration: none;
   font-size: 16px;
   transition: color 0.3s;
 }
 
-.nav-link:hover {
-  color: #ffd700;
-}
-
 /* 會員區域 */
 .member-section {
-  position: relative;
+  display: flex;
+  align-items: center;
+  margin-right: 50px;
 }
 
 .avatar-container {
@@ -234,14 +232,14 @@ onMounted(() => {
 /* 下拉選單 */
 .dropdown-menu {
   position: absolute;
-  top: 60px;
-  right: 0;
+  top: 80px;
+  right: 0px;
   background: linear-gradient(145deg, #ffffff, #f8f8f8);
   border: 1px solid #ddd;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   padding: 15px;
-  width: 220px;
+  width: 180px;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
 }
@@ -344,11 +342,10 @@ onMounted(() => {
   outline: none;
   font-size: 16px;
   border-radius: 6px;
-  margin-right: 8px;
 }
 
 .search-bar button {
-  background-color: #5a95d5;
+  background-color: #2973b2;
   color: white;
   border: none;
   padding: 10px 14px;
@@ -360,7 +357,20 @@ onMounted(() => {
 }
 
 .search-bar button:hover {
-  background-color: #477ab2;
+  background-color: #48a6a7;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  width: 300px; /* 調整 Logo 大小 */
+  height: auto;
+  margin-left: 20px;
+  margin-right: -20px;
 }
 </style>

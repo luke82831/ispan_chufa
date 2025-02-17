@@ -244,15 +244,21 @@ fetchUsers();
 
 .user-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: collapse !important;
+  border-spacing: 0px !important;
+}
+
+.user-table tr {
+  height: 71px !important;
 }
 
 .user-table th,
 .user-table td {
+  height: 50px;
   padding: 10px 15px;
   text-align: center;
   font-size: 14px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #ddd !important;
 }
 
 .user-table th {

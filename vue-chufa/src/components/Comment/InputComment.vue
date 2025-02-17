@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="inputCommentBody">
         <h1>新增留言</h1>
         <input type="text" placeholder="請輸入留言" v-model="comment" >
         <button @click="outputComment">送出</button>
@@ -73,6 +73,26 @@
 
 </script>
     
-<style>
-    
+<style scoped>
+    .inputCommentBody{
+        padding: 10px;
+        margin: 0px;
+        border-radius: 12px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    .inputCommentBody > h1{
+        margin: 10px;
+    }
+    .inputCommentBody > input{
+        font-size: 18px;
+        flex-grow: 1;
+        margin: 10px;
+    }
+    .inputCommentBody > button{
+        margin: 10px;
+    }
 </style>

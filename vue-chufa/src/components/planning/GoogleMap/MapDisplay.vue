@@ -9,7 +9,7 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from "vue";
-import { usePlaceStore } from "@/stores/PlaceStore";
+import { usePlaceStore } from "@/stores/placeStore";
 import PlaceSearch from "@/components/planning/GoogleMap/PlaceSearch.vue";
 
 const placeStore = usePlaceStore();
@@ -132,7 +132,7 @@ function clearMarkers() {
 }
 </script>
 
-<style>
+<style scoped>
 .search {
   position: absolute;
   top: 20px; /* 距離容器頂部 20px，可根據需要調整 */
@@ -140,7 +140,6 @@ function clearMarkers() {
   transform: translateX(-50%);
   width: 400px; /* 固定寬度，可根據需求調整 */
   border-radius: 8px; /* 圓角設計 */
-  z-index: 10; /* 確保在其他元素之上 */
 }
 
 .map {

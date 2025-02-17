@@ -3,20 +3,27 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
+        <!-- <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" /> -->
         <img
-          :src="member.profile_picture"
+          :src="
+            member.profilePicture
+              ? 'data:image/jpeg;base64,' + member.profilePicture
+              : defaultProfilePic
+          "
           alt="Profile Picture"
-          v-if="member.profile_picture"
+          v-if="member.profilePicture || defaultProfilePic"
           class="profile-picture"
         />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
-          <p><strong>ID:</strong> {{ member.userid }}</p>
+          <p><strong></strong> {{ member.bio }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注人數:</strong> {{ followersCount }}</p>
-            <p><strong>粉絲:</strong> {{ followingCount }}</p>
+            <p>
+              <strong>關注:</strong> {{ followersCount }} <strong>粉絲:</strong>
+              {{ followingCount }}
+            </p>
           </router-link>
         </div>
       </div>
@@ -51,14 +58,23 @@
 
       <h3 class="section-title">貼文內容</h3>
       <div class="posts-grid">
-        <PostCard
+        <div
           v-for="post in posts"
           :key="post.postid"
-          :post="post"
-          :member="member"
-          :formatDate="formatDate"
-          @update-posts="fetchPosts()"
-        />
+          :class="{ 'hidden-post': postStore.getHiddenReason(post.postid) }"
+          style="position: relative"
+        >
+          <PostCard
+            :post="post"
+            :member="member"
+            :formatDate="formatDate"
+            @update-posts="fetchPosts"
+          />
+          <div v-if="postStore.getHiddenReason(post.postid)" class="hidden-message">
+            此文章已被隱藏，原因：{{ postStore.getHiddenReason(post.postid) }}，
+            請聯繫客服信箱：Chufa@service.com
+          </div>
+        </div>
       </div>
     </div>
     <div v-else class="loading">
@@ -66,6 +82,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
@@ -75,6 +92,8 @@ import axiosapi from "@/plugins/axios.js";
 import PostCard from "@/components/Postcard.vue";
 import { useUserStore } from "@/stores/user.js";
 import { useRoute } from "vue-router";
+import defaultProfilePicture from "@/assets/empty.png";
+import { usePostStore } from "@/stores/usePostStore";
 
 export default {
   components: {
@@ -90,6 +109,9 @@ export default {
 
     const followersCount = ref(0); // 使用 ref 來定義自適應資料
     const followingCount = ref(0);
+    const defaultProfilePic = ref(defaultProfilePicture);
+
+    const postStore = usePostStore();
 
     // 用來從後端取得關注者和被關注者的人數
     const fetchCount = async (type) => {
@@ -139,7 +161,7 @@ export default {
 
     const fetchPosts = async (filterType) => {
       try {
-        const payload = {};
+        const payload = { checklike: member.value.userid };
         if (filterType === "likedPosts") {
           payload.likedBy = member.value.userid;
           payload.repost = true;
@@ -220,6 +242,8 @@ export default {
       activeTab,
       followersCount,
       followingCount,
+      defaultProfilePic,
+      postStore,
     };
   },
 };
@@ -239,7 +263,7 @@ export default {
   font-size: 1.8em;
   color: #444;
   margin-bottom: 20px;
-  border-bottom: 2px solid #007bff;
+  border-bottom: 2px solid #0d74e2;
   padding-bottom: 10px;
   font-weight: 600;
 }
@@ -264,7 +288,7 @@ export default {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #007bff;
+  border: 3px solid #0000c6;
 }
 
 .info p {
@@ -272,10 +296,13 @@ export default {
   font-size: 1.1em;
   color: #555;
 }
+.info strong {
+  color: #093b8c;
+}
 
 .follow-link {
   text-decoration: none;
-  color: #007bff;
+  color: #0a4c93;
   font-weight: 500;
 }
 
@@ -305,11 +332,11 @@ export default {
 
 .tabs-container button:hover {
   background: rgba(0, 123, 255, 0.1);
-  color: #007bff;
+  color: #6da6de;
 }
 
 .tabs-container button.active {
-  background: #007bff;
+  background: #0e80b4;
   color: white;
   font-weight: 600;
 }
@@ -421,5 +448,33 @@ export default {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+}
+
+.hidden-post {
+  background-color: rgba(80, 73, 73, 0.2) !important; /* 變得更透明 */
+  color: #aaa !important; /* 讓字體變灰 */
+  pointer-events: none; /* 禁止任何互動 */
+  filter: grayscale(80%); /* 增加灰階效果 */
+  position: relative; /* 確保 .hidden-message 絕對定位基於它 */
+}
+
+/* ★★★★★ 明顯顯示隱藏訊息 ★★★★★ */
+.hidden-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(156, 156, 156, 0.9); /* 更加明顯的紅色背景 */
+  text-align: center;
+  font-size: 16px;
+  padding: 15px 25px;
+  color: rgb(255, 0, 0); /* 白色文字提高對比 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold; /* 文字加粗 */
+  border-radius: 8px; /* 圓角讓樣式更好看 */
+  min-width: 320px; /* 讓提示訊息不會太窄 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 添加陰影讓它浮起來 */
 }
 </style>

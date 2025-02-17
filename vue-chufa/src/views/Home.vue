@@ -414,7 +414,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 100,
+          size: 24,
           checklike: member.value.userid,
           repost: true,
         };

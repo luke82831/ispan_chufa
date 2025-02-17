@@ -46,7 +46,8 @@
                 </div>
             </div>
 
-            <div v-html="htmlContent"></div>
+            <div class="htmlContentBox" v-html="htmlContent"></div>
+
             <p v-if="postData.postLink!=null">連結：<a :href="postData.postLink" target="_blank">{{ postData.postLink }}</a></p>
             <div v-if="tags.length!=0" class="TagsBox">
                 <div v-for="tagData in tags">
@@ -348,5 +349,20 @@
     .eventTimeBox{
         display: flex;
         justify-content: space-around;
+    }
+    .htmlContentBox{
+        display: flex; /* 啟用Flexbox佈局 */
+        flex-direction: column;
+    }
+    ::v-deep(.htmlContentBox img){
+        display: block; /* 設為塊級元素 */
+        margin: 0 auto; /* 自動左右邊距 */
+        width: 70%;
+        height: auto; /* 高度自动，保持比例 */
+    }
+    ::v-deep(.htmlContentBox p){
+        width: 100%;
+        word-wrap: break-word;
+        height: auto; /* 高度自动，保持比例 */
     }
 </style>

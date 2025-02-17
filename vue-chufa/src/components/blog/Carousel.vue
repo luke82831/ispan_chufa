@@ -47,7 +47,7 @@ const posts = ref([]);
 const currentIndex = ref(0);
 let autoSlideInterval = null;
 
-const postIds = ref([40]); // 在內部管理 postIds
+const postIds = ref([104,105,106,107,108,109,110,111,112,113,114,115]); // 在內部管理 postIds
 const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 

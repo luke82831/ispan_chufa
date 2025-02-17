@@ -390,7 +390,7 @@ onMounted(fetchPosts);
 }
 
 .hover-effect {
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.1s ease-in-out;
 }
 .hover-effect:hover {
   background-color: #f0f8e6;

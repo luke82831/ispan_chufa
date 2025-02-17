@@ -583,7 +583,7 @@ onMounted(fetchPlaces);
 
 /* 滑鼠懸停時的行高亮顯示 */
 .hover-effect {
-  transition: background-color 0.3s ease-in-out;
+  transition: background-color 0.1s ease-in-out;
   position: relative; /* 確保內部的按鈕不會受到影響 */
 }
 

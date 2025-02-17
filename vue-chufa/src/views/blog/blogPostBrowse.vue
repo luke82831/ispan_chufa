@@ -354,7 +354,7 @@
         display: flex; /* 啟用Flexbox佈局 */
         flex-direction: column;
     }
-    ::v-deep(.htmlContentBox p img){
+    ::v-deep(.htmlContentBox img){
         display: block; /* 設為塊級元素 */
         margin: 0 auto; /* 自動左右邊距 */
         width: 70%;

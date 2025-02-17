@@ -16,27 +16,43 @@
       </div>
 
       <!-- 文字資訊區 -->
-      <div class="text-info">
-        <p>{{ place.placeAddress }}</p>
-        <p v-if="place.rating">評分: {{ place.rating }}</p>
-        <p v-if="place.placePhone">電話: {{ place.placePhone }}</p>
-        <p v-if="place.priceLevel">價位資訊: {{ place.priceLevel }}</p>
+      <div class="text-info-card">
+        <p class="address">
+          <i class="fas fa-map-marker-alt"></i> {{ place.placeAddress }}
+        </p>
+        <p v-if="place.rating" class="rating">
+          <i class="fas fa-star"></i> 評分: {{ place.rating }}
+        </p>
+        <p v-if="place.placePhone" class="phone">
+          <i class="fas fa-phone"></i> 電話: {{ place.placePhone }}
+        </p>
+        <p v-if="place.priceLevel" class="price">
+          <i class="fas fa-dollar-sign"></i> 價位資訊: {{ place.priceLevel }}
+        </p>
 
         <!-- 營業時間 -->
-        <p v-if="formattedBusinessHours.length">營業時間:</p>
-        <ul v-if="formattedBusinessHours.length">
-          <li v-for="(item, index) in formattedBusinessHours" :key="index">
-            {{ item.day }}: {{ item.hours }}
-          </li>
-        </ul>
+        <div v-if="formattedBusinessHours.length" class="business-hours">
+          <p><i class="fas fa-clock"></i> 營業時間:</p>
+          <ul>
+            <li v-for="(item, index) in formattedBusinessHours" :key="index">
+              {{ item.day }}: {{ item.hours }}
+            </li>
+          </ul>
+        </div>
 
-        <p v-if="place.website">
-          網站: <a :href="place.website" target="_blank">{{ place.website }}</a>
-        </p>
-        <p v-if="place.reservation">
-          是否可訂位:
-          <a :href="place.reservation" target="_blank">{{ place.reservation }}</a>
-        </p>
+        <div class="links">
+          <a v-if="place.website" :href="place.website" target="_blank" class="btn">
+            <i class="fas fa-globe"></i> 官方網站
+          </a>
+          <a
+            v-if="place.reservation"
+            :href="place.reservation"
+            target="_blank"
+            class="btn reserve"
+          >
+            <i class="fas fa-calendar-check"></i> 訂位連結
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -72,7 +88,7 @@ const formattedBusinessHours = computed(() => {
 const getPhotoUrl = (photo) => photo || "";
 </script>
 
-<style>
+<style scoped>
 .place-details {
   display: flex;
   flex-direction: column;
@@ -83,11 +99,6 @@ const getPhotoUrl = (photo) => photo || "";
   overflow-y: auto; /* 讓內容可滾動 */
   position: relative;
   padding-bottom: 80px; /* 預留空間，避免內容被按鈕遮住 */
-}
-
-/* 讓內容區域不額外滾動 */
-.text-info {
-  padding: 20px;
 }
 
 /* 照片區塊 - 恢復原本的橫向排列 */
@@ -139,5 +150,63 @@ const getPhotoUrl = (photo) => photo || "";
 
 .photo-gallery img:hover {
   transform: scale(1.05);
+}
+
+.text-info-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  max-width: 500px;
+  font-family: "Arial", sans-serif;
+}
+
+p {
+  margin: 0.5rem 0;
+  color: #333;
+}
+
+.rating {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.phone,
+.price {
+  font-weight: bold;
+}
+
+.business-hours ul {
+  padding-left: 1rem;
+}
+
+.links {
+  margin-top: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  background: #007bff;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  text-decoration: none;
+  margin-right: 0.5rem;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #0056b3;
+}
+
+.reserve {
+  background: #28a745;
+}
+
+.reserve:hover {
+  background: #1e7e34;
+}
+
+i {
+  margin-right: 5px;
 }
 </style>

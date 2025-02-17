@@ -21,44 +21,45 @@
         alt="封面照片"
         class="cover-photo"
       />
+
+      <!-- 固定在圖片右下角的按鈕 -->
+      <!-- <button @click="toggleExpanded" class="toggle-button fixed-button">
+        {{ isExpanded ? "收合行程" : "查看完整行程" }}
+      </button> -->
+
+      <div class="list-container">
+        <!-- 傳遞 isExpanded 狀態給子組件 -->
+        <ItineraryList :isExpanded="isExpanded" @close="isExpanded = false" />
+      </div>
     </div>
 
     <!-- 行程日期範圍 -->
-    <p>
-      {{ scheduleStore.currentSchedule.startDate }} -
+    <h2>
+      行程日期: {{ scheduleStore.currentSchedule.startDate }} -
       {{ scheduleStore.currentSchedule.endDate }}
-    </p>
+    </h2>
 
-    <!-- 日期分頁 -->
-    <div class="date-tabs">
-      <button
-        class="arrow-button"
-        @click="changeDate('prev')"
-        :disabled="isFirstDay"
-      >
-        &lt;
-      </button>
+    <div class="date-tabs-container">
+      <!-- 左側箭頭 -->
+      <button class="arrow-button arrow-left" @click="scrollTabs('left')">&lt;</button>
 
-      <button
-        v-for="(date, index) in dateRange"
-        :key="index"
-        :class="{ active: selectedDate === formatDate(date) }"
-        @click="updateSelectedDate(date)"
-      >
-        {{ formatDate(date) }}
-      </button>
+      <!-- 日期滾動區 -->
+      <div class="date-tabs" ref="tabsContainer">
+        <button
+          v-for="(date, index) in dateRange"
+          :key="index"
+          :class="{ active: selectedDate === formatDate(date) }"
+          @click="updateSelectedDate(date)"
+        >
+          {{ formatDate(date) }}
+        </button>
+      </div>
 
-      <button v-if="isLastDay" @click="addOneMoreDay" class="add-day-btn">
-        ＋
-      </button>
+      <!-- + 按鈕（新增一天） -->
+      <button class="add-day-btn" @click="addOneMoreDay">＋</button>
 
-      <button
-        class="arrow-button"
-        @click="changeDate('next')"
-        :disabled="isLastDay"
-      >
-        &gt;
-      </button>
+      <!-- 右側箭頭 -->
+      <button class="arrow-button arrow-right" @click="scrollTabs('right')">&gt;</button>
     </div>
 
     <!-- 傳遞選擇的日期到 PlanningDay 組件 -->
@@ -74,6 +75,7 @@ import { computed, ref, watch, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import PlanningDay from "./PlanningDay.vue";
+import ItineraryList from "@/components/planning/Itinerary/ItineraryList.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -84,6 +86,25 @@ const tripId = route.params.tripId;
 const selectedDate = ref(""); // 當前選擇的日期
 const isEditing = ref(false);
 const newTitle = ref("");
+const isExpanded = ref(false);
+const tabsContainer = ref(null);
+
+const scrollTabs = (direction) => {
+  if (!tabsContainer.value) return;
+
+  const scrollAmount = 150; // 每次滾動 150px
+  if (direction === "left") {
+    tabsContainer.value.scrollLeft -= scrollAmount;
+  } else {
+    tabsContainer.value.scrollLeft += scrollAmount;
+  }
+};
+
+// 展開所有行程
+const toggleExpanded = () => {
+  isExpanded.value = !isExpanded.value;
+  console.log("isExpanded:", isExpanded.value); // 測試是否變更
+};
 
 // **初始化行程數據**
 onMounted(async () => {
@@ -107,9 +128,17 @@ const editTitle = () => {
 };
 
 // **儲存標題**
-const saveTitle = () => {
+const saveTitle = async () => {
   if (scheduleStore.currentSchedule) {
-    scheduleStore.currentSchedule.tripName = newTitle.value;
+    try {
+      await scheduleStore.updateScheduleTitle(
+        scheduleStore.currentSchedule.tripId,
+        newTitle.value
+      );
+      console.log("行程標題已更新");
+    } catch (error) {
+      console.error("行程標題更新失敗", error);
+    }
   }
   isEditing.value = false;
 };
@@ -165,10 +194,7 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (
-    direction === "next" &&
-    currentIndex < dateRange.value.length - 1
-  ) {
+  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
@@ -210,16 +236,6 @@ const addOneMoreDay = async () => {
   updateSelectedDate(newDate); // 切換到新日期，自動觸發事件查詢
 };
 
-// **是否為第一天 / 最後一天**
-const isFirstDay = computed(
-  () => selectedDate.value === formatDate(dateRange.value[0])
-);
-const isLastDay = computed(
-  () =>
-    selectedDate.value ===
-    formatDate(dateRange.value[dateRange.value.length - 1])
-);
-
 // **返回行程列表**
 const goBack = () => {
   router.push("/myitineraries");
@@ -227,16 +243,24 @@ const goBack = () => {
 </script>
 
 <style scoped>
+/* 全局字體設定 */
+* {
+  font-family: "Noto Sans TC", sans-serif; /* 使用台灣常見的無襯線字體 */
+  font-size: 1.2rem; /* 統一字體大小 */
+}
+
+/* 頁面標題與返回按鈕 */
 .header {
   display: flex;
   align-items: center;
 }
+
+/* 返回按鈕 */
 .back-button {
   background: white;
-  border: 2px solid #007bff;
-  color: #007bff;
-  font-size: 1.2rem;
-  padding: 8px 12px;
+  color: #2973b2;
+  font-size: 1.2rem; /* 調大字體 */
+  padding: 10px 15px;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -246,24 +270,28 @@ const goBack = () => {
   margin-right: 20px;
 }
 .back-button:hover {
-  background: #007bff;
+  background: #2973b2;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
+
+/* 編輯行程名稱輸入框 */
 .edit-input {
-  padding: 5px;
+  padding: 8px;
   margin-left: 10px;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   width: auto;
 }
+
+/* 編輯按鈕 */
 .edit-button {
   background: white;
   border: 2px solid #ccc;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -271,66 +299,189 @@ const goBack = () => {
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-
 .edit-button:hover {
   background: #007bff;
   color: white;
   border-color: #007bff;
   box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
 }
-
 .edit-button svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   fill: currentColor;
 }
 
+/* 通用按鈕樣式 */
 button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: 1.4rem; /* 統一按鈕字體大小 */
   margin-left: 10px;
 }
-
 button:hover {
   color: #007bff;
 }
 
-/* 日期分頁按鈕的樣式 */
-.date-tabs button {
+/* 日期選擇區 */
+.date-tabs-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  border-top: #f3f3f3 solid;
+  border-bottom: #f3f3f3 solid;
+}
+
+.date-tabs {
+  display: flex;
+  align-items: center; /* 確保所有項目垂直置中 */
+  gap: 10px;
   padding: 10px;
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  margin-right: 5px;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow-x: auto; /* 啟用水平滾動條 */
+  scrollbar-width: thin; /* 適用於 Firefox */
+  -ms-overflow-style: auto; /* 適用於 Edge */
+}
+
+/* 隱藏滾動條（適用於 Webkit 瀏覽器） */
+.date-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* 日期按鈕 */
+.date-tabs button {
+  border: none;
+  padding: 10px 20px;
+  min-width: 60px;
+  height: 50px; /* 設定固定高度，確保對齊 */
+  font-size: 1.2rem;
+  text-align: center;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s;
+  transition: all 0.2s ease-in-out;
+  display: flex; /* 讓內容可用 flex 排列 */
+  align-items: center; /* 垂直置中 */
+  justify-content: center; /* 水平置中 */
 }
 
 .date-tabs button.active {
-  background-color: #007bff;
+  background-color: #2973b2;
   color: white;
   font-weight: bold;
 }
 
-.date-tabs button:hover {
-  background-color: #0056b3;
+/* 左右箭頭按鈕 */
+.arrow-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  opacity: 0; /* 預設隱藏 */
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 左側按鈕 */
+.arrow-left {
+  left: 0;
+}
+
+/* 右側按鈕 */
+.arrow-right {
+  right: 50px; /* 避免與 + 按鈕重疊 */
+}
+
+/* + 按鈕樣式 */
+.add-day-btn {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px; /* 確保與其他按鈕一致 */
+  height: 50px; /* 確保與其他按鈕一致 */
+  margin-left: 10px; /* 避免太靠近最後一天 */
+}
+
+.add-day-btn:hover {
+  background-color: #2973b2;
   color: white;
 }
 
+/* 滑鼠移動到 .date-tabs-container 才顯示箭頭 */
+.date-tabs-container:hover .arrow-button {
+  opacity: 1;
+}
+
+/* 封面圖片 */
 .cover-photo-container {
   width: 100%;
-  height: 280px;
+  height: 300px;
   border-radius: 12px;
   overflow: hidden;
   margin-top: 10px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
-
 .cover-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* 行程列表 */
+.list-container {
+  position: relative;
+  padding: 20px;
+}
+
+/* 展開/收合按鈕 */
+.toggle-button {
+  padding: 12px 18px;
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.3rem; /* 加大字體 */
+  cursor: pointer;
+}
+
+.cover-photo-container {
+  position: relative; /* 設定相對定位 */
+  display: inline-block;
+  width: 100%;
+}
+
+.fixed-button {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #2973b2;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.fixed-button:hover {
+  background-color: #20527e;
+  color: white;
 }
 </style>

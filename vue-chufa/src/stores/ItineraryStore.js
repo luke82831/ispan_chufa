@@ -32,8 +32,11 @@ export const useItineraryStore = defineStore("itinerary", {
         temp: state.tempStayDurations[date]?.[index],
         stay: state.stayDurations[date]?.[index],
       });
-      return state.tempStayDurations[date]?.[index] ?? state.stayDurations[date]?.[index] ?? 0;
-
+      return (
+        state.tempStayDurations[date]?.[index] ??
+        state.stayDurations[date]?.[index] ??
+        0
+      );
     },
 
     // 🔥 Getter：讀取「是否正在編輯」
@@ -79,7 +82,7 @@ export const useItineraryStore = defineStore("itinerary", {
           placeAddress: place.placeAddress ?? "",
           latitude: place.latitude ?? null,
           longitude: place.longitude ?? null,
-          index: index, // ✅ 改成 index
+          index: index,
           travelTime: place.travelTime ?? null,
           stayDuration: place.stayDuration ?? null,
           notes: place.notes ?? null,

@@ -16,6 +16,9 @@ export const useEventStore = defineStore("eventStore", {
     getEventIdByDate: (state) => (date) => {
       return state.eventsByDate[date]?.eventId ?? null;
     },
+    getEventByDate: (state) => (date) => {
+      return state.eventsByDate[date] ?? null;
+    },
   },
 
   actions: {

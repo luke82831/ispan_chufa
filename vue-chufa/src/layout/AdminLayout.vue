@@ -14,10 +14,9 @@
     <div class="main-content">
       <!-- 頂部使用者資訊 (未來擴展 Navbar.vue) -->
       <div class="user-info">
-  <span>管理者：</span>
-  <span class="text">{{ member?.username || "訪客" }}</span>
-</div>
-
+        <span>管理者：</span>
+        <span class="text">{{ member?.username || "訪客" }}</span>
+      </div>
 
       <!-- 路由對應的內容 -->
       <div class="content">
@@ -33,7 +32,6 @@ import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
 const member = computed(() => userStore.member);
-
 </script>
 
 <style scoped>
@@ -41,13 +39,12 @@ const member = computed(() => userStore.member);
 .admin-layout {
   display: flex;
   min-height: 100vh; /* 確保容器至少和瀏覽器視窗一樣高 */
-  background: #e0ecff; /* 淡藍背景 */
 }
 
 /* === 側邊選單樣式 === */
 .sidebar {
   width: 220px;
-  background: #5a95d5; /* 主要藍色 */
+  background: #2973b2; /* 主要藍色 */
   color: white;
   padding: 20px;
   min-height: 100vh; /* 利用作法1：側邊選單至少延展至 100vh */
@@ -73,7 +70,7 @@ const member = computed(() => userStore.member);
 }
 
 .sidebar a:hover {
-  background: #2563eb; /* 深藍色 */
+  background: #48a6a7; /* 深藍色 */
   transform: translateX(4px); /* 滑鼠懸停時輕微位移 */
 }
 
@@ -93,25 +90,21 @@ const member = computed(() => userStore.member);
   font-size: 16px;
   font-weight: bold;
   border-radius: 8px;
-  display: flex;  /* 讓內容能夠自然排列 */
+  display: flex; /* 讓內容能夠自然排列 */
   align-items: center;
-  max-width: 200px;  /* 限制整個區塊的寬度 */
+  max-width: 200px; /* 限制整個區塊的寬度 */
   text-align: center;
   margin-bottom: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .user-info .text {
-  display: inline-block;  /* 確保能夠受 max-width 限制 */
-  max-width: 120px;  /* 限制文字部分的最大寬度 */
-  white-space: nowrap;  /* 不允許換行 */
-  overflow: hidden;  /* 隱藏超出部分 */
-  text-overflow: ellipsis;  /* 省略號顯示超出部分 */
+  display: inline-block; /* 確保能夠受 max-width 限制 */
+  max-width: 120px; /* 限制文字部分的最大寬度 */
+  white-space: nowrap; /* 不允許換行 */
+  overflow: hidden; /* 隱藏超出部分 */
+  text-overflow: ellipsis; /* 省略號顯示超出部分 */
 }
-
-
-
-
 
 /* === 主要內容區域 === */
 .main-content {
@@ -119,15 +112,5 @@ const member = computed(() => userStore.member);
   display: flex;
   flex-direction: column;
   overflow: hidden; /* 確保內容不會額外滾動 */
-}
-
-/* 內容區（路由內容） */
-.content {
-  flex: 1;
-  padding: 20px;
-  background: white; /* 主要內容區域保持白色 */
-  border-radius: 8px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
-  margin: 20px;
 }
 </style>

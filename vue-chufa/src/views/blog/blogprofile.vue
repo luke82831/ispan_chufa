@@ -260,7 +260,7 @@ const toggleFollow = async (member) => {
     };
     </script>
     
-    <style>
+    <style scoped>
 /* 基本頁面布局 */
 .profile-page {
     font-family: 'Arial', sans-serif;

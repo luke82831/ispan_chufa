@@ -1,4 +1,6 @@
 import { defineStore } from "pinia";
+import { useScheduleStore } from "@/stores/ScheduleStore";
+import { usePlaceStore } from "@/stores/placeStore";
 
 export const useItineraryStore = defineStore("itinerary", {
   state: () => ({
@@ -269,6 +271,80 @@ export const useItineraryStore = defineStore("itinerary", {
       if (this.tempStayDurations[date]) delete this.tempStayDurations[date];
 
       console.log(`🗑️ 已清除 ${date} 的行程暫存資料`);
+    },
+
+    /** 🔹 透過 scheduleStore 取得所有行程 */
+    async loadAllItineraryData(tripId) {
+      const scheduleStore = useScheduleStore();
+      const placeStore = usePlaceStore();
+      const allEvents = await scheduleStore.fetchAllEventsByTripId(tripId);
+
+      const convertTimeToMinutes = (timeString) => {
+        if (!timeString) return 0; // 預設為 0 分鐘
+
+        if (
+          typeof timeString === "string" &&
+          timeString.match(/^\d{2}:\d{2}:\d{2}$/)
+        ) {
+          const [hours, minutes] = timeString.split(":").map(Number);
+          return hours * 60 + minutes;
+        }
+
+        console.warn(`⚠️ 無法解析時間: ${timeString}`);
+        return 0;
+      };
+
+      if (!allEvents || allEvents.length === 0) return;
+
+      for (const event of allEvents) {
+        const newDate = event.date;
+        let placesWithDetails = [];
+
+        if (event.eventXPlaceBeans) {
+          console.log(`📅 處理日期：${newDate}`);
+
+          const placeIds = event.eventXPlaceBeans.map((e) => e.placeId);
+          await placeStore.fetchMultiplePlaces(placeIds);
+
+          const sortedPlaces = event.eventXPlaceBeans.sort(
+            (a, b) => a.placeOrder - b.placeOrder
+          );
+
+          sortedPlaces.forEach((eventPlace, index) => {
+            const stayDurationMinutes = eventPlace.stayDuration
+              ? convertTimeToMinutes(eventPlace.stayDuration)
+              : 0;
+            this.setStayDuration(newDate, index, stayDurationMinutes);
+          });
+
+          placesWithDetails = sortedPlaces.map((eventPlace, index) => {
+            const placeDetails = placeStore.getPlaceDetailById(
+              eventPlace.placeId
+            );
+
+            return {
+              ...eventPlace,
+              index,
+              placeName: placeDetails?.placeName ?? "未知地點",
+              placeAddress: placeDetails?.placeAddress ?? "未知地址",
+              photos: placeDetails?.photos ?? [],
+              latitude: placeDetails?.latitude ?? null,
+              longitude: placeDetails?.longitude ?? null,
+            };
+          });
+        }
+
+        // **存入 Pinia**
+        this.setItinerary(newDate, placesWithDetails);
+        this.setStartTime(newDate, event.startTime ?? "08:00");
+      }
+
+      console.log("✅ 所有天數的行程已存入 Pinia：", this.itineraryDates);
+    },
+
+    clearAllData() {
+      this.$reset();
+      console.log("🗑️ 已重置所有行程數據");
     },
   },
 });

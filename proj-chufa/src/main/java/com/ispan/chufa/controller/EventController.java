@@ -138,4 +138,10 @@ public class EventController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 資料不存在，返回 404
         }
     }
+    
+    @GetMapping("/trips/{tripId}/events")
+    public ResponseEntity<List<EventBean>> getEventsByTripId(@PathVariable Long tripId) {
+        List<EventBean> events = eventService.getEventsByTripId(tripId);
+        return ResponseEntity.ok(events);
+    }
 }

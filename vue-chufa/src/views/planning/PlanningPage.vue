@@ -44,7 +44,7 @@ const hasUnsavedChanges = ref(false);
 
 const selectedPlaceDetail = computed(() => placeStore.selectedPlaceDetail);
 
-const selectedDate = computed(() => scheduleStore.selectedDate || ""); // ✅ 確保不為 null
+const selectedDate = computed(() => scheduleStore.selectedDate || "overview");
 
 const selectedPlaceId = computed(() => placeStore.selectedPlaceId);
 
@@ -70,14 +70,28 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate; // 如果已經是 YYYY-MM-DD 格式則直接回傳
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
 
   return `${baseYear}-${month}-${day}`; // 轉換為 YYYY-MM-DD
 });
 
 const addPlaceToEvent = async () => {
   console.log("📅 選擇的行程日期: ", formattedSelectedDate.value); // ✅ 確保日期正確
+
+  // ❌ 如果用戶目前選擇的是「總覽頁」，禁止加入行程
+  if (selectedDate.value === "overview") {
+    Swal.fire({
+      title: "無法加入行程",
+      text: "請選擇正確的日期後再加入行程。",
+      icon: "warning",
+      confirmButtonText: "確定",
+    });
+    return;
+  }
 
   if (!formattedSelectedDate.value) {
     Swal.fire("請先選擇行程日期");

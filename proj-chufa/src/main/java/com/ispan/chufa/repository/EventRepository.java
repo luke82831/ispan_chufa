@@ -19,4 +19,7 @@ public interface EventRepository extends JpaRepository<EventBean, Long> {
 	List<EventBean> findByScheduleAndCalendar_Date(@Param("schedule") ScheduleBean schedule, @Param("date") LocalDate date);
 
     List<EventBean> findBySchedule(ScheduleBean schedule);
+    
+    List<EventBean> findBySchedule_TripId(Long tripId);
+
 }

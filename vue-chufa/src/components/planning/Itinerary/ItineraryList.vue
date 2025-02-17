@@ -27,9 +27,7 @@
               <span class="stay-time">
                 ⏳ 停留時間:
                 {{
-                  formatStayTime(
-                    itineraryStore.getStayDuration(day.date, event.index)
-                  )
+                  formatStayTime(itineraryStore.getStayDuration(day.date, event.index))
                 }}
               </span>
             </li>
@@ -44,11 +42,25 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 import { useItineraryStore } from "@/stores/ItineraryStore";
+import { useScheduleStore } from "@/stores/ScheduleStore";
 
+const scheduleStore = useScheduleStore();
 const itineraryStore = useItineraryStore();
+const hasUnsavedChanges = ref(false);
+
+const formattedSelectedDate = computed(() => {
+  if (!scheduleStore.currentSchedule.selectedDate) return "";
+  const cleanedDate = scheduleStore.currentSchedule.selectedDate.replace(/[^0-9\/]/g, "");
+  if (cleanedDate.includes("-")) return cleanedDate;
+
+  const baseYear =
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
+  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+  return `${baseYear}-${month}-${day}`;
+});
 
 // 取得所有行程事件，並整理成按照日期排序的格式
 const sortedEvents = computed(() => {
@@ -80,18 +92,40 @@ const formatStayTime = (minutes) => {
 };
 
 /** 🔥 離開行程列表時，清除所有日期的行程數據 */
-onBeforeRouteLeave((to, from, next) => {
-  console.log("🛑 準備離開 OverviewPage.vue，10 秒後清除所有行程數據...");
+// onBeforeRouteLeave((to, from, next) => {
+//   // 🔹 如果要去的頁面是「總覽頁面」，則不清除行程
+//   if (to.name === "ItineraryOverview") {
+//     console.log("🛑 切換到總覽頁面，保留行程數據");
+//     next();
+//     return;
+//   }
 
-  setTimeout(() => {
-    if (to.fullPath !== from.fullPath) {
-      console.log("🗑️ 確認使用者真的離開，清除所有行程");
-      itineraryStore.clearAllData(); // ✅ 清空所有行程
-    }
-  }, 5000); // 5 秒內如果回來，數據不會被清除
+//   // 🔹 如果沒有未儲存變更，則自動清除行程
+//   if (!hasUnsavedChanges.value) {
+//     console.log("✅ 沒有未儲存變更，自動清除行程");
+//     itineraryStore.clearDayData(formattedSelectedDate.value);
+//     next();
+//     return;
+//   }
 
-  next();
-});
+//   // 其他情況下，詢問使用者
+//   Swal.fire({
+//     title: "未儲存的變更",
+//     text: "變更未儲存，是否仍要離開？",
+//     icon: "warning",
+//     showCancelButton: true,
+//     confirmButtonText: "仍然離開",
+//     cancelButtonText: "留在此頁",
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       console.log("⚠️ 強制離開，清除行程");
+//       itineraryStore.clearDayData(formattedSelectedDate.value);
+//       next();
+//     } else {
+//       next(false); // 取消導航
+//     }
+//   });
+// });
 </script>
 
 <style scoped>

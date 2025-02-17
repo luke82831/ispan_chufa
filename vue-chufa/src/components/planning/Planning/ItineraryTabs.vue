@@ -50,9 +50,7 @@
       </button>
 
       <!-- 左側箭頭 -->
-      <button class="arrow-button arrow-left" @click="scrollTabs('left')">
-        &lt;
-      </button>
+      <button class="arrow-button arrow-left" @click="scrollTabs('left')">&lt;</button>
 
       <!-- 日期滾動區 -->
       <div class="date-tabs" ref="tabsContainer">
@@ -70,9 +68,7 @@
       <button class="add-day-btn" @click="addOneMoreDay">＋</button>
 
       <!-- 右側箭頭 -->
-      <button class="arrow-button arrow-right" @click="scrollTabs('right')">
-        &gt;
-      </button>
+      <button class="arrow-button arrow-right" @click="scrollTabs('right')">&gt;</button>
     </div>
 
     <!-- 根據選擇顯示對應的組件 -->
@@ -107,8 +103,7 @@ const tabsContainer = ref(null);
 const scrollTabs = (direction) => {
   if (!tabsContainer.value) return;
   const scrollAmount = 150; // 每次滾動 150px
-  tabsContainer.value.scrollLeft +=
-    direction === "left" ? -scrollAmount : scrollAmount;
+  tabsContainer.value.scrollLeft += direction === "left" ? -scrollAmount : scrollAmount;
 };
 
 // 切換總覽頁
@@ -131,9 +126,7 @@ const updateSelectedDate = (date) => {
 };
 
 // 取得封面圖片
-const coverPhotoUrl = computed(
-  () => scheduleStore.currentSchedule?.coverPhoto || null
-);
+const coverPhotoUrl = computed(() => scheduleStore.currentSchedule?.coverPhoto || null);
 
 // 取得開始與結束日期
 const startDate = computed(() =>
@@ -172,10 +165,7 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (
-    direction === "next" &&
-    currentIndex < dateRange.value.length - 1
-  ) {
+  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };

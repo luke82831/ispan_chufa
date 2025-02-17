@@ -1,5 +1,6 @@
 package com.ispan.chufa.service;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,45 +50,50 @@ public class EventXPlaceService {
     
     @Transactional
     public void updateEventXPlaces(Long eventId, ItineraryRequest request) {
-        // 取得 `EventBean`
+        // 取得 `EventBean`，確保行程存在
         EventBean event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("行程不存在: " + eventId));
-        
+
+        // 透過 `event.calendar.date` 取得行程日期
+        LocalDate itineraryDate = event.getCalendar().getDate();
+        if (itineraryDate == null) {
+            throw new RuntimeException("行程日期為空，無法更新");
+        }
+
         // 更新 `Event` 的 `startTime` 和 `endTime`
         event.setStartTime(LocalTime.parse(request.getStartTime()));
         event.setEndTime(LocalTime.parse(request.getEndTime()));
-        eventRepository.save(event);  // **儲存更新後的 Event**
+        eventRepository.save(event);
 
-        // 取得現有的 `EventXPlaceBean`
-        List<EventXPlaceBean> existingEventPlaces = eventXPlaceRepository.findByEvent_EventId(eventId);
+        // 取得當天的 `EventXPlaceBean`
+        List<EventXPlaceBean> existingEventPlaces = eventXPlaceRepository.findByEvent_EventIdAndEvent_Calendar_Date(eventId, itineraryDate);
         Map<Long, EventXPlaceBean> existingEventPlacesMap = existingEventPlaces.stream()
                 .collect(Collectors.toMap(EventXPlaceBean::getEventmappingId, Function.identity()));
 
-        List<EventXPlaceBean> updatedEventPlaces = new ArrayList<>();
-
-        // 檢查哪些 `eventmappingId` 仍然存在
         List<Long> incomingEventmappingIds = request.getPlaces().stream()
                 .map(EventXPlaceRequest::getEventmappingId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        // **先刪除**（不在 `request` 內的 `eventXPlace`）
-        eventXPlaceRepository.deleteByEventIdAndNotIn(eventId, incomingEventmappingIds);
+        // 避免 SQL 語法錯誤
+        if (incomingEventmappingIds.isEmpty()) {
+            eventXPlaceRepository.deleteByEventIdAndEventCalendarDate(eventId, itineraryDate);
+        } else {
+            eventXPlaceRepository.deleteByEventIdAndEventCalendarDateAndNotIn(eventId, itineraryDate, incomingEventmappingIds);
+        }
 
-        // **再更新** 或 **新增**
+        List<EventXPlaceBean> updatedEventPlaces = new ArrayList<>();
+
         for (EventXPlaceRequest placeRequest : request.getPlaces()) {
             EventXPlaceBean eventXPlace;
 
             if (placeRequest.getEventmappingId() != null && existingEventPlacesMap.containsKey(placeRequest.getEventmappingId())) {
-                // ✅ 更新 `EventXPlaceBean`
                 eventXPlace = existingEventPlacesMap.get(placeRequest.getEventmappingId());
             } else {
-                // ✅ 新增 `EventXPlaceBean`
                 eventXPlace = new EventXPlaceBean();
-                eventXPlace.setEvent(event);
+                eventXPlace.setEvent(event); // `date` 來自 `event.calendar.date`
             }
 
-            // 設定 `place`
             PlaceBean place = placeRepository.findById(placeRequest.getPlaceId())
                     .orElseThrow(() -> new RuntimeException("找不到地點:" + placeRequest.getPlaceId()));
             eventXPlace.setPlace(place);
@@ -100,8 +106,14 @@ public class EventXPlaceService {
             updatedEventPlaces.add(eventXPlace);
         }
 
-        // **最後才執行批量更新**
         eventXPlaceRepository.saveAll(updatedEventPlaces);
+    }
+    
+    @Transactional
+    public void updateMultipleEventXPlaces(Long eventId, List<ItineraryRequest> requests) {
+        for (ItineraryRequest request : requests) {
+            updateEventXPlaces(eventId, request);
+        }
     }
 
 }

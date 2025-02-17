@@ -52,6 +52,18 @@ public class EventXPlaceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("行程更新失敗：" + e.getMessage());
         }
     }
+    
+    @PutMapping("/{eventId}/batch")
+    public ResponseEntity<?> updateMultipleEventXPlaces(@PathVariable Long eventId, @RequestBody List<ItineraryRequest> requests) {
+        try {
+            eventXPlaceService.updateMultipleEventXPlaces(eventId, requests);
+            return ResponseEntity.ok("所有行程地點更新成功");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("行程更新失敗：" + e.getMessage());
+        }
+    }
+
+
 }
 
 

@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ItineraryRequest {
     private Long eventId;
+    private String date;
     private String startTime;
     private String endTime;
     private String notes;
@@ -40,5 +41,11 @@ public class ItineraryRequest {
 	public void setPlaces(List<EventXPlaceRequest> places) {
 		this.places = places;
 	}
-    
+	public String getDate() {
+		return date;
+	}
+	public void setDate(String date) {
+		this.date = date;
+	}
+	    
 }

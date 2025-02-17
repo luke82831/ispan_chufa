@@ -1,5 +1,5 @@
 <template>
-  <div class="post-management" @wheel.prevent>
+  <div class="post-management">
     <div>
       <h1 class="page-title">文章管理</h1>
     </div>
@@ -81,17 +81,14 @@
                       }}
                     </h3>
                   </div>
-                  <!-- 修改：用 v-html 渲染轉換後的內容 -->
-                  <div
-                    class="post-content"
-                    v-html="transformContent(post.postContent)"
-                  ></div>
+                  <!-- 使用 transformPreview 只顯示約20字且保留圖片 -->
+                  <div class="post-content" v-html="transformPreview(post.postContent)"></div>
                 </div>
               </td>
               <td>{{ post.postTitle }}</td>
-              <!-- 修改：用 v-html 渲染轉換後的內容 -->
+              <!-- 使用 transformContentNoImg 只顯示約20字且不含圖片 -->
               <td>
-                <div v-html="transformContent(post.postContent)"></div>
+                <div v-html="transformContentNoImg(post.postContent)"></div>
               </td>
               <td>{{ post.postStatus }}</td>
               <td>{{ formatDate(post.postTime) }}</td>
@@ -170,18 +167,38 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString("zh-TW", options);
 };
 
-// 新增轉換函式：移除 <p> 標籤，並為 <img> 標籤加上大小限制
-const transformContent = (content) => {
+/**
+ * 轉換貼文內容用於貼文預覽：
+ * 1. 移除 <p> 標籤。
+ * 2. 擷取純文字部分並截取約 20 字（超過則加上省略號）。
+ * 3. 保留所有 <img> 標籤，並移除原有 style 後加上大小限制。
+ */
+const transformPreview = (content) => {
   if (!content) return "";
-  // 移除 <p> 與 </p> 標籤
   let result = content.replace(/<\/?p>/g, "");
-  // 針對 img 標籤，加入 inline style 限制大小為 100px
-  result = result.replace(/<img([^>]*?)>/g, (match, p1) => {
-    // 移除原有的 style 屬性後再加入新 style
-    let cleaned = p1.replace(/\s*style="[^"]*"/, "");
-    return `<img${cleaned} style="max-width:100px; max-height:100px;" />`;
-  });
-  return result;
+  // 擷取 img 標籤
+  const imgTags = result.match(/<img[^>]*>/g) || [];
+  // 移除 img 標籤，取得純文字
+  let textOnly = result.replace(/<img[^>]*>/g, "");
+  let truncatedText = textOnly.length > 20 ? textOnly.substring(0, 20) + "..." : textOnly;
+  const processedImgs = imgTags
+    .map((tag) =>
+      tag.replace(/\s*style="[^"]*"/, "").replace("<img", '<img style="max-width:100px; max-height:100px;"')
+    )
+    .join(" ");
+  return truncatedText + " " + processedImgs;
+};
+
+/**
+ * 轉換貼文內容用於「貼文內容」欄：
+ * 1. 移除 <p> 標籤與所有 <img> 標籤。
+ * 2. 將純文字截取約 20 字（超過則加上省略號）。
+ */
+const transformContentNoImg = (content) => {
+  if (!content) return "";
+  let result = content.replace(/<\/?p>/g, "");
+  result = result.replace(/<img[^>]*>/g, "");
+  return result.length > 20 ? result.substring(0, 20) + "..." : result;
 };
 
 const hidePost = async (postId) => {
@@ -529,3 +546,6 @@ onMounted(fetchPosts);
   font-size: 16px;
 }
 </style>
+
+
+

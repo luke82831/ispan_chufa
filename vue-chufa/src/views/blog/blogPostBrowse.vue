@@ -355,7 +355,9 @@
         flex-direction: column;
     }
     ::v-deep(.htmlContentBox p img){
-        width: 100%;
+        display: block; /* 設為塊級元素 */
+        margin: 0 auto; /* 自動左右邊距 */
+        width: 70%;
         height: auto; /* 高度自动，保持比例 */
     }
     ::v-deep(.htmlContentBox p){

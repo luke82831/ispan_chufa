@@ -366,7 +366,7 @@
         display: flex; /* 啟用Flexbox佈局 */
         flex-direction: column;
     }
-    ::v-deep(.htmlContentBox p img){
+    ::v-deep(.htmlContentBox img){
         width: 100%;
         height: auto; /* 高度自动，保持比例 */
     }

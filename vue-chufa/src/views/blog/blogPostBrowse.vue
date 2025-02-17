@@ -31,15 +31,28 @@
                     <img class="scheduleDataImg" :src="img" alt="Base64 圖片">
                 </div>
                 <div class="scheduleEvents">
+                    <h2>行程日期</h2>
                     <div>
                         <eventButton :hasEvent="hasEvent" :event="event" v-for="event in schedule.events"></eventButton>
                     </div>
-                    <div v-if="hasEvent!=[]" v-for="(eventData,index) in hasEvent[0]" class="postPlaceBox">
-                        <h2 v-if="index!=0">⬇️路程:{{ hasEvent[0][index-1].travelTime }}</h2>
+                    <div v-if="hasEvent!=[]" v-for="(eventData,index) in hasEvent[0]" class="postPlaceBody">
                         <div class="eventTimeBox">
-                            <h2 v-if="index==0">開始時間:{{setStartTime(hasEvent[1],eventData.stayDuration)}}</h2>
-                            <h2 v-else>抵達時間:{{ addTime(hasEvent[0][index-1].travelTime,eventData.stayDuration) }}</h2>
-                            <h2>停留時間:{{eventData.stayDuration}}</h2>
+                            <div v-if="index!=0">
+                                <h2>⬇️路程:</h2>
+                                <h2>{{ hasEvent[0][index-1].travelTime }}</h2>
+                            </div>
+                            <div v-if="index==0">
+                                <h2>開始時間:</h2>
+                                <h2>{{setStartTime(hasEvent[1],eventData.stayDuration)}}</h2>
+                            </div>
+                            <div v-else>
+                                <h2>抵達時間:</h2>
+                                <h2>{{addTime(hasEvent[0][index-1].travelTime,eventData.stayDuration)}}</h2>
+                            </div>
+                            <div>
+                                <h2>停留時間:</h2>
+                                <h2>{{eventData.stayDuration}}</h2>
+                            </div>
                         </div>
                         <postPlaceData :placeId="eventData.placeId"></postPlaceData>
                     </div>
@@ -302,9 +315,6 @@
         justify-content: space-around;
         padding: 25px;
         margin: 20px;
-        border-radius: 12px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
     .scheduleDataText{
         padding: 20px;
@@ -335,6 +345,7 @@
         border-radius: 12px;
         border: 1px solid #e0e0e0;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        background-color: rgb(236, 243, 243);
     }
     .postPlaceBox{
         display: flex; /* 啟用Flexbox佈局 */
@@ -347,8 +358,9 @@
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     }
     .eventTimeBox{
+        width: 180px;
         display: flex;
-        justify-content: space-around;
+        flex-direction: column;
     }
     .htmlContentBox{
         display: flex; /* 啟用Flexbox佈局 */
@@ -362,5 +374,8 @@
         width: 100%;
         word-wrap: break-word;
         height: auto; /* 高度自动，保持比例 */
+    }
+    .postPlaceBody{
+        display: flex; /* 啟用Flexbox佈局 */
     }
 </style>

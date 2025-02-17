@@ -23,7 +23,10 @@
             <tr
               v-for="post in paginatedPosts"
               :key="post.postid"
-              :class="['hover-effect', postStore.getHiddenReason(post.postid) ? 'hidden-row' : '']"
+              :class="[
+                'hover-effect',
+                postStore.getHiddenReason(post.postid) ? 'hidden-row' : '',
+              ]"
             >
               <td>
                 <!-- 如果貼文被隱藏，在上方顯示「已隱藏」標籤 -->
@@ -61,57 +64,75 @@
                       </div>
                       <div class="author-name">
                         <strong>
-                          {{ post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname }}
+                          {{
+                            post.repostDTO
+                              ? post.repostDTO.member.nickname
+                              : post.member.nickname
+                          }}
                           ({{ post.repostDTO?.member?.name || post.member.name }})
                         </strong>
                       </div>
                     </div>
                     <h3>
-                      {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
+                      {{
+                        post.repostDTO
+                          ? post.repostDTO.postTitle
+                          : post.postTitle || "無標題"
+                      }}
                     </h3>
                   </div>
-                  <p class="post-content">{{ post.postContent }}</p>
+                  <!-- 修改：用 v-html 渲染轉換後的內容 -->
+                  <div
+                    class="post-content"
+                    v-html="transformContent(post.postContent)"
+                  ></div>
                 </div>
               </td>
               <td>{{ post.postTitle }}</td>
-              <td>{{ post.postContent }}</td>
+              <!-- 修改：用 v-html 渲染轉換後的內容 -->
+              <td>
+                <div v-html="transformContent(post.postContent)"></div>
+              </td>
               <td>{{ post.postStatus }}</td>
               <td>{{ formatDate(post.postTime) }}</td>
               <td>
                 <div class="action-buttons">
                   <!-- 如果該貼文已隱藏，顯示取消隱藏的綠色按鈕；否則顯示隱藏按鈕 -->
                   <template v-if="postStore.getHiddenReason(post.postid)">
-                    <button class="unhide-btn" @click="unhidePost(post.postid)">取消隱藏</button>
+                    <button class="unhide-btn" @click="unhidePost(post.postid)">
+                      取消隱藏
+                    </button>
                   </template>
                   <template v-else>
                     <button class="hide-btn" @click="hidePost(post.postid)">隱藏</button>
                   </template>
-                  <button class="delete-btn" @click="deletePost(post.postid)">刪除</button>
+                  <button class="delete-btn" @click="deletePost(post.postid)">
+                    刪除
+                  </button>
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      
+
       <!-- 分頁控制 -->
       <div class="pagination">
         <button :disabled="currentPage === 0" @click="currentPage--">上一頁</button>
         <span>第 {{ currentPage + 1 }} 頁 / 共 {{ totalPages }} 頁</span>
-        <button :disabled="currentPage >= totalPages - 1" @click="currentPage++">下一頁</button>
+        <button :disabled="currentPage >= totalPages - 1" @click="currentPage++">
+          下一頁
+        </button>
       </div>
     </div>
   </div>
 </template>
 
-
-
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
-import { usePostStore } from '@/stores/usePostStore';
+import { usePostStore } from "@/stores/usePostStore";
 
 const posts = ref([]);
 const loading = ref(true);
@@ -125,7 +146,7 @@ const fetchPosts = async () => {
     const response = await axios.post("/api/posts/post", {
       sortByLikes: true,
       repost: true,
-      page: 1
+      page: 1,
     });
     posts.value = response.data.postdto || [];
   } catch (error) {
@@ -135,7 +156,8 @@ const fetchPosts = async () => {
   }
 };
 
-const paginatedPosts = computed(() => { // 計算分頁資料
+const paginatedPosts = computed(() => {
+  // 計算分頁資料
   const start = currentPage.value * pageSize;
   return posts.value.slice(start, start + pageSize);
 });
@@ -148,23 +170,37 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString("zh-TW", options);
 };
 
+// 新增轉換函式：移除 <p> 標籤，並為 <img> 標籤加上大小限制
+const transformContent = (content) => {
+  if (!content) return "";
+  // 移除 <p> 與 </p> 標籤
+  let result = content.replace(/<\/?p>/g, "");
+  // 針對 img 標籤，加入 inline style 限制大小為 100px
+  result = result.replace(/<img([^>]*?)>/g, (match, p1) => {
+    // 移除原有的 style 屬性後再加入新 style
+    let cleaned = p1.replace(/\s*style="[^"]*"/, "");
+    return `<img${cleaned} style="max-width:100px; max-height:100px;" />`;
+  });
+  return result;
+};
+
 const hidePost = async (postId) => {
   const { value: reason } = await Swal.fire({
     title: "選擇隱藏原因",
     input: "select",
     inputOptions: {
-      "不當言詞": "不當言詞",
-      "敏感內容": "敏感內容",
-      "隱私問題": "隱私問題",
-      "垃圾內容": "垃圾內容",
+      不當言詞: "不當言詞",
+      敏感內容: "敏感內容",
+      隱私問題: "隱私問題",
+      垃圾內容: "垃圾內容",
       /*========測試========*/
-      "骯髒邪惡又噁心的內容": "骯髒邪惡又噁心的內容",
-      "救命呀~~~救命呀~~~": "救命呀~~~救命呀~~~",
-      "管理員有點鬱悶": "管理員有點鬱悶",
-      "管理員想封鎖你hahaha笑你": "管理員想封鎖你hahaha笑你",
-      "你又騙我": "你又騙我",
-      "我不想看你的程式碼": "我不想看你的程式碼",
-/*========測試========*/
+      // "骯髒邪惡又噁心的內容": "骯髒邪惡又噁心的內容",
+      // "救命呀~~~救命呀~~~": "救命呀~~~救命呀~~~",
+      // "管理員有點鬱悶": "管理員有點鬱悶",
+      // "管理員想封鎖你hahaha笑你": "管理員想封鎖你hahaha笑你",
+      // "你又騙我": "你又騙我",
+      // "我不想看你的程式碼": "我不想看你的程式碼",
+      /*========測試========*/
     },
     inputPlaceholder: "請選擇隱藏原因",
     showCancelButton: true,
@@ -207,9 +243,6 @@ const unhidePost = async (postId) => {
   }
 };
 
-
-
-
 const deletePost = async (postId) => {
   const result = await Swal.fire({
     title: "確定刪除嗎？",
@@ -233,47 +266,62 @@ const deletePost = async (postId) => {
 onMounted(fetchPosts);
 </script>
 
-
-
-
-
 <style scoped>
 /* 與 PlaceManagement 類似的版面設定 */
+/* 外層容器 */
 .post-management {
   width: 100%;
-  max-width: 2000px;
-  margin: 20px auto;
+  max-width: 1500px;
   padding: 30px;
   background: white;
-  border-radius: 20px;
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.2),
-    0 5px 15px rgba(0, 0, 0, 0.15);
-  font-family: "Microsoft JhengHei", sans-serif;
   border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 5px 15px rgba(0, 0, 0, 0.15);
+  font-family: "Microsoft JhengHei", sans-serif;
 }
 
+.page-title {
+  text-align: center;
+  font-size: 28px;
+  color: #343a40;
+  border-bottom: 2px solid #ccc;
+  margin-bottom: 0px;
+}
+
+/* 主要容器 */
 .container {
-  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* 讓內容靠右 */
   padding: 20px;
+  overflow-x: hidden;
+  padding-top: 20px;
+  width: 100%;
 }
 
+/* 表格外的滾動容器 */
 .table-wrapper {
   width: 100%;
+  max-width: 100vw;
   overflow-x: auto;
+  display: block;
   margin-bottom: 20px;
   border-radius: 15px;
 }
 
+/* 表格本身 */
 .post-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
   table-layout: fixed;
 }
 
 .post-table th,
 .post-table td {
-  border: 1px solid #ddd;
+  border-top: 1px solid #ddd; /* 只保留橫向邊框 */
+  border-bottom: 1px solid #ddd; /* 只保留橫向邊框 */
   padding: 8px;
   text-align: center;
   white-space: nowrap;
@@ -281,8 +329,26 @@ onMounted(fetchPosts);
   text-overflow: ellipsis;
 }
 
+/* 去掉縱向邊框 */
+.post-table th:first-child,
+.post-table td:first-child {
+  border-left: none;
+}
+
+.post-table th:last-child,
+.post-table td:last-child {
+  border-right: none;
+}
+
 .post-table th {
   background-color: #f4f4f4;
+}
+
+/* 無資料、載入中文字體 */
+.loading-text,
+.no-data {
+  text-align: center;
+  font-size: 18px;
 }
 
 /* 各欄位寬度調整 */
@@ -304,7 +370,6 @@ onMounted(fetchPosts);
 .action-col {
   width: 150px;
   text-align: center;
-
 }
 
 .hover-effect {
@@ -324,7 +389,6 @@ onMounted(fetchPosts);
   min-width: 80px;
   text-align: center;
   font-size: 14px;
-
 }
 
 /* 確保按鈕留在操作欄 */
@@ -334,7 +398,6 @@ onMounted(fetchPosts);
   align-items: center;
   gap: 30px;
   white-space: nowrap;
-  
 }
 
 .hide-btn {
@@ -385,31 +448,22 @@ onMounted(fetchPosts);
   background-color: #218838;
 }
 
-
-
 .delete-btn:hover {
   background-color: #c82333;
 }
 
-
-/* 分頁樣式 */
+/* 分頁控制 */
 .pagination {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  margin-top: 20px;
   gap: 10px;
-  background: white;
-  padding: 10px 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: auto;
-
+  font-family: "Microsoft JhengHei", sans-serif;
+  text-align: center;
 }
+
 .pagination button {
   padding: 8px 16px;
   border: 2px solid #ccc;
@@ -431,19 +485,12 @@ onMounted(fetchPosts);
   color: #999;
   border: 2px solid #e0e0e0;
   cursor: not-allowed;
+  transform: none;
 }
 .pagination span {
   font-size: 14px;
   color: #555;
   font-weight: bold;
-}
-
-.page-title {
-  text-align: center;
-  font-size: 28px;
-  color: #343a40;
-  border-bottom: 2px solid #ccc;
-  margin-bottom: 20px;
 }
 
 /* 貼文預覽區塊 */
@@ -481,11 +528,4 @@ onMounted(fetchPosts);
   margin: 0;
   font-size: 16px;
 }
-.post-content {
-  font-size: 14px;
-  color: #555;
-  margin-top: 5px;
-}
 </style>
-
-

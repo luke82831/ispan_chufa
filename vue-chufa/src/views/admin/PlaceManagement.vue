@@ -9,16 +9,16 @@
           <thead>
             <tr>
               <th class="number-col">ID</th>
-              <th class="small-col">類型</th>
-              <th class="mid-col">名稱</th>
+              <th class="xsmall-col">類型</th>
+              <th class="small-col">名稱</th>
               <th class="large-col">照片</th>
               <th class="scroll-col">地址</th>
               <th class="xsmall-col">城市</th>
               <th class="xsmall-col">地區</th>
               <th class="phone-col">電話</th>
               <th class="scroll-col">營業時間</th>
-              <th class="number-col">評分</th>
-              <th class="number-col">網址</th>
+              <th class="xsmall-col">評分</th>
+              <th class="xsmall-col">網址</th>
               <th class="xsmall-col">價錢</th>
               <th class="xsmall-col">狀態</th>
               <th class="large-col">更改/刪除</th>
@@ -151,6 +151,7 @@
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios.js";
 import Swal from "sweetalert2";
+import axiosapi from "@/plugins/axios.js";
 
 const places = ref([]);
 const loading = ref(true);
@@ -167,7 +168,7 @@ const fetchPlaces = async (page = 0) => {
 
   loading.value = true;
   try {
-    const response = await axios.get(`/api/places/paged?page=${page}&size=5`);
+    const response = await axios.get(`/api/places/paged?page=${page}&size=4`);
     places.value = response.data.content; // 地點列表
     currentPage.value = response.data.number; // 當前頁碼
     totalPages.value = response.data.totalPages; // 總頁數
@@ -212,7 +213,7 @@ const confirmDelete = async (placeId) => {
 
   if (result.isConfirmed) {
     try {
-      await axios.delete(`/api/places/${placeId}`);
+      await axiosapi.delete(`/api/places/${placeId}`);
       places.value = places.value.filter((place) => place.placeId !== placeId);
       Swal.fire("已刪除", "地點已成功刪除", "success");
     } catch (error) {
@@ -243,7 +244,7 @@ onMounted(fetchPlaces);
 
 .place-management {
   width: 100%;
-  max-width: 2000px;
+  max-width: 1500px;
   padding: 30px;
   background: white;
   border-radius: 15px; /* 使用文章管理的圓角 */
@@ -271,7 +272,8 @@ onMounted(fetchPlaces);
 /*框線*/
 .place-table th,
 .place-table td {
-  border: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
   padding: 8px;
   text-align: center;
   white-space: nowrap;
@@ -345,7 +347,7 @@ onMounted(fetchPlaces);
 
 /* 給數字使用的欄位 */
 .number-col {
-  width: 50px;
+  width: 30px;
 }
 
 /* 滾動區域 */
@@ -361,7 +363,7 @@ onMounted(fetchPlaces);
 
 /* 滾動欄位 */
 .scroll-col {
-  width: 200px;
+  width: 150px;
   max-width: 200px;
 }
 
@@ -532,20 +534,14 @@ onMounted(fetchPlaces);
 /*------------------------分頁功能----------------*/
 
 .pagination {
-  position: fixed; /* ✅ 固定於視窗底部 */
-  bottom: 0px; /* ✅ 與底部保持間距 */
-  left: 50%; /* ✅ 水平置中 */
-  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  margin-top: 20px;
   gap: 10px;
-  background: white; /* ✅ 防止背景透明 */
-  padding: 10px 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* ✅ 增加陰影效果 */
-  z-index: 1000; /* ✅ 確保不被其他元素遮擋 */
-  width: auto; /* ✅ 避免佔滿整個寬度 */
+  font-family: "Microsoft JhengHei", sans-serif;
+  text-align: center;
 }
 
 .pagination button {
@@ -571,6 +567,7 @@ onMounted(fetchPlaces);
   color: #999;
   border: 2px solid #e0e0e0;
   cursor: not-allowed;
+  transform: none;
 }
 
 .pagination span {

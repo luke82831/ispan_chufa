@@ -1,12 +1,6 @@
 <template>
-  <div
-    v-if="isExpanded && scheduleStore.currentSchedule"
-    ref="popup"
-    class="popup"
-  >
-    <h2 class="title">
-      {{ scheduleStore.currentSchedule.tripName }} 的所有行程
-    </h2>
+  <div v-if="isExpanded && scheduleStore.currentSchedule" ref="popup" class="popup">
+    <h2 class="title">{{ scheduleStore.currentSchedule.tripName }} 的所有行程</h2>
 
     <div class="event-list">
       <div
@@ -34,8 +28,7 @@
             <span class="place-name"
               >📍
               {{
-                placeInfo.placeName ||
-                `地點 ID: ${placeInfo.placeId} (載入中...)`
+                placeInfo.placeName || `地點 ID: ${placeInfo.placeId} (載入中...)`
               }}</span
             >
             <p class="place-time">
@@ -56,7 +49,7 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, watch, onMounted, computed } from "vue";
 import { useScheduleStore } from "@/stores/ScheduleStore";
 import { usePlaceStore } from "@/stores/PlaceStore";
 import { useItineraryStore } from "@/stores/ItineraryStore";
@@ -73,30 +66,75 @@ const itineraryStore = useItineraryStore();
 
 const props = defineProps({
   isExpanded: Boolean,
+  selectedDate: String,
+});
+
+// 確保 `tripId` 只有在 `currentSchedule` 存在時才讀取
+const tripId = computed(() => scheduleStore.currentSchedule?.tripId || null);
+
+// 📌 監聽 `selectedDate` 變化，確保切換日期時行程同步
+watch(
+  () => scheduleStore.selectedDate,
+  async (newDate) => {
+    console.log(`🔄 [DEBUG] 切換日期 ${newDate}`);
+
+    if (!newDate) {
+      console.warn(`⚠️ [DEBUG] selectedDate 是 null`);
+      return;
+    }
+
+    if (!scheduleStore.currentSchedule) {
+      console.warn(`⚠️ [DEBUG] currentSchedule 尚未載入`);
+      return;
+    }
+
+    await scheduleStore.fetchScheduleById(scheduleStore.currentSchedule?.tripId);
+    console.log(`✅ [DEBUG] 已載入 ${newDate} 的行程`);
+  },
+  { immediate: true }
+);
+
+onMounted(async () => {
+  if (scheduleStore.selectedDate && tripId.value) {
+    console.log("📌 初次加載行程，日期:", scheduleStore.selectedDate);
+    await scheduleStore.fetchScheduleById(tripId.value);
+  }
 });
 
 // 📌 計算每天的行程時間
 const computedItinerary = (date, itinerary) => {
-  if (!itinerary.length) return [];
+  console.log(`📅 [DEBUG] 計算 ${date} 的行程`);
+
+  if (!itinerary || itinerary.length === 0) {
+    console.warn(`⚠️ [DEBUG] ${date} 沒有行程`);
+    return [];
+  }
 
   let [year, month, day] = date.split("-").map(Number);
-  let [hours, minutes] = getStartTime(date).split(":").map(Number);
+  let startTimeStr = getStartTime(date);
+
+  if (!startTimeStr || startTimeStr === "Invalid Date") {
+    console.error(`❌ [ERROR] 日期 ${date} 沒有正確的 startTime`);
+    return [];
+  }
+
+  console.log(`🕒 [DEBUG] 計算 ${date} 的 startTime = ${startTimeStr}`);
+
+  let [hours, minutes] = startTimeStr.split(":").map(Number);
+  if (isNaN(hours) || isNaN(minutes)) {
+    console.error(`❌ [ERROR] 無法解析 ${date} 的 startTime: ${startTimeStr}`);
+    return [];
+  }
+
   let baseTime = new Date(year, month - 1, day, hours, minutes);
-  let currentTime = new Date(baseTime);
+  console.log(`🕒 [DEBUG] baseTime (${date}) =`, baseTime);
 
-  const routeTimes = itineraryStore.routeTimes[date] || {};
-  const stayTimes = itineraryStore.stayDurations[date] || {};
+  return itinerary.map((place, index) => {
+    let travelTime = index > 0 ? itineraryStore.routeTimes[date]?.[index - 1] || 0 : 0;
+    let stayTime = itineraryStore.stayDurations[date]?.[index] ?? 0;
 
-  let itineraryWithTimes = [];
-
-  itinerary.forEach((place, index) => {
-    let travelTime = index > 0 ? routeTimes[index - 1] || 0 : 0;
-    let stayTime = stayTimes[index] ?? 0;
-
-    let startTime;
-    if (index === 0) {
-      startTime = new Date(currentTime.getTime());
-    } else {
+    let startTime = new Date(baseTime.getTime());
+    if (index > 0) {
       startTime = new Date(itineraryWithTimes[index - 1].endTime);
       startTime.setMinutes(startTime.getMinutes() + travelTime);
     }
@@ -104,16 +142,18 @@ const computedItinerary = (date, itinerary) => {
     let endTime = new Date(startTime.getTime());
     endTime.setMinutes(endTime.getMinutes() + stayTime);
 
-    itineraryWithTimes.push({
+    console.log(
+      `📌 [DEBUG] ${date} 地點 ${index} (${place.placeName}) - startTime: ${startTime}, endTime: ${endTime}`
+    );
+
+    return {
       placeId: place.placeId,
       placeName: getPlaceName(place.placeId),
       stayDuration: stayTime,
       startTime,
       endTime,
-    });
+    };
   });
-
-  return itineraryWithTimes;
 };
 
 // 📌 修正格式化停留時間
@@ -149,8 +189,27 @@ const getPlaceName = (placeId) => {
 };
 
 // 📌 取得每天的 `startTime` 和 `endTime`
-const getStartTime = (date) => itineraryStore.getStartTime(date);
-const getEndTime = (date) => itineraryStore.getEndTime(date);
+const getStartTime = (date) => {
+  const startTime = itineraryStore.startTimes[date];
+  console.log(`🕒 [DEBUG] getStartTime(${date}) =`, startTime);
+
+  if (!startTime) {
+    console.warn(`⚠️ 日期 ${date} 沒有設定出發時間`);
+    return "Invalid Date";
+  }
+  return startTime;
+};
+
+const getEndTime = (date) => {
+  const endTime = itineraryStore.endTimes[date];
+  console.log(`⏳ [DEBUG] getEndTime(${date}) =`, endTime);
+
+  if (!endTime) {
+    console.warn(`⚠️ 日期 ${date} 沒有設定結束時間`);
+    return "Invalid Date";
+  }
+  return endTime;
+};
 </script>
 
 <style scoped>
@@ -160,7 +219,7 @@ const getEndTime = (date) => itineraryStore.getEndTime(date);
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 85%;
+  width: 500px;
   max-width: 50%;
   background: #ffffff;
   border-radius: 12px;

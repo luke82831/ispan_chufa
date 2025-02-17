@@ -140,7 +140,6 @@ function clearMarkers() {
   transform: translateX(-50%);
   width: 400px; /* 固定寬度，可根據需求調整 */
   border-radius: 8px; /* 圓角設計 */
-  z-index: 10; /* 確保在其他元素之上 */
 }
 
 .map {

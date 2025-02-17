@@ -23,9 +23,9 @@
       />
 
       <!-- 固定在圖片右下角的按鈕 -->
-      <button @click="toggleExpanded" class="toggle-button fixed-button">
+      <!-- <button @click="toggleExpanded" class="toggle-button fixed-button">
         {{ isExpanded ? "收合行程" : "查看完整行程" }}
-      </button>
+      </button> -->
 
       <div class="list-container">
         <!-- 傳遞 isExpanded 狀態給子組件 -->
@@ -41,9 +41,7 @@
 
     <div class="date-tabs-container">
       <!-- 左側箭頭 -->
-      <button class="arrow-button arrow-left" @click="scrollTabs('left')">
-        &lt;
-      </button>
+      <button class="arrow-button arrow-left" @click="scrollTabs('left')">&lt;</button>
 
       <!-- 日期滾動區 -->
       <div class="date-tabs" ref="tabsContainer">
@@ -61,9 +59,7 @@
       <button class="add-day-btn" @click="addOneMoreDay">＋</button>
 
       <!-- 右側箭頭 -->
-      <button class="arrow-button arrow-right" @click="scrollTabs('right')">
-        &gt;
-      </button>
+      <button class="arrow-button arrow-right" @click="scrollTabs('right')">&gt;</button>
     </div>
 
     <!-- 傳遞選擇的日期到 PlanningDay 組件 -->
@@ -198,10 +194,7 @@ const changeDate = (direction) => {
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (
-    direction === "next" &&
-    currentIndex < dateRange.value.length - 1
-  ) {
+  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };

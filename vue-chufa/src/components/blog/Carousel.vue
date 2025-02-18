@@ -14,7 +14,7 @@
       <img :src="getFirstImage(post.postContent)" class="carousel-image" />
       <div class="carousel-content">
         <h2>{{ post.postTitle }}</h2>
-        <p>{{ getTextPreview(post.postContent) }}</p>
+        <p>{{ getTextPreview(post.postContent,20) }}</p>
       </div>
     </div>
 
@@ -47,7 +47,8 @@ const posts = ref([]);
 const currentIndex = ref(0);
 let autoSlideInterval = null;
 
-const postIds = ref([20067, 20068, 20069]); // 在內部管理 postIds
+
+const postIds = ref([35,37,38,39,40]); // 在內部管理 postIds
 const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 
@@ -165,7 +166,7 @@ h1 {
 .carousel {
   position: relative;
   width: 100%;
-  max-width: 1200px; /* 调整轮播容器的最大宽度 */
+  max-width: 100%; /* 调整轮播容器的最大宽度 */
   margin: 0 auto;
   overflow: hidden;
 }

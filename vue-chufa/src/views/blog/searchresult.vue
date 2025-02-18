@@ -534,6 +534,14 @@ export default {
   background-color: #000; /* 黑色下劃線 */
   border-radius: 2px;
 }
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  flex:1;
+}
 .pagination {
   display: flex;
   justify-content: center;

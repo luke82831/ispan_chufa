@@ -1,5 +1,6 @@
 <template>
   <div class="main-container">
+    <div class="content">
     <div>
       <Carousel />
     </div>
@@ -268,6 +269,7 @@
       <p>© Chufa, Inc. 2025</p>
     </div>
   </footer>
+</div>
 </template>
 
 <script>
@@ -325,11 +327,11 @@ export default {
     const places = ref([
       { id: 1, name: "台北市" },
       { id: 2, name: "新北市" },
-      { id: 3, name: "桃園市" },
+      { id: 3, name: "南投縣" },
       { id: 4, name: "台中市" },
       { id: 5, name: "臺南市" },
       { id: 6, name: "高雄市" },
-      { id: 7, name: "宜蘭縣" },
+      { id: 7, name: "台東市" },
       { id: 8, name: "花蓮縣" },
     ]);
 
@@ -414,7 +416,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 100,
+          size: 12,
           checklike: member.value.userid,
           repost: true,
         };
@@ -673,6 +675,10 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   height: 100vh;
+  flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 保證頁面至少佔滿視口 */
 }
 
 /* Tab 容器 */
@@ -760,6 +766,7 @@ export default {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   padding: 20px;
+  flex:1;
 }
 
 /* 帖子卡片样式 */
@@ -980,7 +987,7 @@ h3 {
 }
 
 .pagination button:hover {
-  background-color: #ff4757;
+  background-color: #2973b2;
   color: white;
 }
 
@@ -995,11 +1002,21 @@ h3 {
   color: #333;
 }
 
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
 footer {
   background-color: #f2efe7;
   padding: 20px;
   font-family: Arial, sans-serif;
   color: #121322;
+  margin-top: auto;
+  bottom: 0;
+  width: 150%;
+  margin-left: -25%; 
 }
 
 .footer-content {

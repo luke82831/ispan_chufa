@@ -30,8 +30,8 @@
           <div class="follow-section">
             <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
               <p class="follow-count">
-                <strong>關注:</strong> {{ followersCount }} <strong>粉絲:</strong>
-                {{ followingCount }}
+                <strong>關注:</strong> {{ followingCount }} <strong>粉絲:</strong>
+                {{ followersCount }}
               </p>
             </router-link>
           </div>
@@ -80,7 +80,7 @@
     <p v-else>沒有貼文。</p>
 
     <div v-else>
-      <p>載入中...</p>
+      <p>沒有貼文。.</p>
     </div>
   </div>
 </template>
@@ -299,7 +299,7 @@ export default {
 
 /* 會員資料區域 */
 .profile-container {
-  background-color: rgba(11, 144, 238, 0.2);
+  background-color: #F2efe7;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -403,7 +403,7 @@ export default {
 
 /* 強調的文字 */
 .info strong {
-  color: #007bff; /* Instagram 風格的藍色 */
+  color: #48a6a7; /* Instagram 風格的藍色 */
 }
 
 /* 去除連結的下劃線 */
@@ -422,7 +422,7 @@ export default {
 
 /* 強調文字顏色 */
 .follow-link p strong {
-  color: #007bff; /* 可以根據需要調整顏色 */
+  color: #48a6a7; /* 可以根據需要調整顏色 */
 }
 
 /* 懸停時放大並靠近 */
@@ -442,7 +442,7 @@ export default {
   padding: 12px 30px;
   border: none;
   border-radius: 40px;
-  background-color: #0d5ad7;
+  background-color: #9ACBD0;
   color: white;
   cursor: pointer;
   font-size: 16px;
@@ -453,7 +453,7 @@ export default {
 }
 
 .follow-button:hover {
-  background-color: #2980b9;
+  background-color: #2973B2;
 }
 
 .follow-section {
@@ -485,12 +485,12 @@ export default {
 }
 
 .tabs-container button:hover {
-  color: #007bff;
+  color: #48a6a7;
 }
 
 .tabs-container button.active {
-  color: #007bff;
-  border-bottom: 2px solid #007bff;
+  color: #2973B2;
+  border-bottom: 2px solid #9ACBD0;
 }
 
 /* 貼文區域 */

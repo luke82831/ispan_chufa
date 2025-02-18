@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import com.ispan.chufa.service.EventXPlaceService;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api/eventXPlace")
 public class EventXPlaceController {
 
@@ -52,6 +54,27 @@ public class EventXPlaceController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("行程更新失敗：" + e.getMessage());
         }
     }
+    
+    @PutMapping("/{tripId}/batch")
+    public ResponseEntity<?> updateMultipleEventXPlaces(@PathVariable Long tripId, @RequestBody List<ItineraryRequest> requests) {
+        try {
+            if (requests == null || requests.isEmpty()) {
+                return ResponseEntity.badRequest().body("⚠️ 提供的行程列表為空");
+            }
+
+            System.out.println("🚀 批次更新行程，Trip ID: " + tripId + "，共 " + requests.size() + " 筆");
+
+            eventXPlaceService.updateOrCreateMultipleEventXPlaces(tripId, requests);
+
+            return ResponseEntity.ok("✅ 所有行程地點更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();  // 🔍 印出錯誤日誌
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("❌ 行程更新失敗：" + e.getMessage());
+        }
+    }
+
+
 }
 
 

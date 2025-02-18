@@ -33,9 +33,7 @@ const routes = [
     component: () => import("@/views/cssAnimations.vue"),
   },
   //主頁
-  { path: "/", 
-    name:"Home",
-    component: Home },
+  { path: "/", name: "Home", component: Home },
   //會員系統
   {
     path: "/secure/Login",
@@ -152,8 +150,8 @@ const routes = [
   },
   //路由
   {
-    path: '/post/:id',
-    name: 'PostDetail',
+    path: "/post/:id",
+    name: "PostDetail",
     component: PostDetail,
     props: true,
   },
@@ -163,20 +161,20 @@ const routes = [
     component: () => import("@/views/blog/followblog.vue"), // 指向 Role 組件
   },
   {
-    path: '/blog/blogprofile/:bloghomeid',  // 動態路由
-    name: 'blogprofile',
-    component: blogprofile,  // 這是顯示用戶資料的頁面
-    props: true,  // 這樣可以讓路由的參數傳遞給元件
+    path: "/blog/blogprofile/:bloghomeid", // 動態路由
+    name: "blogprofile",
+    component: blogprofile, // 這是顯示用戶資料的頁面
+    props: true, // 這樣可以讓路由的參數傳遞給元件
   },
   {
-    path: '/blog/followlist/:followid',  // 動態路由
-    name: 'followlist',
-    component: followlist,  // 這是顯示用戶資料的頁面
-    props: true,  // 這樣可以讓路由的參數傳遞給元件
+    path: "/blog/followlist/:followid", // 動態路由
+    name: "followlist",
+    component: followlist, // 這是顯示用戶資料的頁面
+    props: true, // 這樣可以讓路由的參數傳遞給元件
   },
   {
-    path: '/search-results',
-    name: 'SearchResults',
+    path: "/search-results",
+    name: "SearchResults",
     component: searchresult,
     props: (route) => ({ query: route.query }), // 将查询参数作为 props 传递
   },
@@ -225,7 +223,7 @@ const router = createRouter({
 export const isSearch = ref(false);
 router.afterEach((to, from) => {
   // 這裡可以根據路徑進行條件判斷
-  if (to.path === '/') {
+  if (to.path === "/") {
     // 假設您有一個全局變數 isSearch，可以在這裡將其設置為 false
     isSearch.value = false;
   }

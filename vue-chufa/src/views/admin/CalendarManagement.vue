@@ -34,7 +34,7 @@
           </thead>
           <tbody>
             <!-- 直接用 calendars 取代 paginatedCalendars -->
-            <tr v-for="calendar in calendars" :key="calendar.date">
+            <tr v-for="calendar in calendars" :key="calendar.date" class="hover-effect">
               <td>{{ calendar.date }}</td>
               <td>{{ calendar.week }}</td>
               <td>{{ calendar.isHoliday ? '是' : '否' }}</td>
@@ -122,7 +122,6 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-bottom: 10px;
 }
 
 /* 確保 Import JSON 按鈕固定在右側 */
@@ -157,7 +156,7 @@ onMounted(() => {
 }
 
 .import-btn:hover {
-  background-color: #0056b3;
+  background-color: #2973B2;
 }
 
 .container {
@@ -197,4 +196,15 @@ onMounted(() => {
   font-size: 18px;
   padding: 20px;
 }
+
+/* 新增部分：滑鼠移入變淺綠色的 hover 效果 */
+.hover-effect {
+  transition: background-color 0.1s ease-in-out;
+  position: relative;
+}
+
+.hover-effect:hover {
+  background-color: #f0f8e6 !important;
+}
+
 </style>

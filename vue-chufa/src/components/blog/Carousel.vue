@@ -14,7 +14,7 @@
       <img :src="getFirstImage(post.postContent)" class="carousel-image" />
       <div class="carousel-content">
         <h2>{{ post.postTitle }}</h2>
-        <p>{{ getTextPreview(post.postContent) }}</p>
+        <p>{{ getTextPreview(post.postContent,20) }}</p>
       </div>
     </div>
 

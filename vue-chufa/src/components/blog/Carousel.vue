@@ -47,7 +47,8 @@ const posts = ref([]);
 const currentIndex = ref(0);
 let autoSlideInterval = null;
 
-const postIds = ref([104,105,106,107,108,109,110,111,112,113,114,115]); // 在內部管理 postIds
+
+const postIds = ref([35,37,38,39,40]); // 在內部管理 postIds
 const postIdsInput = ref(postIds.value.join(",")); // 輸入框預設值
 const router = useRouter();
 
@@ -165,7 +166,7 @@ h1 {
 .carousel {
   position: relative;
   width: 100%;
-  max-width: 1200px; /* 调整轮播容器的最大宽度 */
+  max-width: 100%; /* 调整轮播容器的最大宽度 */
   margin: 0 auto;
   overflow: hidden;
 }

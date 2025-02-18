@@ -3,20 +3,24 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
-        <!-- <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" /> -->
-        <img 
-          :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePic"
-          alt="Profile Picture" 
-          v-if="member.profilePicture || defaultProfilePic" 
-          class="profile-picture" />
+        <img
+          :src="
+            member.profile_picture
+              ? member.profile_picture
+              :  defaultProfilePic
+          "
+          alt="Profile Picture"
+          v-if="member.profile_picture || defaultProfilePic"
+          class="profile-picture"
+        />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
           <p><strong></strong> {{ member.bio }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注:</strong> {{ followersCount }}    
-            <strong>粉絲:</strong> {{ followingCount }}</p>
+            <p><strong>關注:</strong> {{ followingCount }}    
+            <strong>粉絲:</strong> {{ followersCount }}</p>
           </router-link>
         </div>
       </div>
@@ -54,7 +58,7 @@
       </div>
     </div>
     <div v-else class="loading">
-      <p>載入中...</p>
+      <p>沒有貼文</p>
     </div>
   </div>
 </template>
@@ -234,7 +238,7 @@ export default {
   font-size: 1.8em;
   color: #444;
   margin-bottom: 20px;
-  border-bottom: 2px solid #0d74e2;
+  border-bottom: 2px solid #2973B2;
   padding-bottom: 10px;
   font-weight: 600;
 }
@@ -259,7 +263,7 @@ export default {
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #0000C6;
+  border: 3px solid #48a6a7;
 }
 
 .info p {
@@ -268,12 +272,12 @@ export default {
   color: #555;
 }
 .info strong{
-  color: #093b8c;
+  color: #2973B2;
 }
 
 .follow-link {
   text-decoration: none;
-  color: #0a4c93;
+  color: #48a6a7;
   font-weight: 500;
 }
 
@@ -302,7 +306,7 @@ export default {
 }
 
 .tabs-container button:hover {
-  background: rgba(0, 123, 255, 0.1);
+  background: #2973B2;
   color: #6da6de;
 }
 

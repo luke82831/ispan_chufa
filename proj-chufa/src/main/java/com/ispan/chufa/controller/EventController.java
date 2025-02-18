@@ -26,6 +26,7 @@ import com.ispan.chufa.repository.ScheduleRepository;
 import com.ispan.chufa.service.EventService;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @RequestMapping("/api")
 public class EventController {
 

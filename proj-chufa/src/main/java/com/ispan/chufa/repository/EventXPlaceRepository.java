@@ -1,6 +1,5 @@
 package com.ispan.chufa.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,28 +38,20 @@ public interface EventXPlaceRepository extends JpaRepository<EventXPlaceBean, Lo
     @Query("DELETE FROM EventXPlaceBean ep WHERE ep.event.eventId = :eventId")
     void deleteByEventId(@Param("eventId") Long eventId);
     
- // 🔹 查詢特定 `eventId` 和 `event.calendar.date`
-    List<EventXPlaceBean> findByEvent_EventIdAndEvent_Calendar_Date(Long eventId, LocalDate date);
-
-    // 🔹 刪除當天所有不在 `incomingEventmappingIds` 內的行程
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM EventXPlaceBean e WHERE e.event.eventId = :eventId AND e.eventmappingId NOT IN (:eventmappingIds)")
+    void deleteByEventIdAndNotIn(@Param("eventId") Long eventId, @Param("eventmappingIds") List<Long> eventmappingIds);
+   
+    // 刪除 `eventId` 內不在 `incomingEventmappingIds` 內的地點
     @Modifying
     @Transactional
-    @Query("""
-        DELETE FROM EventXPlaceBean e
-        WHERE e.event.eventId = :eventId
-        AND e.event.calendar.date = :date
-        AND NOT EXISTS (
-            SELECT 1 FROM EventXPlaceBean ep WHERE ep.eventmappingId IN :ids 
-            AND ep.event.eventId = e.event.eventId 
-            AND ep.event.calendar.date = e.event.calendar.date
-        )
-    """)
-    void deleteByEventIdAndEventCalendarDateAndNotIn(@Param("eventId") Long eventId, @Param("date") LocalDate date, @Param("ids") List<Long> ids);
+    @Query("DELETE FROM EventXPlaceBean e WHERE e.event.eventId = :eventId AND e.eventmappingId NOT IN :ids")
+    void deleteByEvent_EventIdAndNotIn(@Param("eventId") Long eventId, @Param("ids") List<Long> ids);
 
-    // 🔹 如果該天沒有行程，則刪除該 `eventId` 當天所有行程
+    // 如果 `incomingEventmappingIds` 為空，則刪除該 `eventId` 內所有地點
     @Modifying
     @Transactional
-    @Query("DELETE FROM EventXPlaceBean e WHERE e.event.eventId = :eventId AND e.event.calendar.date = :date")
-    void deleteByEventIdAndEventCalendarDate(@Param("eventId") Long eventId, @Param("date") LocalDate date);
-
+    @Query("DELETE FROM EventXPlaceBean e WHERE e.event.eventId = :eventId")
+    void deleteByEvent_EventId(@Param("eventId") Long eventId);
 }

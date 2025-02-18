@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useItineraryStore } from "@/stores/ItineraryStore";
+import { useEventStore } from "@/stores/EventStore";
 import axiosapi from "@/plugins/axios"; // 全域 axiosapi
 
 export const useEventPlaceStore = defineStore("eventPlaceStore", {
@@ -141,56 +142,69 @@ export const useEventPlaceStore = defineStore("eventPlaceStore", {
     //     throw error; // 讓 `onBeforeRouteLeave` 決定如何處理錯誤
     //   }
     // },
-    async saveItineraryToBackend(eventId, selectedDates) {
-      if (!eventId || !selectedDates || selectedDates.length === 0) {
-        console.warn("⚠️ eventId 或 selectedDates 無效，無法儲存");
+    async saveItineraryToBackend(tripId, selectedDates) {
+      if (!tripId || !selectedDates || selectedDates.length === 0) {
+        console.warn("⚠️ tripId 或 selectedDates 無效，無法儲存");
         return;
       }
 
       const itineraryStore = useItineraryStore();
+      const eventStore = useEventStore(); // 🔥 確保使用 eventStore
 
-      // 🔹 確保 `selectedDates` 為陣列
-      const dates = Array.isArray(selectedDates) ? selectedDates : [selectedDates];
+      // 🔹 確保 `selectedDates` 是陣列
+      const dates = Array.isArray(selectedDates)
+        ? selectedDates
+        : [selectedDates];
 
       // 🔹 生成所有日期的行程數據
-      const formattedData = dates.map((date) => {
-        const formattedStartTime = this.formatTime(itineraryStore.getStartTime(date));
-        const formattedEndTime = this.formatTime(itineraryStore.getEndTime(date));
+      const formattedData = dates
+        .map((date) => {
+          const eventId = eventStore.getEventIdByDate(date); // ✅ 正確取得 `eventId`
 
-        return {
-          eventId: eventId,
-          date: date,
-          startTime: formattedStartTime,
-          endTime: formattedEndTime,
-          notes: "",
+          if (!eventId) {
+            console.warn(`⚠️ 找不到 ${date} 對應的 eventId，跳過該天儲存`);
+            return null;
+          }
 
-          places: itineraryStore
-            .getItineraryForDay(date)
-            .map((place, index) => {
-              const travelTimeRaw = itineraryStore.getRouteTime(date, index) ?? "00:00:00";
-              const stayDurationRaw = itineraryStore.getStayDuration(date, index) ?? "00:00:00";
+          console.log(`📅 確認對應: 日期=${date}, 取得的 eventId=${eventId}`);
 
-              return {
+          return {
+            eventId: eventId, // 🔥 這裡確保 `eventId` 來自 eventStore
+            date: date,
+            startTime: this.formatTime(itineraryStore.getStartTime(date)),
+            endTime: this.formatTime(itineraryStore.getEndTime(date)),
+            notes: "",
+
+            places: itineraryStore
+              .getItineraryForDay(date)
+              .map((place, index) => ({
                 eventmappingId: place.eventmappingId ?? null,
                 placeId: place.placeId,
                 placeOrder: index + 1,
-                travelTime: this.formatTime(travelTimeRaw), // ✅ 確保格式正確
-                stayDuration: this.formatTime(stayDurationRaw),
+                travelTime: this.formatTime(
+                  itineraryStore.getRouteTime(date, index) ?? "00:00:00"
+                ),
+                stayDuration: this.formatTime(
+                  itineraryStore.getStayDuration(date, index) ?? "00:00:00"
+                ),
                 notes: place.notes || "",
-              };
-            }),
-        };
-      });
+              })),
+          };
+        })
+        .filter((data) => data !== null); // 🔥 過濾掉無效的資料
 
-      console.log("🚀 發送到後端的資料:", JSON.stringify(formattedData, null, 2));
+      console.log(
+        "🚀 發送到後端的資料:",
+        JSON.stringify(formattedData, null, 2)
+      );
 
       try {
         console.log("🚀 發送 API 更新行程...");
-
-        // 🔹 這裡可能需要後端 API 支援批量更新
-        const response = await axiosapi.put(`/api/eventXPlace/${eventId}/batch`, formattedData, {
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await axiosapi.put(
+          `/api/eventXPlace/${tripId}/batch`,
+          formattedData,
+          { headers: { "Content-Type": "application/json" } }
+        );
 
         if (response.status !== 200) throw new Error("API 回應錯誤");
 
@@ -198,10 +212,12 @@ export const useEventPlaceStore = defineStore("eventPlaceStore", {
 
         // 🔹 清除所有天數的 Pinia 暫存資料
         dates.forEach((date) => itineraryStore.clearDayData(date));
-
       } catch (error) {
-        console.error("❌ 儲存行程時發生錯誤", error.response?.data || error.message);
-        throw error; // 讓 `onBeforeRouteLeave` 決定如何處理錯誤
+        console.error(
+          "❌ 儲存行程時發生錯誤",
+          error.response?.data || error.message
+        );
+        throw error;
       }
     },
 

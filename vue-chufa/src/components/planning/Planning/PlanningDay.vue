@@ -6,7 +6,11 @@
 
     <div class="departure-time">
       <label>出發時間：</label>
-      <input type="time" v-model="departureTime" @change="updateDepartureTime" />
+      <input
+        type="time"
+        v-model="departureTime"
+        @change="updateDepartureTime"
+      />
     </div>
 
     <div v-if="itineraryForSelectedDay.length" class="itinerary-list">
@@ -21,7 +25,9 @@
           <ul class="itinerary-item-list">
             <li class="itinerary-item">
               <!-- 刪除按鈕 -->
-              <button @click="deletePlace(index)" class="delete-button">✖</button>
+              <button @click="deletePlace(index)" class="delete-button">
+                ✖
+              </button>
 
               <div class="itinerary-details">
                 <div class="stay-time-header">
@@ -40,7 +46,12 @@
                     @click.prevent="editStayTime(index)"
                     class="stay-duration-link"
                   >
-                    {{ itineraryStore.getStayDuration(formattedSelectedDate, index) }}
+                    {{
+                      itineraryStore.getStayDuration(
+                        formattedSelectedDate,
+                        index
+                      )
+                    }}
                     分鐘
                   </a>
 
@@ -72,7 +83,10 @@
             </li>
 
             <!-- 在行程之間插入 RouteTime -->
-            <div v-if="index < itineraryForSelectedDay.length - 1" class="route-time">
+            <div
+              v-if="index < itineraryForSelectedDay.length - 1"
+              class="route-time"
+            >
               <RouteTime :date="formattedSelectedDate" :index="index" />
             </div>
           </ul>
@@ -120,8 +134,15 @@ onMounted(async () => {
 
   console.log("🚀 載入行程...");
 
+  if (Object.keys(itineraryStore.itineraryDates).length > 0) {
+    console.log("✅ `Pinia` 內已有行程，跳過重新載入");
+    return;
+  }
+
   await scheduleStore.fetchScheduleById(scheduleStore.currentSchedule.tripId);
-  await itineraryStore.loadAllItineraryData(scheduleStore.currentSchedule.tripId);
+  await itineraryStore.loadAllItineraryData(
+    scheduleStore.currentSchedule.tripId
+  );
 
   // 🔹 嘗試從 `eventStore` 取得 `eventId`
   const event = await eventStore.fetchEventByDate(
@@ -144,8 +165,11 @@ const formattedSelectedDate = computed(() => {
   if (cleanedDate.includes("-")) return cleanedDate;
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
   return `${baseYear}-${month}-${day}`;
 });
 
@@ -160,7 +184,10 @@ watch(
 const convertTimeToMinutes = (timeString) => {
   if (!timeString) return 0; // 預設為 0 分鐘
 
-  if (typeof timeString === "string" && timeString.match(/^\d{2}:\d{2}:\d{2}$/)) {
+  if (
+    typeof timeString === "string" &&
+    timeString.match(/^\d{2}:\d{2}:\d{2}$/)
+  ) {
     const [hours, minutes] = timeString.split(":").map(Number);
     return hours * 60 + minutes;
   }
@@ -318,7 +345,9 @@ const updateTempStayTime = (index, event) => {
   if (!date) return;
 
   // 讀取使用者輸入的數值
-  const newDuration = isNaN(event.target.value) ? 0 : Number(event.target.value);
+  const newDuration = isNaN(event.target.value)
+    ? 0
+    : Number(event.target.value);
 
   // 即時更新 tempStayDurations，確保畫面同步變更
   itineraryStore.setTempStayDuration(date, index, newDuration);
@@ -394,6 +423,7 @@ onBeforeRouteLeave(async (to, from, next) => {
     return;
   }
 
+  // 🔹 確保 `itineraries` 是一個物件，避免 `Cannot convert undefined or null to object`
   const allDates = Object.keys(itineraryStore.itineraryDates ?? {});
 
   // 🔹 如果 `itineraries` 內沒有行程，直接離開
@@ -425,7 +455,10 @@ onBeforeRouteLeave(async (to, from, next) => {
 
   try {
     console.log("🚀 嘗試儲存所有行程到後端...");
-    await eventPlaceStore.saveItineraryToBackend(eventData.value.eventId, allDates);
+    await eventPlaceStore.saveItineraryToBackend(
+      scheduleStore.currentSchedule.tripId,
+      allDates
+    );
     console.log("✅ 所有行程變更儲存成功");
 
     hasUnsavedChanges.value = false;

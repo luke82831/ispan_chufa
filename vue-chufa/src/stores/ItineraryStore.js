@@ -346,5 +346,15 @@ export const useItineraryStore = defineStore("itinerary", {
       this.$reset();
       console.log("🗑️ 已重置所有行程數據");
     },
+
+    getCorrectDate(date) {
+      // 🔥 確保 `date` 為 `yyyy-MM-dd` 格式
+      if (typeof date === "string" && date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return date;
+      }
+
+      console.warn("⚠️ 非法的 date 值，回傳預設值:", date);
+      return ""; // ✅ 避免錯誤的日期值進入後端
+    },
   },
 });

@@ -30,8 +30,8 @@
           <div class="follow-section">
             <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
               <p class="follow-count">
-                <strong>關注:</strong> {{ followersCount }} <strong>粉絲:</strong>
-                {{ followingCount }}
+                <strong>關注:</strong> {{ followingCount }} <strong>粉絲:</strong>
+                {{ followersCount }}
               </p>
             </router-link>
           </div>

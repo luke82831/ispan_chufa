@@ -3,20 +3,24 @@
     <div v-if="member" class="profile-container">
       <h2 class="section-title">會員資料</h2>
       <div class="profile-details">
-        <!-- <img :src="member.profile_picture" alt="Profile Picture" v-if="member.profile_picture" class="profile-picture" /> -->
-        <img 
-          :src="member.profilePicture ? 'data:image/jpeg;base64,' + member.profilePicture :  defaultProfilePic"
-          alt="Profile Picture" 
-          v-if="member.profilePicture || defaultProfilePic" 
-          class="profile-picture" />
+        <img
+          :src="
+            member.profile_picture
+              ? member.profile_picture
+              :  defaultProfilePic
+          "
+          alt="Profile Picture"
+          v-if="member.profile_picture || defaultProfilePic"
+          class="profile-picture"
+        />
         <div class="info">
           <p><strong>姓名:</strong> {{ member.name }}</p>
           <p><strong>Email:</strong> {{ member.email }}</p>
           <p><strong>生日:</strong> {{ formatDate(member.birth) }}</p>
           <p><strong></strong> {{ member.bio }}</p>
           <router-link :to="`/blog/followlist/${member.userid}`" class="follow-link">
-            <p><strong>關注:</strong> {{ followersCount }}    
-            <strong>粉絲:</strong> {{ followingCount }}</p>
+            <p><strong>關注:</strong> {{ followingCount }}    
+            <strong>粉絲:</strong> {{ followersCount }}</p>
           </router-link>
         </div>
       </div>

@@ -327,11 +327,11 @@ export default {
     const places = ref([
       { id: 1, name: "台北市" },
       { id: 2, name: "新北市" },
-      { id: 3, name: "桃園市" },
+      { id: 3, name: "南投縣" },
       { id: 4, name: "台中市" },
       { id: 5, name: "臺南市" },
       { id: 6, name: "高雄市" },
-      { id: 7, name: "宜蘭縣" },
+      { id: 7, name: "台東市" },
       { id: 8, name: "花蓮縣" },
     ]);
 
@@ -416,7 +416,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 100,
+          size: 12,
           checklike: member.value.userid,
           repost: true,
         };

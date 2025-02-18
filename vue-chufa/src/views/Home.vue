@@ -1,275 +1,308 @@
 <template>
   <div class="main-container">
     <div class="content">
-    <div>
-      <Carousel />
-    </div>
-    <div>
-      <div class="tabs-container">
-        <button
-          class="tab"
-          :class="{ active: selectedPlace === null }"
-          @click="switchPlace(null)"
-        >
-          首頁
-        </button>
-        <button
-          class="tab"
-          :class="{ active: selectedPlace === 'follow' }"
-          @click="switchPlace('follow')"
-          v-if="userStore.isLoggedIn"
-        >
-          關注
-        </button>
-        <button
-          v-for="place in places"
-          :key="place.id"
-          class="tab"
-          :class="{ active: selectedPlace === place.name }"
-          @click="switchPlace(place.name)"
-        >
-          {{ place.name }}
-        </button>
-
-        <div class="sort-select-container">
-          <select
-            id="sortSelect"
-            v-model="sortBy"
-            @change="fetchPosts"
-            class="border p-2 rounded"
+      <div>
+        <Carousel />
+      </div>
+      <div>
+        <div class="tabs-container">
+          <button
+            class="tab"
+            :class="{ active: selectedPlace === null }"
+            @click="switchPlace(null)"
           >
-            <option value="likes">熱度排序</option>
-            <option value="time">時間排序</option>
-          </select>
+            首頁
+          </button>
+          <button
+            class="tab"
+            :class="{ active: selectedPlace === 'follow' }"
+            @click="switchPlace('follow')"
+            v-if="userStore.isLoggedIn"
+          >
+            關注
+          </button>
+          <button
+            v-for="place in places"
+            :key="place.id"
+            class="tab"
+            :class="{ active: selectedPlace === place.name }"
+            @click="switchPlace(place.name)"
+          >
+            {{ place.name }}
+          </button>
+
+          <div class="sort-select-container">
+            <select
+              id="sortSelect"
+              v-model="sortBy"
+              @change="fetchPosts"
+              class="border p-2 rounded"
+            >
+              <option value="likes">熱度排序</option>
+              <option value="time">時間排序</option>
+            </select>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- 貼文網格布局 -->
-    <div class="posts-grid" v-if="posts.length > 0">
-      <div
-        v-for="post in visiblePosts"
-        :key="post.postid"
-        class="post-card"
-        @click="navigateToDetail(post, $event)"
-      >
-        <!-- REPOST 版型處理 -->
-        <div v-if="post.repost" class="repost-header">
-          <div class="interaction-info">
-            <div class="repost-profile-container">
-              <img
-                v-if="post.member?.profilePicture"
-                :src="'data:image/jpeg;base64,' + post.member.profilePicture"
-                alt="Interaction Profile Picture"
-                class="profile-picture small-profile"
-              />
-              <div v-else>
+      <!-- 貼文網格布局 -->
+      <div class="posts-grid" v-if="posts.length > 0">
+        <div
+          v-for="post in visiblePosts"
+          :key="post.postid"
+          class="post-card"
+          @click="navigateToDetail(post, $event)"
+        >
+          <!-- REPOST 版型處理 -->
+          <div v-if="post.repost" class="repost-header">
+            <div class="interaction-info">
+              <div class="repost-profile-container">
                 <img
-                  :src="defaultProfilePic"
-                  alt="Default Profile Picture"
+                  v-if="post.member?.profilePicture"
+                  :src="'data:image/jpeg;base64,' + post.member.profilePicture"
+                  alt="Interaction Profile Picture"
                   class="profile-picture small-profile"
                 />
+                <div v-else>
+                  <img
+                    :src="defaultProfilePic"
+                    alt="Default Profile Picture"
+                    class="profile-picture small-profile"
+                  />
+                </div>
               </div>
+              <p class="interaction-name">
+                {{
+                  post.member.nickname ? post.member.nickname : post.member.name
+                }}
+                轉發貼文
+              </p>
             </div>
-            <p class="interaction-name">
-              {{ post.member.nickname ? post.member.nickname : post.member.name }}
-              轉發貼文
-            </p>
           </div>
-        </div>
 
-        <!-- 作者信息 -->
-        <div class="author-info">
-          <div class="author-header">
-            <div class="profile-picture-container">
-              <router-link :to="`/blog/blogprofile/${post.member.userid}`" @click.stop>
-                <img
+          <!-- 作者信息 -->
+          <div class="author-info">
+            <div class="author-header">
+              <div class="profile-picture-container">
+                <router-link
+                  :to="`/blog/blogprofile/${post.member.userid}`"
+                  @click.stop
+                >
+                  <img
+                    v-if="
+                      post.repostDTO
+                        ? post.repostDTO.member?.profilePicture
+                        : post.member?.profilePicture
+                    "
+                    :src="
+                      'data:image/jpeg;base64,' +
+                      (post.repostDTO?.member?.profilePicture ??
+                        post.member.profilePicture)
+                    "
+                    alt="Author's Profile Picture"
+                    class="profile-picture"
+                  />
+                  <img
+                    v-else
+                    :src="defaultProfilePic"
+                    alt="Default Profile Picture"
+                    class="profile-picture"
+                  />
+                </router-link>
+              </div>
+              <div class="author-name">
+                <strong
                   v-if="
                     post.repostDTO
-                      ? post.repostDTO.member?.profilePicture
-                      : post.member?.profilePicture
+                      ? post.repostDTO.member.nickname
+                      : post.member.nickname
                   "
-                  :src="
-                    'data:image/jpeg;base64,' +
-                    (post.repostDTO?.member?.profilePicture ?? post.member.profilePicture)
-                  "
-                  alt="Author's Profile Picture"
-                  class="profile-picture"
-                />
-                <img
-                  v-else
-                  :src="defaultProfilePic"
-                  alt="Default Profile Picture"
-                  class="profile-picture"
-                />
-              </router-link>
-            </div>
-            <div class="author-name">
-              <strong
-                v-if="
-                  post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname
-                "
-              >
-                {{
-                  post.repostDTO ? post.repostDTO.member.nickname : post.member.nickname
-                }}
-              </strong>
-              <strong v-else>
-                {{ post.repostDTO?.member?.name || post.member.name }}
-              </strong>
-              <p class="post-time">{{ formatDate(post.postTime) }}</p>
+                >
+                  {{
+                    post.repostDTO
+                      ? post.repostDTO.member.nickname
+                      : post.member.nickname
+                  }}
+                </strong>
+                <strong v-else>
+                  {{ post.repostDTO?.member?.name || post.member.name }}
+                </strong>
+                <p class="post-time">{{ formatDate(post.postTime) }}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- 顯示第一張圖片 -->
-        <div
-          v-if="
-            getFirstImage(post.repostDTO ? post.repostDTO.postContent : post.postContent)
-          "
-          class="post-image-container"
-        >
-          <img
-            :src="
+          <!-- 顯示第一張圖片 -->
+          <div
+            v-if="
               getFirstImage(
                 post.repostDTO ? post.repostDTO.postContent : post.postContent
               )
             "
-            class="post-image"
-          />
-        </div>
-        <div v-else class="post-image-container">
-          <img :src="defaultpicture" class="post-image" />
-        </div>
-        <div class="post-content-preview">
-          <p>
-            {{ post.repostDTO ? post.repostDTO.postTitle : post.postTitle || "無標題" }}
-          </p>
-          {{
-            getTextPreview(
-              post.repostDTO ? post.repostDTO.postContent : post.postContent || "無標題",
-              30
-            )
-          }}
-        </div>
-        <!-- 互動按鈕 -->
-        <div class="post-actions" @click.stop>
-          <button
-            @click.stop="likePost(post.postid)"
-            class="action-btn like-btn"
-            :class="{ active: post.likedByCurrentUser }"
+            class="post-image-container"
           >
-            <span class="heart-icon"></span>
-            <!-- {{ post.likedByCurrentUser ? '已點讚' : '點讚' }} -->
-            {{ post.likeCount }}
-          </button>
-          <button @click.stop="repostPost(post.postid)" class="action-btn repost-btn">
-            🔁 {{ post.repostCount }}
-          </button>
-          <button
-            @click.stop="collectPost(post.postid)"
-            class="action-btn collect-btn"
-            :class="{ active: post.collectByCurrentUser }"
-          >
-            {{ post.collectByCurrentUser ? "已收藏" : "收藏" }}
-          </button>
+            <img
+              :src="
+                getFirstImage(
+                  post.repostDTO ? post.repostDTO.postContent : post.postContent
+                )
+              "
+              class="post-image"
+            />
+          </div>
+          <div v-else class="post-image-container">
+            <img :src="defaultpicture" class="post-image" />
+          </div>
+          <div class="post-content-preview">
+            <p>
+              {{
+                post.repostDTO
+                  ? post.repostDTO.postTitle
+                  : post.postTitle || "無標題"
+              }}
+            </p>
+            {{
+              getTextPreview(
+                post.repostDTO
+                  ? post.repostDTO.postContent
+                  : post.postContent || "無標題",
+                30
+              )
+            }}
+          </div>
+          <!-- 互動按鈕 -->
+          <div class="post-actions" @click.stop>
+            <button
+              @click.stop="likePost(post.postid)"
+              class="action-btn like-btn"
+              :class="{ active: post.likedByCurrentUser }"
+            >
+              <span class="heart-icon"></span>
+              <!-- {{ post.likedByCurrentUser ? '已點讚' : '點讚' }} -->
+              {{ post.likeCount }}
+            </button>
+            <button
+              @click.stop="repostPost(post.postid)"
+              class="action-btn repost-btn"
+            >
+              🔁 {{ post.repostCount }}
+            </button>
+            <button
+              @click.stop="collectPost(post.postid)"
+              class="action-btn collect-btn"
+              :class="{ active: post.collectByCurrentUser }"
+            >
+              {{ post.collectByCurrentUser ? "已收藏" : "收藏" }}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    <div v-else>
-      <p>沒有文章喔~</p>
-    </div>
+      <div v-else>
+        <p>沒有文章喔~</p>
+      </div>
 
-    <!-- 分頁控制 -->
-    <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">上一頁</button>
-      <span>第 {{ currentPage }} 頁</span>
-      <button @click="nextPage">下一頁</button>
-    </div>
+      <!-- 分頁控制 -->
+      <div class="pagination">
+        <button @click="prevPage" :disabled="currentPage === 1">上一頁</button>
+        <span>第 {{ currentPage }} 頁</span>
+        <button @click="nextPage">下一頁</button>
+      </div>
 
-    <div v-if="userStore.isLoggedIn">
-      <!-- 發文按鈕 -->
-      <div id="blogbutton" @mouseenter="hoverBlog = true" @mouseleave="hoverBlog = false">
-        <RouterLink to="/blog/create" class="button">
-          <transition name="fade" mode="out-in">
-            <div v-if="hoverBlog" key="expanded" class="expanded-content">
+      <div v-if="userStore.isLoggedIn">
+        <!-- 發文按鈕 -->
+        <div
+          id="blogbutton"
+          @mouseenter="hoverBlog = true"
+          @mouseleave="hoverBlog = false"
+        >
+          <RouterLink to="/blog/create" class="button">
+            <transition name="fade" mode="out-in">
+              <div v-if="hoverBlog" key="expanded" class="expanded-content">
+                <img
+                  class="icon-large"
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEj0lEQVR4nO2beYhWVRTAjzaWWws2maAwRaGVlJW2oAhRomG2UBRJpkWS0YKk/VHQHxMF9kdaIoV/qIEGmQ7avlBi0bS5RQmltlDYqubapo3zi9OcNxyf773vjs18ft/73u+vmXvPfe+dc5dz7rn3EykoKCgoKCg7wMPAb8BWYKrUEsC1HMpB4EKpFYAPOJxpUgsAF5HMpVILABcAs4Fm4C9TfoPUIkAPGxHDJO8A5wEvAw8C/aRWAPoATwL/uPn+BzAfOEfyDm09nkYrMF5yPse3ks0cySvALSWUz7cHANYGGGAf0F3yBjCaMJ6RPAKsCFBeF8GzJW8ApwEtAQZ4VfII8FTg8L9C8gZwPLA7QPmNQDfJG8CMwN6/XfIGcAzwTYDyvwI9JW8ANwT2fqNrcwnwAnCx5DTTE+dvYIBrs8rVrQMm60iSagMYQRgLXZsxKTI6jabrTlKqBeD5QAO0Jz+Aj0rI7gHmAoOkkgEGAgcClH/btbmOcPYDyzR7JJUAcCUw2P3/eKAiV5l8d+DzDhjgECPa+8sfQwBDrCfUjdVZWW9gR8CHb452fcAk/j9bbJ3oVQ7F+1kv61BU5rq6ewI/+C6XJPmazkM7oxGo7wrFewB3AttjL/3PZ+swBL4M+Mid0YquhqBrUPe6uNPyjMA4G2ZxtjiZCYEfN8vkewE/0LUctOzz+COOJ4A64OeAKM4HMWmodxho8jMpLz8Bi4Apdv5QDxwXYoAJGQ8dYjLnWkKjFM+ZfF+brxWDZBhgeUqbNU7m2cD3jDD5qcArwGPAjWbA22wfoGtE2ZEU5U+2BSWJ6SYzIENG+dGG3rQO7CLVt5cVSfmYe1PkW6JNDPBIxnPfBU6JPVO9xWBgIvAEsNqSJjol1gBNwFIqxABrU+TfsvqeGXP5aXWdJne1U1Zj+opDEpQfmiE/2c3lOHrud58bzrqBqXgkwQDaY0noOf6JJvNZrE6DpMus7gTN9FIlSAd8/1KTGRsr/xRosLozgC+oIqQDvv8ak3ndlS2LNiLA5Xbji2o2QFOKnO70jgXOcoFPcxRmWmwfkguoOCTQ9883mTtc2dgSLrMqkADfr4x2Fxsj+lqZBjy5MMDHKTLfRpkXPcVNMIBuNnJhgN9TZCY5mZWufJyV3Z/xfHWdS4CRiRFXW/v+FigdFcR9yDsJ9St83i02Sj50Ed/1Fv7qYrnX/p4RmqEx9zs7cGfZqYj7iAZLNu63ed0YKehkvo+1byqVt9fbn8ACuwVyd2y90ejxATfFNMb47qgYoBS2mYnygfEDjChCbL/mApyfkPV93+rqY896CTjV5QweBf6kDEgourtLaK9D9la3PdYF8w0nfyBBviFhPYnC6eHufYPsbqFOqYowQF3Cud9D7j7Aeivb5dq8mPDOm1Kuy7d6A7hnnGRTpvkI1ohfgHl6QzVY0Syckl8BN7us8ZvupZ9knPy0Rr8JsCk1z3p4czSSAk6fJtrIeA/YZCOnxZTdaNNJL2aO6vQDVtp8/jbgzNhdoA2myGvA6a4urmS7S61KaFuhq/8Mv6CgoKCgQCL+BVWzEQZxQJDIAAAAAElFTkSuQmCC"
+                  alt="發文圖示"
+                />
+                <span class="button-text">發佈文章</span>
+              </div>
               <img
-                class="icon-large"
+                v-else
+                key="small"
+                class="icon-small"
                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEj0lEQVR4nO2beYhWVRTAjzaWWws2maAwRaGVlJW2oAhRomG2UBRJpkWS0YKk/VHQHxMF9kdaIoV/qIEGmQ7avlBi0bS5RQmltlDYqubapo3zi9OcNxyf773vjs18ft/73u+vmXvPfe+dc5dz7rn3EykoKCgoKCg7wMPAb8BWYKrUEsC1HMpB4EKpFYAPOJxpUgsAF5HMpVILABcAs4Fm4C9TfoPUIkAPGxHDJO8A5wEvAw8C/aRWAPoATwL/uPn+BzAfOEfyDm09nkYrMF5yPse3ks0cySvALSWUz7cHANYGGGAf0F3yBjCaMJ6RPAKsCFBeF8GzJW8ApwEtAQZ4VfII8FTg8L9C8gZwPLA7QPmNQDfJG8CMwN6/XfIGcAzwTYDyvwI9JW8ANwT2fqNrcwnwAnCx5DTTE+dvYIBrs8rVrQMm60iSagMYQRgLXZsxKTI6jabrTlKqBeD5QAO0Jz+Aj0rI7gHmAoOkkgEGAgcClH/btbmOcPYDyzR7JJUAcCUw2P3/eKAiV5l8d+DzDhjgECPa+8sfQwBDrCfUjdVZWW9gR8CHb452fcAk/j9bbJ3oVQ7F+1kv61BU5rq6ewI/+C6XJPmazkM7oxGo7wrFewB3AttjL/3PZ+swBL4M+Mid0YquhqBrUPe6uNPyjMA4G2ZxtjiZCYEfN8vkewE/0LUctOzz+COOJ4A64OeAKM4HMWmodxho8jMpLz8Bi4Apdv5QDxwXYoAJGQ8dYjLnWkKjFM+ZfF+brxWDZBhgeUqbNU7m2cD3jDD5qcArwGPAjWbA22wfoGtE2ZEU5U+2BSWJ6SYzIENG+dGG3rQO7CLVt5cVSfmYe1PkW6JNDPBIxnPfBU6JPVO9xWBgIvAEsNqSJjol1gBNwFIqxABrU+TfsvqeGXP5aXWdJne1U1Zj+opDEpQfmiE/2c3lOHrud58bzrqBqXgkwQDaY0noOf6JJvNZrE6DpMus7gTN9FIlSAd8/1KTGRsr/xRosLozgC+oIqQDvv8ak3ndlS2LNiLA5Xbji2o2QFOKnO70jgXOcoFPcxRmWmwfkguoOCTQ9883mTtc2dgSLrMqkADfr4x2Fxsj+lqZBjy5MMDHKTLfRpkXPcVNMIBuNnJhgN9TZCY5mZWufJyV3Z/xfHWdS4CRiRFXW/v+FigdFcR9yDsJ9St83i02Sj50Ed/1Fv7qYrnX/p4RmqEx9zs7cGfZqYj7iAZLNu63ed0YKehkvo+1byqVt9fbn8ACuwVyd2y90ejxATfFNMb47qgYoBS2mYnygfEDjChCbL/mApyfkPV93+rqY896CTjV5QweBf6kDEgourtLaK9D9la3PdYF8w0nfyBBviFhPYnC6eHufYPsbqFOqYowQF3Cud9D7j7Aeivb5dq8mPDOm1Kuy7d6A7hnnGRTpvkI1ohfgHl6QzVY0Syckl8BN7us8ZvupZ9knPy0Rr8JsCk1z3p4czSSAk6fJtrIeA/YZCOnxZTdaNNJL2aO6vQDVtp8/jbgzNhdoA2myGvA6a4urmS7S61KaFuhq/8Mv6CgoKCgQCL+BVWzEQZxQJDIAAAAAElFTkSuQmCC"
                 alt="發文圖示"
               />
-              <span class="button-text">發佈文章</span>
-            </div>
-            <img
-              v-else
-              key="small"
-              class="icon-small"
-              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEj0lEQVR4nO2beYhWVRTAjzaWWws2maAwRaGVlJW2oAhRomG2UBRJpkWS0YKk/VHQHxMF9kdaIoV/qIEGmQ7avlBi0bS5RQmltlDYqubapo3zi9OcNxyf773vjs18ft/73u+vmXvPfe+dc5dz7rn3EykoKCgoKCg7wMPAb8BWYKrUEsC1HMpB4EKpFYAPOJxpUgsAF5HMpVILABcAs4Fm4C9TfoPUIkAPGxHDJO8A5wEvAw8C/aRWAPoATwL/uPn+BzAfOEfyDm09nkYrMF5yPse3ks0cySvALSWUz7cHANYGGGAf0F3yBjCaMJ6RPAKsCFBeF8GzJW8ApwEtAQZ4VfII8FTg8L9C8gZwPLA7QPmNQDfJG8CMwN6/XfIGcAzwTYDyvwI9JW8ANwT2fqNrcwnwAnCx5DTTE+dvYIBrs8rVrQMm60iSagMYQRgLXZsxKTI6jabrTlKqBeD5QAO0Jz+Aj0rI7gHmAoOkkgEGAgcClH/btbmOcPYDyzR7JJUAcCUw2P3/eKAiV5l8d+DzDhjgECPa+8sfQwBDrCfUjdVZWW9gR8CHb452fcAk/j9bbJ3oVQ7F+1kv61BU5rq6ewI/+C6XJPmazkM7oxGo7wrFewB3AttjL/3PZ+swBL4M+Mid0YquhqBrUPe6uNPyjMA4G2ZxtjiZCYEfN8vkewE/0LUctOzz+COOJ4A64OeAKM4HMWmodxho8jMpLz8Bi4Apdv5QDxwXYoAJGQ8dYjLnWkKjFM+ZfF+brxWDZBhgeUqbNU7m2cD3jDD5qcArwGPAjWbA22wfoGtE2ZEU5U+2BSWJ6SYzIENG+dGG3rQO7CLVt5cVSfmYe1PkW6JNDPBIxnPfBU6JPVO9xWBgIvAEsNqSJjol1gBNwFIqxABrU+TfsvqeGXP5aXWdJne1U1Zj+opDEpQfmiE/2c3lOHrud58bzrqBqXgkwQDaY0noOf6JJvNZrE6DpMus7gTN9FIlSAd8/1KTGRsr/xRosLozgC+oIqQDvv8ak3ndlS2LNiLA5Xbji2o2QFOKnO70jgXOcoFPcxRmWmwfkguoOCTQ9883mTtc2dgSLrMqkADfr4x2Fxsj+lqZBjy5MMDHKTLfRpkXPcVNMIBuNnJhgN9TZCY5mZWufJyV3Z/xfHWdS4CRiRFXW/v+FigdFcR9yDsJ9St83i02Sj50Ed/1Fv7qYrnX/p4RmqEx9zs7cGfZqYj7iAZLNu63ed0YKehkvo+1byqVt9fbn8ACuwVyd2y90ejxATfFNMb47qgYoBS2mYnygfEDjChCbL/mApyfkPV93+rqY896CTjV5QweBf6kDEgourtLaK9D9la3PdYF8w0nfyBBviFhPYnC6eHufYPsbqFOqYowQF3Cud9D7j7Aeivb5dq8mPDOm1Kuy7d6A7hnnGRTpvkI1ohfgHl6QzVY0Syckl8BN7us8ZvupZ9knPy0Rr8JsCk1z3p4czSSAk6fJtrIeA/YZCOnxZTdaNNJL2aO6vQDVtp8/jbgzNhdoA2myGvA6a4urmS7S61KaFuhq/8Mv6CgoKCgQCL+BVWzEQZxQJDIAAAAAElFTkSuQmCC"
-              alt="發文圖示"
-            />
-          </transition>
-        </RouterLink>
-      </div>
+            </transition>
+          </RouterLink>
+        </div>
 
-      <!-- 開始規劃按鈕 -->
-      <div
-        id="planningbutton"
-        @mouseenter="hoverPlanning = true"
-        @mouseleave="hoverPlanning = false"
-      >
-        <RouterLink to="/myitineraries" class="button">
-          <transition name="fade" mode="out-in">
-            <div v-if="hoverPlanning" key="expanded" class="expanded-content">
+        <!-- 開始規劃按鈕 -->
+        <div
+          id="planningbutton"
+          @mouseenter="hoverPlanning = true"
+          @mouseleave="hoverPlanning = false"
+        >
+          <RouterLink to="/myitineraries" class="button">
+            <transition name="fade" mode="out-in">
+              <div v-if="hoverPlanning" key="expanded" class="expanded-content">
+                <img
+                  class="icon-large"
+                  src="data:image/png;base64,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"
+                  alt="規劃圖示"
+                />
+                <span class="button-text">開始規劃</span>
+              </div>
               <img
-                class="icon-large"
+                v-else
+                key="small"
+                class="icon-small"
                 src="data:image/png;base64,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"
                 alt="規劃圖示"
               />
-              <span class="button-text">開始規劃</span>
-            </div>
-            <img
-              v-else
-              key="small"
-              class="icon-small"
-              src="data:image/png;base64,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"
-              alt="規劃圖示"
-            />
-          </transition>
-        </RouterLink>
+            </transition>
+          </RouterLink>
+        </div>
       </div>
     </div>
-  </div>
 
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>探索下一個旅程</h3>
-        <ul>
-          <li><a href="#">關於我們</a></li>
-          <li><a href="#">官方粉專</a></li>
-          <li><a :href="mailToLink">聯絡我們</a></li>
-        </ul>
+    <footer>
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>探索下一個旅程</h3>
+          <ul>
+            <li><a href="#">關於我們</a></li>
+            <li><a href="#">官方粉專</a></li>
+            <li>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLScfLqx3Y79IbletTm2zhNoW25Wbo_pM_RkAfNbvKjgt4tY89A/viewform?usp=dialog"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                聯絡我們
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>公司資訊</h3>
+          <ul>
+            <li>快樂出發有限公司</li>
+            <li>統一編號：12345678</li>
+            <li>旅行業註冊編號：CHUFA</li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>其他產品</h3>
+          <ul>
+            <li>統一編號：9999999</li>
+            <li>聯繫地址：106台北市大安區復興南路一段390號2樓</li>
+          </ul>
+        </div>
       </div>
-      <div class="footer-section">
-        <h3>公司資訊</h3>
-        <ul>
-          <li>快樂出發有限公司</li>
-          <li>統一編號：12345678</li>
-          <li>旅行業註冊編號：CHUFA</li>
-        </ul>
+      <div class="footer-bottom">
+        <p>© Chufa, Inc. 2025</p>
       </div>
-      <div class="footer-section">
-        <h3>其他產品</h3>
-        <ul>
-          <li>統一編號：9999999</li>
-          <li>聯繫地址：106台北市大安區復興南路一段390號2樓</li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© Chufa, Inc. 2025</p>
-    </div>
-  </footer>
-</div>
+    </footer>
+  </div>
 </template>
 
 <script>
@@ -362,14 +395,21 @@ export default {
 
     const getTextPreview = (content, length) => {
       // 移除圖片和其他 HTML 標籤
-      const textContent = content.replace(/<img[^>]*>/g, "").replace(/<[^>]+>/g, "");
-      return textContent.slice(0, length) + (textContent.length > length ? "..." : "");
+      const textContent = content
+        .replace(/<img[^>]*>/g, "")
+        .replace(/<[^>]+>/g, "");
+      return (
+        textContent.slice(0, length) +
+        (textContent.length > length ? "..." : "")
+      );
     };
     const postStore = usePostStore();
 
     // computed 屬性：只回傳未被隱藏的貼文
     const visiblePosts = computed(() => {
-      return posts.value.filter((post) => !postStore.getHiddenReason(post.postid));
+      return posts.value.filter(
+        (post) => !postStore.getHiddenReason(post.postid)
+      );
     });
     const userStore = useUserStore(); // 使用 Pinia 的狀態
 
@@ -422,7 +462,9 @@ export default {
         };
 
         // 動態設定排序條件
-        requestData[sortBy.value === "likes" ? "sortByLikes" : "sortByTime"] = true;
+        requestData[
+          sortBy.value === "likes" ? "sortByLikes" : "sortByTime"
+        ] = true;
 
         if (query) {
           requestData.postTitle = query; // 加入搜尋條件
@@ -495,11 +537,15 @@ export default {
           userid: member.value.userid,
         };
 
-        const response = await axiosapi.post("/api/posts/repost/forward", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axiosapi.post(
+          "/api/posts/repost/forward",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (response.data.repost) {
           Swal.fire("成功", "轉發成功！", "success");
           await fetchPosts();
@@ -523,11 +569,15 @@ export default {
           interactionType: "LIKE", // 如果点赞则是 LIKE，取消点赞则是 DISLIKE
         };
 
-        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axiosapi.post(
+          "/api/posts/insertinteraction",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.data.success) {
           // 更新本地状态：更新点赞状态和点赞数量
@@ -564,11 +614,15 @@ export default {
           interactionType: "COLLECT",
         };
 
-        const response = await axiosapi.post("/api/posts/insertinteraction", data, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await axiosapi.post(
+          "/api/posts/insertinteraction",
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (response.data.success) {
           const updatedPosts = posts.value.map((post) => {
             if (post.postid === postid) {
@@ -766,7 +820,7 @@ export default {
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
   padding: 20px;
-  flex:1;
+  flex: 1;
 }
 
 /* 帖子卡片样式 */
@@ -1015,8 +1069,8 @@ footer {
   color: #121322;
   margin-top: auto;
   bottom: 0;
-  width: 150%;
-  margin-left: -25%; 
+  width: 200%;
+  margin-left: -50%;
 }
 
 .footer-content {

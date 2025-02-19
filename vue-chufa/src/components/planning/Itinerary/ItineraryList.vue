@@ -27,7 +27,9 @@
               <span class="stay-time">
                 ⏳ 停留時間:
                 {{
-                  formatStayTime(itineraryStore.getStayDuration(day.date, event.index))
+                  formatStayTime(
+                    itineraryStore.getStayDuration(day.date, event.index)
+                  )
                 }}
               </span>
             </li>
@@ -53,12 +55,18 @@ const hasUnsavedChanges = ref(false);
 
 const formattedSelectedDate = computed(() => {
   if (!scheduleStore.currentSchedule.selectedDate) return "";
-  const cleanedDate = scheduleStore.currentSchedule.selectedDate.replace(/[^0-9\/]/g, "");
+  const cleanedDate = scheduleStore.currentSchedule.selectedDate.replace(
+    /[^0-9\/]/g,
+    ""
+  );
   if (cleanedDate.includes("-")) return cleanedDate;
 
   const baseYear =
-    scheduleStore.currentSchedule?.startDate?.split("-")[0] || new Date().getFullYear();
-  const [month, day] = cleanedDate.split("/").map((num) => num.padStart(2, "0"));
+    scheduleStore.currentSchedule?.startDate?.split("-")[0] ||
+    new Date().getFullYear();
+  const [month, day] = cleanedDate
+    .split("/")
+    .map((num) => num.padStart(2, "0"));
   return `${baseYear}-${month}-${day}`;
 });
 
@@ -69,6 +77,18 @@ const sortedEvents = computed(() => {
   console.log("📅 目前的行程數據:", itineraryStore.itineraryDates);
 
   for (const date in itineraryStore.itineraryDates) {
+    // 檢查日期格式是否符合 YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      console.warn(`⚠️ 無效日期格式: ${date}，已跳過該日期`);
+      continue; // 跳過無效日期
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      console.warn(`⚠️ 無法解析的日期: ${date}，已跳過該日期`);
+      continue; // 跳過無法解析的日期
+    }
+
     const dayEvents = itineraryStore.itineraryDates[date].map((event) => ({
       ...event,
       date, // 添加日期屬性

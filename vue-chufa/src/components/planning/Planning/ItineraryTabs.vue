@@ -87,7 +87,7 @@ const scheduleStore = useScheduleStore();
 
 // 從 URL 取得行程 ID
 const tripId = route.params.tripId;
-const selectedDate = ref("overview"); // 預設為總覽頁
+const selectedDate = ref("");
 const isEditing = ref(false);
 const newTitle = ref("");
 const isExpanded = ref(false);
@@ -241,6 +241,11 @@ const saveTitle = async () => {
 onMounted(async () => {
   if (tripId) {
     await scheduleStore.fetchScheduleById(tripId);
+
+    // 確保行程已載入並有日期範圍
+    if (dateRange.value.length > 0) {
+      updateSelectedDate(dateRange.value[0]); // 預設選擇第一天
+    }
   }
 });
 

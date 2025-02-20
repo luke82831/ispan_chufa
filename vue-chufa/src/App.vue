@@ -376,4 +376,100 @@ onMounted(() => {
   margin-left: 20px;
   margin-right: -20px;
 }
+
+/* 手機端樣式 */
+@media (max-width: 768px) {
+  .navbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+  }
+
+  /* Logo */
+  .logo-img {
+    width: 120px;
+    height: auto;
+  }
+
+  /* 搜索欄 */
+  .search-bar {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .search-bar input {
+    flex-grow: 1;
+    margin-right: 10px;
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  .search-bar button {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  /* 註冊/登入按鈕 */
+  .nav-links {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+  }
+
+  /* 會員大頭貼和下拉選單 */
+  .member-section {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .avatar-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .username {
+    font-size: 14px;
+  }
+
+  /* 下拉選單 */
+  .dropdown-menu {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    display: none;
+  }
+
+  .dropdown-menu .dropdown-item {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* 顯示下拉選單 */
+  .dropdown-menu.show {
+    display: block;
+  }
+}
+
 </style>

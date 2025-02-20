@@ -1,7 +1,6 @@
 package com.ispan.chufa.repository;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -25,6 +24,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -158,19 +158,33 @@ public class PostDaoImpl implements PostDao {
 			criteriaQuery.orderBy(criteriaBuilder.desc(postRoot.get("postTime")));
 		}
 	
-		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
-		    Subquery<Long> likeCountSubquery = criteriaQuery.subquery(Long.class);
-		    Root<InteractionBean> interactionRoot = likeCountSubquery.from(InteractionBean.class);
-		    likeCountSubquery.select(criteriaBuilder.count(interactionRoot))
-		                     .where(criteriaBuilder.equal(interactionRoot.get("post").get("postid"), postRoot.get("postid")));		    
-		    criteriaQuery.orderBy(
-		        criteriaBuilder.desc(likeCountSubquery), // 按点赞数排序
-		        criteriaBuilder.asc(postRoot.get("postid")) // 按 postid 排序，确保唯一性
-		    );
-		}
+//		if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
+//		    Subquery<Long> likeCountSubquery = criteriaQuery.subquery(Long.class);
+//		    Root<InteractionBean> interactionRoot = likeCountSubquery.from(InteractionBean.class);
+//		    likeCountSubquery.select(criteriaBuilder.count(interactionRoot))
+//		                     .where(criteriaBuilder.equal(interactionRoot.get("post").get("postid"), postRoot.get("postid")));		    
+//		    criteriaQuery.orderBy(
+//		        criteriaBuilder.desc(likeCountSubquery), // 按点赞数排序
+//		        criteriaBuilder.asc(postRoot.get("postid")) // 按 postid 排序，确保唯一性
+//		    );
+//		}
 
-//		String sql = entityManager.createQuery(criteriaQuery).unwrap(org.hibernate.query.Query.class).getQueryString();
-//		System.out.println("Generated SQL: " + sql);
+		  if (!param.isNull("sortByLikes") && param.getBoolean("sortByLikes")) {
+			  criteriaQuery.groupBy(postRoot.get("postid"),
+					    postRoot.get("forwardedFrom"),
+				        postRoot.get("member").get("userid"),
+				        postRoot.get("postContent"),
+				        postRoot.get("postLink"),
+				        postRoot.get("postStatus"),
+				        postRoot.get("postTime"),
+				        postRoot.get("postTitle"),
+				        postRoot.get("scheduleBean").get("tripId"));  // 添加 GROUP BY 語句
+	            Expression<Long> likeCount = criteriaBuilder.count(
+	            		criteriaBuilder.selectCase().when(criteriaBuilder.equal(interactionJoin.get("interactionType"), "LIKE"), 1).otherwise(0)
+	            );
+	            criteriaQuery.orderBy(criteriaBuilder.desc(likeCount), criteriaBuilder.asc(postRoot.get("postid")));
+	        }
+
 
 		// 建立查詢並執行
 		TypedQuery<PostBean> query = entityManager.createQuery(criteriaQuery);

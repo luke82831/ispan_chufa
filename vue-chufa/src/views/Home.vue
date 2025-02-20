@@ -329,7 +329,7 @@ export default {
       { id: 2, name: "新北市" },
       { id: 3, name: "南投縣" },
       { id: 4, name: "台中市" },
-      { id: 5, name: "臺南市" },
+      { id: 5, name: "台南市" },
       { id: 6, name: "高雄市" },
       { id: 7, name: "台東市" },
       { id: 8, name: "花蓮縣" },
@@ -416,7 +416,7 @@ export default {
       try {
         const requestData = {
           page: currentPage.value,
-          size: 12,
+          size: 9,
           checklike: member.value.userid,
           repost: true,
         };
@@ -1015,8 +1015,8 @@ footer {
   color: #121322;
   margin-top: auto;
   bottom: 0;
-  width: 150%;
-  margin-left: -25%; 
+  width: 200%;
+  margin-left: -50%; 
 }
 
 .footer-content {

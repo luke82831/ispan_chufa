@@ -1,10 +1,9 @@
 <template>
-  <div>
-    <button @click="reply">回覆</button>
-    <button>讚</button>
+  <button class="replyButton" @click="reply">回覆</button>
+  <div v-if="replyInput" class="outputReply">
+    <input class="outputReplyInput" type="text" placeholder="請輸入留言" v-model="comment" />
+    <button class="outputReplyButton" @click="outputReply">送出</button>
   </div>
-  <input v-show="replyInput" type="text" placeholder="請輸入留言" v-model="comment" />
-  <button v-show="replyInput" @click="outputReply">送出</button>
 </template>
 
 <script setup>
@@ -60,6 +59,8 @@ const reply = () => {
   }
 };
 
+
+
 const outputReply = async () => {
   if (isLoggedIn) {
     console.log("送出Reply留言");
@@ -83,6 +84,7 @@ const outputReply = async () => {
     if (response.data.successs) {
       console.log(response.data);
       replyInput.value = false;
+      alert(response.data.message);
     } else {
       alert(response.data.message);
     }
@@ -94,4 +96,42 @@ const outputReply = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.replyButton{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #17a2b8;
+        color: white;
+        margin-bottom: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .replyButton:hover {
+        transform: scale(1.05);
+    }
+    .outputReply{
+      display: flex;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        background-color: #c1c8f0;
+        color: white;
+        margin-bottom: 10px; 
+    }
+    .outputReplyInput{
+      flex-grow: 1;
+      font-size: 16px;
+      border: none;
+    }
+    .outputReplyButton{
+      padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        background-color: #7e8ee4;
+        color: white;
+    }
+</style>

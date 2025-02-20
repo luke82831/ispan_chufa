@@ -1,5 +1,5 @@
 <template>
-  <div v-show="isMe && isLoggedIn">
+  <div v-if="isMe && isLoggedIn">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -11,19 +11,21 @@
       stroke-linecap="round"
       stroke-linejoin="round"
       @click="edit"
+      class="openEditComment"
     >
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
 
-    <div v-show="isClick">
-      <button @click="editComment">編輯留言</button>
-      <button @click="removeComment">刪除留言</button>
+    <div v-if="isClick" class="editBox">
+      <button @click="editComment" class="editButton edit">編輯留言</button>
+      <div v-if="isEdit">
+        <input type="text" v-model="content" class="editInput"> 
+        <button @click="outputEdit" class="editOkButton">確認編輯</button>
+      </div>
+      <button v-else @click="removeComment" class="editButton remove">刪除留言</button>
     </div>
-    <div v-show="isEdit">
-      <input type="text" v-model="content" />
-      <button @click="outputEdit">確認編輯</button>
-    </div>
+    
   </div>
 </template>
 
@@ -100,6 +102,7 @@ const outputEdit = async () => {
     isEdit.value = false;
     console.log(response.data.list[0].parentId);
     eventBus.emit("editComment", response.data.list[0].parentId);
+    alert("編輯留言成功");
   } else {
     alert("編輯留言失敗");
   }
@@ -108,4 +111,53 @@ const outputEdit = async () => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.openEditComment:hover{
+        cursor: pointer;
+        color: rgb(219, 35, 3);
+    }
+    .editBox{
+        position: absolute;
+        background: linear-gradient(145deg, #ffffff, #f8f8f8);
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        
+        animation: fadeIn 0.3s ease;
+
+        display: flex;
+        flex-direction: column;
+    }
+    .editButton{
+        color: #4882c0;
+        padding: 10px;
+        width: 140px;
+        text-align: left;
+        font-size: 16px;
+        background-color: #ffffff;
+        border: none;
+    }
+    .edit{
+        margin-top: 10px;
+        margin-bottom: 2px;
+    }
+    .remove{
+        color: red;
+        margin-top: 2px;
+        margin-bottom: 10px;
+    }
+    .editButton:hover{
+        background-color: #d4f3f3
+    }
+    .editOkButton{
+      padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        background-color: #7e8ee4;
+        color: white;
+    }
+    .editInput{
+      font-size: 16px;
+    }
+</style>

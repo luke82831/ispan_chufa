@@ -2,8 +2,8 @@
     <div class="inputCommentBody">
         <h1>新增留言</h1>
         <input type="text" placeholder="請輸入留言" v-model="comment" >
-        <button @click="outputComment">送出</button>
-        <button @click="removeComment">取消</button>
+        <button class="outputComment" @click="outputComment">送出</button>
+        <button class="removeComment" @click="removeComment">清空</button>
     </div>
 </template>
     
@@ -57,6 +57,7 @@
             const response =await axiosapi.post(`/comment/create`,body);
             if (response.data.successs) {
                 console.log(response.data)
+                alert(response.data.message);
             }else{
                 alert(response.data.message);
             }
@@ -94,5 +95,33 @@
     }
     .inputCommentBody > button{
         margin: 10px;
+    }
+    .outputComment{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #17a2b8;
+        color: white;
+        margin-bottom: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .outputComment:hover {
+        transform: scale(1.05);
+    }
+    .removeComment{
+        padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 14px;
+        cursor: pointer;
+        background-color: #d34659;
+        color: white;
+        margin-bottom: 10px; 
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .removeComment:hover {
+        transform: scale(1.05);
     }
 </style>

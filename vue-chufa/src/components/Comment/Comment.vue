@@ -21,6 +21,18 @@ onMounted(() => {
   eventBus.on("outputComment", () => {
     lookComment();
   });
+  eventBus.on("deleteComment", (parentId) => {
+    if(parentId==null){
+      commentData.value = null;
+      lookComment();
+    }
+  });
+  eventBus.on("editComment", (parentId) => {
+    if(parentId==null){
+      commentData.value = null;
+      lookComment();
+    }
+  });
 });
 
 const commentData = ref();

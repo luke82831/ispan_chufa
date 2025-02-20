@@ -1,6 +1,6 @@
 <template>
   <div>
-    <button v-show="haveReply" @click="openReply">
+    <button v-if="haveReply" @click="openReply" class="openReply">
       {{ lookReply }}{{ dataLength }}則回覆
     </button>
     <div v-if="lookReply == '▼'" class="Reply">
@@ -20,12 +20,13 @@
               class="memberPicture"
             />
             <h3>{{ comment.memberBean.name }}</h3>
+            <p class="commentTime" v-if="comment.commentUpdatedAt == null">創建留言時間:{{ comment.commentCreatedAt }}</p>
+            <p class="commentTime" v-else>更新留言時間:{{ comment.commentCreatedAt }}</p>
+            <editComment :comment="comment"></editComment>
           </div>
-          <div v-html="comment.content"></div>
-          <p v-if="comment.commentUpdatedAt == null">
-            創建留言時間:{{ comment.commentCreatedAt }}
-          </p>
-          <p v-else>更新留言時間:{{ comment.commentCreatedAt }}</p>
+
+          <div v-html="comment.content" class="htmlComment"></div>
+
           <CommentFunction
             :parentId="comment.parentId"
             :replyUser="comment.memberBean"
@@ -38,6 +39,7 @@
 </template>
 
 <script setup>
+import editComment from "./editComment.vue";
 import CommentFunction from "@/components/Comment/CommentFunction.vue";
 import axiosapi from "@/plugins/axios.js";
 import { ref, onMounted } from "vue";
@@ -63,6 +65,16 @@ onMounted(() => {
   findReply();
   eventBus.on("outputReply", (newCommentParentId) => {
     if (props.parentId == newCommentParentId) {
+      findReply();
+    }
+  });
+  eventBus.on("deleteComment", (parentId) => {
+    if(props.parentId== parentId){
+      findReply();
+    }
+  });
+  eventBus.on("editComment", (parentId) => {
+    if(props.parentId== parentId){
       findReply();
     }
   });
@@ -98,4 +110,24 @@ const findReply = async () => {
   align-items: center;
   flex-grow: 1;
 }
+.commentTime {
+  margin: 5px;
+  font-size: 14px;
+  color: rgb(160, 160, 160);
+}
+.openReply{
+  padding: 10px 20px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        background-color: #59b49e;
+        color: white;
+}
+.htmlComment {
+      font-size: 16px;
+      margin-bottom: 10px;
+      margin-left: 50px;
+      width: 90%;
+      word-break: break-all;
+    }
 </style>

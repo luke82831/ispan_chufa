@@ -28,6 +28,10 @@ public class EventService {
     }
     
     
+    public List<EventBean> getEventsByTripId(Long tripId) {
+        return eventRepository.findBySchedule_TripId(tripId);
+    }
+    
  // 根據 eventId 查詢 EventBean
     public EventBean findEventById(Long eventId) {
         return eventRepository.findById(eventId).orElse(null); // 返回對應的 EventBean，若找不到返回 null

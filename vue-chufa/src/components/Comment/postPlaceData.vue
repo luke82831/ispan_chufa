@@ -73,6 +73,7 @@
         border-radius: 12px;
         border: 1px solid #e0e0e0;
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        background-color: rgb(227, 245, 245);
     }
     .aaa{
         padding: 10px 20px;

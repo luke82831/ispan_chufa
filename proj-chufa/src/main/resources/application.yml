@@ -2,7 +2,7 @@
 spring:  
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    url: jdbc:sqlserver://localhost:9433;database=chufa;trustServerCertificate=true
+    url: jdbc:sqlserver://localhost:1433;database=chufa;trustServerCertificate=true
     username: sa
     password: P@ssw0rd
   mvc:
@@ -30,7 +30,7 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.SQLServerDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
       naming:
         implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl

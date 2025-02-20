@@ -21,16 +21,6 @@
         alt="封面照片"
         class="cover-photo"
       />
-
-      <!-- 固定在圖片右下角的按鈕 -->
-      <!-- <button @click="toggleExpanded" class="toggle-button fixed-button">
-        {{ isExpanded ? "收合行程" : "查看完整行程" }}
-      </button> -->
-
-      <div class="list-container">
-        <!-- 傳遞 isExpanded 狀態給子組件 -->
-        <ItineraryList :isExpanded="isExpanded" @close="isExpanded = false" />
-      </div>
     </div>
 
     <!-- 行程日期範圍 -->
@@ -40,8 +30,19 @@
     </h2>
 
     <div class="date-tabs-container">
+      <!-- 總覽按鈕 -->
+      <button
+        class="overview-button"
+        :class="{ active: selectedDate === 'overview' }"
+        @click="showOverview"
+      >
+        總覽
+      </button>
+
       <!-- 左側箭頭 -->
-      <button class="arrow-button arrow-left" @click="scrollTabs('left')">&lt;</button>
+      <button class="arrow-button arrow-left" @click="scrollTabs('left')">
+        &lt;
+      </button>
 
       <!-- 日期滾動區 -->
       <div class="date-tabs" ref="tabsContainer">
@@ -59,11 +60,14 @@
       <button class="add-day-btn" @click="addOneMoreDay">＋</button>
 
       <!-- 右側箭頭 -->
-      <button class="arrow-button arrow-right" @click="scrollTabs('right')">&gt;</button>
+      <button class="arrow-button arrow-right" @click="scrollTabs('right')">
+        &gt;
+      </button>
     </div>
 
-    <!-- 傳遞選擇的日期到 PlanningDay 組件 -->
-    <PlanningDay :selectedDate="selectedDate" />
+    <!-- 根據選擇顯示對應的組件 -->
+    <ItineraryList v-if="selectedDate === 'overview'" />
+    <PlanningDay v-else :selectedDate="selectedDate" />
   </div>
 
   <!-- 如果 `currentSchedule` 還沒載入，顯示 Loading -->
@@ -83,73 +87,45 @@ const scheduleStore = useScheduleStore();
 
 // 從 URL 取得行程 ID
 const tripId = route.params.tripId;
-const selectedDate = ref(""); // 當前選擇的日期
+const selectedDate = ref("");
 const isEditing = ref(false);
 const newTitle = ref("");
 const isExpanded = ref(false);
 const tabsContainer = ref(null);
 
+// 滾動日期選單
 const scrollTabs = (direction) => {
   if (!tabsContainer.value) return;
-
   const scrollAmount = 150; // 每次滾動 150px
-  if (direction === "left") {
-    tabsContainer.value.scrollLeft -= scrollAmount;
-  } else {
-    tabsContainer.value.scrollLeft += scrollAmount;
-  }
+  tabsContainer.value.scrollLeft +=
+    direction === "left" ? -scrollAmount : scrollAmount;
 };
 
-// 展開所有行程
-const toggleExpanded = () => {
-  isExpanded.value = !isExpanded.value;
-  console.log("isExpanded:", isExpanded.value); // 測試是否變更
+// 切換總覽頁
+const showOverview = () => {
+  console.log("📜 切換到總覽頁");
+  selectedDate.value = "overview";
+  scheduleStore.setSelectedDate("overview");
 };
 
-// **初始化行程數據**
-onMounted(async () => {
-  if (tripId) {
-    await scheduleStore.fetchScheduleById(tripId);
+// 更新選擇的日期
+const updateSelectedDate = (date) => {
+  if (date === "overview") {
+    showOverview();
+    return;
   }
-});
+  const formatted = formatDate(date);
+  console.log("📅 選擇的行程日期:", formatted);
+  selectedDate.value = formatted;
+  scheduleStore.setSelectedDate(formatted);
+};
 
-// **監聽行程名稱變更，確保標題更新**
-watch(
-  () => scheduleStore.currentSchedule?.tripName,
-  (newName) => {
-    newTitle.value = newName || "";
-  },
-  { immediate: true }
+// 取得封面圖片
+const coverPhotoUrl = computed(
+  () => scheduleStore.currentSchedule?.coverPhoto || null
 );
 
-// **編輯標題**
-const editTitle = () => {
-  isEditing.value = true;
-};
-
-// **儲存標題**
-const saveTitle = async () => {
-  if (scheduleStore.currentSchedule) {
-    try {
-      await scheduleStore.updateScheduleTitle(
-        scheduleStore.currentSchedule.tripId,
-        newTitle.value
-      );
-      console.log("行程標題已更新");
-    } catch (error) {
-      console.error("行程標題更新失敗", error);
-    }
-  }
-  isEditing.value = false;
-};
-
-// **封面圖片**
-const coverPhotoUrl = computed(() => {
-  const coverPhoto = scheduleStore.currentSchedule?.coverPhoto;
-  return coverPhoto ? coverPhoto : null;
-});
-
-// **開始與結束日期**
+// 取得開始與結束日期
 const startDate = computed(() =>
   scheduleStore.currentSchedule?.startDate
     ? new Date(scheduleStore.currentSchedule.startDate)
@@ -161,7 +137,7 @@ const endDate = computed(() =>
     : null
 );
 
-// **日期範圍**
+// 取得日期範圍
 const dateRange = computed(() => {
   if (!startDate.value || !endDate.value) return [];
   const dates = [];
@@ -173,44 +149,40 @@ const dateRange = computed(() => {
   return dates;
 });
 
-// **格式化日期**
-const formatDate = (date) => {
-  if (!(date instanceof Date) || isNaN(date)) return "";
-  return date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" });
-};
+// 格式化日期
+const formatDate = (date) =>
+  date instanceof Date && !isNaN(date)
+    ? date.toLocaleDateString("zh-TW", { month: "numeric", day: "numeric" })
+    : "";
 
-// **更新選擇的日期**
-const updateSelectedDate = (date) => {
-  const formatted = formatDate(date);
-  console.log("📅 選擇的行程日期:", formatted);
-  selectedDate.value = formatted;
-  scheduleStore.setSelectedDate(formatted);
-};
-
-// **切換日期**
+// 切換日期
 const changeDate = (direction) => {
   const currentIndex = dateRange.value.findIndex(
     (date) => formatDate(date) === selectedDate.value
   );
   if (direction === "prev" && currentIndex > 0) {
     updateSelectedDate(dateRange.value[currentIndex - 1]);
-  } else if (direction === "next" && currentIndex < dateRange.value.length - 1) {
+  } else if (
+    direction === "next" &&
+    currentIndex < dateRange.value.length - 1
+  ) {
     updateSelectedDate(dateRange.value[currentIndex + 1]);
   }
 };
 
-// **頁面載入時設定初始選擇日期**
+// 監聽日期範圍變化，設定預設選擇日期
 watch(
   dateRange,
   (newDates) => {
-    if (newDates.length > 0 && !selectedDate.value) {
+    if (newDates.length > 0 && selectedDate.value === "overview") return;
+    if (newDates.length > 0 && selectedDate.value === "") {
       updateSelectedDate(newDates[0]);
     }
   },
   { immediate: true }
 );
 
-// **新增一天**
+// 新增一天
 const addOneMoreDay = async () => {
   if (!endDate.value) return;
 
@@ -228,15 +200,56 @@ const addOneMoreDay = async () => {
     await scheduleStore.updateScheduleEndDate(tripId, formattedDate);
     console.log("✅ `endDate` 更新成功");
 
-    // ✅ 不需要手動更新 eventStore，因為切換日期時會自動查詢
+    // 成功後才更新選擇日期
+    updateSelectedDate(newDate);
   } catch (error) {
     console.error("❌ 更新行程結束日期失敗:", error);
   }
-
-  updateSelectedDate(newDate); // 切換到新日期，自動觸發事件查詢
 };
 
-// **返回行程列表**
+// 監聽行程名稱變更，確保標題更新
+watch(
+  () => scheduleStore.currentSchedule?.tripName,
+  (newName) => {
+    newTitle.value = newName || "";
+  },
+  { immediate: true }
+);
+
+// 編輯標題
+const editTitle = () => {
+  isEditing.value = true;
+};
+
+// 儲存標題
+const saveTitle = async () => {
+  if (scheduleStore.currentSchedule) {
+    try {
+      await scheduleStore.updateScheduleTitle(
+        scheduleStore.currentSchedule.tripId,
+        newTitle.value
+      );
+      console.log("行程標題已更新");
+    } catch (error) {
+      console.error("行程標題更新失敗", error);
+    }
+  }
+  isEditing.value = false;
+};
+
+// 初始化行程數據
+onMounted(async () => {
+  if (tripId) {
+    await scheduleStore.fetchScheduleById(tripId);
+
+    // 確保行程已載入並有日期範圍
+    if (dateRange.value.length > 0) {
+      updateSelectedDate(dateRange.value[0]); // 預設選擇第一天
+    }
+  }
+});
+
+// 返回行程列表
 const goBack = () => {
   router.push("/myitineraries");
 };
@@ -449,17 +462,6 @@ button:hover {
   padding: 20px;
 }
 
-/* 展開/收合按鈕 */
-.toggle-button {
-  padding: 12px 18px;
-  background-color: orange;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.3rem; /* 加大字體 */
-  cursor: pointer;
-}
-
 .cover-photo-container {
   position: relative; /* 設定相對定位 */
   display: inline-block;
@@ -483,5 +485,29 @@ button:hover {
 .fixed-button:hover {
   background-color: #20527e;
   color: white;
+}
+
+.overview-button {
+  white-space: nowrap; /* ✅ 防止文字換行 */
+  display: inline-flex; /* ✅ 讓內容橫向排列 */
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  background-color: #ff6b6b; /* 紅色按鈕 */
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.overview-button:hover {
+  background-color: #ff4757;
+}
+
+.overview-button.active {
+  background-color: #e84118; /* 深紅色表示選中狀態 */
 }
 </style>

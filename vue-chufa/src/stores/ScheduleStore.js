@@ -29,12 +29,29 @@ export const useScheduleStore = defineStore("scheduleStore", {
     /** 🔹 獲取特定schedule */
     async fetchScheduleById(tripId) {
       try {
-        console.log("fetchScheduleById 被呼叫，tripId:", tripId); // 🔍 檢查是否進入函數
+        if (this.currentSchedule?.tripId === tripId) {
+          console.log("🔄 行程已載入，無需重新請求 API");
+          return;
+        }
+
+        console.log("🚀 從 API 重新獲取行程資料...");
         const response = await axiosapi.get(`/api/schedule/${tripId}`);
-        console.log("API 回傳fetchScheduleById資料:", response.data);
         this.currentSchedule = response.data;
       } catch (error) {
-        console.error("載入行程詳細資料失敗:", error);
+        console.error("❌ 獲取行程失敗", error);
+      }
+    },
+
+    /** 🔹 獲取特定 schedule 的所有行程數據 */
+    async fetchAllEventsByTripId(tripId) {
+      try {
+        console.log("fetchAllEventsByTripId 被呼叫，tripId:", tripId);
+        const response = await axiosapi.get(`/api/trips/${tripId}/events`);
+        console.log("📌 從 API 獲取所有天數的行程:", response.data);
+        return response.data; // 直接回傳，不存入 state
+      } catch (error) {
+        console.error("載入所有行程事件失敗:", error);
+        return [];
       }
     },
 
